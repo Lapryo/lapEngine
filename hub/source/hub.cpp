@@ -26,16 +26,17 @@ void HubApp::Update(float deltaTime)
         return;
     }
 
-    project.main_scene->Update(deltaTime);
-
-    BeginDrawing();
-    ClearBackground(RAYWHITE);
-    EndDrawing();
+    project.main_scene->Update(deltaTime, SystemDrawOrder::PREDRAW);
 }
 
 void HubApp::Draw()
 {
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
 
+    project.main_scene->Update(0.0f, SystemDrawOrder::DRAW);
+
+    EndDrawing();
 }
 
 int main()

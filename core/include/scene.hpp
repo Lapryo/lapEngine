@@ -9,9 +9,9 @@ namespace lapCore
     {
         std::string name;
         entt::registry entities;
-        std::vector<std::unique_ptr<System>> systems;
+        std::unordered_map<SystemDrawOrder, std::vector<std::unique_ptr<System>>> systems;
 
-        void Update(float deltaTime);
+        void Update(float deltaTime, SystemDrawOrder order);
         void AddSystem(std::unique_ptr<System> system);
 
         entt::entity AddEntity();

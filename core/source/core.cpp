@@ -20,6 +20,7 @@ void App::Run()
     {
         delta = GetFrameTime();
         Update(delta);
+        Draw();
     }
 }
 
@@ -82,9 +83,17 @@ void PhysicsSystem::Update(float deltaTime, entt::registry &registry)
     }
 }
 
-void Scene::Update(float deltaTime)
+void RenderSystem::Update(float deltaTime, entt::registry &registry)
 {
-    for (auto &system : systems)
+    auto view = registry.view<Transform2D, RectVisualizer>();
+    view.each([deltaTime](auto entity, Transform2D& transform, RectVisualizer& rect) {
+        DrawRectangle(transform.position.x, transform.position.y, rect.size.x, rect.size.y, rect.tint);
+    });
+}
+
+void Scene::Update(float deltaTime, SystemDrawOrder order)
+{
+    for (auto &system : systems[order])
     {
         if (system) {
             system->Update(deltaTime, entities);
@@ -95,7 +104,7 @@ void Scene::Update(float deltaTime)
 void Scene::AddSystem(std::unique_ptr<System> system)
 {
     if (system) {
-        systems.push_back(std::move(system));
+        systems[system->drawOrder].push_back(std::move(system));
     }
 }
 
@@ -195,8 +204,9 @@ Project lapCore::UnpackProject(const char projJson[])
                     {
                         scene->AddSystem(std::make_unique<PhysicsSystem>());
                     }
-                    else
+                    else if (systemType == "render")
                     {
+                        scene->AddSystem(std::make_unique<RenderSystem>());
                         // Add other systems
                     }
                 }
@@ -240,8 +250,17 @@ Project lapCore::UnpackProject(const char projJson[])
 
                             scene->AddComponent<Transform2D>(entity, transform);
                         }
-                        else
+                        else if (type == "rectvisualizer")
                         {
+                            RectVisualizer visualizer;
+                            visualizer.size = {
+                                data["size"].at(0).get<float>(),
+                                data["size"].at(1).get<float>()
+                            };
+                            visualizer.tint = RED;
+
+                            scene->AddComponent<RectVisualizer>(entity, visualizer);
+
                             // handle other component types
                         }
                     }

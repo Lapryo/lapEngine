@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < 10; ++i)
     {
-        main_scene.Update(0);
+        main_scene.Update(0, SystemDrawOrder::POSTDRAW);
     }
 
     std::cout << "got to here 1.\n";

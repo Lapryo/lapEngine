@@ -7,7 +7,8 @@ const char proj_json[] = R"json(
         {
             "name": "main",
             "systems": [
-                "physics"
+                "physics",
+                "render"
             ],
             "objects": [
                 {
@@ -17,10 +18,18 @@ const char proj_json[] = R"json(
                             "name": "transform",
                             "type": "transform2d",
                             "data": {
-                                "position": [0,0],
-                                "velocity": [0,-50],
+                                "position": [100,20],
+                                "velocity": [0,10],
                                 "scale": [1,1],
                                 "rotation": 0
+                            }
+                        },
+                        {
+                            "name": "rectvisualizer",
+                            "type": "rectvisualizer",
+                            "data": {
+                                "size": [100,100],
+                                "color": "red"
                             }
                         }
                     ]

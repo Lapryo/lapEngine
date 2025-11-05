@@ -17,6 +17,11 @@ namespace lapCore
         float rotation;
         Color tint;
     };
+
+    struct RectVisualizer {
+        Vector2 size;
+        Color tint;
+    };
 }
 
 #endif
