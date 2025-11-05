@@ -2,6 +2,11 @@
 #define CORE_HPP
 
 #include "systems.hpp"
-#include "scene.hpp"
+#include "app.hpp"
+
+namespace lapCore
+{
+    std::string ReadFileToString(const std::string &filePath);
+}
 
 #endif

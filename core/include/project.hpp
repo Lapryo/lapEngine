@@ -10,9 +10,12 @@ namespace lapCore
     struct Project
     {
         std::string name;
+        std::string version;
         std::string path;
-        Scene main_scene;
+        Scene* main_scene;
         std::vector<Scene> scenes;
+
+        void Clear();
     };
 
     void PackProject(Project& project);

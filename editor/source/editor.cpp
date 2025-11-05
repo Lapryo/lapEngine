@@ -1,12 +1,40 @@
-#include "core.hpp"
+#include "editor.hpp"
 
 #include <iostream>
 
 using namespace lapCore;
+using namespace lapEditor;
 
-int main()
+Editor::Editor(Project &project) : App(project)
+{}
+
+void Editor::Init()
 {
-    Scene main_scene = CreateScene();
+
+}
+
+void Editor::Update(float deltaTime)
+{
+
+}
+
+void Editor::Draw()
+{
+
+}
+
+int main(int argc, char *argv[])
+{
+    std::cout << "========== [EDITOR] ==========\n\nEditor application started!\nAttempting to open project file \"" << argv[1] << "\"...\n";
+    Project project = UnpackProject(argv[1]);
+
+    Editor editor(project);
+
+    std::cout << "Initializing the project... ";
+    editor.Init();
+    std::cout << "Done.\n\n";
+
+    Scene main_scene;
     PhysicsSystem physics = PhysicsSystem();
     main_scene.AddSystem(&physics);
 
@@ -27,7 +55,13 @@ int main()
         main_scene.Update(0);
     }
 
+    std::cout << "got to here 1.\n";
+
     main_scene.Clear();
+
+    std::cout << "got to here 2.\n";
+
+    project.Clear();
 
     return 0;
 }

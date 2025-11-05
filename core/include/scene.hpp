@@ -7,11 +7,11 @@ namespace lapCore
 {
     struct Scene
     {
+        std::string name;
         entt::registry entities;
         std::vector<System*> systems;
 
         void Update(float deltaTime);
-
         void AddSystem(System* system);
 
         entt::entity AddEntity();
@@ -33,9 +33,6 @@ namespace lapCore
         void Clear();
         void ClearComponents();
     };
-
-    Scene CreateScene();
-    Scene CreateScene(entt::registry &registry);
 }
 
 #endif
