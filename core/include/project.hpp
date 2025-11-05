@@ -12,14 +12,16 @@ namespace lapCore
         std::string name;
         std::string version;
         std::string path;
+        int main_scene_index;
         Scene* main_scene;
-        std::vector<Scene> scenes;
+        std::vector<std::unique_ptr<Scene>> scenes;
 
+        Scene* GetMainScene();
         void Clear();
     };
 
     void PackProject(Project& project);
-    Project UnpackProject(const std::string& projectPath);
+    Project UnpackProject(const char projJson[]);
 }
 
 #endif

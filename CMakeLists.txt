@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1.0)
+cmake_minimum_required(VERSION 4.2.0)
 project(lapEngine)
 
 add_subdirectory(editor)

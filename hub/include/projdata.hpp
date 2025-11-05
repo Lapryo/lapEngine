@@ -1,3 +1,5 @@
+#pragma once
+const char proj_json[] = R"json(
 {
     "name": "hub",
     "version": "1.0",
@@ -27,3 +29,4 @@
         }
     ]
 }
+)json";

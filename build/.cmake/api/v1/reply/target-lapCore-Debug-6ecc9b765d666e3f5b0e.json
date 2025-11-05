@@ -3,7 +3,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "C:/Users/wellh/Documents/engine/engine/lib/liblapCore.a"
+			"path" : "C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a"
 		}
 	],
 	"backtrace" : 1,
@@ -12,6 +12,7 @@
 		"commands" : 
 		[
 			"add_library",
+			"target_link_libraries",
 			"target_include_directories"
 		],
 		"files" : 
@@ -32,10 +33,21 @@
 			{
 				"command" : 1,
 				"file" : 0,
+				"line" : 26,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
 				"line" : 17,
 				"parent" : 0
 			}
 		]
+	},
+	"codemodelVersion" : 
+	{
+		"major" : 2,
+		"minor" : 9
 	},
 	"compileGroups" : 
 	[
@@ -49,8 +61,8 @@
 			"includes" : 
 			[
 				{
-					"backtrace" : 2,
-					"path" : "C:/Users/wellh/Documents/engine/engine/core/include"
+					"backtrace" : 3,
+					"path" : "C:/Users/WellH/Documents/projects/lapEngine/core/include"
 				}
 			],
 			"language" : "CXX",
@@ -61,6 +73,28 @@
 		}
 	],
 	"id" : "lapCore::@57760688d1f824db5d9c",
+	"interfaceLinkLibraries" : 
+	[
+		{
+			"backtrace" : 2,
+			"fragment" : "raylib"
+		},
+		{
+			"backtrace" : 2,
+			"fragment" : "winmm"
+		}
+	],
+	"linkLibraries" : 
+	[
+		{
+			"backtrace" : 2,
+			"fragment" : "raylib"
+		},
+		{
+			"backtrace" : 2,
+			"fragment" : "winmm"
+		}
+	],
 	"name" : "lapCore",
 	"nameOnDisk" : "liblapCore.a",
 	"paths" : 

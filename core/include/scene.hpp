@@ -9,10 +9,10 @@ namespace lapCore
     {
         std::string name;
         entt::registry entities;
-        std::vector<System*> systems;
+        std::vector<std::unique_ptr<System>> systems;
 
         void Update(float deltaTime);
-        void AddSystem(System* system);
+        void AddSystem(std::unique_ptr<System> system);
 
         entt::entity AddEntity();
         void DestroyEntity(entt::entity &entity);

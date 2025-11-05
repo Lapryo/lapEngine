@@ -35,8 +35,8 @@ int main(int argc, char *argv[])
     std::cout << "Done.\n\n";
 
     Scene main_scene;
-    PhysicsSystem physics = PhysicsSystem();
-    main_scene.AddSystem(&physics);
+    auto physics = std::make_unique<PhysicsSystem>();
+    main_scene.AddSystem(std::move(physics));
 
     auto entity = main_scene.AddEntity();
 

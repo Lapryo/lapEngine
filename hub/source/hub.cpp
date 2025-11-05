@@ -1,4 +1,5 @@
 #include "hub.hpp"
+#include "projdata.hpp"
 #include <iostream>
 
 using namespace lapHub;
@@ -12,6 +13,8 @@ void HubApp::Init()
     InitWindow(800, 450, "lapHub");
     SetTargetFPS(60);
 
+    project.main_scene = project.GetMainScene();
+
     state = AppState::RUNNING;
 }
 
@@ -23,7 +26,7 @@ void HubApp::Update(float deltaTime)
         return;
     }
 
-    project.scenes[0].Update(deltaTime);
+    project.main_scene->Update(deltaTime);
 
     BeginDrawing();
     ClearBackground(RAYWHITE);
@@ -37,7 +40,7 @@ void HubApp::Draw()
 
 int main()
 {
-    Project hubProject = UnpackProject("assets/proj.lapengine.json");
+    Project hubProject = UnpackProject(proj_json);
     HubApp hub(hubProject);
 
     hub.Init();

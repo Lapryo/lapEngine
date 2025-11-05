@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "C:/Users/wellh/Documents/engine/engine/lib/liblapCore.a"
-  "C:/Users/wellh/Documents/engine/engine/lib/liblapCore.pdb"
+  "C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a"
+  "C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.pdb"
   "CMakeFiles/lapCore.dir/source/core.cpp.obj"
   "CMakeFiles/lapCore.dir/source/core.cpp.obj.d"
 )

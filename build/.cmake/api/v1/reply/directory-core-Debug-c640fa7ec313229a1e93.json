@@ -5,10 +5,15 @@
 		"files" : [],
 		"nodes" : []
 	},
+	"codemodelVersion" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	},
 	"installers" : [],
 	"paths" : 
 	{
-		"build" : "editor",
-		"source" : "editor"
+		"build" : "core",
+		"source" : "core"
 	}
 }

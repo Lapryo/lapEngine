@@ -63,6 +63,18 @@
 			}
 		]
 	},
+	"codemodelVersion" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	},
+	"compileDependencies" : 
+	[
+		{
+			"backtrace" : 3,
+			"id" : "lapCore::@57760688d1f824db5d9c"
+		}
+	],
 	"compileGroups" : 
 	[
 		{
@@ -76,11 +88,11 @@
 			[
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/wellh/Documents/engine/engine/editor/include"
+					"path" : "C:/Users/WellH/Documents/projects/lapEngine/editor/include"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/wellh/Documents/engine/engine/editor/../core/include"
+					"path" : "C:/Users/WellH/Documents/projects/lapEngine/editor/../core/include"
 				}
 			],
 			"language" : "CXX",
@@ -108,12 +120,12 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "-LC:/Users/wellh/Documents/engine/engine/lib",
+				"fragment" : "-LC:/Users/WellH/Documents/projects/lapEngine/lib",
 				"role" : "libraryPath"
 			},
 			{
 				"backtrace" : 3,
-				"fragment" : "C:/Users/wellh/Documents/engine/engine/lib/liblapCore.a",
+				"fragment" : "C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a",
 				"role" : "libraries"
 			},
 			{
@@ -133,6 +145,13 @@
 		],
 		"language" : "CXX"
 	},
+	"linkLibraries" : 
+	[
+		{
+			"backtrace" : 3,
+			"id" : "lapCore::@57760688d1f824db5d9c"
+		}
+	],
 	"name" : "lapEditor",
 	"nameOnDisk" : "lapEditor.exe",
 	"paths" : 
