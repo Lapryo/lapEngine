@@ -78,8 +78,6 @@ void PhysicsSystem::Update(float deltaTime, entt::registry &registry)
 
         transform.position.x += transform.velocity.x * deltaTime;
         transform.position.y += transform.velocity.y * deltaTime;
-
-        std::cout << "X: " << transform.position.x << " | Y: " << transform.position.y << "\n";
     }
 }
 
@@ -257,8 +255,12 @@ Project lapCore::UnpackProject(const char projJson[])
                                 data["size"].at(0).get<float>(),
                                 data["size"].at(1).get<float>()
                             };
-                            visualizer.tint = RED;
-
+                            visualizer.tint = {
+                                data["tint"].at(0).get<unsigned char>(),
+                                data["tint"].at(1).get<unsigned char>(),
+                                data["tint"].at(2).get<unsigned char>(),
+                                data["tint"].at(3).get<unsigned char>()
+                            };
                             scene->AddComponent<RectVisualizer>(entity, visualizer);
 
                             // handle other component types

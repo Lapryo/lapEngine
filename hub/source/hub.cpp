@@ -10,8 +10,8 @@ HubApp::HubApp(Project &project) : App(project)
 
 void HubApp::Init()
 {
-    InitWindow(800, 450, "lapHub");
-    SetTargetFPS(60);
+    InitWindow(1920, 1080, "lapHub");
+    SetTargetFPS(-1);
 
     project.main_scene = project.GetMainScene();
 
@@ -36,7 +36,15 @@ void HubApp::Draw()
 
     project.main_scene->Update(0.0f, SystemDrawOrder::DRAW);
 
+    /*
+        TODO:
+        ADD CAMERA DRAW ORDER
+        ADD Z LAYERS
+    */
+
     EndDrawing();
+
+    project.main_scene->Update(0.0f, SystemDrawOrder::POSTDRAW);
 }
 
 int main()

@@ -3,21 +3,26 @@ const char proj_json[] = R"json(
 {
     "name": "hub",
     "version": "1.0",
-    "scenes": [
+    "scenes":
+    [
         {
             "name": "main",
-            "systems": [
+            "systems":
+            [
                 "physics",
                 "render"
             ],
-            "objects": [
+            "objects":
+            [
                 {
                     "name": "cube",
-                    "components": [
+                    "components":
+                    [
                         {
                             "name": "transform",
                             "type": "transform2d",
-                            "data": {
+                            "data":
+                            {
                                 "position": [100,20],
                                 "velocity": [0,10],
                                 "scale": [1,1],
@@ -28,8 +33,16 @@ const char proj_json[] = R"json(
                             "name": "rectvisualizer",
                             "type": "rectvisualizer",
                             "data": {
-                                "size": [100,100],
-                                "color": "red"
+                                "size": [10,10],
+                                "tint": [230, 41, 55, 255]
+                            }
+                        },
+                        {
+                            "name": "mesh",
+                            "type": "mesh",
+                            "data":
+                            {
+                                
                             }
                         }
                     ]
