@@ -3,6 +3,7 @@
 #include <utility>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <memory>
 #include "json.hpp"
 
@@ -31,25 +32,15 @@ void App::Shutdown()
         scene->Clear();
     }
 
-    for (auto &texture : resources.textures)
-    {
-        resources.RemoveTexture(texture.first);
-    }
-
-    for (auto &shader : resources.shaders)
-    {
-        resources.RemoveShader(shader.first);
-    }
-
     // shutdown window if it exists
     CloseWindow();
 }
 
-Texture2D ResourceManager::AddTexture(const std::string &name, const std::string &filePath)
+Texture2D* ResourceManager::AddTexture(const std::string &name, const std::string &filePath)
 {
-    Texture2D tex = LoadTexture(filePath.c_str());
+    auto tex = LoadTexture(filePath.c_str());
     textures[name] = tex;
-    return tex;
+    return &textures[name];
 }
 
 void ResourceManager::RemoveTexture(const std::string &name)
@@ -57,11 +48,11 @@ void ResourceManager::RemoveTexture(const std::string &name)
     textures.erase(name);
 }
 
-Shader ResourceManager::AddShader(const std::string &name, const std::string &vertexFilePath, const std::string &fragmentFilePath)
+Shader* ResourceManager::AddShader(const std::string &name, const std::string &vertexFilePath, const std::string &fragmentFilePath)
 {
     Shader shader = LoadShader(vertexFilePath.c_str(), fragmentFilePath.c_str());
     shaders[name] = shader;
-    return shader;
+    return &shaders[name];
 }
 
 void ResourceManager::RemoveShader(const std::string &name)
@@ -83,9 +74,91 @@ void PhysicsSystem::Update(float deltaTime, entt::registry &registry)
 
 void RenderSystem::Update(float deltaTime, entt::registry &registry)
 {
-    auto view = registry.view<Transform2D, RectVisualizer>();
-    view.each([deltaTime](auto entity, Transform2D& transform, RectVisualizer& rect) {
-        DrawRectangle(transform.position.x, transform.position.y, rect.size.x, rect.size.y, rect.tint);
+    // First, handle all world-space rendering.
+
+    // Sort world-space sprites
+    // We assume Sprite has both zlayer and isScreenSpace members.
+    registry.sort<Sprite>([](const auto& lhs, const auto& rhs) { 
+        // Ensure world-space items are sorted together
+        if (lhs.isScreenSpace != rhs.isScreenSpace) {
+            return !lhs.isScreenSpace; // World space (false) comes first
+        }
+        return lhs.zlayer < rhs.zlayer; 
+    });
+
+    auto cameraView = registry.view<Cam2D>();
+    // Note: cameraView is a temporary view object that lives until the end of this scope.
+
+    // Capture cameraView AND registry by reference in the lambda
+    auto sortedSpriteView = registry.view<Transform2D, Sprite>();
+    sortedSpriteView.each([deltaTime, &cameraView, &registry](auto entity, Transform2D& transform, Sprite& sprite) { 
+        if (sprite.texture != nullptr)
+        {
+            if (!sprite.isScreenSpace) {
+                // World space items need to be drawn with the camera applied
+                for (auto ntt : cameraView)
+                {
+                    Cam2D cam = registry.get<Cam2D>(ntt);
+                    BeginMode2D(cam.camera);
+                    DrawTexture(*sprite.texture, transform.position.x, transform.position.y, sprite.tint); 
+                    EndMode2D();
+                }
+            }
+            else
+            {
+                // Screen space items are drawn directly
+                DrawTexture(*sprite.texture, transform.position.x, transform.position.y, sprite.tint); 
+            }
+        }
+    });
+
+    // Capture cameraView AND registry by reference in the lambda
+    auto otherView = registry.view<Transform2D, RectVisualizer>();
+    otherView.each([deltaTime, &cameraView, &registry](auto entity, Transform2D& transform, RectVisualizer& rect) { 
+        // We assume RectVisualizer also has an isScreenSpace boolean, or this system is purely world-space
+        if (!rect.isScreenSpace) {
+             for (auto ntt : cameraView)
+            {
+                Cam2D cam = registry.get<Cam2D>(ntt);
+                BeginMode2D(cam.camera);
+                DrawRectangle(transform.position.x, transform.position.y, rect.size.x, rect.size.y, rect.tint); 
+                EndMode2D();
+            }
+        }
+        else
+        {
+            DrawRectangle(transform.position.x, transform.position.y, rect.size.x, rect.size.y, rect.tint); 
+        }
+    });
+
+    // Capture cameraView by reference in the lambda (registry was already captured here correctly)
+    auto labelView = registry.view<TextLabel>();
+    labelView.each([deltaTime, &registry, &cameraView](auto entity, TextLabel& textLabel) {
+        const auto* transform = registry.try_get<Transform2D>(entity);
+
+        float posX = textLabel.textPosition.x;
+        float posY = textLabel.textPosition.y;
+
+        if (transform) {
+            // If the entity has a transform, apply its position
+            posX += transform->position.x;
+            posY += transform->position.y;
+        }
+
+        if (!textLabel.isScreenSpace) { // World space label
+            for (auto ntt : cameraView)
+            {
+                Cam2D cam = registry.get<Cam2D>(ntt);
+                BeginMode2D(cam.camera);
+                DrawText(textLabel.text.c_str(), posX, posY, textLabel.textSize, textLabel.textColor);
+                EndMode2D();
+            }
+        }
+        else
+        {
+            // Screen space label
+            DrawText(textLabel.text.c_str(), posX, posY, textLabel.textSize, textLabel.textColor);
+        }
     });
 }
 
@@ -106,9 +179,10 @@ void Scene::AddSystem(std::unique_ptr<System> system)
     }
 }
 
-entt::entity Scene::AddEntity()
+entt::entity Scene::AddEntity(const std::string &name)
 {
     const auto entity = entities.create();
+    nameToEntity[name] = entity;
     return entity;
 }
 
@@ -121,6 +195,21 @@ void Scene::Clear()
 {
     entities.clear();
     systems.clear();
+
+    for (auto &texture : resources.textures)
+    {
+        resources.RemoveTexture(texture.first);
+    }
+
+    for (auto &shader : resources.shaders)
+    {
+        resources.RemoveShader(shader.first);
+    }
+}
+
+entt::entity Scene::FindEntity(const std::string &name)
+{
+    return nameToEntity[name];
 }
 
 Scene* Project::GetMainScene()
@@ -191,6 +280,24 @@ Project lapCore::UnpackProject(const char projJson[])
 
             if (scene->name == "main")
                 project.main_scene_index = static_cast<int>(project.scenes.size());
+
+            if (sceneJson.contains("assets") && sceneJson["assets"].is_array())
+            {
+                for (const auto &assetJson : sceneJson["assets"])
+                {
+                    const auto& assetName = assetJson.value("name", "");
+                    const auto& assetType = assetJson.value("type", "");
+                    const auto& assetPath = assetJson.value("path", "");
+
+                    if (assetType == "texture")
+                    {
+                        // THIS WILL NOT WORK BECAUSE THE GL CONTEXT HAS NOT BEEN INITIATED YET.
+                        // NEED TO MAKE THIS INTO A QUEUE THAT THEN LOADS THE CONTENTS AFTER THE GL CONTEXT IS INITIATED.
+                        
+                        // scene->resources.AddTexture(assetName, assetPath);
+                    }
+                }
+            }
             
             if (sceneJson.contains("systems") && sceneJson["systems"].is_array())
             {
@@ -218,7 +325,7 @@ Project lapCore::UnpackProject(const char projJson[])
             {
                 for (const auto& object : sceneJson["objects"])
                 {
-                    auto entity = scene->AddEntity();
+                    auto entity = scene->AddEntity(object.value("name", ""));
 
                     if (!object.contains("components") || !object["components"].is_array())
                         continue;
@@ -231,39 +338,111 @@ Project lapCore::UnpackProject(const char projJson[])
                         const auto& data = comp["data"];
 
                         if (type == "transform2d") {
-                            Transform2D transform;
-                            transform.position = {
+                            Vector2 position{
                                 data["position"].at(0).get<float>(),
                                 data["position"].at(1).get<float>()
                             };
-                            transform.velocity = {
+                            Vector2 velocity{
                                 data["velocity"].at(0).get<float>(),
                                 data["velocity"].at(1).get<float>()
                             };
-                            transform.scale = {
+                            Vector2 scale{
                                 data["scale"].at(0).get<float>(),
                                 data["scale"].at(1).get<float>()
                             };
-                            transform.rotation = data.value("rotation", 0.0f);
+                            float rotation = data.value("rotation", 0.0f);
 
-                            scene->AddComponent<Transform2D>(entity, transform);
+                            scene->AddComponent<Transform2D>(entity, position, velocity, scale, rotation);
                         }
                         else if (type == "rectvisualizer")
                         {
-                            RectVisualizer visualizer;
-                            visualizer.size = {
+                            Vector2 size{
                                 data["size"].at(0).get<float>(),
                                 data["size"].at(1).get<float>()
                             };
-                            visualizer.tint = {
+
+                            Color tint{
                                 data["tint"].at(0).get<unsigned char>(),
                                 data["tint"].at(1).get<unsigned char>(),
                                 data["tint"].at(2).get<unsigned char>(),
                                 data["tint"].at(3).get<unsigned char>()
                             };
-                            scene->AddComponent<RectVisualizer>(entity, visualizer);
 
-                            // handle other component types
+                            bool isScreenSpace = data["isScreenSpace"].get<bool>();
+
+                            scene->AddComponent<RectVisualizer>(entity, size, tint, isScreenSpace);
+                        }
+                        else if (type == "sprite")
+                        {
+                            Color tint{
+                                data["tint"].at(0).get<unsigned char>(),
+                                data["tint"].at(1).get<unsigned char>(),
+                                data["tint"].at(2).get<unsigned char>(),
+                                data["tint"].at(3).get<unsigned char>()
+                            };
+                            unsigned int zlayer = data["zlayer"].get<unsigned int>();
+                            bool isScreenSpace = data["isScreenSpace"].get<bool>();
+
+                            scene->AddComponent<Sprite>(entity, nullptr, tint, zlayer, isScreenSpace);
+                        }
+                        else if (type == "textlabel")
+                        {
+                            std::string text = data.value("text", "");
+
+                            Vector2 textPosition{
+                                data["position"].at(0).get<float>(),
+                                data["position"].at(1).get<float>()
+                            };
+
+                            float textSize = data["size"].get<float>();
+
+                            Color textColor{
+                                data["color"].at(0).get<unsigned char>(),
+                                data["color"].at(1).get<unsigned char>(),
+                                data["color"].at(2).get<unsigned char>(),
+                                data["color"].at(3).get<unsigned char>()
+                            };
+
+                            bool isScreenSpace = data["isScreenSpace"].get<bool>();
+
+                            scene->AddComponent<TextLabel>(entity, text, textPosition, textSize, textColor, isScreenSpace);
+                        }
+                        else if (type == "cam2d")
+                        {
+                            // THIS ALSO NEEDS TO BE PUSHED TO AFTER THE UNPACKING IS COMPLETE
+
+                            /*
+                            std::vector<entt::entity> excludeList;
+                            if (data["exclude"] && data["exclude"].is_array())
+                                for (const auto& objName : data["exclude"])
+                                {
+                                    excludeList.push_back(objName);
+                                }
+                            }
+                            */
+
+                            std::vector<entt::entity> excludeList;
+
+                            Vector2 offset{
+                                data["offset"].at(0).get<float>(),
+                                data["offset"].at(1).get<float>()
+                            };
+
+                            Vector2 target{
+                                data["target"].at(0).get<float>(),
+                                data["target"].at(1).get<float>()
+                            };
+
+                            float rotation = data["rotation"].get<float>();
+                            float zoom = data["zoom"].get<float>();
+                            
+                            Camera2D camera;
+                            camera.offset = offset;
+                            camera.target = target;
+                            camera.rotation = rotation;
+                            camera.zoom = zoom;
+
+                            scene->AddComponent<Cam2D>(entity, camera, excludeList);
                         }
                     }
                 }

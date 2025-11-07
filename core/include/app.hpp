@@ -3,7 +3,6 @@
 
 #include <unordered_map>
 #include "project.hpp"
-#include "resource_manager.hpp"
 
 namespace lapCore
 {
@@ -28,7 +27,6 @@ namespace lapCore
         void Shutdown();
 
         AppState state = AppState::DEAD;
-        ResourceManager resources;
         Project project;
     };
 

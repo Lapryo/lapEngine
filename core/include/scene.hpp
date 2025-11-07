@@ -2,6 +2,7 @@
 #define SCENE_HPP
 
 #include "systems.hpp"
+#include "resource_manager.hpp"
 
 namespace lapCore
 {
@@ -9,19 +10,21 @@ namespace lapCore
     {
         std::string name;
         entt::registry entities;
+        std::unordered_map<std::string, entt::entity> nameToEntity;
         std::unordered_map<SystemDrawOrder, std::vector<std::unique_ptr<System>>> systems;
+        ResourceManager resources;
 
         void Update(float deltaTime, SystemDrawOrder order);
         void AddSystem(std::unique_ptr<System> system);
 
-        entt::entity AddEntity();
+        entt::entity AddEntity(const std::string &name);
         void DestroyEntity(entt::entity &entity);
-        void FindEntity();
+        entt::entity FindEntity(const std::string &name);
 
-        template <typename Comp>
-        Comp &AddComponent(entt::entity &entity, Comp &component)
+        template <typename Comp, typename... CompArgs>
+        Comp &AddComponent(entt::entity &entity, CompArgs&&... args)
         {
-            return entities.emplace<Comp>(entity, std::forward<Comp>(component));
+            return entities.emplace<Comp>(entity, std::forward<CompArgs>(args)...);
         }
 
         template <typename Comp>

@@ -1,20 +1,20 @@
 [
 {
-  "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/editor",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -o CMakeFiles/lapEditor.dir/source/editor.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/editor/source/editor.cpp",
-  "file": "C:/Users/WellH/Documents/projects/lapEngine/editor/source/editor.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/editor",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -o CMakeFiles/lapEditor.dir/source/editor.cpp.obj -c C:/Users/wellh/Documents/engine/engine/editor/source/editor.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/editor/source/editor.cpp",
   "output": "editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -o CMakeFiles/lapCore.dir/source/core.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/core.cpp",
-  "file": "C:/Users/WellH/Documents/projects/lapEngine/core/source/core.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/core",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -o CMakeFiles/lapCore.dir/source/core.cpp.obj -c C:/Users/wellh/Documents/engine/engine/core/source/core.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/core/source/core.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/core.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/hub",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -g -o CMakeFiles/lapHub.dir/source/hub.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/hub.cpp",
-  "file": "C:/Users/WellH/Documents/projects/lapEngine/hub/source/hub.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/hub",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -g -o CMakeFiles/lapHub.dir/source/hub.cpp.obj -c C:/Users/wellh/Documents/engine/engine/hub/source/hub.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/hub/source/hub.cpp",
   "output": "hub/CMakeFiles/lapHub.dir/source/hub.cpp.obj"
 }
 ]
