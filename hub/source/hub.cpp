@@ -1,6 +1,7 @@
 #include "hub.hpp"
 #include "projdata.hpp"
 #include <iostream>
+#include <random>
 
 #include "json.hpp"
 
@@ -13,7 +14,7 @@ std::vector<std::string> windowSubTitles = {
     "I swear it works.",
     "Mostly harmless!",
     "We ball.",
-    "Don't hate the player, hate the game!",
+    "Don't hate the player, hate the game.",
     "Blame the coder.",
     "Lag, errors, and bugs are part of the experience!",
     "Ctrl+Z is your bsf!",
@@ -44,8 +45,13 @@ void HubApp::Init()
 
     bool vsync = windowJson.value("vsync", false);
     bool inf_fps = windowJson.value("inf-fps", true);
+    bool decorated = windowJson.value("decorated", true);
 
-    std::string windowTitle = windowJson.value("title", "");
+    std::random_device rd;
+    std::mt19937 rng(rd());
+
+    std::uniform_int_distribution<int> intDist(0, windowSubTitles.size() - 1);
+    std::string windowTitle = windowJson.value("title", "") + " - " + windowSubTitles[intDist(rng)];
 
     InitWindow(windowRes.x, windowRes.y, windowTitle.c_str());
     for (auto& scene : project.scenes) {
@@ -57,6 +63,9 @@ void HubApp::Init()
 
     if (windowMode == "fullscreen")
         SetWindowState(FLAG_FULLSCREEN_MODE);
+
+    if (!decorated)
+        SetWindowState(FLAG_WINDOW_UNDECORATED);
     
     if (!vsync)
         if (inf_fps)
@@ -70,7 +79,7 @@ void HubApp::Init()
     project.logicalResolution = logicalRes;
 
     target = LoadRenderTexture(logicalRes.x, logicalRes.y);
-    SetTextureWrap(target.texture, TEXTURE_WRAP_CLAMP);
+    SetTextureFilter(target.texture, TEXTURE_FILTER_TRILINEAR);
 
     state = AppState::RUNNING;
 }
@@ -83,8 +92,10 @@ void HubApp::Update(float deltaTime)
         return;
     }
 
-    if (IsKeyDown(KEY_F11))
+    if (IsKeyDown(KEY_F11)) {
         ToggleFullscreen();
+        SetWindowPosition(100, 100);
+    }
 
     project.main_scene->Update(deltaTime, SystemDrawOrder::PREDRAW);
 }
@@ -140,36 +151,12 @@ void HubApp::Draw()
             OPTIMIZE
     */
 
-    /*EndTextureMode();
-
-    BeginDrawing();
-    ClearBackground(BLACK);
-
-    float scaleX = (float)GetScreenWidth() / project.windowResolution.x;
-    float scaleY = (float)GetScreenHeight() / project.windowResolution.y;
-    float scale = fmin(scaleX, scaleY);
-
-    float offsetX = (GetScreenWidth() - project.windowResolution.x * scale) / 2;
-    float offsetY = (GetScreenHeight() - project.windowResolution.y * scale) / 2;
-
-    DrawTexturePro(
-        project.drawTexture.texture,
-        { 0, 0, (float)project.drawTexture.texture.width, -(float)project.drawTexture.texture.height },
-        { offsetX, offsetY, project.windowResolution.x * scale, project.windowResolution.y * scale },
-        { 0, 0 },
-        0.0f,
-        WHITE
-    );
-
-    EndDrawing();*/
-
     project.main_scene->Update(0.0f, SystemDrawOrder::POSTDRAW);
 }
 
 int main()
 {
     Project hubProject = UnpackProject(proj_json);
-    std::cout << "got past here.\n";
     HubApp hub(hubProject);
 
     hub.Init();
