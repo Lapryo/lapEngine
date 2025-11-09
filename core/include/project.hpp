@@ -15,9 +15,13 @@ namespace lapCore
         int main_scene_index;
         Scene* main_scene;
         std::vector<std::unique_ptr<Scene>> scenes;
+        
+        Vector2 logicalResolution;
 
         Scene* GetMainScene();
         void Clear();
+
+        void LoadSettings(const std::string &settingsFilePath);
     };
 
     void PackProject(Project& project);

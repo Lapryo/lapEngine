@@ -3,6 +3,8 @@
 
 #include "systems.hpp"
 #include "app.hpp"
+#include "scriptregistry.hpp"
+#include "raylib/rlgl.h"
 
 namespace lapCore
 {

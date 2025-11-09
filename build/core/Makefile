@@ -57,10 +57,10 @@ RM = "C:/Program Files/CMake/bin/cmake.exe" -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:/Users/wellh/Documents/engine/engine
+CMAKE_SOURCE_DIR = C:/Users/WellH/Documents/projects/lapEngine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:/Users/wellh/Documents/engine/engine/build
+CMAKE_BINARY_DIR = C:/Users/WellH/Documents/projects/lapEngine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,21 +87,21 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd C:/Users/wellh/Documents/engine/engine/build && $(CMAKE_COMMAND) -E cmake_progress_start C:/Users/wellh/Documents/engine/engine/build/CMakeFiles C:/Users/wellh/Documents/engine/engine/build/core//CMakeFiles/progress.marks
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/all
-	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/wellh/Documents/engine/engine/build/CMakeFiles 0
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles C:/Users/WellH/Documents/projects/lapEngine/build/core//CMakeFiles/progress.marks
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/all
+	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles 0
 .PHONY : all
 
 # The main codegen target
 codegen: cmake_check_build_system
-	cd C:/Users/wellh/Documents/engine/engine/build && $(CMAKE_COMMAND) -E cmake_progress_start C:/Users/wellh/Documents/engine/engine/build/CMakeFiles C:/Users/wellh/Documents/engine/engine/build/core//CMakeFiles/progress.marks
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/codegen
-	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/wellh/Documents/engine/engine/build/CMakeFiles 0
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles C:/Users/WellH/Documents/projects/lapEngine/build/core//CMakeFiles/progress.marks
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/codegen
+	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles 0
 .PHONY : codegen
 
 # The main clean target
 clean:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/clean
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/clean
 .PHONY : clean
 
 # The main clean target
@@ -110,22 +110,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/preinstall
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/preinstall
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 core/CMakeFiles/lapCore.dir/rule:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/CMakeFiles/lapCore.dir/rule
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/CMakeFiles/lapCore.dir/rule
 .PHONY : core/CMakeFiles/lapCore.dir/rule
 
 # Convenience name for target.
@@ -134,15 +134,39 @@ lapCore: core/CMakeFiles/lapCore.dir/rule
 
 # fast build rule for target.
 lapCore/fast:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/build
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/build
 .PHONY : lapCore/fast
+
+source/app.obj: source/app.cpp.obj
+.PHONY : source/app.obj
+
+# target to build an object file
+source/app.cpp.obj:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/app.cpp.obj
+.PHONY : source/app.cpp.obj
+
+source/app.i: source/app.cpp.i
+.PHONY : source/app.i
+
+# target to preprocess a source file
+source/app.cpp.i:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/app.cpp.i
+.PHONY : source/app.cpp.i
+
+source/app.s: source/app.cpp.s
+.PHONY : source/app.s
+
+# target to generate assembly for a file
+source/app.cpp.s:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/app.cpp.s
+.PHONY : source/app.cpp.s
 
 source/core.obj: source/core.cpp.obj
 .PHONY : source/core.obj
 
 # target to build an object file
 source/core.cpp.obj:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/core.cpp.obj
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/core.cpp.obj
 .PHONY : source/core.cpp.obj
 
 source/core.i: source/core.cpp.i
@@ -150,7 +174,7 @@ source/core.i: source/core.cpp.i
 
 # target to preprocess a source file
 source/core.cpp.i:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/core.cpp.i
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/core.cpp.i
 .PHONY : source/core.cpp.i
 
 source/core.s: source/core.cpp.s
@@ -158,8 +182,104 @@ source/core.s: source/core.cpp.s
 
 # target to generate assembly for a file
 source/core.cpp.s:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/core.cpp.s
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/core.cpp.s
 .PHONY : source/core.cpp.s
+
+source/project.obj: source/project.cpp.obj
+.PHONY : source/project.obj
+
+# target to build an object file
+source/project.cpp.obj:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/project.cpp.obj
+.PHONY : source/project.cpp.obj
+
+source/project.i: source/project.cpp.i
+.PHONY : source/project.i
+
+# target to preprocess a source file
+source/project.cpp.i:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/project.cpp.i
+.PHONY : source/project.cpp.i
+
+source/project.s: source/project.cpp.s
+.PHONY : source/project.s
+
+# target to generate assembly for a file
+source/project.cpp.s:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/project.cpp.s
+.PHONY : source/project.cpp.s
+
+source/resource_manager.obj: source/resource_manager.cpp.obj
+.PHONY : source/resource_manager.obj
+
+# target to build an object file
+source/resource_manager.cpp.obj:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj
+.PHONY : source/resource_manager.cpp.obj
+
+source/resource_manager.i: source/resource_manager.cpp.i
+.PHONY : source/resource_manager.i
+
+# target to preprocess a source file
+source/resource_manager.cpp.i:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.i
+.PHONY : source/resource_manager.cpp.i
+
+source/resource_manager.s: source/resource_manager.cpp.s
+.PHONY : source/resource_manager.s
+
+# target to generate assembly for a file
+source/resource_manager.cpp.s:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.s
+.PHONY : source/resource_manager.cpp.s
+
+source/scene.obj: source/scene.cpp.obj
+.PHONY : source/scene.obj
+
+# target to build an object file
+source/scene.cpp.obj:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/scene.cpp.obj
+.PHONY : source/scene.cpp.obj
+
+source/scene.i: source/scene.cpp.i
+.PHONY : source/scene.i
+
+# target to preprocess a source file
+source/scene.cpp.i:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/scene.cpp.i
+.PHONY : source/scene.cpp.i
+
+source/scene.s: source/scene.cpp.s
+.PHONY : source/scene.s
+
+# target to generate assembly for a file
+source/scene.cpp.s:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/scene.cpp.s
+.PHONY : source/scene.cpp.s
+
+source/systems.obj: source/systems.cpp.obj
+.PHONY : source/systems.obj
+
+# target to build an object file
+source/systems.cpp.obj:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems.cpp.obj
+.PHONY : source/systems.cpp.obj
+
+source/systems.i: source/systems.cpp.i
+.PHONY : source/systems.i
+
+# target to preprocess a source file
+source/systems.cpp.i:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems.cpp.i
+.PHONY : source/systems.cpp.i
+
+source/systems.s: source/systems.cpp.s
+.PHONY : source/systems.s
+
+# target to generate assembly for a file
+source/systems.cpp.s:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems.cpp.s
+.PHONY : source/systems.cpp.s
 
 # Help Target
 help:
@@ -171,9 +291,24 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... lapCore"
+	@echo "... source/app.obj"
+	@echo "... source/app.i"
+	@echo "... source/app.s"
 	@echo "... source/core.obj"
 	@echo "... source/core.i"
 	@echo "... source/core.s"
+	@echo "... source/project.obj"
+	@echo "... source/project.i"
+	@echo "... source/project.s"
+	@echo "... source/resource_manager.obj"
+	@echo "... source/resource_manager.i"
+	@echo "... source/resource_manager.s"
+	@echo "... source/scene.obj"
+	@echo "... source/scene.i"
+	@echo "... source/scene.s"
+	@echo "... source/systems.obj"
+	@echo "... source/systems.i"
+	@echo "... source/systems.s"
 .PHONY : help
 
 
@@ -185,6 +320,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

@@ -57,10 +57,10 @@ RM = "C:/Program Files/CMake/bin/cmake.exe" -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:/Users/wellh/Documents/engine/engine
+CMAKE_SOURCE_DIR = C:/Users/WellH/Documents/projects/lapEngine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:/Users/wellh/Documents/engine/engine/build
+CMAKE_BINARY_DIR = C:/Users/WellH/Documents/projects/lapEngine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,21 +87,21 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd C:/Users/wellh/Documents/engine/engine/build && $(CMAKE_COMMAND) -E cmake_progress_start C:/Users/wellh/Documents/engine/engine/build/CMakeFiles C:/Users/wellh/Documents/engine/engine/build/hub//CMakeFiles/progress.marks
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/all
-	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/wellh/Documents/engine/engine/build/CMakeFiles 0
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles C:/Users/WellH/Documents/projects/lapEngine/build/hub//CMakeFiles/progress.marks
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/all
+	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles 0
 .PHONY : all
 
 # The main codegen target
 codegen: cmake_check_build_system
-	cd C:/Users/wellh/Documents/engine/engine/build && $(CMAKE_COMMAND) -E cmake_progress_start C:/Users/wellh/Documents/engine/engine/build/CMakeFiles C:/Users/wellh/Documents/engine/engine/build/hub//CMakeFiles/progress.marks
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/codegen
-	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/wellh/Documents/engine/engine/build/CMakeFiles 0
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles C:/Users/WellH/Documents/projects/lapEngine/build/hub//CMakeFiles/progress.marks
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/codegen
+	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles 0
 .PHONY : codegen
 
 # The main clean target
 clean:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/clean
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/clean
 .PHONY : clean
 
 # The main clean target
@@ -110,22 +110,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/preinstall
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/preinstall
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 hub/CMakeFiles/lapHub.dir/rule:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/CMakeFiles/lapHub.dir/rule
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/CMakeFiles/lapHub.dir/rule
 .PHONY : hub/CMakeFiles/lapHub.dir/rule
 
 # Convenience name for target.
@@ -134,15 +134,63 @@ lapHub: hub/CMakeFiles/lapHub.dir/rule
 
 # fast build rule for target.
 lapHub/fast:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/build
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/build
 .PHONY : lapHub/fast
+
+source/camera.obj: source/camera.cpp.obj
+.PHONY : source/camera.obj
+
+# target to build an object file
+source/camera.cpp.obj:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/camera.cpp.obj
+.PHONY : source/camera.cpp.obj
+
+source/camera.i: source/camera.cpp.i
+.PHONY : source/camera.i
+
+# target to preprocess a source file
+source/camera.cpp.i:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/camera.cpp.i
+.PHONY : source/camera.cpp.i
+
+source/camera.s: source/camera.cpp.s
+.PHONY : source/camera.s
+
+# target to generate assembly for a file
+source/camera.cpp.s:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/camera.cpp.s
+.PHONY : source/camera.cpp.s
+
+source/fpslabel.obj: source/fpslabel.cpp.obj
+.PHONY : source/fpslabel.obj
+
+# target to build an object file
+source/fpslabel.cpp.obj:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/fpslabel.cpp.obj
+.PHONY : source/fpslabel.cpp.obj
+
+source/fpslabel.i: source/fpslabel.cpp.i
+.PHONY : source/fpslabel.i
+
+# target to preprocess a source file
+source/fpslabel.cpp.i:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/fpslabel.cpp.i
+.PHONY : source/fpslabel.cpp.i
+
+source/fpslabel.s: source/fpslabel.cpp.s
+.PHONY : source/fpslabel.s
+
+# target to generate assembly for a file
+source/fpslabel.cpp.s:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/fpslabel.cpp.s
+.PHONY : source/fpslabel.cpp.s
 
 source/hub.obj: source/hub.cpp.obj
 .PHONY : source/hub.obj
 
 # target to build an object file
 source/hub.cpp.obj:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/hub.cpp.obj
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/hub.cpp.obj
 .PHONY : source/hub.cpp.obj
 
 source/hub.i: source/hub.cpp.i
@@ -150,7 +198,7 @@ source/hub.i: source/hub.cpp.i
 
 # target to preprocess a source file
 source/hub.cpp.i:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/hub.cpp.i
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/hub.cpp.i
 .PHONY : source/hub.cpp.i
 
 source/hub.s: source/hub.cpp.s
@@ -158,8 +206,56 @@ source/hub.s: source/hub.cpp.s
 
 # target to generate assembly for a file
 source/hub.cpp.s:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/hub.cpp.s
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/hub.cpp.s
 .PHONY : source/hub.cpp.s
+
+source/maxfpslabel.obj: source/maxfpslabel.cpp.obj
+.PHONY : source/maxfpslabel.obj
+
+# target to build an object file
+source/maxfpslabel.cpp.obj:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.obj
+.PHONY : source/maxfpslabel.cpp.obj
+
+source/maxfpslabel.i: source/maxfpslabel.cpp.i
+.PHONY : source/maxfpslabel.i
+
+# target to preprocess a source file
+source/maxfpslabel.cpp.i:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.i
+.PHONY : source/maxfpslabel.cpp.i
+
+source/maxfpslabel.s: source/maxfpslabel.cpp.s
+.PHONY : source/maxfpslabel.s
+
+# target to generate assembly for a file
+source/maxfpslabel.cpp.s:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.s
+.PHONY : source/maxfpslabel.cpp.s
+
+source/velocitylabel.obj: source/velocitylabel.cpp.obj
+.PHONY : source/velocitylabel.obj
+
+# target to build an object file
+source/velocitylabel.cpp.obj:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.obj
+.PHONY : source/velocitylabel.cpp.obj
+
+source/velocitylabel.i: source/velocitylabel.cpp.i
+.PHONY : source/velocitylabel.i
+
+# target to preprocess a source file
+source/velocitylabel.cpp.i:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.i
+.PHONY : source/velocitylabel.cpp.i
+
+source/velocitylabel.s: source/velocitylabel.cpp.s
+.PHONY : source/velocitylabel.s
+
+# target to generate assembly for a file
+source/velocitylabel.cpp.s:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.s
+.PHONY : source/velocitylabel.cpp.s
 
 # Help Target
 help:
@@ -171,9 +267,21 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... lapHub"
+	@echo "... source/camera.obj"
+	@echo "... source/camera.i"
+	@echo "... source/camera.s"
+	@echo "... source/fpslabel.obj"
+	@echo "... source/fpslabel.i"
+	@echo "... source/fpslabel.s"
 	@echo "... source/hub.obj"
 	@echo "... source/hub.i"
 	@echo "... source/hub.s"
+	@echo "... source/maxfpslabel.obj"
+	@echo "... source/maxfpslabel.i"
+	@echo "... source/maxfpslabel.s"
+	@echo "... source/velocitylabel.obj"
+	@echo "... source/velocitylabel.i"
+	@echo "... source/velocitylabel.s"
 .PHONY : help
 
 
@@ -185,6 +293,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd C:/Users/wellh/Documents/engine/engine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

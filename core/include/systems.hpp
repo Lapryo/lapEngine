@@ -16,25 +16,76 @@ namespace lapCore
     class System
     {
     public:
-        System(SystemDrawOrder order) : drawOrder(order) {}
+        System(SystemDrawOrder order, Scene* scene) : drawOrder(order), scene(scene) {}
         virtual ~System() = default;
         virtual void Update(float deltaTime, entt::registry &reg) = 0;
 
         SystemDrawOrder drawOrder;
+        bool active = true;
+        Scene* scene;
     };
 
     class PhysicsSystem : public System
     {
     public:
-        PhysicsSystem() : System(SystemDrawOrder::PREDRAW) {}
+        PhysicsSystem(Scene* scene) : System(SystemDrawOrder::PREDRAW, scene) {}
         void Update(float deltaTime, entt::registry &reg) override;
     };
 
     class RenderSystem : public System
     {
     public:
-        RenderSystem() : System(SystemDrawOrder::DRAW) {}
+        struct RenderEntry
+        {
+            entt::entity entity;
+            unsigned int zlayer;
+            bool isScreenSpace;
+            enum class Type { Sprite, Text, Rect } type;
+        };
+
+        std::vector<RenderEntry> renderList;
+
+        RenderSystem(Scene* scene) : System(SystemDrawOrder::DRAW, scene) {}
         void Update(float deltaTime, entt::registry &reg) override;
+        
+        void Connect(entt::registry &registry);
+        void OnRenderableUpdated(entt::registry &registry, entt::entity entity);
+
+        void RebuildRenderList(entt::registry &registry);
+
+        bool needsResort = true;
+    };
+
+    class ScriptSystem : public System
+    {
+    public:
+        ScriptSystem(Scene* scene) : System(SystemDrawOrder::PREDRAW, scene) {}
+
+        void Update(float deltaTime, entt::registry& registry) override {
+            auto view = registry.view<Script>();
+
+            for (auto entity : view) {
+                auto &script = view.get<Script>(entity);
+
+                if (!script.active) {
+                    if (script.OnCreate)
+                        script.OnCreate(scene, entity);
+                    script.active = true;
+                }
+
+                if (script.OnUpdate)
+                    script.OnUpdate(scene, entity, deltaTime);
+            }
+        }
+
+        void OnDestroy(entt::registry& registry) {
+            auto view = registry.view<Script>();
+            for (auto entity : view) {
+                auto &script = view.get<Script>(entity);
+                if (script.OnDestroy)
+                    script.OnDestroy(scene, entity);
+            }
+        }
     };
 }
 

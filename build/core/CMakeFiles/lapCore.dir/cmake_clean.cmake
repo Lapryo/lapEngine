@@ -1,8 +1,18 @@
 file(REMOVE_RECURSE
-  "C:/Users/wellh/Documents/engine/engine/lib/liblapCore.a"
-  "C:/Users/wellh/Documents/engine/engine/lib/liblapCore.pdb"
+  "C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a"
+  "C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.pdb"
+  "CMakeFiles/lapCore.dir/source/app.cpp.obj"
+  "CMakeFiles/lapCore.dir/source/app.cpp.obj.d"
   "CMakeFiles/lapCore.dir/source/core.cpp.obj"
   "CMakeFiles/lapCore.dir/source/core.cpp.obj.d"
+  "CMakeFiles/lapCore.dir/source/project.cpp.obj"
+  "CMakeFiles/lapCore.dir/source/project.cpp.obj.d"
+  "CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj"
+  "CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj.d"
+  "CMakeFiles/lapCore.dir/source/scene.cpp.obj"
+  "CMakeFiles/lapCore.dir/source/scene.cpp.obj.d"
+  "CMakeFiles/lapCore.dir/source/systems.cpp.obj"
+  "CMakeFiles/lapCore.dir/source/systems.cpp.obj.d"
 )
 
 # Per-language clean rules from dependency scanning.

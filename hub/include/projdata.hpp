@@ -18,7 +18,8 @@ const char proj_json[] = R"json(
             "systems":
             [
                 "physics",
-                "render"
+                "render",
+                "script"
             ],
             "objects":
             [
@@ -31,8 +32,8 @@ const char proj_json[] = R"json(
                             "type": "transform2d",
                             "data":
                             {
-                                "position": [0,0],
-                                "velocity": [0,10],
+                                "position": [100,20],
+                                "velocity": [0,0],
                                 "scale": [1,1],
                                 "rotation": 0
                             }
@@ -41,8 +42,9 @@ const char proj_json[] = R"json(
                             "name": "rectvisualizer",
                             "type": "rectvisualizer",
                             "data": {
-                                "size": [10,10],
+                                "size": [50,50],
                                 "tint": [230, 41, 55, 255],
+                                "zlayer": 2,
                                 "isScreenSpace": false
                             }
                         },
@@ -69,9 +71,76 @@ const char proj_json[] = R"json(
                             "data": {
                                 "text": "FPS: ___",
                                 "position": [0, 0],
-                                "size": 20,
+                                "size": 100,
                                 "color": [255, 0, 0, 255],
+                                "zlayer": 3,
                                 "isScreenSpace": true
+                            }
+                        },
+                        {
+                            "name": "updatefps",
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "",
+                                "onUpdate": "updatefps",
+                                "onDestroy": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "maxfpslabel",
+                    "components":
+                    [
+                        {
+                            "name": "textlabel",
+                            "type": "textlabel",
+                            "data": {
+                                "text": "MAX FPS: ___",
+                                "position": [0, 150],
+                                "size": 100,
+                                "color": [255, 0, 0, 255],
+                                "zlayer": 3,
+                                "isScreenSpace": true
+                            }
+                        },
+                        {
+                            "name": "updatemaxfps",
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "",
+                                "onUpdate": "updatemaxfps",
+                                "onDestroy": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "velocitylabel",
+                    "components":
+                    [
+                        {
+                            "name": "textlabel",
+                            "type": "textlabel",
+                            "data": {
+                                "text": "BOX'S Y VEL: ___",
+                                "position": [0, 300],
+                                "size": 100,
+                                "color": [255, 0, 0, 255],
+                                "zlayer": 3,
+                                "isScreenSpace": true
+                            }
+                        },
+                        {
+                            "name": "updatevelocitylabel",
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "",
+                                "onUpdate": "updatevelocitylabel",
+                                "onDestroy": ""
                             }
                         }
                     ]
@@ -90,6 +159,16 @@ const char proj_json[] = R"json(
                                 "rotation": 0.0,
                                 "zoom": 1.0,
                                 "exclude": []
+                            }
+                        },
+                        {
+                            "name": "followbox",
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "",
+                                "onUpdate": "followbox",
+                                "onDestroy": ""
                             }
                         }
                     ]
