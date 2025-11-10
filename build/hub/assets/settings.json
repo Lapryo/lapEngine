@@ -2,10 +2,10 @@
     "window":
     {
         "title": "lapHub",
-        "mode": "fullscreen",
+        "mode": "windowed",
         "decorated": true,
         "resizable": true,
-        "resolution": [2560, 1440],
+        "resolution": [1200, 900],
         "logical-resolution": [6400, 4800],
         "vsync": false,
         "inf-fps": true,

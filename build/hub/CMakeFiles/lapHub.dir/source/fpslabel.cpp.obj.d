@@ -264,4 +264,7 @@ hub/CMakeFiles/lapHub.dir/source/fpslabel.cpp.obj: \
  C:/Users/WellH/Documents/projects/lapEngine/core/include/scene.hpp \
  C:/Users/WellH/Documents/projects/lapEngine/core/include/resource_manager.hpp \
  C:/Users/WellH/Documents/projects/lapEngine/core/include/scriptregistry.hpp \
- C:/Users/WellH/Documents/projects/lapEngine/core/include/raylib/rlgl.h
+ C:/Users/WellH/Documents/projects/lapEngine/core/include/raylib/rlgl.h \
+ C:/msys64/mingw64/include/c++/14.2.0/iostream \
+ C:/msys64/mingw64/include/c++/14.2.0/istream \
+ C:/msys64/mingw64/include/c++/14.2.0/bits/istream.tcc

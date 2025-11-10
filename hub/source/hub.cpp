@@ -24,62 +24,17 @@ std::vector<std::string> windowSubTitles = {
 HubApp::HubApp(Project &project) : App(project)
 {}
 
-RenderTexture2D target;
-
 void HubApp::Init()
 {
-    // MOVE THIS TO SEPERATE FUNCTION
-    auto settingsJson = nlohmann::json::parse(ReadFileToString("assets/settings.json"));
-    auto &windowJson = settingsJson["window"];
-
-    std::string windowMode = windowJson.value("mode", "windowed");
-    bool resizable = windowJson.value("resizable", false);
-    Vector2 windowRes{
-        windowJson["resolution"].at(0),
-        windowJson["resolution"].at(1)
-    };
-    Vector2 logicalRes{
-        windowJson["logical-resolution"].at(0),
-        windowJson["logical-resolution"].at(1)
-    };
-
-    bool vsync = windowJson.value("vsync", false);
-    bool inf_fps = windowJson.value("inf-fps", true);
-    bool decorated = windowJson.value("decorated", true);
+    project.LoadSettings("assets/settings.json");
 
     std::random_device rd;
     std::mt19937 rng(rd());
 
     std::uniform_int_distribution<int> intDist(0, windowSubTitles.size() - 1);
-    std::string windowTitle = windowJson.value("title", "") + " - " + windowSubTitles[intDist(rng)];
+    std::string windowTitle = "lapHub - " + windowSubTitles[intDist(rng)];
 
-    InitWindow(windowRes.x, windowRes.y, windowTitle.c_str());
-    for (auto& scene : project.scenes) {
-        scene->LoadQueuedAssets();
-    }
-
-    if (resizable)
-        SetWindowState(FLAG_WINDOW_RESIZABLE);
-
-    if (windowMode == "fullscreen")
-        SetWindowState(FLAG_FULLSCREEN_MODE);
-
-    if (!decorated)
-        SetWindowState(FLAG_WINDOW_UNDECORATED);
-    
-    if (!vsync)
-        if (inf_fps)
-            SetTargetFPS(-1);
-        else
-            SetTargetFPS(windowJson["max-fps"].get<int>());
-    else
-        SetWindowState(FLAG_VSYNC_HINT);
-
-    project.main_scene = project.GetMainScene();
-    project.logicalResolution = logicalRes;
-
-    target = LoadRenderTexture(logicalRes.x, logicalRes.y);
-    SetTextureFilter(target.texture, TEXTURE_FILTER_TRILINEAR);
+    SetWindowTitle(windowTitle.c_str());
 
     state = AppState::RUNNING;
 }
@@ -92,66 +47,18 @@ void HubApp::Update(float deltaTime)
         return;
     }
 
-    if (IsKeyDown(KEY_F11)) {
+    if (IsKeyReleased(KEY_F11)) {
         ToggleFullscreen();
         SetWindowPosition(100, 100);
     }
 
-    project.main_scene->Update(deltaTime, SystemDrawOrder::PREDRAW);
+    project.main_scene->Update(deltaTime, SystemDrawOrder::PREDRAW, project.target);
 }
 
 void HubApp::Draw()
 {
-    BeginTextureMode(target);
-    ClearBackground(WHITE);
-
-    // draw game using logical coordinates here
-    project.main_scene->Update(0.0f, SystemDrawOrder::DRAW);
-
-    EndTextureMode();
-    ClearBackground(BLACK);
-
-    // Now draw render texture to the screen, scaled and letterboxed
-    int screenW = GetScreenWidth();
-    int screenH = GetScreenHeight();
-    float screenAspect = (float)screenW / screenH;
-    float targetAspect = (float)project.logicalResolution.x / project.logicalResolution.y;
-
-    int drawWidth, drawHeight;
-    int offsetX, offsetY;
-
-    if (screenAspect > targetAspect) {
-        // window is wider than logical
-        drawHeight = screenH;
-        drawWidth = (int)(screenH * targetAspect);
-        offsetX = (screenW - drawWidth) / 2;
-        offsetY = 0;
-    } else {
-        // window is taller than logical
-        drawWidth = screenW;
-        drawHeight = (int)(screenW / targetAspect);
-        offsetX = 0;
-        offsetY = (screenH - drawHeight) / 2;
-    }
-
-    // Draw the render texture to the screen, scaling it
-    DrawTexturePro(
-        target.texture,
-        { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height }, // source rect (flip y)
-        { (float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight },     // dest rect
-        { 0.0f, 0.0f }, // origin
-        0.0f,           // rotation
-        WHITE
-    );
-
-    EndDrawing();
-
-    /*
-        TODO:
-            OPTIMIZE
-    */
-
-    project.main_scene->Update(0.0f, SystemDrawOrder::POSTDRAW);
+    project.main_scene->Update(0.0f, SystemDrawOrder::DRAW, project.target);
+    project.main_scene->Update(0.0f, SystemDrawOrder::POSTDRAW, project.target);
 }
 
 int main()
@@ -162,8 +69,6 @@ int main()
     hub.Init();
     hub.Run();
     hub.Shutdown();
-
-    UnloadRenderTexture(target);
 
     return 0;
 }

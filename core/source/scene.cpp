@@ -36,13 +36,62 @@ void Scene::LoadQueuedAssets()
     ReloadTextures();
 }
 
-void Scene::Update(float deltaTime, SystemDrawOrder order)
+void Scene::Update(float deltaTime, SystemDrawOrder order, RenderTexture2D &target)
 {
+    if (order == SystemDrawOrder::DRAW)
+    {
+        BeginTextureMode(target);
+        ClearBackground(WHITE);
+    }
+
     for (auto &system : systems[order])
     {
         if (system->active) {
             system->Update(deltaTime, entities);
         }
+    }
+
+    if (order == SystemDrawOrder::DRAW)
+    {
+        EndTextureMode();
+        ClearBackground(BLACK);
+
+        // Now draw render texture to the screen, scaled and letterboxed
+        int screenW = GetScreenWidth();
+        int screenH = GetScreenHeight();
+        float screenAspect = (float)screenW / screenH;
+        float targetAspect = (float)logicalResolution.x / logicalResolution.y;
+
+        int drawWidth, drawHeight;
+        int offsetX, offsetY;
+
+        if (screenAspect > targetAspect) {
+            // window is wider than logical
+            drawHeight = screenH;
+            drawWidth = (int)(screenH * targetAspect);
+            offsetX = (screenW - drawWidth) / 2;
+            offsetY = 0;
+        } else {
+            // window is taller than logical
+            drawWidth = screenW;
+            drawHeight = (int)(screenW / targetAspect);
+            offsetX = 0;
+            offsetY = (screenH - drawHeight) / 2;
+        }
+
+        logicalWindowPos = {(float)offsetX, (float)offsetY};
+
+        // Draw the render texture to the screen, scaling it
+        DrawTexturePro(
+            target.texture,
+            { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height }, // source rect (flip y)
+            { (float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight },     // dest rect
+            { 0.0f, 0.0f }, // origin
+            0.0f,           // rotation
+            WHITE
+        );
+
+        EndDrawing();
     }
 }
 

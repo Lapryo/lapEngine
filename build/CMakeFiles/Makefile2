@@ -214,12 +214,12 @@ core/CMakeFiles/lapCore.dir/clean:
 hub/CMakeFiles/lapHub.dir/all: core/CMakeFiles/lapCore.dir/all
 	$(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/depend
 	$(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=10,11,12,13,14,15 "Built target lapHub"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=10,11,12,13,14 "Built target lapHub"
 .PHONY : hub/CMakeFiles/lapHub.dir/all
 
 # Build rule for subdir invocation for target.
 hub/CMakeFiles/lapHub.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles 13
+	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles 12
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hub/CMakeFiles/lapHub.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles 0
 .PHONY : hub/CMakeFiles/lapHub.dir/rule
@@ -231,7 +231,7 @@ lapHub: hub/CMakeFiles/lapHub.dir/rule
 # codegen rule for target.
 hub/CMakeFiles/lapHub.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=10,11,12,13,14,15 "Finished codegen for target lapHub"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=10,11,12,13,14 "Finished codegen for target lapHub"
 .PHONY : hub/CMakeFiles/lapHub.dir/codegen
 
 # clean rule for target.

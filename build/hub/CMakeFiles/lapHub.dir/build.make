@@ -72,20 +72,20 @@ include hub/CMakeFiles/lapHub.dir/flags.make
 hub/CMakeFiles/lapHub.dir/codegen:
 .PHONY : hub/CMakeFiles/lapHub.dir/codegen
 
-hub/CMakeFiles/lapHub.dir/source/camera.cpp.obj: hub/CMakeFiles/lapHub.dir/flags.make
-hub/CMakeFiles/lapHub.dir/source/camera.cpp.obj: hub/CMakeFiles/lapHub.dir/includes_CXX.rsp
-hub/CMakeFiles/lapHub.dir/source/camera.cpp.obj: C:/Users/WellH/Documents/projects/lapEngine/hub/source/camera.cpp
-hub/CMakeFiles/lapHub.dir/source/camera.cpp.obj: hub/CMakeFiles/lapHub.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object hub/CMakeFiles/lapHub.dir/source/camera.cpp.obj"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT hub/CMakeFiles/lapHub.dir/source/camera.cpp.obj -MF CMakeFiles/lapHub.dir/source/camera.cpp.obj.d -o CMakeFiles/lapHub.dir/source/camera.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/camera.cpp
+hub/CMakeFiles/lapHub.dir/source/createproject.cpp.obj: hub/CMakeFiles/lapHub.dir/flags.make
+hub/CMakeFiles/lapHub.dir/source/createproject.cpp.obj: hub/CMakeFiles/lapHub.dir/includes_CXX.rsp
+hub/CMakeFiles/lapHub.dir/source/createproject.cpp.obj: C:/Users/WellH/Documents/projects/lapEngine/hub/source/createproject.cpp
+hub/CMakeFiles/lapHub.dir/source/createproject.cpp.obj: hub/CMakeFiles/lapHub.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object hub/CMakeFiles/lapHub.dir/source/createproject.cpp.obj"
+	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT hub/CMakeFiles/lapHub.dir/source/createproject.cpp.obj -MF CMakeFiles/lapHub.dir/source/createproject.cpp.obj.d -o CMakeFiles/lapHub.dir/source/createproject.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/createproject.cpp
 
-hub/CMakeFiles/lapHub.dir/source/camera.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapHub.dir/source/camera.cpp.i"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/Documents/projects/lapEngine/hub/source/camera.cpp > CMakeFiles/lapHub.dir/source/camera.cpp.i
+hub/CMakeFiles/lapHub.dir/source/createproject.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapHub.dir/source/createproject.cpp.i"
+	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/Documents/projects/lapEngine/hub/source/createproject.cpp > CMakeFiles/lapHub.dir/source/createproject.cpp.i
 
-hub/CMakeFiles/lapHub.dir/source/camera.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapHub.dir/source/camera.cpp.s"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/Documents/projects/lapEngine/hub/source/camera.cpp -o CMakeFiles/lapHub.dir/source/camera.cpp.s
+hub/CMakeFiles/lapHub.dir/source/createproject.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapHub.dir/source/createproject.cpp.s"
+	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/Documents/projects/lapEngine/hub/source/createproject.cpp -o CMakeFiles/lapHub.dir/source/createproject.cpp.s
 
 hub/CMakeFiles/lapHub.dir/source/fpslabel.cpp.obj: hub/CMakeFiles/lapHub.dir/flags.make
 hub/CMakeFiles/lapHub.dir/source/fpslabel.cpp.obj: hub/CMakeFiles/lapHub.dir/includes_CXX.rsp
@@ -117,63 +117,46 @@ hub/CMakeFiles/lapHub.dir/source/hub.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapHub.dir/source/hub.cpp.s"
 	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/Documents/projects/lapEngine/hub/source/hub.cpp -o CMakeFiles/lapHub.dir/source/hub.cpp.s
 
-hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.obj: hub/CMakeFiles/lapHub.dir/flags.make
-hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.obj: hub/CMakeFiles/lapHub.dir/includes_CXX.rsp
-hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.obj: C:/Users/WellH/Documents/projects/lapEngine/hub/source/maxfpslabel.cpp
-hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.obj: hub/CMakeFiles/lapHub.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.obj"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.obj -MF CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.obj.d -o CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/maxfpslabel.cpp
+hub/CMakeFiles/lapHub.dir/source/openproject.cpp.obj: hub/CMakeFiles/lapHub.dir/flags.make
+hub/CMakeFiles/lapHub.dir/source/openproject.cpp.obj: hub/CMakeFiles/lapHub.dir/includes_CXX.rsp
+hub/CMakeFiles/lapHub.dir/source/openproject.cpp.obj: C:/Users/WellH/Documents/projects/lapEngine/hub/source/openproject.cpp
+hub/CMakeFiles/lapHub.dir/source/openproject.cpp.obj: hub/CMakeFiles/lapHub.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object hub/CMakeFiles/lapHub.dir/source/openproject.cpp.obj"
+	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT hub/CMakeFiles/lapHub.dir/source/openproject.cpp.obj -MF CMakeFiles/lapHub.dir/source/openproject.cpp.obj.d -o CMakeFiles/lapHub.dir/source/openproject.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/openproject.cpp
 
-hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.i"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/Documents/projects/lapEngine/hub/source/maxfpslabel.cpp > CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.i
+hub/CMakeFiles/lapHub.dir/source/openproject.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapHub.dir/source/openproject.cpp.i"
+	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/Documents/projects/lapEngine/hub/source/openproject.cpp > CMakeFiles/lapHub.dir/source/openproject.cpp.i
 
-hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.s"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/Documents/projects/lapEngine/hub/source/maxfpslabel.cpp -o CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.s
-
-hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.obj: hub/CMakeFiles/lapHub.dir/flags.make
-hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.obj: hub/CMakeFiles/lapHub.dir/includes_CXX.rsp
-hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.obj: C:/Users/WellH/Documents/projects/lapEngine/hub/source/velocitylabel.cpp
-hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.obj: hub/CMakeFiles/lapHub.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.obj"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.obj -MF CMakeFiles/lapHub.dir/source/velocitylabel.cpp.obj.d -o CMakeFiles/lapHub.dir/source/velocitylabel.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/velocitylabel.cpp
-
-hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapHub.dir/source/velocitylabel.cpp.i"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/Documents/projects/lapEngine/hub/source/velocitylabel.cpp > CMakeFiles/lapHub.dir/source/velocitylabel.cpp.i
-
-hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapHub.dir/source/velocitylabel.cpp.s"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/Documents/projects/lapEngine/hub/source/velocitylabel.cpp -o CMakeFiles/lapHub.dir/source/velocitylabel.cpp.s
+hub/CMakeFiles/lapHub.dir/source/openproject.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapHub.dir/source/openproject.cpp.s"
+	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/Documents/projects/lapEngine/hub/source/openproject.cpp -o CMakeFiles/lapHub.dir/source/openproject.cpp.s
 
 # Object files for target lapHub
 lapHub_OBJECTS = \
-"CMakeFiles/lapHub.dir/source/camera.cpp.obj" \
+"CMakeFiles/lapHub.dir/source/createproject.cpp.obj" \
 "CMakeFiles/lapHub.dir/source/fpslabel.cpp.obj" \
 "CMakeFiles/lapHub.dir/source/hub.cpp.obj" \
-"CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.obj" \
-"CMakeFiles/lapHub.dir/source/velocitylabel.cpp.obj"
+"CMakeFiles/lapHub.dir/source/openproject.cpp.obj"
 
 # External object files for target lapHub
 lapHub_EXTERNAL_OBJECTS =
 
-hub/lapHub.exe: hub/CMakeFiles/lapHub.dir/source/camera.cpp.obj
-hub/lapHub.exe: hub/CMakeFiles/lapHub.dir/source/fpslabel.cpp.obj
-hub/lapHub.exe: hub/CMakeFiles/lapHub.dir/source/hub.cpp.obj
-hub/lapHub.exe: hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.obj
-hub/lapHub.exe: hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.obj
-hub/lapHub.exe: hub/CMakeFiles/lapHub.dir/build.make
-hub/lapHub.exe: C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a
-hub/lapHub.exe: hub/CMakeFiles/lapHub.dir/linkLibs.rsp
-hub/lapHub.exe: hub/CMakeFiles/lapHub.dir/objects1.rsp
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable lapHub.exe"
+hub/debug/lapHub.exe: hub/CMakeFiles/lapHub.dir/source/createproject.cpp.obj
+hub/debug/lapHub.exe: hub/CMakeFiles/lapHub.dir/source/fpslabel.cpp.obj
+hub/debug/lapHub.exe: hub/CMakeFiles/lapHub.dir/source/hub.cpp.obj
+hub/debug/lapHub.exe: hub/CMakeFiles/lapHub.dir/source/openproject.cpp.obj
+hub/debug/lapHub.exe: hub/CMakeFiles/lapHub.dir/build.make
+hub/debug/lapHub.exe: C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a
+hub/debug/lapHub.exe: hub/CMakeFiles/lapHub.dir/linkLibs.rsp
+hub/debug/lapHub.exe: hub/CMakeFiles/lapHub.dir/objects1.rsp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable debug/lapHub.exe"
 	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && "C:/Program Files/CMake/bin/cmake.exe" -E rm -f CMakeFiles/lapHub.dir/objects.a
 	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/ar.exe qc CMakeFiles/lapHub.dir/objects.a @CMakeFiles/lapHub.dir/objects1.rsp
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe -g -Wl,--whole-archive CMakeFiles/lapHub.dir/objects.a -Wl,--no-whole-archive -o lapHub.exe -Wl,--out-implib,liblapHub.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/lapHub.dir/linkLibs.rsp
+	cd C:/Users/WellH/Documents/projects/lapEngine/build/hub && C:/msys64/mingw64/bin/g++.exe -g -Wl,--whole-archive CMakeFiles/lapHub.dir/objects.a -Wl,--no-whole-archive -o debug/lapHub.exe -Wl,--out-implib,liblapHub.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/lapHub.dir/linkLibs.rsp
 
 # Rule to build all files generated by this target.
-hub/CMakeFiles/lapHub.dir/build: hub/lapHub.exe
+hub/CMakeFiles/lapHub.dir/build: hub/debug/lapHub.exe
 .PHONY : hub/CMakeFiles/lapHub.dir/build
 
 hub/CMakeFiles/lapHub.dir/clean:

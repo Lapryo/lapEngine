@@ -548,11 +548,14 @@ core/CMakeFiles/lapCore.dir/source/core.cpp.obj: C:/Users/WellH/Documents/projec
   C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/syslimits.h
 
 core/CMakeFiles/lapCore.dir/source/project.cpp.obj: C:/Users/WellH/Documents/projects/lapEngine/core/source/project.cpp \
+  C:/Users/WellH/Documents/projects/lapEngine/core/include/app.hpp \
   C:/Users/WellH/Documents/projects/lapEngine/core/include/components.hpp \
+  C:/Users/WellH/Documents/projects/lapEngine/core/include/core.hpp \
   C:/Users/WellH/Documents/projects/lapEngine/core/include/entt/entt.hpp \
   C:/Users/WellH/Documents/projects/lapEngine/core/include/json.hpp \
   C:/Users/WellH/Documents/projects/lapEngine/core/include/project.hpp \
   C:/Users/WellH/Documents/projects/lapEngine/core/include/raylib/raylib.h \
+  C:/Users/WellH/Documents/projects/lapEngine/core/include/raylib/rlgl.h \
   C:/Users/WellH/Documents/projects/lapEngine/core/include/resource_manager.hpp \
   C:/Users/WellH/Documents/projects/lapEngine/core/include/scene.hpp \
   C:/Users/WellH/Documents/projects/lapEngine/core/include/scriptregistry.hpp \

@@ -1,0 +1,14 @@
+{
+    "window":
+    {
+        "title": "lapHub",
+        "mode": "fullscreen",
+        "decorated": true,
+        "resizable": true,
+        "resolution": [2560, 1440],
+        "logical-resolution": [6400, 4800],
+        "vsync": false,
+        "inf-fps": true,
+        "max-fps": 60
+    }
+}

@@ -1,30 +1,25 @@
 #pragma once
 const char proj_json[] = R"json(
 {
-    "name": "hub",
-    "version": "1.0",
+    "name": "lapHub",
+    "version": "0.1-alpha",
     "scenes":
     [
         {
             "name": "main",
             "assets":
             [
-                {
-                    "name": "box",
-                    "type": "texture",
-                    "path": "assets/textures/box.png"
-                }
+
             ],
             "systems":
-            [
-                "physics",
+            [ 
                 "render",
                 "script"
             ],
             "objects":
             [
                 {
-                    "name": "cube",
+                    "name": "opLabel",
                     "components":
                     [
                         {
@@ -32,31 +27,62 @@ const char proj_json[] = R"json(
                             "type": "transform2d",
                             "data":
                             {
-                                "position": [100,20],
+                                "position": [100, 2000],
                                 "velocity": [0,0],
                                 "scale": [1,1],
                                 "rotation": 0
                             }
                         },
                         {
-                            "name": "rectvisualizer",
-                            "type": "rectvisualizer",
+                            "name": "textlabel",
+                            "type": "textlabel",
                             "data": {
-                                "size": [50,50],
-                                "tint": [230, 41, 55, 255],
+                                "text": "Open Project?",
+                                "offset": [0, 0],
+                                "size": 250,
+                                "color": [255, 0, 0, 255],
                                 "zlayer": 2,
-                                "isScreenSpace": false
+                                "isScreenSpace": true
                             }
                         },
                         {
-                            "name": "sprite",
-                            "type": "sprite",
+                            "name": "hitbox",
+                            "type": "rectvisualizer",
                             "data":
                             {
-                                "texture": "box",
-                                "tint": [255, 255, 255, 255],
+                                "size": [250, 250],
+                                "offset": [-30, -20],
+                                "tint": [0, 255, 0, 255],
                                 "zlayer": 1,
-                                "isScreenSpace": false
+                                "isScreenSpace": true
+                            }
+                        },
+                        {
+                            "name": "openproject",
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "adjustopenproject",
+                                "onUpdate": "openproject",
+                                "onDestroy": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "background",
+                    "components":
+                    [
+                        {
+                            "name": "background",
+                            "type": "rectvisualizer",
+                            "data":
+                            {
+                                "size": [6400, 4800],
+                                "offset": [0, 0],
+                                "tint": [13, 12, 29, 255],
+                                "zlayer": 0,
+                                "isScreenSpace": true
                             }
                         }
                     ]
@@ -66,14 +92,15 @@ const char proj_json[] = R"json(
                     "components":
                     [
                         {
-                            "name": "textlabel",
+                            "name": "fpslabel",
                             "type": "textlabel",
-                            "data": {
+                            "data":
+                            {
                                 "text": "FPS: ___",
-                                "position": [0, 0],
+                                "offset": [0, 0],
                                 "size": 100,
                                 "color": [255, 0, 0, 255],
-                                "zlayer": 3,
+                                "zlayer": 1,
                                 "isScreenSpace": true
                             }
                         },
@@ -90,84 +117,51 @@ const char proj_json[] = R"json(
                     ]
                 },
                 {
-                    "name": "maxfpslabel",
+                    "name": "cpLabel",
                     "components":
                     [
+                        {
+                            "name": "transform",
+                            "type": "transform2d",
+                            "data":
+                            {
+                                "position": [4050, 2000],
+                                "velocity": [0,0],
+                                "scale": [1,1],
+                                "rotation": 0
+                            }
+                        },
                         {
                             "name": "textlabel",
                             "type": "textlabel",
                             "data": {
-                                "text": "MAX FPS: ___",
-                                "position": [0, 150],
-                                "size": 100,
-                                "color": [255, 0, 0, 255],
-                                "zlayer": 3,
-                                "isScreenSpace": true
-                            }
-                        },
-                        {
-                            "name": "updatemaxfps",
-                            "type": "script",
-                            "data":
-                            {
-                                "onCreate": "",
-                                "onUpdate": "updatemaxfps",
-                                "onDestroy": ""
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "velocitylabel",
-                    "components":
-                    [
-                        {
-                            "name": "textlabel",
-                            "type": "textlabel",
-                            "data": {
-                                "text": "BOX'S Y VEL: ___",
-                                "position": [0, 300],
-                                "size": 100,
-                                "color": [255, 0, 0, 255],
-                                "zlayer": 3,
-                                "isScreenSpace": true
-                            }
-                        },
-                        {
-                            "name": "updatevelocitylabel",
-                            "type": "script",
-                            "data":
-                            {
-                                "onCreate": "",
-                                "onUpdate": "updatevelocitylabel",
-                                "onDestroy": ""
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "camera",
-                    "components":
-                    [
-                        {
-                            "name": "camera",
-                            "type": "cam2d",
-                            "data":
-                            {
+                                "text": "Create Project?",
                                 "offset": [0, 0],
-                                "target": [100, 20],
-                                "rotation": 0.0,
-                                "zoom": 1.0,
-                                "exclude": []
+                                "size": 250,
+                                "color": [255, 0, 0, 255],
+                                "zlayer": 4,
+                                "isScreenSpace": true
                             }
                         },
                         {
-                            "name": "followbox",
+                            "name": "hitbox",
+                            "type": "rectvisualizer",
+                            "data":
+                            {
+                                "size": [250, 250],
+                                "offset": [-30, -20],
+                                "tint": [0, 255, 0, 255],
+                                "zlayer": 3,
+                                "isScreenSpace": true
+                            }
+                        },
+                        {
+                            "name": "createproject",
                             "type": "script",
                             "data":
                             {
-                                "onCreate": "",
-                                "onUpdate": "followbox",
+                                "onCreate": "adjustcreateproject",
+                                "onUpdate": "createproject",
                                 "onDestroy": ""
                             }
                         }

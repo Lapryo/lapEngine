@@ -137,29 +137,29 @@ lapHub/fast:
 	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/build
 .PHONY : lapHub/fast
 
-source/camera.obj: source/camera.cpp.obj
-.PHONY : source/camera.obj
+source/createproject.obj: source/createproject.cpp.obj
+.PHONY : source/createproject.obj
 
 # target to build an object file
-source/camera.cpp.obj:
-	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/camera.cpp.obj
-.PHONY : source/camera.cpp.obj
+source/createproject.cpp.obj:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/createproject.cpp.obj
+.PHONY : source/createproject.cpp.obj
 
-source/camera.i: source/camera.cpp.i
-.PHONY : source/camera.i
+source/createproject.i: source/createproject.cpp.i
+.PHONY : source/createproject.i
 
 # target to preprocess a source file
-source/camera.cpp.i:
-	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/camera.cpp.i
-.PHONY : source/camera.cpp.i
+source/createproject.cpp.i:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/createproject.cpp.i
+.PHONY : source/createproject.cpp.i
 
-source/camera.s: source/camera.cpp.s
-.PHONY : source/camera.s
+source/createproject.s: source/createproject.cpp.s
+.PHONY : source/createproject.s
 
 # target to generate assembly for a file
-source/camera.cpp.s:
-	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/camera.cpp.s
-.PHONY : source/camera.cpp.s
+source/createproject.cpp.s:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/createproject.cpp.s
+.PHONY : source/createproject.cpp.s
 
 source/fpslabel.obj: source/fpslabel.cpp.obj
 .PHONY : source/fpslabel.obj
@@ -209,53 +209,29 @@ source/hub.cpp.s:
 	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/hub.cpp.s
 .PHONY : source/hub.cpp.s
 
-source/maxfpslabel.obj: source/maxfpslabel.cpp.obj
-.PHONY : source/maxfpslabel.obj
+source/openproject.obj: source/openproject.cpp.obj
+.PHONY : source/openproject.obj
 
 # target to build an object file
-source/maxfpslabel.cpp.obj:
-	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.obj
-.PHONY : source/maxfpslabel.cpp.obj
+source/openproject.cpp.obj:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/openproject.cpp.obj
+.PHONY : source/openproject.cpp.obj
 
-source/maxfpslabel.i: source/maxfpslabel.cpp.i
-.PHONY : source/maxfpslabel.i
-
-# target to preprocess a source file
-source/maxfpslabel.cpp.i:
-	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.i
-.PHONY : source/maxfpslabel.cpp.i
-
-source/maxfpslabel.s: source/maxfpslabel.cpp.s
-.PHONY : source/maxfpslabel.s
-
-# target to generate assembly for a file
-source/maxfpslabel.cpp.s:
-	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/maxfpslabel.cpp.s
-.PHONY : source/maxfpslabel.cpp.s
-
-source/velocitylabel.obj: source/velocitylabel.cpp.obj
-.PHONY : source/velocitylabel.obj
-
-# target to build an object file
-source/velocitylabel.cpp.obj:
-	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.obj
-.PHONY : source/velocitylabel.cpp.obj
-
-source/velocitylabel.i: source/velocitylabel.cpp.i
-.PHONY : source/velocitylabel.i
+source/openproject.i: source/openproject.cpp.i
+.PHONY : source/openproject.i
 
 # target to preprocess a source file
-source/velocitylabel.cpp.i:
-	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.i
-.PHONY : source/velocitylabel.cpp.i
+source/openproject.cpp.i:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/openproject.cpp.i
+.PHONY : source/openproject.cpp.i
 
-source/velocitylabel.s: source/velocitylabel.cpp.s
-.PHONY : source/velocitylabel.s
+source/openproject.s: source/openproject.cpp.s
+.PHONY : source/openproject.s
 
 # target to generate assembly for a file
-source/velocitylabel.cpp.s:
-	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/velocitylabel.cpp.s
-.PHONY : source/velocitylabel.cpp.s
+source/openproject.cpp.s:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/openproject.cpp.s
+.PHONY : source/openproject.cpp.s
 
 # Help Target
 help:
@@ -267,21 +243,18 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... lapHub"
-	@echo "... source/camera.obj"
-	@echo "... source/camera.i"
-	@echo "... source/camera.s"
+	@echo "... source/createproject.obj"
+	@echo "... source/createproject.i"
+	@echo "... source/createproject.s"
 	@echo "... source/fpslabel.obj"
 	@echo "... source/fpslabel.i"
 	@echo "... source/fpslabel.s"
 	@echo "... source/hub.obj"
 	@echo "... source/hub.i"
 	@echo "... source/hub.s"
-	@echo "... source/maxfpslabel.obj"
-	@echo "... source/maxfpslabel.i"
-	@echo "... source/maxfpslabel.s"
-	@echo "... source/velocitylabel.obj"
-	@echo "... source/velocitylabel.i"
-	@echo "... source/velocitylabel.s"
+	@echo "... source/openproject.obj"
+	@echo "... source/openproject.i"
+	@echo "... source/openproject.s"
 .PHONY : help
 
 

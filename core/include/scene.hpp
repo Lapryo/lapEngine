@@ -22,13 +22,16 @@ namespace lapCore
         std::vector<AssetLoadRequest> queuedAssets;
         ResourceManager resources;
 
+        Vector2 logicalWindowPos;
+        Vector2 logicalResolution;
+
         void QueueAsset(const std::string &name, const std::string &type, const std::string &path);
         void QueueAsset(const AssetLoadRequest &asset);
 
         void LoadQueuedAssets();
         void ReloadTextures();
 
-        void Update(float deltaTime, SystemDrawOrder order);
+        void Update(float deltaTime, SystemDrawOrder order, RenderTexture2D &target);
 
         template <typename T, typename... Args>
         void AddSystem(Args&&... args)

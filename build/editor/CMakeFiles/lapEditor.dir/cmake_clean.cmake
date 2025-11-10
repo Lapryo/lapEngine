@@ -1,9 +1,9 @@
 file(REMOVE_RECURSE
   "CMakeFiles/lapEditor.dir/source/editor.cpp.obj"
   "CMakeFiles/lapEditor.dir/source/editor.cpp.obj.d"
-  "lapEditor.exe"
-  "lapEditor.exe.manifest"
-  "lapEditor.pdb"
+  "debug/lapEditor.exe"
+  "debug/lapEditor.exe.manifest"
+  "debug/lapEditor.pdb"
   "liblapEditor.dll.a"
 )
 

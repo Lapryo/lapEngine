@@ -60,32 +60,15 @@ namespace lapCore
     {
     public:
         ScriptSystem(Scene* scene) : System(SystemDrawOrder::PREDRAW, scene) {}
+        void Update(float deltaTime, entt::registry& registry) override;
+        void OnDestroy(entt::registry& registry);
+    };
 
-        void Update(float deltaTime, entt::registry& registry) override {
-            auto view = registry.view<Script>();
-
-            for (auto entity : view) {
-                auto &script = view.get<Script>(entity);
-
-                if (!script.active) {
-                    if (script.OnCreate)
-                        script.OnCreate(scene, entity);
-                    script.active = true;
-                }
-
-                if (script.OnUpdate)
-                    script.OnUpdate(scene, entity, deltaTime);
-            }
-        }
-
-        void OnDestroy(entt::registry& registry) {
-            auto view = registry.view<Script>();
-            for (auto entity : view) {
-                auto &script = view.get<Script>(entity);
-                if (script.OnDestroy)
-                    script.OnDestroy(scene, entity);
-            }
-        }
+    class GUISystem : public System
+    {
+    public:
+        GUISystem(Scene* scene) : System(SystemDrawOrder::DRAW, scene) {}
+        void Update(float deltaTime, entt::registry& registry) override;
     };
 }
 

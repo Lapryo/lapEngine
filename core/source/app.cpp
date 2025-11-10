@@ -24,6 +24,8 @@ void App::Shutdown()
         scene->Clear();
     }
 
+    UnloadRenderTexture(project.target);
+
     // shutdown window if it exists
     CloseWindow();
 }

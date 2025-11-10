@@ -9,6 +9,7 @@
 namespace lapCore
 {
     std::string ReadFileToString(const std::string &filePath);
+    Vector2 GetMouseInViewportSpace(int logicalWidth, int logicalHeight);
 }
 
 #endif

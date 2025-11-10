@@ -66,23 +66,27 @@ void RenderWorldSpace(entt::registry &registry)
 
         // Draw world-space sprites
         for (auto [entity, transform, sprite] : registry.view<Transform2D, Sprite>().each())
-            if (!sprite.isScreenSpace && sprite.texture)
+            if (!sprite.isScreenSpace && sprite.texture && sprite.visible)
                 DrawTexture(*sprite.texture, transform.position.x, transform.position.y, sprite.tint);
 
         // Draw world-space rects
-        for (auto [entity, transform, rect] : registry.view<Transform2D, RectVisualizer>().each())
-            if (!rect.isScreenSpace)
-                DrawRectangle(transform.position.x, transform.position.y, rect.size.x, rect.size.y, rect.tint);
+        for (auto [entity, rect] : registry.view<RectVisualizer>().each())
+            if (!rect.isScreenSpace && rect.visible) {
+                const auto* transform = registry.try_get<Transform2D>(entity);
+                float posX = rect.offset.x + (transform ? transform->position.x : 0);
+                float posY = rect.offset.y + (transform ? transform->position.y : 0);
+                DrawRectangle(posX, posY, rect.size.x, rect.size.y, rect.tint);
+            }
 
         // Draw world-space text
         for (auto [entity, textLabel] : registry.view<TextLabel>().each())
         {
-            if (!textLabel.isScreenSpace)
+            if (!textLabel.isScreenSpace && textLabel.visible)
             {
                 const auto* transform = registry.try_get<Transform2D>(entity);
-                float posX = textLabel.textPosition.x + (transform ? transform->position.x : 0);
-                float posY = textLabel.textPosition.y + (transform ? transform->position.y : 0);
-                DrawText(textLabel.text.c_str(), posX, posY, textLabel.textSize, textLabel.textColor);
+                float posX = textLabel.offset.x + (transform ? transform->position.x : 0);
+                float posY = textLabel.offset.y + (transform ? transform->position.y : 0);
+                DrawText(textLabel.text.c_str(), posX, posY, textLabel.size, textLabel.color);
             }
         }
 
@@ -93,20 +97,24 @@ void RenderWorldSpace(entt::registry &registry)
 void RenderScreenSpace(entt::registry &registry)
 {
     for (auto [entity, transform, sprite] : registry.view<Transform2D, Sprite>().each())
-        if (sprite.isScreenSpace && sprite.texture)
+        if (sprite.isScreenSpace && sprite.texture && sprite.visible)
             DrawTexture(*sprite.texture, transform.position.x, transform.position.y, sprite.tint);
 
-    for (auto [entity, transform, rect] : registry.view<Transform2D, RectVisualizer>().each())
-        if (rect.isScreenSpace)
-            DrawRectangle(transform.position.x, transform.position.y, rect.size.x, rect.size.y, rect.tint);
+    for (auto [entity, rect] : registry.view<RectVisualizer>().each())
+        if (rect.isScreenSpace && rect.visible) {
+            const auto* transform = registry.try_get<Transform2D>(entity);
+            float posX = rect.offset.x + (transform ? transform->position.x : 0);
+            float posY = rect.offset.y + (transform ? transform->position.y : 0);
+            DrawRectangle(posX, posY, rect.size.x, rect.size.y, rect.tint);
+        }
 
     for (auto [entity, textLabel] : registry.view<TextLabel>().each())
-        if (textLabel.isScreenSpace)
+        if (textLabel.isScreenSpace && textLabel.visible)
         {
             const auto* transform = registry.try_get<Transform2D>(entity);
-            float posX = textLabel.textPosition.x + (transform ? transform->position.x : 0);
-            float posY = textLabel.textPosition.y + (transform ? transform->position.y : 0);
-            DrawText(textLabel.text.c_str(), posX, posY, textLabel.textSize, textLabel.textColor);
+            float posX = textLabel.offset.x + (transform ? transform->position.x : 0);
+            float posY = textLabel.offset.y + (transform ? transform->position.y : 0);
+            DrawText(textLabel.text.c_str(), posX, posY, textLabel.size, textLabel.color);
         }
 }
 
@@ -114,7 +122,227 @@ void RenderSystem::Update(float deltaTime, entt::registry& registry)
 {
     if (needsResort)
         RebuildRenderList(registry);
-    
-    RenderWorldSpace(registry);
-    RenderScreenSpace(registry);
+
+    // Separate world-space and screen-space entities
+    std::vector<RenderEntry> worldSpace;
+    std::vector<RenderEntry> screenSpace;
+
+    for (const auto& entry : renderList)
+    {
+        if (entry.isScreenSpace)
+            screenSpace.push_back(entry);
+        else
+            worldSpace.push_back(entry);
+    }
+
+    // Draw world-space entities per camera
+    for (auto [camEntity, cam] : registry.view<Cam2D>().each())
+    {
+        BeginMode2D(cam.camera);
+
+        for (const auto& entry : worldSpace)
+        {
+            switch (entry.type)
+            {
+                case RenderEntry::Type::Sprite:
+                {
+                    auto& sprite = registry.get<Sprite>(entry.entity);
+                    if (!sprite.visible || !sprite.texture) break;
+
+                    auto* transform = registry.try_get<Transform2D>(entry.entity);
+                    float x = transform ? transform->position.x : 0.f;
+                    float y = transform ? transform->position.y : 0.f;
+
+                    DrawTexture(*sprite.texture, x, y, sprite.tint);
+                    break;
+                }
+
+                case RenderEntry::Type::Rect:
+                {
+                    auto& rect = registry.get<RectVisualizer>(entry.entity);
+                    if (!rect.visible) break;
+
+                    auto* transform = registry.try_get<Transform2D>(entry.entity);
+                    float x = rect.offset.x + (transform ? transform->position.x : 0.f);
+                    float y = rect.offset.y + (transform ? transform->position.y : 0.f);
+
+                    DrawRectangle(x, y, rect.size.x, rect.size.y, rect.tint);
+                    break;
+                }
+
+                case RenderEntry::Type::Text:
+                {
+                    auto& text = registry.get<TextLabel>(entry.entity);
+                    if (!text.visible) break;
+
+                    auto* transform = registry.try_get<Transform2D>(entry.entity);
+                    float x = text.offset.x + (transform ? transform->position.x : 0.f);
+                    float y = text.offset.y + (transform ? transform->position.y : 0.f);
+
+                    DrawText(text.text.c_str(), x, y, text.size, text.color);
+                    break;
+                }
+            }
+        }
+
+        EndMode2D();
+    }
+
+    // Draw screen-space entities
+    for (const auto& entry : screenSpace)
+    {
+        switch (entry.type)
+        {
+            case RenderEntry::Type::Sprite:
+            {
+                auto& sprite = registry.get<Sprite>(entry.entity);
+                if (!sprite.visible || !sprite.texture) break;
+
+                auto* transform = registry.try_get<Transform2D>(entry.entity);
+                float x = transform ? transform->position.x : 0.f;
+                float y = transform ? transform->position.y : 0.f;
+
+                DrawTexture(*sprite.texture, x, y, sprite.tint);
+                break;
+            }
+
+            case RenderEntry::Type::Rect:
+            {
+                auto& rect = registry.get<RectVisualizer>(entry.entity);
+                if (!rect.visible) break;
+
+                auto* transform = registry.try_get<Transform2D>(entry.entity);
+                float x = rect.offset.x + (transform ? transform->position.x : 0.f);
+                float y = rect.offset.y + (transform ? transform->position.y : 0.f);
+
+                DrawRectangle(x, y, rect.size.x, rect.size.y, rect.tint);
+                break;
+            }
+
+            case RenderEntry::Type::Text:
+            {
+                auto& text = registry.get<TextLabel>(entry.entity);
+                if (!text.visible) break;
+
+                auto* transform = registry.try_get<Transform2D>(entry.entity);
+                float x = text.offset.x + (transform ? transform->position.x : 0.f);
+                float y = text.offset.y + (transform ? transform->position.y : 0.f);
+
+                DrawText(text.text.c_str(), x, y, text.size, text.color);
+                break;
+            }
+        }
+    }
+}
+
+void ScriptSystem::Update(float deltaTime, entt::registry& registry)
+{
+    auto view = registry.view<Script>();
+
+    for (auto entity : view) {
+        auto &script = view.get<Script>(entity);
+
+        if (!script.active) {
+            if (script.OnCreate)
+                script.OnCreate(scene, entity);
+            script.active = true;
+        }
+
+        if (script.OnUpdate)
+            script.OnUpdate(scene, entity, deltaTime);
+    }
+}
+
+void ScriptSystem::OnDestroy(entt::registry& registry)
+{
+    auto view = registry.view<Script>();
+    for (auto entity : view) {
+        auto &script = view.get<Script>(entity);
+        if (script.OnDestroy)
+            script.OnDestroy(scene, entity);
+    }
+}
+
+void GUISystem::Update(float deltaTime, entt::registry& registry)
+{
+    /*for (auto [entity, textLabel, textButton] : registry.view<TextLabel, TextButton>().each())
+    {
+        switch (textLabel.verticalAlignment)
+        {
+            case Alignment::LEFT:
+            {
+
+                break;
+            }
+            case Alignment::MIDDLE:
+            {
+
+                break;
+            }
+            case Alignment::RIGHT:
+            {
+
+                break;
+            }
+        }
+
+        switch (textLabel.horizontalAlignment)
+        {
+            case Alignment::LEFT:
+            {
+                
+                break;
+            }
+            case Alignment::MIDDLE:
+            {
+
+                break;
+            }
+            case Alignment::RIGHT:
+            {
+
+                break;
+            }
+        }
+
+        switch (textButton.verticalAlignment)
+        {
+            case Alignment::LEFT:
+            {
+                
+                break;
+            }
+            case Alignment::MIDDLE:
+            {
+
+                break;
+            }
+            case Alignment::RIGHT:
+            {
+
+                break;
+            }
+        }
+
+        switch (textButton.horizontalAlignment)
+        {
+            case Alignment::LEFT:
+            {
+                
+                break;
+            }
+            case Alignment::MIDDLE:
+            {
+
+                break;
+            }
+            case Alignment::RIGHT:
+            {
+
+                break;
+            }
+        }
+
+
+    }*/
 }
