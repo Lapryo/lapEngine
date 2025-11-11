@@ -9,9 +9,8 @@ namespace backgroundObject {
         ScriptRegistry::onCreateFunctions["adjustbackground"] = [](Scene* scene, entt::entity entity) {
             auto &rect = scene->entities.get<RectVisualizer>(entity);
 
-            float scale = scene->logicalResolution.x / 6400;
-            rect.size.x *= scale;
-            rect.size.y *= scale;
+            rect.size.x *= scene->resolutionScale;
+            rect.size.y *= scene->resolutionScale;
         };
         return true;
     }();

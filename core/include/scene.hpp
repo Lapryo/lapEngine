@@ -6,6 +6,8 @@
 
 namespace lapCore
 {
+    const unsigned int LOGICAL_RESOLUTION_REFERENCE = 6400;
+
     struct AssetLoadRequest
     {
         std::string name;
@@ -24,6 +26,7 @@ namespace lapCore
 
         Vector2 logicalWindowPos;
         Vector2 logicalResolution;
+        double resolutionScale = 1;
 
         void QueueAsset(const std::string &name, const std::string &type, const std::string &path);
         void QueueAsset(const AssetLoadRequest &asset);

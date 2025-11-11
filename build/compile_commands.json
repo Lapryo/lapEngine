@@ -1,73 +1,73 @@
 [
 {
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/editor",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapEditor.dir/source/editor.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/editor/source/editor.cpp",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/editor.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/editor/source/editor.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/editor/source/editor.cpp",
   "output": "editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj"
 },
 {
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapCore.dir/source/app.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/app.cpp",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/app.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/app.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/core/source/app.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/app.cpp.obj"
 },
 {
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapCore.dir/source/core.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/core.cpp",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/core.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/core.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/core/source/core.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/core.cpp.obj"
 },
 {
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapCore.dir/source/project.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/project.cpp",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/project.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/project.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/core/source/project.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/project.cpp.obj"
 },
 {
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/resource_manager.cpp",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/resource_manager.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/core/source/resource_manager.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj"
 },
 {
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapCore.dir/source/scene.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/scene.cpp",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/scene.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/scene.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/core/source/scene.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/scene.cpp.obj"
 },
 {
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapCore.dir/source/systems.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/systems.cpp",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/systems.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/systems.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/core/source/systems.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/systems.cpp.obj"
 },
 {
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/hub",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapHub.dir/source/background.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/background.cpp",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapHub.dir/source/background.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/background.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/hub/source/background.cpp",
   "output": "hub/CMakeFiles/lapHub.dir/source/background.cpp.obj"
 },
 {
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/hub",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapHub.dir/source/createproject.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/createproject.cpp",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapHub.dir/source/createproject.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/createproject.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/hub/source/createproject.cpp",
   "output": "hub/CMakeFiles/lapHub.dir/source/createproject.cpp.obj"
 },
 {
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/hub",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapHub.dir/source/fpslabel.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/fpslabel.cpp",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapHub.dir/source/fpslabel.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/fpslabel.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/hub/source/fpslabel.cpp",
   "output": "hub/CMakeFiles/lapHub.dir/source/fpslabel.cpp.obj"
 },
 {
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/hub",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapHub.dir/source/hub.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/hub.cpp",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapHub.dir/source/hub.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/hub.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/hub/source/hub.cpp",
   "output": "hub/CMakeFiles/lapHub.dir/source/hub.cpp.obj"
 },
 {
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/hub",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapHub.dir/source/openproject.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/openproject.cpp",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapHub.dir/source/openproject.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/hub/source/openproject.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/hub/source/openproject.cpp",
   "output": "hub/CMakeFiles/lapHub.dir/source/openproject.cpp.obj"
 }

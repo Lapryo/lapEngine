@@ -5,6 +5,7 @@
 #include "app.hpp"
 #include "scriptregistry.hpp"
 #include "raylib/rlgl.h"
+#include "event.hpp"
 
 namespace lapCore
 {

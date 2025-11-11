@@ -13,7 +13,7 @@
 						2,
 						3
 					],
-					"jsonFile" : "directory-.-Release-f6f22219c74102c3da70.json",
+					"jsonFile" : "directory-.-Debug-f6f22219c74102c3da70.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "4.2.0"
@@ -23,7 +23,7 @@
 				},
 				{
 					"build" : "editor",
-					"jsonFile" : "directory-editor-Release-a27bbbf6135c891d9319.json",
+					"jsonFile" : "directory-editor-Debug-a27bbbf6135c891d9319.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "4.2.0"
@@ -38,7 +38,7 @@
 				},
 				{
 					"build" : "core",
-					"jsonFile" : "directory-core-Release-c640fa7ec313229a1e93.json",
+					"jsonFile" : "directory-core-Debug-c640fa7ec313229a1e93.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "4.2.0"
@@ -53,7 +53,7 @@
 				},
 				{
 					"build" : "hub",
-					"jsonFile" : "directory-hub-Release-11e3761ff91f92571bae.json",
+					"jsonFile" : "directory-hub-Debug-11e3761ff91f92571bae.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "4.2.0"
@@ -67,7 +67,7 @@
 					]
 				}
 			],
-			"name" : "Release",
+			"name" : "Debug",
 			"projects" : 
 			[
 				{
@@ -125,21 +125,21 @@
 				{
 					"directoryIndex" : 2,
 					"id" : "lapCore::@57760688d1f824db5d9c",
-					"jsonFile" : "target-lapCore-Release-b7780fa018db315ef842.json",
+					"jsonFile" : "target-lapCore-Debug-18fa11926fc1c63aa09e.json",
 					"name" : "lapCore",
 					"projectIndex" : 2
 				},
 				{
 					"directoryIndex" : 1,
 					"id" : "lapEditor::@ed37844f285895dce70e",
-					"jsonFile" : "target-lapEditor-Release-cffe348980bf7fdf9a53.json",
+					"jsonFile" : "target-lapEditor-Debug-0348035b144fff0cc45d.json",
 					"name" : "lapEditor",
 					"projectIndex" : 1
 				},
 				{
 					"directoryIndex" : 3,
 					"id" : "lapHub::@3bdb9653047029b699dd",
-					"jsonFile" : "target-lapHub-Release-244a3e5788ccc7cf85a1.json",
+					"jsonFile" : "target-lapHub-Debug-e3ce489c10d92c9189a8.json",
 					"name" : "lapHub",
 					"projectIndex" : 3
 				}

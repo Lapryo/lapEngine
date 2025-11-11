@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = @CMakeFiles/lapCore.dir/includes_CXX.rsp
 
-CXX_FLAGS = -O3 -DNDEBUG -std=c++23
+CXX_FLAGS = -g -std=c++23
 

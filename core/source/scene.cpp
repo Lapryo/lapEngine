@@ -18,7 +18,7 @@ void Scene::ReloadTextures()
     for (auto entity : view)
     {
         auto &sprite = view.get<Sprite>(entity);
-        sprite.texture = &resources.textures[sprite.texName];
+        sprite.texture = &resources.textures[sprite.textureName];
     }
 }
 
@@ -38,6 +38,8 @@ void Scene::LoadQueuedAssets()
 
 void Scene::Update(float deltaTime, SystemDrawOrder order, RenderTexture2D &target)
 {
+    resolutionScale = logicalResolution.x / LOGICAL_RESOLUTION_REFERENCE;
+
     if (order == SystemDrawOrder::DRAW)
     {
         BeginTextureMode(target);

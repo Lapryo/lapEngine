@@ -13,22 +13,29 @@ namespace cpProjectObject {
             auto &transform = scene->entities.get<Transform2D>(entity);
             auto &label = scene->entities.get<TextLabel>(entity);
 
-            float scale = scene->logicalResolution.x / 6400;
-            label.size *= scale;
+            label.textSize *= scene->resolutionScale;
             
-            float textWidth = MeasureText(label.text.c_str(), label.size);
+            float textWidth = MeasureText(label.text.c_str(), label.textSize);
 
             auto &hitbox = scene->entities.get<RectVisualizer>(entity);
-            hitbox.size = {textWidth + 60 * scale, label.size + 40 * scale};
-            hitbox.offset.x *= scale;
-            hitbox.offset.y *= scale;
+            hitbox.size = {textWidth + 60 * (float)scene->resolutionScale, label.textSize + 40 * (float)scene->resolutionScale};
+            hitbox.offset.x *= scene->resolutionScale;
+            hitbox.offset.y *= scene->resolutionScale;
 
             Vector2 targetPosition = {
                 scene->logicalResolution.x / 4 - textWidth / 2,
-                scene->logicalResolution.y / 2 - label.size * 1.5f
+                scene->logicalResolution.y / 2 - label.textSize * 1.5f
             };
 
             transform.position = targetPosition;
+
+            EventRegistry::Connect<>(
+                "onCreateProject",
+                []()
+                {
+                    std::cout << "Close and open a new empty editor space.\n";
+                }
+            );
         };
 
         ScriptRegistry::onUpdateFunctions["createproject"] = [](Scene* scene, entt::entity entity, float dt) {
@@ -50,7 +57,7 @@ namespace cpProjectObject {
                 hitbox.tint = unhighlight;
 
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && inRange)
-                std::cout << "Close and open a new empty editor space.\n";
+                EventRegistry::Fire<>("onCreateProject");
         };
         return true;
     }();

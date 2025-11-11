@@ -34,13 +34,13 @@ void RenderSystem::RebuildRenderList(entt::registry& registry) {
     auto spriteView = registry.view<Sprite>();
     for (auto e : spriteView) {
         const auto& s = spriteView.get<Sprite>(e);
-        renderList.push_back({e, s.zlayer, s.isScreenSpace, RenderEntry::Type::Sprite});
+        renderList.push_back({e, s.renderable.zlayer, s.renderable.isScreenSpace, RenderEntry::Type::Sprite});
     }
 
     auto textView = registry.view<TextLabel>();
     for (auto e : textView) {
         const auto& t = textView.get<TextLabel>(e);
-        renderList.push_back({e, t.zlayer, t.isScreenSpace, RenderEntry::Type::Text});
+        renderList.push_back({e, t.renderable.zlayer, t.renderable.isScreenSpace, RenderEntry::Type::Text});
     }
 
     auto rectView = registry.view<RectVisualizer>();
@@ -58,7 +58,7 @@ void RenderSystem::RebuildRenderList(entt::registry& registry) {
     needsResort = false;
 }
 
-void RenderWorldSpace(entt::registry &registry)
+/*void RenderWorldSpace(entt::registry &registry)
 {
     for (auto [camEntity, cam] : registry.view<Cam2D>().each())
     {
@@ -92,9 +92,9 @@ void RenderWorldSpace(entt::registry &registry)
 
         EndMode2D();
     }
-}
+}*/
 
-void RenderScreenSpace(entt::registry &registry)
+/*void RenderScreenSpace(entt::registry &registry)
 {
     for (auto [entity, transform, sprite] : registry.view<Transform2D, Sprite>().each())
         if (sprite.isScreenSpace && sprite.texture && sprite.visible)
@@ -116,7 +116,7 @@ void RenderScreenSpace(entt::registry &registry)
             float posY = textLabel.offset.y + (transform ? transform->position.y : 0);
             DrawText(textLabel.text.c_str(), posX, posY, textLabel.size, textLabel.color);
         }
-}
+}*/
 
 void RenderSystem::Update(float deltaTime, entt::registry& registry)
 {
@@ -147,13 +147,13 @@ void RenderSystem::Update(float deltaTime, entt::registry& registry)
                 case RenderEntry::Type::Sprite:
                 {
                     auto& sprite = registry.get<Sprite>(entry.entity);
-                    if (!sprite.visible || !sprite.texture) break;
+                    if (!sprite.renderable.visible || !sprite.texture) break;
 
                     auto* transform = registry.try_get<Transform2D>(entry.entity);
                     float x = transform ? transform->position.x : 0.f;
                     float y = transform ? transform->position.y : 0.f;
 
-                    DrawTexture(*sprite.texture, x, y, sprite.tint);
+                    DrawTexture(*sprite.texture, x, y, sprite.renderable.tint);
                     break;
                 }
 
@@ -173,13 +173,13 @@ void RenderSystem::Update(float deltaTime, entt::registry& registry)
                 case RenderEntry::Type::Text:
                 {
                     auto& text = registry.get<TextLabel>(entry.entity);
-                    if (!text.visible) break;
+                    if (!text.renderable.visible) break;
 
                     auto* transform = registry.try_get<Transform2D>(entry.entity);
-                    float x = text.offset.x + (transform ? transform->position.x : 0.f);
-                    float y = text.offset.y + (transform ? transform->position.y : 0.f);
+                    float x = text.frame.position.offset.x + (transform ? transform->position.x : 0.f);
+                    float y = text.frame.position.offset.y + (transform ? transform->position.y : 0.f);
 
-                    DrawText(text.text.c_str(), x, y, text.size, text.color);
+                    DrawText(text.text.c_str(), x, y, text.textSize, text.renderable.tint);
                     break;
                 }
             }
@@ -196,13 +196,13 @@ void RenderSystem::Update(float deltaTime, entt::registry& registry)
             case RenderEntry::Type::Sprite:
             {
                 auto& sprite = registry.get<Sprite>(entry.entity);
-                if (!sprite.visible || !sprite.texture) break;
+                if (!sprite.renderable.visible || !sprite.texture) break;
 
                 auto* transform = registry.try_get<Transform2D>(entry.entity);
                 float x = transform ? transform->position.x : 0.f;
                 float y = transform ? transform->position.y : 0.f;
 
-                DrawTexture(*sprite.texture, x, y, sprite.tint);
+                DrawTexture(*sprite.texture, x, y, sprite.renderable.tint);
                 break;
             }
 
@@ -222,13 +222,13 @@ void RenderSystem::Update(float deltaTime, entt::registry& registry)
             case RenderEntry::Type::Text:
             {
                 auto& text = registry.get<TextLabel>(entry.entity);
-                if (!text.visible) break;
+                if (!text.renderable.visible) break;
 
                 auto* transform = registry.try_get<Transform2D>(entry.entity);
-                float x = text.offset.x + (transform ? transform->position.x : 0.f);
-                float y = text.offset.y + (transform ? transform->position.y : 0.f);
+                float x = text.frame.position.offset.x + (transform ? transform->position.x : 0.f);
+                float y = text.frame.position.offset.y + (transform ? transform->position.y : 0.f);
 
-                DrawText(text.text.c_str(), x, y, text.size, text.color);
+                DrawText(text.text.c_str(), x, y, text.textSize, text.renderable.tint);
                 break;
             }
         }

@@ -8,7 +8,7 @@ namespace FPSLabelObject {
     const bool setup = [] {
         ScriptRegistry::onCreateFunctions["adjustfps"] = [](Scene* scene, entt::entity entity)
         {
-            scene->entities.get<TextLabel>(entity).size *= scene->logicalResolution.x / 6400;
+            scene->entities.get<TextLabel>(entity).textSize *= scene->resolutionScale;
         };
 
         ScriptRegistry::onUpdateFunctions["updatefps"] = [](Scene* scene, entt::entity entity, float dt) {

@@ -67,7 +67,7 @@ namespace lapCore
     class GUISystem : public System
     {
     public:
-        GUISystem(Scene* scene) : System(SystemDrawOrder::DRAW, scene) {}
+        GUISystem(Scene* scene) : System(SystemDrawOrder::PREDRAW, scene) {}
         void Update(float deltaTime, entt::registry& registry) override;
     };
 }

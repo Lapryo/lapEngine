@@ -3,6 +3,7 @@
 
 #include "raylib/raylib.h"
 #include <functional>
+#include <any>
 
 namespace lapCore {
     class Scene; // <-- forward declaration
@@ -17,7 +18,8 @@ namespace lapCore
         bool visible = true;
         Color tint;
 
-        Renderable(unsigned int zlayer, bool isScreenSpace) : zlayer(zlayer), isScreenSpace(isScreenSpace) {}
+        Renderable(unsigned int zlayer, bool isScreenSpace, Color tint)
+            : zlayer(zlayer), isScreenSpace(isScreenSpace), tint(tint) {}
     };
 
     enum class Alignment
@@ -27,85 +29,138 @@ namespace lapCore
         RIGHT
     };
 
-    struct Origin
+    struct Origin2D
     {
         Vector2 position, scale;
         float rotation;
     };
 
-    struct Physics2D : Origin
+    struct Physics2D
     {
         Vector2 velocity;
         Vector2 gravity;
-        
     };
 
-    // New version of RectVisualizer
+    struct FrameVector
+    {
+        Vector2 scale;
+        Vector2 offset;
+    };
+
+    struct Padding
+    {
+        float top, right, bottom, left;
+
+        Padding(float top, float right, float bottom, float left)
+            : top(top), right(right), bottom(bottom), left(left) {}
+    };
+
+    // New version of RectVisualizer, the basis of all GUI components (needed for all of them)
     struct Frame
     {
-        Alignment horizontalAlignment;
-        Alignment verticalAlignment;
+        Renderable renderable;
+
+        FrameVector size;
+        FrameVector position;
+        float rotation;
+
         Vector2 anchor;
+        Alignment horizontal;
+        Alignment vertical;
 
-        Vector2 size;
-        Vector2 padding;
-        Color color;
-
-        Frame(Alignment horizontal, Alignment vertical, Vector2 anchor, Vector2 size, Vector2 padding, Color color)
-            : horizontalAlignment(horizontal), verticalAlignment(vertical), anchor(anchor), padding(padding), color(color) {}
+        Frame(Renderable renderable, FrameVector position, FrameVector size, float rotation, Alignment horizontal, Alignment vertical, Vector2 anchor)
+            : renderable(renderable), horizontal(horizontal), vertical(vertical), anchor(anchor), size(size), position(position) {}
     };
 
-    struct /*[[deprecated("Use Origin and Physics2D instead, will not work")]]*/ Transform2D
+    struct [[deprecated("Use Origin and Physics2D instead, will not work")]] Transform2D
     {
         Vector2 position, velocity, scale;
         float rotation;
     };
 
-    struct Sprite : Renderable
+    struct Sprite
     {
+        Renderable renderable;
         Texture2D* texture = nullptr;
-        std::string texName;
-        Color tint;
+        std::string textureName;
 
-        Sprite(Texture2D *texture, const std::string &name, Color &color, unsigned int zlayer, bool isScreenSpace) : Renderable(zlayer, isScreenSpace), texture(texture), texName(name), tint(color) {}
-        Sprite(const std::string &name, Color tint, unsigned int zlayer, bool isScreenSpace) : Renderable(zlayer, isScreenSpace), tint(tint), texName(name) {}
+        Sprite(Renderable renderable, Texture2D* texture, const std::string &textureName)
+            : renderable(renderable), texture(texture), textureName(textureName) {}
+
+        Sprite(Renderable renderable, const std::string &textureName)
+            : renderable(renderable), textureName(textureName) {}
     };
 
-    struct /*[[deprecated("Use Frame instead")]]*/ RectVisualizer : Renderable
+    struct Image
+    {
+        Sprite sprite;
+        Frame frame;
+
+        Image(Sprite sprite, Frame frame)
+            : sprite(sprite), frame(frame) {}
+    };
+
+    struct [[deprecated("Use Frame instead")]] RectVisualizer : Renderable
     {
         Vector2 offset;
         Vector2 size;
         Color tint;
 
-        /*[[deprecated("Use frame instead")]]*/
-        RectVisualizer(Vector2 offset, Vector2 size, Color tint, unsigned int zlayer, bool isScreenSpace) : Renderable(zlayer, isScreenSpace), offset(offset), size(size), tint(tint) {}
+        RectVisualizer(Vector2 offset, Vector2 size, Color tint, unsigned int zlayer, bool isScreenSpace)
+            : Renderable(zlayer, isScreenSpace, tint), offset(offset), size(size), tint(tint) {}
     };
 
-    struct TextLabel : Renderable
+    struct TextLabel
     {
+        Renderable renderable;
+        Frame frame;
+
         std::string text;
-        Vector2 offset;
-        float size;
-        Color color;
+        float textSize;
         
-        TextLabel(std::string text, Vector2 offset, float size, Color color, unsigned int zlayer, bool isScreenSpace) : Renderable(zlayer, isScreenSpace), text(text), offset(offset), size(size), color(color) {}
+        TextLabel(Renderable renderable, Frame frame, const std::string &text, float textSize)
+            : renderable(renderable), frame(frame), text(text), textSize(textSize) {}
     };
 
-    // Incomplete
-    struct TextButton : TextLabel
+    struct EventListener
     {
+        std::string event;
+        std::function<void(const std::vector<std::any>&)> connectedFunc;
+
         template <typename... Args>
-        void SetConnectedFunc(std::function<void(Args...)> function)
+        void Connect(std::function<void(Args...)> func)
         {
-            connectedFuncWrapper = [function](auto&&... args) {
-                function(std::forward<decltype(args)>(args)...);
+            connectedFunc = [func](const std::vector<std::any>& args)
+            {
+                Call(func, args, std::index_sequence_for<Args...>{});
             };
         }
 
+        template <typename... Args, size_t... I>
+        static void Call(const std::function<void(Args...)>& func, const std::vector<std::any>& args, std::index_sequence<I...>)
+        {
+            func(std::any_cast<Args>(args[I])...);
+        }
 
+        template <typename... Args>
+        void Fire(Args&&... args)
+        {
+            if (connectedFunc)
+                connectedFunc({ std::forward<Args>(args)... });
+        }
+    };
 
-    private:
-        std::function<void()> connectedFuncWrapper;
+    // Incomplete
+    struct TextButton
+    {
+        TextLabel label;
+        EventListener* event;
+
+        bool interactable = true;
+        Color active, inactive;
+
+        TextButton(TextLabel label, EventListener* event, bool interactable, Color active, Color inactive)
+            : label(label), event(event), interactable(interactable), active(active), inactive(inactive) {}
     };
 
     struct Cam2D

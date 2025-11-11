@@ -145,7 +145,8 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tScreen Space: " << (isScreenSpace ? "True" : "False") << '\n';
             std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tZ-Layer: " << zlayer << '\n';
 
-            scene->AddComponent<Sprite>(entity, texName, tint, zlayer, isScreenSpace);
+            Renderable renderable(zlayer, isScreenSpace, tint);
+            scene->AddComponent<Sprite>(entity, renderable, texName);
         }
         else if (type == "textlabel")
         {
@@ -175,7 +176,10 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tScreen Space: " << (isScreenSpace ? "True" : "False") << '\n';
             std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tZ-Layer: " << zlayer << '\n';
 
-            scene->AddComponent<TextLabel>(entity, text, textPosition, textSize, textColor, zlayer, isScreenSpace);
+            Renderable renderable(zlayer, isScreenSpace, textColor);
+            Frame frame(Renderable(zlayer, isScreenSpace, WHITE), {{0, 0}, textPosition}, {{0, 0}, {0, 0}}, 0.0f, Alignment::LEFT, Alignment::MIDDLE, {0, 0});
+
+            scene->AddComponent<TextLabel>(entity, renderable, frame, text, textSize);
         }
         else if (type == "cam2d")
         {
