@@ -125,21 +125,21 @@
 				{
 					"directoryIndex" : 2,
 					"id" : "lapCore::@57760688d1f824db5d9c",
-					"jsonFile" : "target-lapCore-Release-ec857df55ce0305e9952.json",
+					"jsonFile" : "target-lapCore-Release-b7780fa018db315ef842.json",
 					"name" : "lapCore",
 					"projectIndex" : 2
 				},
 				{
 					"directoryIndex" : 1,
 					"id" : "lapEditor::@ed37844f285895dce70e",
-					"jsonFile" : "target-lapEditor-Release-a903c2005c88d59522ff.json",
+					"jsonFile" : "target-lapEditor-Release-cffe348980bf7fdf9a53.json",
 					"name" : "lapEditor",
 					"projectIndex" : 1
 				},
 				{
 					"directoryIndex" : 3,
 					"id" : "lapHub::@3bdb9653047029b699dd",
-					"jsonFile" : "target-lapHub-Release-2184dbb36f98bd001367.json",
+					"jsonFile" : "target-lapHub-Release-244a3e5788ccc7cf85a1.json",
 					"name" : "lapHub",
 					"projectIndex" : 3
 				}
@@ -149,8 +149,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/wellh/Documents/engine/engine/build",
-		"source" : "C:/Users/wellh/Documents/engine/engine"
+		"build" : "C:/Users/WellH/Documents/projects/lapEngine/build",
+		"source" : "C:/Users/WellH/Documents/projects/lapEngine"
 	},
 	"version" : 
 	{

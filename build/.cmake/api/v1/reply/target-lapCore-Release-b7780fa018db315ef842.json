@@ -3,7 +3,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "C:/Users/wellh/Documents/engine/engine/lib/liblapCore.a"
+			"path" : "C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a"
 		}
 	],
 	"backtrace" : 1,
@@ -62,7 +62,7 @@
 			[
 				{
 					"backtrace" : 3,
-					"path" : "C:/Users/wellh/Documents/engine/engine/core/include"
+					"path" : "C:/Users/WellH/Documents/projects/lapEngine/core/include"
 				}
 			],
 			"language" : "CXX",

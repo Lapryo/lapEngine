@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "hub/release/lapHub.exe"
+			"path" : "editor/release/lapEditor.exe"
 		},
 		{
-			"path" : "hub/release/lapHub.pdb"
+			"path" : "editor/release/lapEditor.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -20,7 +20,7 @@
 		],
 		"files" : 
 		[
-			"hub/CMakeLists.txt",
+			"editor/CMakeLists.txt",
 			"core/CMakeLists.txt"
 		],
 		"nodes" : 
@@ -31,19 +31,19 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 24,
+				"line" : 19,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 36,
+				"line" : 30,
 				"parent" : 0
 			},
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 40,
+				"line" : 34,
 				"parent" : 0
 			},
 			{
@@ -58,7 +58,7 @@
 			{
 				"command" : 3,
 				"file" : 0,
-				"line" : 30,
+				"line" : 24,
 				"parent" : 0
 			}
 		]
@@ -88,11 +88,11 @@
 			[
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/wellh/Documents/engine/engine/hub/include"
+					"path" : "C:/Users/WellH/Documents/projects/lapEngine/editor/include"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/wellh/Documents/engine/engine/hub/../core/include"
+					"path" : "C:/Users/WellH/Documents/projects/lapEngine/editor/../core/include"
 				}
 			],
 			"language" : "CXX",
@@ -106,11 +106,7 @@
 			},
 			"sourceIndexes" : 
 			[
-				0,
-				1,
-				2,
-				3,
-				4
+				0
 			]
 		}
 	],
@@ -121,7 +117,7 @@
 			"id" : "lapCore::@57760688d1f824db5d9c"
 		}
 	],
-	"id" : "lapHub::@3bdb9653047029b699dd",
+	"id" : "lapEditor::@ed37844f285895dce70e",
 	"link" : 
 	{
 		"commandFragments" : 
@@ -131,17 +127,13 @@
 				"role" : "flags"
 			},
 			{
-				"fragment" : "-mwindows",
-				"role" : "flags"
-			},
-			{
 				"backtrace" : 2,
-				"fragment" : "-LC:/Users/wellh/Documents/engine/engine/lib",
+				"fragment" : "-LC:/Users/WellH/Documents/projects/lapEngine/lib",
 				"role" : "libraryPath"
 			},
 			{
 				"backtrace" : 3,
-				"fragment" : "C:/Users/wellh/Documents/engine/engine/lib/liblapCore.a",
+				"fragment" : "C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a",
 				"role" : "libraries"
 			},
 			{
@@ -168,12 +160,12 @@
 			"id" : "lapCore::@57760688d1f824db5d9c"
 		}
 	],
-	"name" : "lapHub",
-	"nameOnDisk" : "lapHub.exe",
+	"name" : "lapEditor",
+	"nameOnDisk" : "lapEditor.exe",
 	"paths" : 
 	{
-		"build" : "hub",
-		"source" : "hub"
+		"build" : "editor",
+		"source" : "editor"
 	},
 	"sourceGroups" : 
 	[
@@ -181,11 +173,7 @@
 			"name" : "Source Files",
 			"sourceIndexes" : 
 			[
-				0,
-				1,
-				2,
-				3,
-				4
+				0
 			]
 		}
 	],
@@ -194,31 +182,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "hub/source/background.cpp",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "hub/source/createproject.cpp",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "hub/source/fpslabel.cpp",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "hub/source/hub.cpp",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "hub/source/openproject.cpp",
+			"path" : "editor/source/editor.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],
