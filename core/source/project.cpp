@@ -370,11 +370,11 @@ void Project::LoadSettings(const std::string &settingsFilePath)
     if (resizable)
         SetWindowState(FLAG_WINDOW_RESIZABLE);
 
-    if (windowMode == "fullscreen")
-        SetWindowState(FLAG_FULLSCREEN_MODE);
-
     if (!decorated)
         SetWindowState(FLAG_WINDOW_UNDECORATED);
+
+    if (windowMode == "fullscreen")
+        SetWindowState(FLAG_FULLSCREEN_MODE);
     
     if (!vsync)
         if (inf_fps)

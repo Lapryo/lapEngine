@@ -36,6 +36,8 @@ namespace lapCore
     struct Physics2D : Origin
     {
         Vector2 velocity;
+        Vector2 gravity;
+        
     };
 
     // New version of RectVisualizer

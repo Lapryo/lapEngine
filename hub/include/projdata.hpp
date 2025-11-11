@@ -84,6 +84,16 @@ const char proj_json[] = R"json(
                                 "zlayer": 0,
                                 "isScreenSpace": true
                             }
+                        },
+                        {
+                            "name": "script",
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "adjustbackground",
+                                "onUpdate": "",
+                                "onDestroy": ""
+                            }
                         }
                     ]
                 },
@@ -109,7 +119,7 @@ const char proj_json[] = R"json(
                             "type": "script",
                             "data":
                             {
-                                "onCreate": "",
+                                "onCreate": "adjustfps",
                                 "onUpdate": "updatefps",
                                 "onDestroy": ""
                             }

@@ -7,10 +7,10 @@ file(REMOVE_RECURSE
   "CMakeFiles/lapHub.dir/source/hub.cpp.obj.d"
   "CMakeFiles/lapHub.dir/source/openproject.cpp.obj"
   "CMakeFiles/lapHub.dir/source/openproject.cpp.obj.d"
-  "debug/lapHub.exe"
-  "debug/lapHub.exe.manifest"
-  "debug/lapHub.pdb"
   "liblapHub.dll.a"
+  "release/lapHub.exe"
+  "release/lapHub.exe.manifest"
+  "release/lapHub.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

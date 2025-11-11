@@ -3,7 +3,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a"
+			"path" : "C:/Users/wellh/Documents/engine/engine/lib/liblapCore.a"
 		}
 	],
 	"backtrace" : 1,
@@ -55,14 +55,14 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-g -std=c++23"
+					"fragment" : "-O3 -DNDEBUG -std=c++23"
 				}
 			],
 			"includes" : 
 			[
 				{
 					"backtrace" : 3,
-					"path" : "C:/Users/WellH/Documents/projects/lapEngine/core/include"
+					"path" : "C:/Users/wellh/Documents/engine/engine/core/include"
 				}
 			],
 			"language" : "CXX",
