@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/lapHub.dir/source/background.cpp.obj"
+  "CMakeFiles/lapHub.dir/source/background.cpp.obj.d"
   "CMakeFiles/lapHub.dir/source/createproject.cpp.obj"
   "CMakeFiles/lapHub.dir/source/createproject.cpp.obj.d"
   "CMakeFiles/lapHub.dir/source/fpslabel.cpp.obj"

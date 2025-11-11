@@ -43,6 +43,12 @@
 },
 {
   "directory": "C:/Users/wellh/Documents/engine/engine/build/hub",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapHub.dir/source/background.cpp.obj -c C:/Users/wellh/Documents/engine/engine/hub/source/background.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/hub/source/background.cpp",
+  "output": "hub/CMakeFiles/lapHub.dir/source/background.cpp.obj"
+},
+{
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/hub",
   "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapHub.dir/includes_CXX.rsp -O3 -DNDEBUG -std=c++23 -o CMakeFiles/lapHub.dir/source/createproject.cpp.obj -c C:/Users/wellh/Documents/engine/engine/hub/source/createproject.cpp",
   "file": "C:/Users/wellh/Documents/engine/engine/hub/source/createproject.cpp",
   "output": "hub/CMakeFiles/lapHub.dir/source/createproject.cpp.obj"

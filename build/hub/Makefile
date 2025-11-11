@@ -137,6 +137,30 @@ lapHub/fast:
 	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/build
 .PHONY : lapHub/fast
 
+source/background.obj: source/background.cpp.obj
+.PHONY : source/background.obj
+
+# target to build an object file
+source/background.cpp.obj:
+	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/background.cpp.obj
+.PHONY : source/background.cpp.obj
+
+source/background.i: source/background.cpp.i
+.PHONY : source/background.i
+
+# target to preprocess a source file
+source/background.cpp.i:
+	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/background.cpp.i
+.PHONY : source/background.cpp.i
+
+source/background.s: source/background.cpp.s
+.PHONY : source/background.s
+
+# target to generate assembly for a file
+source/background.cpp.s:
+	cd C:/Users/wellh/Documents/engine/engine/build && $(MAKE) $(MAKESILENT) -f hub/CMakeFiles/lapHub.dir/build.make hub/CMakeFiles/lapHub.dir/source/background.cpp.s
+.PHONY : source/background.cpp.s
+
 source/createproject.obj: source/createproject.cpp.obj
 .PHONY : source/createproject.obj
 
@@ -243,6 +267,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... lapHub"
+	@echo "... source/background.obj"
+	@echo "... source/background.i"
+	@echo "... source/background.s"
 	@echo "... source/createproject.obj"
 	@echo "... source/createproject.i"
 	@echo "... source/createproject.s"
