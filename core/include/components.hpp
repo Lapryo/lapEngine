@@ -64,12 +64,14 @@ namespace lapCore
         FrameVector position;
         float rotation;
 
-        Vector2 anchor;
         Alignment horizontal;
         Alignment vertical;
+        Vector2 anchor;
+
+        bool useOrigin = true;
 
         Frame(Renderable renderable, FrameVector position, FrameVector size, float rotation, Alignment horizontal, Alignment vertical, Vector2 anchor)
-            : renderable(renderable), horizontal(horizontal), vertical(vertical), anchor(anchor), size(size), position(position) {}
+            : renderable(renderable), horizontal(horizontal), vertical(vertical), size(size), position(position), anchor(anchor) {}
     };
 
     struct [[deprecated("Use Origin and Physics2D instead, will not work")]] Transform2D
@@ -84,20 +86,23 @@ namespace lapCore
         Texture2D* texture = nullptr;
         std::string textureName;
 
-        Sprite(Renderable renderable, Texture2D* texture, const std::string &textureName)
+        Vector2 anchor;
+
+        Sprite(Renderable renderable, Texture2D* texture, std::string textureName)
             : renderable(renderable), texture(texture), textureName(textureName) {}
 
-        Sprite(Renderable renderable, const std::string &textureName)
+        Sprite(Renderable renderable, std::string textureName)
             : renderable(renderable), textureName(textureName) {}
     };
 
     struct Image
     {
         Sprite sprite;
-        Frame frame;
 
-        Image(Sprite sprite, Frame frame)
-            : sprite(sprite), frame(frame) {}
+        bool useOrigin = true;
+
+        Image(Sprite sprite)
+            : sprite(sprite) {}
     };
 
     struct [[deprecated("Use Frame instead")]] RectVisualizer : Renderable
@@ -113,13 +118,12 @@ namespace lapCore
     struct TextLabel
     {
         Renderable renderable;
-        Frame frame;
 
         std::string text;
         float textSize;
         
-        TextLabel(Renderable renderable, Frame frame, const std::string &text, float textSize)
-            : renderable(renderable), frame(frame), text(text), textSize(textSize) {}
+        TextLabel(Renderable renderable, std::string text, float textSize)
+            : renderable(renderable), text(text), textSize(textSize) {}
     };
 
     struct EventListener
@@ -151,16 +155,15 @@ namespace lapCore
     };
 
     // Incomplete
-    struct TextButton
+    struct Button
     {
-        TextLabel label;
         EventListener* event;
 
         bool interactable = true;
         Color active, inactive;
 
-        TextButton(TextLabel label, EventListener* event, bool interactable, Color active, Color inactive)
-            : label(label), event(event), interactable(interactable), active(active), inactive(inactive) {}
+        Button(EventListener* event, bool interactable, Color active, Color inactive)
+            : event(event), interactable(interactable), active(active), inactive(inactive) {}
     };
 
     struct Cam2D

@@ -53,10 +53,10 @@ RM = "C:/Program Files/CMake/bin/cmake.exe" -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:/Users/WellH/Documents/projects/lapEngine
+CMAKE_SOURCE_DIR = C:/Users/wellh/Documents/engine/engine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:/Users/WellH/Documents/projects/lapEngine/build
+CMAKE_BINARY_DIR = C:/Users/wellh/Documents/engine/engine/build
 
 # Include any dependencies generated for this target.
 include editor/CMakeFiles/lapEditor.dir/depend.make
@@ -74,18 +74,18 @@ editor/CMakeFiles/lapEditor.dir/codegen:
 
 editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj: editor/CMakeFiles/lapEditor.dir/flags.make
 editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj: editor/CMakeFiles/lapEditor.dir/includes_CXX.rsp
-editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj: C:/Users/WellH/Documents/projects/lapEngine/editor/source/editor.cpp
+editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj: C:/Users/wellh/Documents/engine/engine/editor/source/editor.cpp
 editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj: editor/CMakeFiles/lapEditor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj -MF CMakeFiles/lapEditor.dir/source/editor.cpp.obj.d -o CMakeFiles/lapEditor.dir/source/editor.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/editor/source/editor.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/wellh/Documents/engine/engine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj"
+	cd C:/Users/wellh/Documents/engine/engine/build/editor && C:/other/ucrt64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj -MF CMakeFiles/lapEditor.dir/source/editor.cpp.obj.d -o CMakeFiles/lapEditor.dir/source/editor.cpp.obj -c C:/Users/wellh/Documents/engine/engine/editor/source/editor.cpp
 
 editor/CMakeFiles/lapEditor.dir/source/editor.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapEditor.dir/source/editor.cpp.i"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/Documents/projects/lapEngine/editor/source/editor.cpp > CMakeFiles/lapEditor.dir/source/editor.cpp.i
+	cd C:/Users/wellh/Documents/engine/engine/build/editor && C:/other/ucrt64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/wellh/Documents/engine/engine/editor/source/editor.cpp > CMakeFiles/lapEditor.dir/source/editor.cpp.i
 
 editor/CMakeFiles/lapEditor.dir/source/editor.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapEditor.dir/source/editor.cpp.s"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/Documents/projects/lapEngine/editor/source/editor.cpp -o CMakeFiles/lapEditor.dir/source/editor.cpp.s
+	cd C:/Users/wellh/Documents/engine/engine/build/editor && C:/other/ucrt64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/wellh/Documents/engine/engine/editor/source/editor.cpp -o CMakeFiles/lapEditor.dir/source/editor.cpp.s
 
 # Object files for target lapEditor
 lapEditor_OBJECTS = \
@@ -96,23 +96,23 @@ lapEditor_EXTERNAL_OBJECTS =
 
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/build.make
-editor/debug/lapEditor.exe: C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a
+editor/debug/lapEditor.exe: C:/Users/wellh/Documents/engine/engine/lib/liblapCore.a
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/linkLibs.rsp
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/objects1.rsp
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable debug/lapEditor.exe"
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && "C:/Program Files/CMake/bin/cmake.exe" -E rm -f CMakeFiles/lapEditor.dir/objects.a
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/ar.exe qc CMakeFiles/lapEditor.dir/objects.a @CMakeFiles/lapEditor.dir/objects1.rsp
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe -g -Wl,--whole-archive CMakeFiles/lapEditor.dir/objects.a -Wl,--no-whole-archive -o debug/lapEditor.exe -Wl,--out-implib,liblapEditor.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/lapEditor.dir/linkLibs.rsp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:/Users/wellh/Documents/engine/engine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable debug/lapEditor.exe"
+	cd C:/Users/wellh/Documents/engine/engine/build/editor && "C:/Program Files/CMake/bin/cmake.exe" -E rm -f CMakeFiles/lapEditor.dir/objects.a
+	cd C:/Users/wellh/Documents/engine/engine/build/editor && C:/other/ucrt64/bin/ar.exe qc CMakeFiles/lapEditor.dir/objects.a @CMakeFiles/lapEditor.dir/objects1.rsp
+	cd C:/Users/wellh/Documents/engine/engine/build/editor && C:/other/ucrt64/bin/g++.exe -g -Wl,--whole-archive CMakeFiles/lapEditor.dir/objects.a -Wl,--no-whole-archive -o debug/lapEditor.exe -Wl,--out-implib,liblapEditor.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/lapEditor.dir/linkLibs.rsp
 
 # Rule to build all files generated by this target.
 editor/CMakeFiles/lapEditor.dir/build: editor/debug/lapEditor.exe
 .PHONY : editor/CMakeFiles/lapEditor.dir/build
 
 editor/CMakeFiles/lapEditor.dir/clean:
-	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && $(CMAKE_COMMAND) -P CMakeFiles/lapEditor.dir/cmake_clean.cmake
+	cd C:/Users/wellh/Documents/engine/engine/build/editor && $(CMAKE_COMMAND) -P CMakeFiles/lapEditor.dir/cmake_clean.cmake
 .PHONY : editor/CMakeFiles/lapEditor.dir/clean
 
 editor/CMakeFiles/lapEditor.dir/depend:
-	$(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" C:/Users/WellH/Documents/projects/lapEngine C:/Users/WellH/Documents/projects/lapEngine/editor C:/Users/WellH/Documents/projects/lapEngine/build C:/Users/WellH/Documents/projects/lapEngine/build/editor C:/Users/WellH/Documents/projects/lapEngine/build/editor/CMakeFiles/lapEditor.dir/DependInfo.cmake "--color=$(COLOR)" lapEditor
+	$(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" C:/Users/wellh/Documents/engine/engine C:/Users/wellh/Documents/engine/engine/editor C:/Users/wellh/Documents/engine/engine/build C:/Users/wellh/Documents/engine/engine/build/editor C:/Users/wellh/Documents/engine/engine/build/editor/CMakeFiles/lapEditor.dir/DependInfo.cmake "--color=$(COLOR)" lapEditor
 .PHONY : editor/CMakeFiles/lapEditor.dir/depend
 

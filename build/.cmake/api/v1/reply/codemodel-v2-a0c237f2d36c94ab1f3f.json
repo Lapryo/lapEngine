@@ -1,0 +1,160 @@
+{
+	"configurations" : 
+	[
+		{
+			"abstractTargets" : [],
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3
+					],
+					"jsonFile" : "directory-.-Debug-f6f22219c74102c3da70.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.2.0"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "editor",
+					"jsonFile" : "directory-editor-Debug-a27bbbf6135c891d9319.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.2.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "editor",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "core",
+					"jsonFile" : "directory-core-Debug-c640fa7ec313229a1e93.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.2.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "core",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "hub",
+					"jsonFile" : "directory-hub-Debug-11e3761ff91f92571bae.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.2.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 3,
+					"source" : "hub",
+					"targetIndexes" : 
+					[
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "lapEngine"
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "lapEditor",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "lapCore",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						3
+					],
+					"name" : "lapHub",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 2,
+					"id" : "lapCore::@57760688d1f824db5d9c",
+					"jsonFile" : "target-lapCore-Debug-95d208889e6f966ed32e.json",
+					"name" : "lapCore",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "lapEditor::@ed37844f285895dce70e",
+					"jsonFile" : "target-lapEditor-Debug-8b2d023c27a9c2c4e1b3.json",
+					"name" : "lapEditor",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "lapHub::@3bdb9653047029b699dd",
+					"jsonFile" : "target-lapHub-Debug-2f2fae1de4f8dce3b8cd.json",
+					"name" : "lapHub",
+					"projectIndex" : 3
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/wellh/Documents/engine/engine/build",
+		"source" : "C:/Users/wellh/Documents/engine/engine"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	}
+}

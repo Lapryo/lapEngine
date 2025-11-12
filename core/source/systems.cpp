@@ -1,4 +1,5 @@
 #include "systems.hpp"
+#include "scene.hpp"
 
 #include <iostream>
 
@@ -6,13 +7,11 @@ using namespace lapCore;
 
 void PhysicsSystem::Update(float deltaTime, entt::registry &registry)
 {
-    auto view = registry.view<Transform2D>();
-    for (auto entity : view)
+    auto view = registry.view<Origin2D, Physics2D>();
+    for (auto [entity, origin, physics] : view.each())
     {
-        auto &transform = view.get<Transform2D>(entity);
-
-        transform.position.x += transform.velocity.x * deltaTime;
-        transform.position.y += transform.velocity.y * deltaTime;
+        origin.position.x += physics.velocity.x * deltaTime;
+        origin.position.y += physics.velocity.y * deltaTime;
     }
 }
 
@@ -20,7 +19,8 @@ void RenderSystem::Connect(entt::registry& registry)
 {
     registry.on_update<Sprite>().connect<&RenderSystem::OnRenderableUpdated>(*this);
     registry.on_update<TextLabel>().connect<&RenderSystem::OnRenderableUpdated>(*this);
-    registry.on_update<RectVisualizer>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_update<Image>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_update<Frame>().connect<&RenderSystem::OnRenderableUpdated>(*this);
 }
 
 void RenderSystem::OnRenderableUpdated(entt::registry& registry, entt::entity entity) {
@@ -37,16 +37,23 @@ void RenderSystem::RebuildRenderList(entt::registry& registry) {
         renderList.push_back({e, s.renderable.zlayer, s.renderable.isScreenSpace, RenderEntry::Type::Sprite});
     }
 
+    auto imageView = registry.view<Image>();
+    for (auto e : imageView)
+    {
+        const auto& s = imageView.get<Image>(e);
+        renderList.push_back({e, s.sprite.renderable.zlayer, s.sprite.renderable.isScreenSpace, RenderEntry::Type::Sprite});
+    }
+
     auto textView = registry.view<TextLabel>();
     for (auto e : textView) {
         const auto& t = textView.get<TextLabel>(e);
         renderList.push_back({e, t.renderable.zlayer, t.renderable.isScreenSpace, RenderEntry::Type::Text});
     }
 
-    auto rectView = registry.view<RectVisualizer>();
-    for (auto e : rectView) {
-        const auto& r = rectView.get<RectVisualizer>(e);
-        renderList.push_back({e, r.zlayer, r.isScreenSpace, RenderEntry::Type::Rect});
+    auto frameView = registry.view<Frame>();
+    for (auto e : frameView) {
+        const auto& t = frameView.get<Frame>(e);
+        renderList.push_back({e, t.renderable.zlayer, t.renderable.isScreenSpace, RenderEntry::Type::Rect});
     }
 
     std::sort(renderList.begin(), renderList.end(), [](const auto& a, const auto& b) {
@@ -57,66 +64,6 @@ void RenderSystem::RebuildRenderList(entt::registry& registry) {
 
     needsResort = false;
 }
-
-/*void RenderWorldSpace(entt::registry &registry)
-{
-    for (auto [camEntity, cam] : registry.view<Cam2D>().each())
-    {
-        BeginMode2D(cam.camera);
-
-        // Draw world-space sprites
-        for (auto [entity, transform, sprite] : registry.view<Transform2D, Sprite>().each())
-            if (!sprite.isScreenSpace && sprite.texture && sprite.visible)
-                DrawTexture(*sprite.texture, transform.position.x, transform.position.y, sprite.tint);
-
-        // Draw world-space rects
-        for (auto [entity, rect] : registry.view<RectVisualizer>().each())
-            if (!rect.isScreenSpace && rect.visible) {
-                const auto* transform = registry.try_get<Transform2D>(entity);
-                float posX = rect.offset.x + (transform ? transform->position.x : 0);
-                float posY = rect.offset.y + (transform ? transform->position.y : 0);
-                DrawRectangle(posX, posY, rect.size.x, rect.size.y, rect.tint);
-            }
-
-        // Draw world-space text
-        for (auto [entity, textLabel] : registry.view<TextLabel>().each())
-        {
-            if (!textLabel.isScreenSpace && textLabel.visible)
-            {
-                const auto* transform = registry.try_get<Transform2D>(entity);
-                float posX = textLabel.offset.x + (transform ? transform->position.x : 0);
-                float posY = textLabel.offset.y + (transform ? transform->position.y : 0);
-                DrawText(textLabel.text.c_str(), posX, posY, textLabel.size, textLabel.color);
-            }
-        }
-
-        EndMode2D();
-    }
-}*/
-
-/*void RenderScreenSpace(entt::registry &registry)
-{
-    for (auto [entity, transform, sprite] : registry.view<Transform2D, Sprite>().each())
-        if (sprite.isScreenSpace && sprite.texture && sprite.visible)
-            DrawTexture(*sprite.texture, transform.position.x, transform.position.y, sprite.tint);
-
-    for (auto [entity, rect] : registry.view<RectVisualizer>().each())
-        if (rect.isScreenSpace && rect.visible) {
-            const auto* transform = registry.try_get<Transform2D>(entity);
-            float posX = rect.offset.x + (transform ? transform->position.x : 0);
-            float posY = rect.offset.y + (transform ? transform->position.y : 0);
-            DrawRectangle(posX, posY, rect.size.x, rect.size.y, rect.tint);
-        }
-
-    for (auto [entity, textLabel] : registry.view<TextLabel>().each())
-        if (textLabel.isScreenSpace && textLabel.visible)
-        {
-            const auto* transform = registry.try_get<Transform2D>(entity);
-            float posX = textLabel.offset.x + (transform ? transform->position.x : 0);
-            float posY = textLabel.offset.y + (transform ? transform->position.y : 0);
-            DrawText(textLabel.text.c_str(), posX, posY, textLabel.size, textLabel.color);
-        }
-}*/
 
 void RenderSystem::Update(float deltaTime, entt::registry& registry)
 {
@@ -146,40 +93,178 @@ void RenderSystem::Update(float deltaTime, entt::registry& registry)
             {
                 case RenderEntry::Type::Sprite:
                 {
-                    auto& sprite = registry.get<Sprite>(entry.entity);
-                    if (!sprite.renderable.visible || !sprite.texture) break;
+                    auto* image = registry.try_get<Image>(entry.entity);
+                    if (image && image->sprite.renderable.visible && image->sprite.texture)
+                    {
+                        // Because it's an image, we now check for a frame and adjust the position and size accordingly
+                        // If there is no frame, then use the Origin2D
+                        // If there is no Origin2D, or any sufficient position and size data, don't render the image
 
-                    auto* transform = registry.try_get<Transform2D>(entry.entity);
-                    float x = transform ? transform->position.x : 0.f;
-                    float y = transform ? transform->position.y : 0.f;
+                        auto* frame = registry.try_get<Frame>(entry.entity);
+                        auto* origin = registry.try_get<Origin2D>(entry.entity);
+                        if (frame)
+                        {
+                            float x = frame->position.scale.x * scene->logicalResolution.x + frame->position.offset.x;
+                            float y = frame->position.scale.y * scene->logicalResolution.y + frame->position.offset.y;
 
-                    DrawTexture(*sprite.texture, x, y, sprite.renderable.tint);
+                            float sx = frame->size.scale.x * scene->logicalResolution.x + frame->size.offset.x;
+                            float sy = frame->size.scale.y * scene->logicalResolution.y + frame->size.offset.y;
+
+                            if (frame->useOrigin && origin)
+                            {
+                                // Add origin position to the frame position
+                                // Multiply frame size by scale
+
+                                x += origin->position.x;
+                                y += origin->position.y;
+
+                                sx *= origin->scale.x;
+                                sy *= origin->scale.y;
+                            }
+
+                            DrawTexturePro(
+                                *image->sprite.texture,
+                                {0.0f, 0.0f, (float)image->sprite.texture->width, (float)image->sprite.texture->height},
+                                {x, y, sx, sy},
+                                image->sprite.anchor,
+                                frame->rotation,
+                                image->sprite.renderable.tint
+                            );
+                        }
+                        else if (origin)
+                        {
+                            // Just use origin
+                            DrawTexturePro(
+                                *image->sprite.texture,
+                                {0.0f, 0.0f, (float)image->sprite.texture->width, (float)image->sprite.texture->height},
+                                {origin->position.x, origin->position.y, origin->scale.x, origin->scale.y},
+                                image->sprite.anchor,
+                                origin->rotation,
+                                image->sprite.renderable.tint
+                            );
+                        }
+
+                        // Else do nothing
+                    }
+                    else
+                    {
+                        auto* sprite = registry.try_get<Sprite>(entry.entity);
+                        if (sprite && sprite->renderable.visible && sprite->texture)
+                        {
+                            // Because it's a sprite, we don't need to check for a frame, so just render normally
+
+                            auto* origin = registry.try_get<Origin2D>(entry.entity);
+                            if (origin)
+                            {
+                                DrawTexturePro(
+                                    *sprite->texture,
+                                    {0.0f, 0.0f, (float)image->sprite.texture->width, (float)image->sprite.texture->height},
+                                    {origin->position.x, origin->position.y, origin->scale.x, origin->scale.y},
+                                    sprite->anchor,
+                                    origin->rotation,
+                                    image->sprite.renderable.tint
+                                );
+                            }
+                        }
+                    }
+
                     break;
                 }
 
                 case RenderEntry::Type::Rect:
                 {
-                    auto& rect = registry.get<RectVisualizer>(entry.entity);
-                    if (!rect.visible) break;
+                    // GET THE FRAME AND USE THAT BROCHACHO
 
-                    auto* transform = registry.try_get<Transform2D>(entry.entity);
-                    float x = rect.offset.x + (transform ? transform->position.x : 0.f);
-                    float y = rect.offset.y + (transform ? transform->position.y : 0.f);
+                    auto* frame = registry.try_get<Frame>(entry.entity);
+                    if (frame && frame->renderable.visible)
+                    {
+                        float x = frame->position.scale.x * scene->logicalResolution.x + frame->position.offset.x;
+                        float y = frame->position.scale.y * scene->logicalResolution.y + frame->position.offset.y;
 
-                    DrawRectangle(x, y, rect.size.x, rect.size.y, rect.tint);
+                        float sx = frame->size.scale.x * scene->logicalResolution.x + frame->size.offset.x;
+                        float sy = frame->size.scale.y * scene->logicalResolution.y + frame->size.offset.y;
+
+                        if (frame->useOrigin)
+                        {
+                            auto* origin = registry.try_get<Origin2D>(entry.entity);
+                            if (origin)
+                            {
+                                x += origin->position.x;
+                                y += origin->position.y;
+
+                                sx *= origin->scale.x;
+                                sy *= origin->scale.y;
+                            }
+                            // Add origin position to the frame position
+                            // Multiply frame size by scale
+
+                            
+                        }
+
+                        DrawRectangle(x, y, sx, sy, frame->renderable.tint);
+                    }
+
                     break;
                 }
 
                 case RenderEntry::Type::Text:
                 {
-                    auto& text = registry.get<TextLabel>(entry.entity);
-                    if (!text.renderable.visible) break;
+                    auto* text = registry.try_get<TextLabel>(entry.entity);
+                    if (text && text->renderable.visible)
+                    {
+                        // Check if there is a frame then if there is an origin2d component,
+                        // If so use them both, if not origin2d, just use frame positioning and sizes,
+                        // If no frame, use origin2d,
+                        // If neither, render nothing
+                        auto* frame = registry.try_get<Frame>(entry.entity);
+                        if (frame)
+                        {
+                            float x = frame->position.scale.x * scene->logicalResolution.x + frame->position.offset.x;
+                            float y = frame->position.scale.y * scene->logicalResolution.y + frame->position.offset.y;
 
-                    auto* transform = registry.try_get<Transform2D>(entry.entity);
-                    float x = text.frame.position.offset.x + (transform ? transform->position.x : 0.f);
-                    float y = text.frame.position.offset.y + (transform ? transform->position.y : 0.f);
+                            if (frame->useOrigin)
+                            {
+                                auto* origin = registry.try_get<Origin2D>(entry.entity);
+                                if (origin)
+                                {
+                                    x += origin->position.x;
+                                    y += origin->position.y;
+                                }
+                                // Add origin position to the frame position
+                                // Multiply frame size by scale
 
-                    DrawText(text.text.c_str(), x, y, text.textSize, text.renderable.tint);
+                               
+                            }
+
+                            auto* padding = registry.try_get<Padding>(entry.entity);
+                            if (padding)
+                            {
+                                x += padding->left;
+                                y += padding->top;
+                            }
+
+                            DrawText(text->text.c_str(), x, y, text->textSize, text->renderable.tint);
+                        }
+                        else
+                        {
+                            auto* origin = registry.try_get<Origin2D>(entry.entity);
+                            if (origin)
+                            {
+                                float x = origin->position.x;
+                                float y = origin->position.y;
+
+                                auto* padding = registry.try_get<Padding>(entry.entity);
+                                if (padding)
+                                {
+                                    x += padding->left;
+                                    y += padding->top;
+                                }
+
+                                DrawText(text->text.c_str(), x, y, text->textSize, text->renderable.tint);
+                            }
+                        }
+                    }
+
                     break;
                 }
             }
@@ -195,40 +280,174 @@ void RenderSystem::Update(float deltaTime, entt::registry& registry)
         {
             case RenderEntry::Type::Sprite:
             {
-                auto& sprite = registry.get<Sprite>(entry.entity);
-                if (!sprite.renderable.visible || !sprite.texture) break;
+                auto* image = registry.try_get<Image>(entry.entity);
+                if (image && image->sprite.renderable.visible && image->sprite.texture)
+                {
+                    // Because it's an image, we now check for a frame and adjust the position and size accordingly
+                    // If there is no frame, then use the Origin2D
+                    // If there is no Origin2D, or any sufficient position and size data, don't render the image
 
-                auto* transform = registry.try_get<Transform2D>(entry.entity);
-                float x = transform ? transform->position.x : 0.f;
-                float y = transform ? transform->position.y : 0.f;
+                    auto* frame = registry.try_get<Frame>(entry.entity);
+                    auto* origin = registry.try_get<Origin2D>(entry.entity);
+                    if (frame)
+                    {
+                        float x = frame->position.scale.x * scene->logicalResolution.x + frame->position.offset.x;
+                        float y = frame->position.scale.y * scene->logicalResolution.y + frame->position.offset.y;
 
-                DrawTexture(*sprite.texture, x, y, sprite.renderable.tint);
+                        float sx = frame->size.scale.x * scene->logicalResolution.x + frame->size.offset.x;
+                        float sy = frame->size.scale.y * scene->logicalResolution.y + frame->size.offset.y;
+
+                        if (frame->useOrigin && origin)
+                        {
+                            // Add origin position to the frame position
+                            // Multiply frame size by scale
+
+                            x += origin->position.x;
+                            y += origin->position.y;
+
+                            sx *= origin->scale.x;
+                            sy *= origin->scale.y;
+                        }
+
+                        DrawTexturePro(
+                            *image->sprite.texture,
+                            {0.0f, 0.0f, (float)image->sprite.texture->width, (float)image->sprite.texture->height},
+                            {x, y, sx, sy},
+                            image->sprite.anchor,
+                            frame->rotation,
+                            image->sprite.renderable.tint
+                        );
+                    }
+                    else if (origin)
+                    {
+                        // Just use origin
+                        DrawTexturePro(
+                            *image->sprite.texture,
+                            {0.0f, 0.0f, (float)image->sprite.texture->width, (float)image->sprite.texture->height},
+                            {origin->position.x, origin->position.y, origin->scale.x, origin->scale.y},
+                            image->sprite.anchor,
+                            origin->rotation,
+                            image->sprite.renderable.tint
+                        );
+                    }
+
+                    // Else do nothing
+                }
+                else
+                {
+                    auto* sprite = registry.try_get<Sprite>(entry.entity);
+                    if (sprite && sprite->renderable.visible && sprite->texture)
+                    {
+                        // Because it's a sprite, we don't need to check for a frame, so just render normally
+
+                        auto* origin = registry.try_get<Origin2D>(entry.entity);
+                        if (origin)
+                        {
+                            DrawTexturePro(
+                                *sprite->texture,
+                                {0.0f, 0.0f, (float)image->sprite.texture->width, (float)image->sprite.texture->height},
+                                {origin->position.x, origin->position.y, origin->scale.x, origin->scale.y},
+                                sprite->anchor,
+                                origin->rotation,
+                                image->sprite.renderable.tint
+                            );
+                        }
+                    }
+                }
+
                 break;
             }
 
             case RenderEntry::Type::Rect:
             {
-                auto& rect = registry.get<RectVisualizer>(entry.entity);
-                if (!rect.visible) break;
+                // GET THE FRAME AND USE THAT BROCHACHO
 
-                auto* transform = registry.try_get<Transform2D>(entry.entity);
-                float x = rect.offset.x + (transform ? transform->position.x : 0.f);
-                float y = rect.offset.y + (transform ? transform->position.y : 0.f);
+                auto* frame = registry.try_get<Frame>(entry.entity);
+                if (frame && frame->renderable.visible)
+                {
+                    float x = frame->position.scale.x * scene->logicalResolution.x + frame->position.offset.x;
+                    float y = frame->position.scale.y * scene->logicalResolution.y + frame->position.offset.y;
 
-                DrawRectangle(x, y, rect.size.x, rect.size.y, rect.tint);
+                    float sx = frame->size.scale.x * scene->logicalResolution.x + frame->size.offset.x;
+                    float sy = frame->size.scale.y * scene->logicalResolution.y + frame->size.offset.y;
+
+                    if (frame->useOrigin)
+                    {
+                        auto* origin = registry.try_get<Origin2D>(entry.entity);
+                        if (origin)
+                        {
+                            x += origin->position.x;
+                            y += origin->position.y;
+
+                            sx *= origin->scale.x;
+                            sy *= origin->scale.y;
+                        }
+                        // Add origin position to the frame position
+                        // Multiply frame size by scale
+                    }
+
+                    DrawRectangle(x, y, sx, sy, frame->renderable.tint);
+                }
+
                 break;
             }
 
             case RenderEntry::Type::Text:
             {
-                auto& text = registry.get<TextLabel>(entry.entity);
-                if (!text.renderable.visible) break;
+                auto* text = registry.try_get<TextLabel>(entry.entity);
+                if (text && text->renderable.visible)
+                {
+                    // Check if there is a frame then if there is an origin2d component,
+                    // If so use them both, if not origin2d, just use frame positioning and sizes,
+                    // If no frame, use origin2d,
+                    // If neither, render nothing
+                    auto* frame = registry.try_get<Frame>(entry.entity);
+                    if (frame)
+                    {
+                        float x = frame->position.scale.x * scene->logicalResolution.x + frame->position.offset.x;
+                        float y = frame->position.scale.y * scene->logicalResolution.y + frame->position.offset.y;
 
-                auto* transform = registry.try_get<Transform2D>(entry.entity);
-                float x = text.frame.position.offset.x + (transform ? transform->position.x : 0.f);
-                float y = text.frame.position.offset.y + (transform ? transform->position.y : 0.f);
+                        if (frame->useOrigin)
+                        {
+                            auto* origin = registry.try_get<Origin2D>(entry.entity);
+                            if (origin)
+                            {
+                                x += origin->position.x;
+                                y += origin->position.y;
+                            }
+                            // Add origin position to the frame position
+                            // Multiply frame size by scale
+                        }
 
-                DrawText(text.text.c_str(), x, y, text.textSize, text.renderable.tint);
+                        auto* padding = registry.try_get<Padding>(entry.entity);
+                        if (padding)
+                        {
+                            x += padding->left;
+                            y += padding->top;
+                        }
+
+                        DrawText(text->text.c_str(), x, y, text->textSize, text->renderable.tint);
+                    }
+                    else
+                    {
+                        auto* origin = registry.try_get<Origin2D>(entry.entity);
+                        if (origin)
+                        {
+                            float x = origin->position.x;
+                            float y = origin->position.y;
+
+                            auto* padding = registry.try_get<Padding>(entry.entity);
+                            if (padding)
+                            {
+                                x += padding->left;
+                                y += padding->top;
+                            }
+
+                            DrawText(text->text.c_str(), x, y, text->textSize, text->renderable.tint);
+                        }
+                    }
+                }
+
                 break;
             }
         }

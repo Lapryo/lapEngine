@@ -76,58 +76,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
         std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] \t\tData: " << type << '\n';
 
-        if (type == "transform2d") {
-            Vector2 position{
-                data["position"].at(0).get<float>(),
-                data["position"].at(1).get<float>()
-            };
-            Vector2 velocity{
-                data["velocity"].at(0).get<float>(),
-                data["velocity"].at(1).get<float>()
-            };
-            Vector2 scale{
-                data["scale"].at(0).get<float>(),
-                data["scale"].at(1).get<float>()
-            };
-            float rotation = data.value("rotation", 0.0f);
-
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [TRANSFORM2D] \t\t\tPosition: " << position.x << ", " << position.y << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [TRANSFORM2D] \t\t\tVelocity: " << velocity.x << ", " << velocity.y << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [TRANSFORM2D] \t\t\tScale: " << scale.x << " x " << scale.y << '\n';
-
-            scene->AddComponent<Transform2D>(entity, position, velocity, scale, rotation);
-        }
-        else if (type == "rectvisualizer")
-        {
-            Vector2 offset{
-                data["offset"].at(0).get<float>(),
-                data["offset"].at(1).get<float>()
-            };
-
-            Vector2 size{
-                data["size"].at(0).get<float>(),
-                data["size"].at(1).get<float>()
-            };
-
-            Color tint{
-                data["tint"].at(0).get<unsigned char>(),
-                data["tint"].at(1).get<unsigned char>(),
-                data["tint"].at(2).get<unsigned char>(),
-                data["tint"].at(3).get<unsigned char>()
-            };
-
-            bool isScreenSpace = data["isScreenSpace"].get<bool>();
-            unsigned int zlayer = data["zlayer"].get<unsigned int>();
-
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [RECTVISUALIZER] \t\t\tOffset: " << offset.x << ", " << offset.y << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [RECTVISUALIZER] \t\t\tSize: " << size.x << " x " << size.y << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [RECTVISUALIZER] \t\t\tTint: " << tint.r << ", " << tint.g << ", " << tint.b << ", " << tint.a << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [RECTVISUALIZER] \t\t\tScreen Space: " << (isScreenSpace ? "True" : "False") << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [RECTVISUALIZER] \t\t\tZ-Layer: " << zlayer << '\n';
-
-            scene->AddComponent<RectVisualizer>(entity, offset, size, tint, zlayer, isScreenSpace);
-        }
-        else if (type == "sprite")
+        if (type == "sprite")
         {
             Color tint{
                 data["tint"].at(0).get<unsigned char>(),
@@ -177,9 +126,8 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tZ-Layer: " << zlayer << '\n';
 
             Renderable renderable(zlayer, isScreenSpace, textColor);
-            Frame frame(Renderable(zlayer, isScreenSpace, WHITE), {{0, 0}, textPosition}, {{0, 0}, {0, 0}}, 0.0f, Alignment::LEFT, Alignment::MIDDLE, {0, 0});
 
-            scene->AddComponent<TextLabel>(entity, renderable, frame, text, textSize);
+            scene->AddComponent<TextLabel>(entity, renderable, text, textSize);
         }
         else if (type == "cam2d")
         {
@@ -239,6 +187,79 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SCRIPT] \t\t\tDestroy Function: " << destroyFuncName << '\n';
 
             scene->AddComponent<Script>(entity, ScriptRegistry::onCreateFunctions[createFuncName], ScriptRegistry::onUpdateFunctions[updateFuncName], ScriptRegistry::onDestroyFunctions[destroyFuncName], false);
+        }
+        else if (type == "frame")
+        {
+            FrameVector position
+            {
+                {
+                    data["position"].at(0).get<float>(),
+                    data["position"].at(1).get<float>()
+                },
+                {
+                    data["position"].at(2).get<float>(),
+                    data["position"].at(3).get<float>()
+                }
+            };
+
+            FrameVector size
+            {
+                {
+                    data["size"].at(0).get<float>(),
+                    data["size"].at(1).get<float>()
+                },
+                {
+                    data["size"].at(2).get<float>(),
+                    data["size"].at(3).get<float>()
+                }
+            };
+
+            float rotation = data.value("rotation", 0.0f);
+            Vector2 anchor
+            {
+                data["anchor"].at(0).get<float>(),
+                data["anchor"].at(1).get<float>()
+            };
+
+            Alignment horizontalAlignment = Alignment::LEFT;
+            std::string h_alignmentType = data.value("horizontal-alignment", "left");
+            if (h_alignmentType == "middle")
+                horizontalAlignment = Alignment::MIDDLE;
+            else
+                horizontalAlignment = Alignment::RIGHT;
+
+            Alignment verticalAlignment = Alignment::LEFT;
+            std::string v_alignmentType = data.value("vertical-alignment", "left");
+            if (v_alignmentType == "middle")
+                verticalAlignment = Alignment::MIDDLE;
+            else
+                verticalAlignment = Alignment::RIGHT;
+
+            Color tint
+            {
+                data["renderable"]["tint"].at(0).get<unsigned char>(),
+                data["renderable"]["tint"].at(1).get<unsigned char>(),
+                data["renderable"]["tint"].at(2).get<unsigned char>(),
+                data["renderable"]["tint"].at(3).get<unsigned char>()
+            };
+
+            Renderable renderable
+            (
+                data["renderable"]["zlayer"].get<unsigned int>(),
+                data["renderable"]["isScreenSpace"].get<bool>(),
+                tint
+            );
+
+            // Renderable renderable, FrameVector position, FrameVector size, float rotation, Alignment horizontal, Alignment vertical, Vector2 anchor
+            scene->AddComponent<Frame>(entity, renderable, position, size, rotation, horizontalAlignment, verticalAlignment, anchor);
+        }
+        else if (type == "origin2d")
+        {
+            
+        }
+        else if (type == "physics2d")
+        {
+
         }
     }
 }

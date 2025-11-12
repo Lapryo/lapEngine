@@ -1,0 +1,46 @@
+{
+    "name": "lapHub",
+    "version": "0.2-alpha",
+    "scenes":
+    [
+        {
+            "name": "main",
+            "assets":
+            [
+
+            ],
+            "systems":
+            [ 
+                "render"
+            ],
+            "objects":
+            [
+                {
+                    "name": "background",
+                    "components":
+                    [
+                        {
+                            "type": "frame",
+                            "data":
+                            {
+                                "position": [0, 0, 0, 0],
+                                "size": [1, 1, 0, 0],
+                                "rotation": 0,
+                                "anchor": [0, 0],
+                                "horizontal-alignment": "left",
+                                "vertical-alignment": "top",
+                                "renderable":
+                                {
+                                    "zlayer": 0,
+                                    "isScreenSpace": true,
+                                    "visible": true,
+                                    "tint": [10, 50, 30, 255]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
