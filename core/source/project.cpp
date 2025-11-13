@@ -19,9 +19,9 @@ void GetAssets(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::
     {
         for (const auto &assetJson : sceneJson["assets"])
         {
-            const auto& assetName = assetJson.value("name", "");
-            const auto& assetType = assetJson.value("type", "");
-            const auto& assetPath = assetJson.value("path", "");
+            const auto &assetName = assetJson.value("name", "");
+            const auto &assetType = assetJson.value("type", "");
+            const auto &assetPath = assetJson.value("path", "");
 
             std::cout << "[PROJECT] [SCENE] [ASSET] Queueing asset:\n[PROJECT] [SCENE] [ASSET] \tName: " << assetName << "\n[PROJECT] [SCENE] [ASSET] \tType: " << assetType << "[PROJECT] [SCENE] [ASSET] \tPath: " << assetPath << '\n';
 
@@ -66,13 +66,14 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 {
     std::cout << "[PROJECT] [SCENE] [OBJECT] \tComponents:\n";
 
-    for (const auto& comp : object["components"])
+    for (const auto &comp : object["components"])
     {
-        const auto& type = comp.value("type", "");
+        const auto &type = comp.value("type", "");
         std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] \t\tType: " << type << '\n';
 
-        if (!comp.contains("data")) continue;
-        const auto& data = comp["data"];
+        if (!comp.contains("data"))
+            continue;
+        const auto &data = comp["data"];
 
         std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] \t\tData: " << type << '\n';
 
@@ -82,17 +83,11 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 data["tint"].at(0).get<unsigned char>(),
                 data["tint"].at(1).get<unsigned char>(),
                 data["tint"].at(2).get<unsigned char>(),
-                data["tint"].at(3).get<unsigned char>()
-            };
+                data["tint"].at(3).get<unsigned char>()};
             unsigned int zlayer = data["zlayer"].get<unsigned int>();
             bool isScreenSpace = data["isScreenSpace"].get<bool>();
 
             std::string texName = data["texture"].get<std::string>();
-
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tTexture Name: " << texName << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tTint: " << tint.r << ", " << tint.g << ", " << tint.b << ", " << tint.a << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tScreen Space: " << (isScreenSpace ? "True" : "False") << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tZ-Layer: " << zlayer << '\n';
 
             Renderable renderable(zlayer, isScreenSpace, tint);
             scene->AddComponent<Sprite>(entity, renderable, texName);
@@ -100,34 +95,41 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
         else if (type == "textlabel")
         {
             std::string text = data.value("text", "");
-
-            Vector2 textPosition{
-                data["offset"].at(0).get<float>(),
-                data["offset"].at(1).get<float>()
-            };
-
             float textSize = data["size"].get<float>();
 
             Color textColor{
-                data["color"].at(0).get<unsigned char>(),
-                data["color"].at(1).get<unsigned char>(),
-                data["color"].at(2).get<unsigned char>(),
-                data["color"].at(3).get<unsigned char>()
-            };
+                data["renderable"]["tint"].at(0).get<unsigned char>(),
+                data["renderable"]["tint"].at(1).get<unsigned char>(),
+                data["renderable"]["tint"].at(2).get<unsigned char>(),
+                data["renderable"]["tint"].at(3).get<unsigned char>()};
 
-            bool isScreenSpace = data["isScreenSpace"].get<bool>();
-            unsigned int zlayer = data["zlayer"].get<unsigned int>();
+            Vector2 bounds{
+                data["bounds"].at(0).get<float>(),
+                data["bounds"].at(1).get<float>()};
 
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tText: " << text << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tOffset: " << textPosition.x << ", " << textPosition.y << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tSize: " << textSize << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tColor: " << textColor.r << ", " << textColor.g << ", " << textColor.b << ", " << textColor.a << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tScreen Space: " << (isScreenSpace ? "True" : "False") << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SPRITE] \t\t\tZ-Layer: " << zlayer << '\n';
+            HorizontalAlignment hAlign = HorizontalAlignment::LEFT;
+            VerticalAlignment vAlign = VerticalAlignment::TOP;
+            std::string hAlign_text = data.value("horizontal-alignment", "left");
+            std::string vAlign_text = data.value("vertical-alignment", "top");
+
+            if (hAlign_text == "middle")
+                hAlign = HorizontalAlignment::MIDDLE;
+            else
+                hAlign = HorizontalAlignment::RIGHT;
+
+            if (vAlign_text == "middle")
+                vAlign = VerticalAlignment::MIDDLE;
+            else
+                vAlign = VerticalAlignment::BOTTOM;
+
+            bool isScreenSpace = data["renderable"]["isScreenSpace"].get<bool>();
+            unsigned int zlayer = data["renderable"]["zlayer"].get<unsigned int>();
+            bool visible = data["renderable"]["visible"].get<bool>();
 
             Renderable renderable(zlayer, isScreenSpace, textColor);
+            renderable.visible = visible;
 
-            scene->AddComponent<TextLabel>(entity, renderable, text, textSize);
+            scene->AddComponent<TextLabel>(entity, renderable, text, textSize, hAlign, vAlign, bounds);
         }
         else if (type == "cam2d")
         {
@@ -147,28 +149,21 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
             Vector2 offset{
                 data["offset"].at(0).get<float>(),
-                data["offset"].at(1).get<float>()
-            };
+                data["offset"].at(1).get<float>()};
 
             Vector2 target{
                 data["target"].at(0).get<float>(),
-                data["target"].at(1).get<float>()
-            };
+                data["target"].at(1).get<float>()};
 
             float rotation = data["rotation"].get<float>();
             float zoom = data["zoom"].get<float>();
-            
+
             Camera2D camera;
             camera.offset = offset;
             camera.target = target;
             camera.rotation = rotation;
             camera.zoom = zoom;
 
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [CAM2D] \t\t\tOffset: " << offset.x << ", " << offset.y << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [CAM2D] \t\t\tTarget: " << target.x << ", " << target.y << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [CAM2D] \t\t\tRotation: " << rotation << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [CAM2D] \t\t\tZoom: " << zoom << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [CAM2D] \t\t\tExclude List:\n";
             for (auto &entity : excludeList)
             {
                 std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [CAM2D] \t\t\t\t" << static_cast<std::uint16_t>(entity) << '\n';
@@ -182,84 +177,46 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             std::string updateFuncName = data["onUpdate"];
             std::string destroyFuncName = data["onDestroy"];
 
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SCRIPT] \t\t\tCreate Function: " << createFuncName << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SCRIPT] \t\t\tUpdate Function: " << updateFuncName << '\n';
-            std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [SCRIPT] \t\t\tDestroy Function: " << destroyFuncName << '\n';
-
             scene->AddComponent<Script>(entity, ScriptRegistry::onCreateFunctions[createFuncName], ScriptRegistry::onUpdateFunctions[updateFuncName], ScriptRegistry::onDestroyFunctions[destroyFuncName], false);
         }
         else if (type == "frame")
         {
-            FrameVector position
-            {
-                {
-                    data["position"].at(0).get<float>(),
-                    data["position"].at(1).get<float>()
-                },
-                {
-                    data["position"].at(2).get<float>(),
-                    data["position"].at(3).get<float>()
-                }
-            };
+            FrameVector position{
+                {data["position"].at(0).get<float>(),
+                 data["position"].at(1).get<float>()},
+                {data["position"].at(2).get<float>(),
+                 data["position"].at(3).get<float>()}};
 
-            FrameVector size
-            {
-                {
-                    data["size"].at(0).get<float>(),
-                    data["size"].at(1).get<float>()
-                },
-                {
-                    data["size"].at(2).get<float>(),
-                    data["size"].at(3).get<float>()
-                }
-            };
+            FrameVector size{
+                {data["size"].at(0).get<float>(),
+                 data["size"].at(1).get<float>()},
+                {data["size"].at(2).get<float>(),
+                 data["size"].at(3).get<float>()}};
 
             float rotation = data.value("rotation", 0.0f);
-            Vector2 anchor
-            {
+            Vector2 anchor{
                 data["anchor"].at(0).get<float>(),
-                data["anchor"].at(1).get<float>()
-            };
+                data["anchor"].at(1).get<float>()};
 
-            Alignment horizontalAlignment = Alignment::LEFT;
-            std::string h_alignmentType = data.value("horizontal-alignment", "left");
-            if (h_alignmentType == "middle")
-                horizontalAlignment = Alignment::MIDDLE;
-            else
-                horizontalAlignment = Alignment::RIGHT;
-
-            Alignment verticalAlignment = Alignment::LEFT;
-            std::string v_alignmentType = data.value("vertical-alignment", "left");
-            if (v_alignmentType == "middle")
-                verticalAlignment = Alignment::MIDDLE;
-            else
-                verticalAlignment = Alignment::RIGHT;
-
-            Color tint
-            {
+            Color tint{
                 data["renderable"]["tint"].at(0).get<unsigned char>(),
                 data["renderable"]["tint"].at(1).get<unsigned char>(),
                 data["renderable"]["tint"].at(2).get<unsigned char>(),
-                data["renderable"]["tint"].at(3).get<unsigned char>()
-            };
+                data["renderable"]["tint"].at(3).get<unsigned char>()};
 
-            Renderable renderable
-            (
+            Renderable renderable(
                 data["renderable"]["zlayer"].get<unsigned int>(),
                 data["renderable"]["isScreenSpace"].get<bool>(),
-                tint
-            );
+                tint);
 
             // Renderable renderable, FrameVector position, FrameVector size, float rotation, Alignment horizontal, Alignment vertical, Vector2 anchor
-            scene->AddComponent<Frame>(entity, renderable, position, size, rotation, horizontalAlignment, verticalAlignment, anchor);
+            scene->AddComponent<Frame>(entity, renderable, position, size, rotation, anchor);
         }
         else if (type == "origin2d")
         {
-            
         }
         else if (type == "physics2d")
         {
-
         }
     }
 }
@@ -270,7 +227,7 @@ void GetObjects(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
 
     if (sceneJson.contains("objects") && sceneJson["objects"].is_array())
     {
-        for (const auto& object : sceneJson["objects"])
+        for (const auto &object : sceneJson["objects"])
         {
             auto entity = scene->AddEntity(object.value("name", ""));
             std::cout << "[PROJECT] [SCENE] [OBJECT] Loading object:\n[PROJECT] [SCENE] [OBJECT] \tName: " << object.value("name", "") << '\n';
@@ -349,10 +306,10 @@ Project lapCore::UnpackProject(const char projJson[])
     return project;
 }
 
-Scene* Project::GetMainScene()
+Scene *Project::GetMainScene()
 {
     if (main_scene_index >= 0 && main_scene_index < (int)scenes.size())
-            return scenes[main_scene_index].get();
+        return scenes[main_scene_index].get();
     return nullptr;
 }
 
@@ -373,12 +330,10 @@ void Project::LoadSettings(const std::string &settingsFilePath)
     bool resizable = windowJson.value("resizable", false);
     Vector2 windowRes{
         windowJson["resolution"].at(0),
-        windowJson["resolution"].at(1)
-    };
+        windowJson["resolution"].at(1)};
     Vector2 logicalRes{
         windowJson["logical-resolution"].at(0),
-        windowJson["logical-resolution"].at(1)
-    };
+        windowJson["logical-resolution"].at(1)};
 
     bool vsync = windowJson.value("vsync", false);
     bool inf_fps = windowJson.value("inf-fps", true);
@@ -387,7 +342,8 @@ void Project::LoadSettings(const std::string &settingsFilePath)
     std::string windowTitle = windowJson.value("title", "");
 
     InitWindow(windowRes.x, windowRes.y, windowTitle.c_str());
-    for (auto& scene : scenes) {
+    for (auto &scene : scenes)
+    {
         scene->LoadQueuedAssets();
         scene->logicalResolution = logicalRes;
     }
@@ -400,7 +356,7 @@ void Project::LoadSettings(const std::string &settingsFilePath)
 
     if (windowMode == "fullscreen")
         SetWindowState(FLAG_FULLSCREEN_MODE);
-    
+
     if (!vsync)
         if (inf_fps)
             SetTargetFPS(-1);

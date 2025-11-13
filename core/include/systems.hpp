@@ -16,19 +16,19 @@ namespace lapCore
     class System
     {
     public:
-        System(SystemDrawOrder order, Scene* scene) : drawOrder(order), scene(scene) {}
+        System(SystemDrawOrder order, Scene *scene) : drawOrder(order), scene(scene) {}
         virtual ~System() = default;
         virtual void Update(float deltaTime, entt::registry &reg) = 0;
 
         SystemDrawOrder drawOrder;
         bool active = true;
-        Scene* scene;
+        Scene *scene;
     };
 
     class PhysicsSystem : public System
     {
     public:
-        PhysicsSystem(Scene* scene) : System(SystemDrawOrder::PREDRAW, scene) {}
+        PhysicsSystem(Scene *scene) : System(SystemDrawOrder::PREDRAW, scene) {}
         void Update(float deltaTime, entt::registry &reg) override;
     };
 
@@ -40,14 +40,22 @@ namespace lapCore
             entt::entity entity;
             unsigned int zlayer;
             bool isScreenSpace;
-            enum class Type { Sprite, Text, Rect } type;
+            enum class Type
+            {
+                Sprite,
+                Text,
+                Rect,
+                RoundedRect,
+                Circle,
+                Image
+            } type;
         };
 
         std::vector<RenderEntry> renderList;
 
-        RenderSystem(Scene* scene) : System(SystemDrawOrder::DRAW, scene) {}
+        RenderSystem(Scene *scene) : System(SystemDrawOrder::DRAW, scene) {}
         void Update(float deltaTime, entt::registry &reg) override;
-        
+
         void Connect(entt::registry &registry);
         void OnRenderableUpdated(entt::registry &registry, entt::entity entity);
 
@@ -59,16 +67,16 @@ namespace lapCore
     class ScriptSystem : public System
     {
     public:
-        ScriptSystem(Scene* scene) : System(SystemDrawOrder::PREDRAW, scene) {}
-        void Update(float deltaTime, entt::registry& registry) override;
-        void OnDestroy(entt::registry& registry);
+        ScriptSystem(Scene *scene) : System(SystemDrawOrder::PREDRAW, scene) {}
+        void Update(float deltaTime, entt::registry &registry) override;
+        void OnDestroy(entt::registry &registry);
     };
 
     class GUISystem : public System
     {
     public:
-        GUISystem(Scene* scene) : System(SystemDrawOrder::PREDRAW, scene) {}
-        void Update(float deltaTime, entt::registry& registry) override;
+        GUISystem(Scene *scene) : System(SystemDrawOrder::PREDRAW, scene) {}
+        void Update(float deltaTime, entt::registry &registry) override;
     };
 }
 

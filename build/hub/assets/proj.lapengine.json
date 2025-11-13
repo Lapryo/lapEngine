@@ -27,8 +27,6 @@
                                 "size": [1, 1, 0, 0],
                                 "rotation": 0,
                                 "anchor": [0, 0],
-                                "horizontal-alignment": "left",
-                                "vertical-alignment": "top",
                                 "renderable":
                                 {
                                     "zlayer": 0,
@@ -36,6 +34,31 @@
                                     "visible": true,
                                     "tint": [10, 50, 30, 255]
                                 }
+                            }
+                        },
+                        {
+                            "type": "textlabel",
+                            "data":
+                            {
+                                "text": "FPS: ___",
+                                "size": 20,
+                                "bounds": [800, 30],
+                                "horizontal-alignment": "middle",
+                                "vertical-alignment": "middle",
+                                "renderable":
+                                {
+                                    "zlayer": 1,
+                                    "isScreenSpace": true,
+                                    "visible": true,
+                                    "tint": [255, 0, 0, 255]
+                                }
+                            }
+                        },
+                        {
+                            "type": "padding",
+                            "data":
+                            {
+                                "padding": [0, 100, 0, 0]
                             }
                         }
                     ]

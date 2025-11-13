@@ -6,7 +6,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "build/CMakeFiles/4.2.0-rc2/CMakeSystem.cmake"
+			"path" : "build/CMakeFiles/4.2.0-rc1/CMakeSystem.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -20,11 +20,11 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "build/CMakeFiles/4.2.0-rc2/CMakeCCompiler.cmake"
+			"path" : "build/CMakeFiles/4.2.0-rc1/CMakeCCompiler.cmake"
 		},
 		{
 			"isGenerated" : true,
-			"path" : "build/CMakeFiles/4.2.0-rc2/CMakeCXXCompiler.cmake"
+			"path" : "build/CMakeFiles/4.2.0-rc1/CMakeCXXCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -88,7 +88,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "build/CMakeFiles/4.2.0-rc2/CMakeRCCompiler.cmake"
+			"path" : "build/CMakeFiles/4.2.0-rc1/CMakeRCCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -228,8 +228,8 @@
 	"kind" : "cmakeFiles",
 	"paths" : 
 	{
-		"build" : "C:/Users/wellh/Documents/engine/engine/build",
-		"source" : "C:/Users/wellh/Documents/engine/engine"
+		"build" : "C:/Users/WellH/Documents/projects/lapEngine/build",
+		"source" : "C:/Users/WellH/Documents/projects/lapEngine"
 	},
 	"version" : 
 	{

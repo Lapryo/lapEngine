@@ -18,11 +18,11 @@ std::vector<std::string> windowSubTitles = {
     "Blame the coder.",
     "Lag, errors, and bugs are part of the experience!",
     "Ctrl+Z is your bsf!",
-    "Wonky, but loveable."
-};
+    "Wonky, but loveable."};
 
 HubApp::HubApp(Project &project) : App(project)
-{}
+{
+}
 
 void HubApp::Init()
 {
@@ -47,7 +47,8 @@ void HubApp::Update(float deltaTime)
         return;
     }
 
-    if (IsKeyReleased(KEY_F11)) {
+    if (IsKeyReleased(KEY_F11))
+    {
         ToggleFullscreen();
         SetWindowPosition(100, 100);
     }

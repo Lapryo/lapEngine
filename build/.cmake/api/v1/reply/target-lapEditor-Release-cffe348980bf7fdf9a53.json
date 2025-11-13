@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "editor/debug/lapEditor.exe"
+			"path" : "editor/release/lapEditor.exe"
 		},
 		{
-			"path" : "editor/debug/lapEditor.pdb"
+			"path" : "editor/release/lapEditor.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -81,18 +81,18 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-g -std=c++23"
+					"fragment" : "-O3 -DNDEBUG -std=c++23"
 				}
 			],
 			"includes" : 
 			[
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/wellh/Documents/engine/engine/editor/include"
+					"path" : "C:/Users/WellH/Documents/projects/lapEngine/editor/include"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/wellh/Documents/engine/engine/editor/../core/include"
+					"path" : "C:/Users/WellH/Documents/projects/lapEngine/editor/../core/include"
 				}
 			],
 			"language" : "CXX",
@@ -123,17 +123,17 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "-g",
+				"fragment" : "-O3 -DNDEBUG",
 				"role" : "flags"
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "-LC:/Users/wellh/Documents/engine/engine/lib",
+				"fragment" : "-LC:/Users/WellH/Documents/projects/lapEngine/lib",
 				"role" : "libraryPath"
 			},
 			{
 				"backtrace" : 3,
-				"fragment" : "C:/Users/wellh/Documents/engine/engine/lib/liblapCore.a",
+				"fragment" : "C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a",
 				"role" : "libraries"
 			},
 			{

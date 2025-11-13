@@ -13,7 +13,8 @@ const char proj_json[] = R"json(
             ],
             "systems":
             [ 
-                "render"
+                "render",
+                "script"
             ],
             "objects":
             [
@@ -29,8 +30,6 @@ const char proj_json[] = R"json(
                                 "size": [1, 1, 0, 0],
                                 "rotation": 0,
                                 "anchor": [0, 0],
-                                "horizontal-alignment": "left",
-                                "vertical-alignment": "top",
                                 "renderable":
                                 {
                                     "zlayer": 0,
@@ -38,6 +37,39 @@ const char proj_json[] = R"json(
                                     "visible": true,
                                     "tint": [10, 50, 30, 255]
                                 }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "fpslabel",
+                    "components":
+                    [
+                        {
+                            "type": "textlabel",
+                            "data":
+                            {
+                                "text": "FPS: ___",
+                                "size": 20,
+                                "bounds": [800, 30],
+                                "horizontal-alignment": "middle",
+                                "vertical-alignment": "middle",
+                                "renderable":
+                                {
+                                    "zlayer": 1,
+                                    "isScreenSpace": true,
+                                    "visible": true,
+                                    "tint": [255, 0, 0, 255]
+                                }
+                            }
+                        },
+                        {
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "",
+                                "onUpdate": "updatefps",
+                                "onDestroy": ""
                             }
                         }
                     ]

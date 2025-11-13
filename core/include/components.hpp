@@ -5,7 +5,8 @@
 #include <functional>
 #include <any>
 
-namespace lapCore {
+namespace lapCore
+{
     class Scene; // <-- forward declaration
 }
 
@@ -22,11 +23,18 @@ namespace lapCore
             : zlayer(zlayer), isScreenSpace(isScreenSpace), tint(tint) {}
     };
 
-    enum class Alignment
+    enum class HorizontalAlignment
     {
         LEFT,
         MIDDLE,
         RIGHT
+    };
+
+    enum class VerticalAlignment
+    {
+        TOP,
+        MIDDLE,
+        BOTTOM
     };
 
     struct Origin2D
@@ -64,14 +72,12 @@ namespace lapCore
         FrameVector position;
         float rotation;
 
-        Alignment horizontal;
-        Alignment vertical;
         Vector2 anchor;
 
         bool useOrigin = true;
 
-        Frame(Renderable renderable, FrameVector position, FrameVector size, float rotation, Alignment horizontal, Alignment vertical, Vector2 anchor)
-            : renderable(renderable), horizontal(horizontal), vertical(vertical), size(size), position(position), anchor(anchor) {}
+        Frame(Renderable renderable, FrameVector position, FrameVector size, float rotation, Vector2 anchor)
+            : renderable(renderable), size(size), position(position), anchor(anchor) {}
     };
 
     struct [[deprecated("Use Origin and Physics2D instead, will not work")]] Transform2D
@@ -83,12 +89,12 @@ namespace lapCore
     struct Sprite
     {
         Renderable renderable;
-        Texture2D* texture = nullptr;
+        Texture2D *texture = nullptr;
         std::string textureName;
 
         Vector2 anchor;
 
-        Sprite(Renderable renderable, Texture2D* texture, std::string textureName)
+        Sprite(Renderable renderable, Texture2D *texture, std::string textureName)
             : renderable(renderable), texture(texture), textureName(textureName) {}
 
         Sprite(Renderable renderable, std::string textureName)
@@ -121,48 +127,54 @@ namespace lapCore
 
         std::string text;
         float textSize;
-        
-        TextLabel(Renderable renderable, std::string text, float textSize)
-            : renderable(renderable), text(text), textSize(textSize) {}
+
+        HorizontalAlignment horizontal;
+        VerticalAlignment vertical;
+
+        Vector2 bounds;
+
+        TextLabel(Renderable renderable, std::string text, float textSize, HorizontalAlignment horizontal, VerticalAlignment vertical, Vector2 bounds)
+            : renderable(renderable), text(text), textSize(textSize), horizontal(horizontal), vertical(vertical), bounds(bounds) {}
     };
 
     struct EventListener
     {
         std::string event;
-        std::function<void(const std::vector<std::any>&)> connectedFunc;
+        std::function<void(const std::vector<std::any> &)> connectedFunc;
 
         template <typename... Args>
         void Connect(std::function<void(Args...)> func)
         {
-            connectedFunc = [func](const std::vector<std::any>& args)
+            connectedFunc = [func](const std::vector<std::any> &args)
             {
                 Call(func, args, std::index_sequence_for<Args...>{});
             };
         }
 
         template <typename... Args, size_t... I>
-        static void Call(const std::function<void(Args...)>& func, const std::vector<std::any>& args, std::index_sequence<I...>)
+        static void Call(const std::function<void(Args...)> &func, const std::vector<std::any> &args, std::index_sequence<I...>)
         {
             func(std::any_cast<Args>(args[I])...);
         }
 
         template <typename... Args>
-        void Fire(Args&&... args)
+        void Fire(Args &&...args)
         {
             if (connectedFunc)
-                connectedFunc({ std::forward<Args>(args)... });
+                connectedFunc({std::forward<Args>(args)...});
         }
     };
 
     // Incomplete
     struct Button
     {
-        EventListener* event;
+        EventListener *event;
+        Rectangle bounds;
 
         bool interactable = true;
         Color active, inactive;
 
-        Button(EventListener* event, bool interactable, Color active, Color inactive)
+        Button(EventListener *event, bool interactable, Color active, Color inactive)
             : event(event), interactable(interactable), active(active), inactive(inactive) {}
     };
 
@@ -172,11 +184,11 @@ namespace lapCore
         std::vector<entt::entity> exclude;
     };
 
-    struct Script 
+    struct Script
     {
-        std::function<void(lapCore::Scene*, entt::entity)> OnCreate;
-        std::function<void(lapCore::Scene*, entt::entity, float)> OnUpdate;
-        std::function<void(lapCore::Scene*, entt::entity)> OnDestroy;
+        std::function<void(lapCore::Scene *, entt::entity)> OnCreate;
+        std::function<void(lapCore::Scene *, entt::entity, float)> OnUpdate;
+        std::function<void(lapCore::Scene *, entt::entity)> OnDestroy;
 
         bool active = true;
         bool initiated = false;

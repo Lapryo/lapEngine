@@ -48,7 +48,8 @@ void Scene::Update(float deltaTime, SystemDrawOrder order, RenderTexture2D &targ
 
     for (auto &system : systems[order])
     {
-        if (system->active) {
+        if (system->active)
+        {
             system->Update(deltaTime, entities);
         }
     }
@@ -67,13 +68,16 @@ void Scene::Update(float deltaTime, SystemDrawOrder order, RenderTexture2D &targ
         int drawWidth, drawHeight;
         int offsetX, offsetY;
 
-        if (screenAspect > targetAspect) {
+        if (screenAspect > targetAspect)
+        {
             // window is wider than logical
             drawHeight = screenH;
             drawWidth = (int)(screenH * targetAspect);
             offsetX = (screenW - drawWidth) / 2;
             offsetY = 0;
-        } else {
+        }
+        else
+        {
             // window is taller than logical
             drawWidth = screenW;
             drawHeight = (int)(screenW / targetAspect);
@@ -86,12 +90,11 @@ void Scene::Update(float deltaTime, SystemDrawOrder order, RenderTexture2D &targ
         // Draw the render texture to the screen, scaling it
         DrawTexturePro(
             target.texture,
-            { 0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height }, // source rect (flip y)
-            { (float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight },     // dest rect
-            { 0.0f, 0.0f }, // origin
-            0.0f,           // rotation
-            WHITE
-        );
+            {0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height}, // source rect (flip y)
+            {(float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight},    // dest rect
+            {0.0f, 0.0f},                                                             // origin
+            0.0f,                                                                     // rotation
+            WHITE);
 
         EndDrawing();
     }
@@ -104,7 +107,7 @@ entt::entity Scene::AddEntity(const std::string &name)
     return entity;
 }
 
-void Scene::DestroyEntity(entt::entity& entity)
+void Scene::DestroyEntity(entt::entity &entity)
 {
     entities.destroy(entity);
 }

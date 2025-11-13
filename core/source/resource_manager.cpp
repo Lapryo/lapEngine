@@ -2,7 +2,7 @@
 
 using namespace lapCore;
 
-Texture2D* ResourceManager::AddTexture(const std::string &name, const std::string &filePath)
+Texture2D *ResourceManager::AddTexture(const std::string &name, const std::string &filePath)
 {
     auto tex = LoadTexture(filePath.c_str());
     textures[name] = tex;
@@ -14,7 +14,7 @@ void ResourceManager::RemoveTexture(const std::string &name)
     textures.erase(name);
 }
 
-Shader* ResourceManager::AddShader(const std::string &name, const std::string &vertexFilePath, const std::string &fragmentFilePath)
+Shader *ResourceManager::AddShader(const std::string &name, const std::string &vertexFilePath, const std::string &fragmentFilePath)
 {
     Shader shader = LoadShader(vertexFilePath.c_str(), fragmentFilePath.c_str());
     shaders[name] = shader;
