@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.2.0)
+cmake_minimum_required(VERSION 4.1.2)
 project(lapEditor)
 
 # Set output directories to match Makefile structure
@@ -16,9 +16,15 @@ file(GLOB_RECURSE EDITOR_SOURCES
 )
 
 # Source files
-add_executable(lapEditor 
-    ${EDITOR_SOURCES}
-)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_executable(lapEditor 
+        ${EDITOR_SOURCES}
+    )
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_executable(lapEditor WIN32 
+        ${EDITOR_SOURCES}
+    )
+endif()
 
 # Include directories
 target_include_directories(lapEditor PRIVATE 

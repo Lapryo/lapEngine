@@ -4,6 +4,8 @@
 #include "systems.hpp"
 #include "resource_manager.hpp"
 
+#include <iostream>
+
 namespace lapCore
 {
     const unsigned int LOGICAL_RESOLUTION_REFERENCE = 6400;
@@ -20,7 +22,7 @@ namespace lapCore
         std::string name;
         entt::registry entities;
         std::unordered_map<std::string, entt::entity> nameToEntity;
-        std::unordered_map<SystemDrawOrder, std::vector<std::unique_ptr<System>>> systems;
+        std::vector<std::unique_ptr<System>> systems;
         std::vector<AssetLoadRequest> queuedAssets;
         ResourceManager resources;
 
@@ -34,17 +36,25 @@ namespace lapCore
         void LoadQueuedAssets();
         void ReloadTextures();
 
-        void Update(float deltaTime, SystemDrawOrder order, RenderTexture2D &target);
+        void Update(float deltaTime, RenderTexture2D &target);
 
         template <typename T, typename... Args>
-        void AddSystem(Args&&... args)
+        void AddSystem(unsigned int order, Args&&... args)
         {
-            auto sys = std::make_unique<T>(this, std::forward<Args>(args)...);
+            std::cout << "got to here.\n";
+            auto sys = std::make_unique<T>(this, order, std::forward<Args>(args)...);
+            std::cout << "got to here.\n";
 
             if constexpr (requires(T& t, entt::registry& r) { t.Connect(r); })
                 sys->Connect(entities);
+            
+            std::cout << "got to here.\n";
 
-            systems[sys->drawOrder].push_back(std::move(sys));
+            if (order > systems.size())
+                systems.resize(order + 1);
+
+            systems[order] = std::move(sys);
+            std::cout << "got to here.\n";
         }
 
         entt::entity AddEntity(const std::string &name);

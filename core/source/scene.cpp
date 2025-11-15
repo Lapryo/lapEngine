@@ -36,67 +36,72 @@ void Scene::LoadQueuedAssets()
     ReloadTextures();
 }
 
-void Scene::Update(float deltaTime, SystemDrawOrder order, RenderTexture2D &target)
+// figure this out later
+void Scene::Update(float deltaTime, RenderTexture2D &target)
 {
     resolutionScale = logicalResolution.x / LOGICAL_RESOLUTION_REFERENCE;
 
-    if (order == SystemDrawOrder::DRAW)
+    for (auto &system : systems)
     {
-        BeginTextureMode(target);
-        ClearBackground(WHITE);
-    }
+        if (!system || !system->active)
+            continue;
 
-    for (auto &system : systems[order])
-    {
-        if (system->active)
+        bool drawing = false;
+        if (system->drawing)
+            drawing = true;
+
+        if (drawing)
         {
-            system->Update(deltaTime, entities);
-        }
-    }
-
-    if (order == SystemDrawOrder::DRAW)
-    {
-        EndTextureMode();
-        ClearBackground(BLACK);
-
-        // Now draw render texture to the screen, scaled and letterboxed
-        int screenW = GetScreenWidth();
-        int screenH = GetScreenHeight();
-        float screenAspect = (float)screenW / screenH;
-        float targetAspect = (float)logicalResolution.x / logicalResolution.y;
-
-        int drawWidth, drawHeight;
-        int offsetX, offsetY;
-
-        if (screenAspect > targetAspect)
-        {
-            // window is wider than logical
-            drawHeight = screenH;
-            drawWidth = (int)(screenH * targetAspect);
-            offsetX = (screenW - drawWidth) / 2;
-            offsetY = 0;
-        }
-        else
-        {
-            // window is taller than logical
-            drawWidth = screenW;
-            drawHeight = (int)(screenW / targetAspect);
-            offsetX = 0;
-            offsetY = (screenH - drawHeight) / 2;
+            BeginTextureMode(target);
+            ClearBackground(WHITE);
         }
 
-        logicalWindowPos = {(float)offsetX, (float)offsetY};
+        system->Update(deltaTime, entities);
 
-        // Draw the render texture to the screen, scaling it
-        DrawTexturePro(
-            target.texture,
-            {0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height}, // source rect (flip y)
-            {(float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight},    // dest rect
-            {0.0f, 0.0f},                                                             // origin
-            0.0f,                                                                     // rotation
-            WHITE);
+        if (drawing)
+        {
+            EndTextureMode();
+            ClearBackground(BLACK);
 
-        EndDrawing();
+            // Now draw render texture to the screen, scaled and letterboxed
+            int screenW = GetScreenWidth();
+            int screenH = GetScreenHeight();
+            float screenAspect = (float)screenW / screenH;
+            float targetAspect = (float)logicalResolution.x / logicalResolution.y;
+
+            int drawWidth, drawHeight;
+            int offsetX, offsetY;
+
+            if (screenAspect > targetAspect)
+            {
+                // window is wider than logical
+                drawHeight = screenH;
+                drawWidth = (int)(screenH * targetAspect);
+                offsetX = (screenW - drawWidth) / 2;
+                offsetY = 0;
+            }
+            else
+            {
+                // window is taller than logical
+                drawWidth = screenW;
+                drawHeight = (int)(screenW / targetAspect);
+                offsetX = 0;
+                offsetY = (screenH - drawHeight) / 2;
+            }
+
+            logicalWindowPos = {(float)offsetX, (float)offsetY};
+
+            // Draw the render texture to the screen, scaling it
+            DrawTexturePro(
+                target.texture,
+                {0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height}, // source rect (flip y)
+                {(float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight},    // dest rect
+                {0.0f, 0.0f},                                                             // origin
+                0.0f,                                                                     // rotation
+                WHITE);
+
+            EndDrawing();
+        }
     }
 }
 

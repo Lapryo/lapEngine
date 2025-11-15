@@ -6,29 +6,23 @@
 
 namespace lapCore
 {
-    enum class SystemDrawOrder
-    {
-        PREDRAW,
-        DRAW,
-        POSTDRAW
-    };
-
     class System
     {
     public:
-        System(SystemDrawOrder order, Scene *scene) : drawOrder(order), scene(scene) {}
+        System(unsigned int order, Scene *scene) : order(order), scene(scene) {}
         virtual ~System() = default;
         virtual void Update(float deltaTime, entt::registry &reg) = 0;
 
-        SystemDrawOrder drawOrder;
+        unsigned int order;
         bool active = true;
+        bool drawing = false;
         Scene *scene;
     };
 
     class PhysicsSystem : public System
     {
     public:
-        PhysicsSystem(Scene *scene) : System(SystemDrawOrder::PREDRAW, scene) {}
+        PhysicsSystem(Scene *scene, unsigned int order) : System(order, scene) {}
         void Update(float deltaTime, entt::registry &reg) override;
     };
 
@@ -53,7 +47,7 @@ namespace lapCore
 
         std::vector<RenderEntry> renderList;
 
-        RenderSystem(Scene *scene) : System(SystemDrawOrder::DRAW, scene) {}
+        RenderSystem(Scene *scene, unsigned int order) : System(order, scene) {drawing = true;}
         void Update(float deltaTime, entt::registry &reg) override;
 
         void Connect(entt::registry &registry);
@@ -67,7 +61,7 @@ namespace lapCore
     class ScriptSystem : public System
     {
     public:
-        ScriptSystem(Scene *scene) : System(SystemDrawOrder::PREDRAW, scene) {}
+        ScriptSystem(Scene *scene, unsigned int order) : System(order, scene) {}
         void Update(float deltaTime, entt::registry &registry) override;
         void OnDestroy(entt::registry &registry);
     };
@@ -75,7 +69,7 @@ namespace lapCore
     class GUISystem : public System
     {
     public:
-        GUISystem(Scene *scene) : System(SystemDrawOrder::PREDRAW, scene) {}
+        GUISystem(Scene *scene, unsigned int order) : System(order, scene) {}
         void Update(float deltaTime, entt::registry &registry) override;
     };
 }

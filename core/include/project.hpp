@@ -15,9 +15,9 @@ namespace lapCore
         int main_scene_index;
         Scene* main_scene;
         std::vector<std::unique_ptr<Scene>> scenes;
-        
-        RenderTexture2D target;
+
         Vector2 logicalResolution;
+        RenderTexture target;
 
         Scene* GetMainScene();
         void Clear();

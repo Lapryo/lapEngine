@@ -1,30 +1,80 @@
 #include "editor.hpp"
+#include "projdata.hpp"
 
 #include <iostream>
+#include <random>
 
-using namespace lapCore;
+#include "json.hpp"
+
 using namespace lapEditor;
+using namespace lapCore;
 
-Editor::Editor(Project &project) : App(project)
-{}
+std::vector<std::string> windowSubTitles = {
+    "For the love of the game.",
+    "Don't feed the bugs!",
+    "I swear it works.",
+    "Mostly harmless!",
+    "We ball.",
+    "Don't hate the player, hate the game.",
+    "Blame the coder.",
+    "Lag, errors, and bugs are part of the experience!",
+    "Ctrl+Z is your bsf!",
+    "Wonky, but loveable."};
 
-void Editor::Init()
+EditorApp::EditorApp(Project &project) : App(project)
+{
+}
+
+void EditorApp::Init()
+{
+    project.LoadSettings("assets/settings.json");
+
+    std::random_device rd;
+    std::mt19937 rng(rd());
+
+    std::uniform_int_distribution<int> intDist(0, windowSubTitles.size() - 1);
+    std::string windowTitle = "lapEditor - " + windowSubTitles[intDist(rng)];
+
+    SetWindowTitle(windowTitle.c_str());
+
+    state = AppState::RUNNING;
+}
+
+void EditorApp::Update(float deltaTime)
+{
+    if (WindowShouldClose())
+    {
+        state = AppState::DEAD;
+        return;
+    }
+
+    if (IsKeyReleased(KEY_F11))
+    {
+        ToggleFullscreen();
+        SetWindowPosition(100, 100);
+    }
+
+    project.main_scene->Update(deltaTime, project.target);
+}
+
+void EditorApp::Draw()
 {
 
 }
 
-void Editor::Update(float deltaTime)
+int main()
 {
+    Project editorProject = UnpackProject(proj_json);
+    EditorApp editor(editorProject);
 
-}
+    editor.Init();
+    editor.Run();
+    editor.Shutdown();
 
-void Editor::Draw()
-{
-
-}
-
-int main(int argc, char *argv[])
-{
-    
     return 0;
 }
+
+/*
+    TODO:
+    IMPLEMENT GUI SYSTEM
+*/

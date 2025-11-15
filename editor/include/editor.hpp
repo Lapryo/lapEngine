@@ -5,19 +5,15 @@
 
 namespace lapEditor
 {
-    class Editor : public lapCore::App
+    class EditorApp : public lapCore::App
     {
     public:
-        Editor(lapCore::Project &project);
+        EditorApp(lapCore::Project &project);
 
         void Init() override;
         void Update(float deltaTime) override;
         void Draw() override;
     };
-
-    void PackLevel();
-    void UnpackLevel();
-
-};
+}
 
 #endif

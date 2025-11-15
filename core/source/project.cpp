@@ -38,21 +38,22 @@ void GetSystems(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
     {
         for (const auto &systemJson : sceneJson["systems"])
         {
-            std::string systemType = systemJson.get<std::string>();
+            std::string systemType = systemJson.value("type", "");
+            unsigned int systemOrder = systemJson.value("order", -1);
             std::cout << "[PROJECT] [SCENE] [SYSTEM] Adding system type: " << systemType << '\n';
 
             if (systemType == "physics")
             {
-                scene->AddSystem<PhysicsSystem>();
+                scene->AddSystem<PhysicsSystem>(systemOrder);
             }
             else if (systemType == "render")
             {
-                scene->AddSystem<RenderSystem>();
+                scene->AddSystem<RenderSystem>(systemOrder);
                 // Add other systems
             }
             else if (systemType == "script")
             {
-                scene->AddSystem<ScriptSystem>();
+                scene->AddSystem<ScriptSystem>(systemOrder);
             }
         }
     }
@@ -368,5 +369,4 @@ void Project::LoadSettings(const std::string &settingsFilePath)
     main_scene = GetMainScene();
 
     target = LoadRenderTexture(logicalRes.x, logicalRes.y);
-    SetTextureFilter(target.texture, TEXTURE_FILTER_TRILINEAR);
 }
