@@ -59,7 +59,7 @@ void EditorApp::Update(float deltaTime)
 
 void EditorApp::Draw()
 {
-
+    
 }
 
 int main()

@@ -19,7 +19,7 @@ const char proj_json[] = R"json(
                 },
                 {
                     "type": "script",
-                    "order": 1
+                    "order": 0
                 }
             ],
             "objects":
@@ -41,7 +41,7 @@ const char proj_json[] = R"json(
                                     "zlayer": 0,
                                     "isScreenSpace": true,
                                     "visible": true,
-                                    "tint": [10, 50, 30, 255]
+                                    "tint": [13, 12, 29, 255]
                                 }
                             }
                         }
@@ -65,7 +65,7 @@ const char proj_json[] = R"json(
                                     "zlayer": 1,
                                     "isScreenSpace": true,
                                     "visible": true,
-                                    "tint": [255, 0, 0, 255]
+                                    "tint": [179, 95, 76, 255]
                                 }
                             }
                         },

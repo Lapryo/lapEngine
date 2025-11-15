@@ -52,6 +52,7 @@ void Scene::Update(float deltaTime, RenderTexture2D &target)
 
         if (drawing)
         {
+            BeginDrawing();
             BeginTextureMode(target);
             ClearBackground(WHITE);
         }
