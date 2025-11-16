@@ -576,14 +576,35 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
     auto drawText = [&](entt::entity e, const Scene *scene)
     {
         auto *text = registry.try_get<TextLabel>(e);
-        if (!text || !text->renderable.visible)
+        if (!text)
+            return;
+        
+        float x = 0.f, y = 0.f;
+        
+        if (scene->entityToParent.contains(e))
+        {
+            auto parent = scene->entityToParent.at(e);
+            auto scrollFrame = scene->entities.try_get<ScrollingFrame>(parent);
+            if (scrollFrame)
+            {
+                auto frame = scene->entities.try_get<Frame>(parent);
+                if (frame)
+                {
+                    x += frame->position.scale.x * scene->logicalResolution.x + frame->position.offset.x;
+                    y += frame->position.scale.y * scene->logicalResolution.y + frame->position.offset.y;
+
+                    text->renderable.visible = frame->renderable.visible;
+                }
+            }
+        }
+
+        if (!text->renderable.visible)
             return;
 
         auto *frame = registry.try_get<Frame>(e);
         auto *origin = registry.try_get<Origin2D>(e);
-        auto *padding = registry.try_get<Padding>(e);
 
-        float x = 0.f, y = 0.f;
+        
 
         if (frame)
         {
@@ -602,49 +623,46 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             y = origin->position.y;
         }
 
-        if (padding)
-        {
-            x += padding->left;
-            y += padding->top;
-        }
+        x += text->padding.left;
+        y += text->padding.top;
 
         float textWidth = MeasureText(text->text.c_str(), text->textSize);
         switch (text->horizontal)
         {
-        case HorizontalAlignment::LEFT:
-        {
-            // Do nothing
-            break;
-        }
-        case HorizontalAlignment::MIDDLE:
-        {
-            x += (text->bounds.x - textWidth - (padding ? padding->right : 0.0f)) * 0.5f;
-            break;
-        }
-        case HorizontalAlignment::RIGHT:
-        {
-            x += text->bounds.x - textWidth - (padding ? padding->right : 0.0f);
-            break;
-        }
+            case HorizontalAlignment::LEFT:
+            {
+                // Do nothing
+                break;
+            }
+            case HorizontalAlignment::MIDDLE:
+            {
+                x += (text->bounds.x - textWidth - text->padding.right) * 0.5f;
+                break;
+            }
+            case HorizontalAlignment::RIGHT:
+            {
+                x += text->bounds.x - textWidth - text->padding.right;
+                break;
+            }
         }
 
         switch (text->vertical)
         {
-        case VerticalAlignment::TOP:
-        {
-            // Do nothing
-            break;
-        }
-        case VerticalAlignment::MIDDLE:
-        {
-            y += (text->bounds.y - text->textSize - (padding ? padding->bottom : 0.0f)) * 0.5f;
-            break;
-        }
-        case VerticalAlignment::BOTTOM:
-        {
-            y += text->bounds.y - text->textSize - (padding ? padding->bottom : 0.0f);
-            break;
-        }
+            case VerticalAlignment::TOP:
+            {
+                // Do nothing
+                break;
+            }
+            case VerticalAlignment::MIDDLE:
+            {
+                y += (text->bounds.y - text->textSize - text->padding.bottom) * 0.5f;
+                break;
+            }
+            case VerticalAlignment::BOTTOM:
+            {
+                y += text->bounds.y - text->textSize - text->padding.bottom;
+                break;
+            }
         }
 
         DrawText(text->text.c_str(), x, y, text->textSize, text->renderable.tint);
@@ -752,7 +770,18 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
         if (frame)
             frame->renderable.tint = hovered ? button.active : button.inactive;
 
-        if (hovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-            button.event->Fire();
+        if (hovered)
+        {
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                button.leftClickEvent->Fire();
+
+            if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
+                button.rightClickEvent->Fire();
+
+            if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON))
+                button.middleClickEvent->Fire();
+
+            button.mouseHoverEvent->Fire();
+        }
     }
 }

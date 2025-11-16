@@ -3,7 +3,7 @@ import json
 with open("build/editor/assets/proj.lapengine.json") as f:
     data = f.read()
 
-with open("hub/include/projdata.hpp", "w") as out:
+with open("editor/include/projdata.hpp", "w") as out:
     out.write('#pragma once\n')
     out.write('const char proj_json[] = R"json(\n')
     out.write(data)

@@ -185,6 +185,30 @@ source/fpslabel.cpp.s:
 	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/source/fpslabel.cpp.s
 .PHONY : source/fpslabel.cpp.s
 
+source/selectionMenu.obj: source/selectionMenu.cpp.obj
+.PHONY : source/selectionMenu.obj
+
+# target to build an object file
+source/selectionMenu.cpp.obj:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj
+.PHONY : source/selectionMenu.cpp.obj
+
+source/selectionMenu.i: source/selectionMenu.cpp.i
+.PHONY : source/selectionMenu.i
+
+# target to preprocess a source file
+source/selectionMenu.cpp.i:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.i
+.PHONY : source/selectionMenu.cpp.i
+
+source/selectionMenu.s: source/selectionMenu.cpp.s
+.PHONY : source/selectionMenu.s
+
+# target to generate assembly for a file
+source/selectionMenu.cpp.s:
+	cd C:/Users/WellH/Documents/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.s
+.PHONY : source/selectionMenu.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -201,6 +225,9 @@ help:
 	@echo "... source/fpslabel.obj"
 	@echo "... source/fpslabel.i"
 	@echo "... source/fpslabel.s"
+	@echo "... source/selectionMenu.obj"
+	@echo "... source/selectionMenu.i"
+	@echo "... source/selectionMenu.s"
 .PHONY : help
 
 

@@ -86,11 +86,12 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 data["tint"].at(2).get<unsigned char>(),
                 data["tint"].at(3).get<unsigned char>()};
             unsigned int zlayer = data["zlayer"].get<unsigned int>();
+            bool visible = data["renderable"].value("visible", true);
             bool isScreenSpace = data["isScreenSpace"].get<bool>();
 
             std::string texName = data["texture"].get<std::string>();
 
-            Renderable renderable(zlayer, isScreenSpace, tint);
+            Renderable renderable(zlayer, isScreenSpace, visible, tint);
             scene->AddComponent<Sprite>(entity, renderable, texName);
         }
         else if (type == "textlabel")
@@ -106,7 +107,15 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
             Vector2 bounds{
                 data["bounds"].at(0).get<float>(),
-                data["bounds"].at(1).get<float>()};
+                data["bounds"].at(1).get<float>()
+            };
+
+            Padding padding{
+                data["padding"].at(0).get<float>(),
+                data["padding"].at(1).get<float>(),
+                data["padding"].at(2).get<float>(),
+                data["padding"].at(3).get<float>()
+            };
 
             HorizontalAlignment hAlign = HorizontalAlignment::LEFT;
             VerticalAlignment vAlign = VerticalAlignment::TOP;
@@ -115,22 +124,22 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
             if (hAlign_text == "middle")
                 hAlign = HorizontalAlignment::MIDDLE;
-            else
+            else if (hAlign_text == "right")
                 hAlign = HorizontalAlignment::RIGHT;
 
             if (vAlign_text == "middle")
                 vAlign = VerticalAlignment::MIDDLE;
-            else
+            else if (hAlign_text == "bottom")
                 vAlign = VerticalAlignment::BOTTOM;
 
             bool isScreenSpace = data["renderable"]["isScreenSpace"].get<bool>();
             unsigned int zlayer = data["renderable"]["zlayer"].get<unsigned int>();
             bool visible = data["renderable"]["visible"].get<bool>();
 
-            Renderable renderable(zlayer, isScreenSpace, textColor);
+            Renderable renderable(zlayer, isScreenSpace, visible, textColor);
             renderable.visible = visible;
 
-            scene->AddComponent<TextLabel>(entity, renderable, text, textSize, hAlign, vAlign, bounds);
+            scene->AddComponent<TextLabel>(entity, renderable, text, textSize, hAlign, vAlign, bounds, padding);
         }
         else if (type == "cam2d")
         {
@@ -207,17 +216,92 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
             Renderable renderable(
                 data["renderable"]["zlayer"].get<unsigned int>(),
-                data["renderable"]["isScreenSpace"].get<bool>(),
+                data["renderable"]["isScreenSpace"].get<bool>(), data["renderable"]["visible"].get<bool>(),
                 tint);
 
             // Renderable renderable, FrameVector position, FrameVector size, float rotation, Alignment horizontal, Alignment vertical, Vector2 anchor
             scene->AddComponent<Frame>(entity, renderable, position, size, rotation, anchor);
+        }
+        else if (type == "scrolling-frame")
+        {
+            FrameVector scrollSize{
+                {data["scroll-size"].at(0).get<float>(),
+                 data["scroll-size"].at(1).get<float>()},
+                {data["scroll-size"].at(2).get<float>(),
+                 data["scroll-size"].at(3).get<float>()}
+            };
+
+            FrameVector displaySize{
+                {data["display-size"].at(0).get<float>(),
+                 data["display-size"].at(1).get<float>()},
+                {data["display-size"].at(2).get<float>(),
+                 data["display-size"].at(3).get<float>()}
+            };
+
+            // Renderable renderable, FrameVector position, FrameVector size, float rotation, Alignment horizontal, Alignment vertical, Vector2 anchor
+            scene->AddComponent<ScrollingFrame>(entity, scrollSize, displaySize);
         }
         else if (type == "origin2d")
         {
         }
         else if (type == "physics2d")
         {
+        }
+        else if (type == "button")
+        {
+            auto &eventsJson = data["events"];
+
+            Rectangle bounds;
+            bounds.x = data["bounds"].at(0).get<float>();
+            bounds.y = data["bounds"].at(1).get<float>();
+            bounds.width = data["bounds"].at(2).get<float>();
+            bounds.height = data["bounds"].at(3).get<float>();
+
+            bool interactable = data.value("interactable", false);
+
+            Color activeCol{
+                data["active"].at(0).get<unsigned char>(),
+                data["active"].at(1).get<unsigned char>(),
+                data["active"].at(2).get<unsigned char>(),
+                data["active"].at(3).get<unsigned char>(),
+            };
+
+            Color inactiveCol{
+                data["inactive"].at(0).get<unsigned char>(),
+                data["inactive"].at(1).get<unsigned char>(),
+                data["inactive"].at(2).get<unsigned char>(),
+                data["inactive"].at(3).get<unsigned char>(),
+            };
+
+            EventListener rcEvent(eventsJson.value("right-click", ""));
+            EventListener lcEvent(eventsJson.value("left-click", ""));
+            EventListener mcEvent(eventsJson.value("middle-click", ""));
+            
+            EventListener meEvent(eventsJson.value("mouse-enter", ""));
+            EventListener mlEvent(eventsJson.value("mouse-leave", ""));
+            EventListener mhEvent(eventsJson.value("mouse-hover", ""));
+
+            auto &button = scene->AddComponent<Button>(entity, bounds, interactable, activeCol, inactiveCol);
+            button.rightClickEvent = &rcEvent;
+            button.leftClickEvent = &lcEvent;
+            button.middleClickEvent = &mcEvent;
+
+            button.mouseEnterEvent = &meEvent;
+            button.mouseLeaveEvent = &mlEvent;
+            button.mouseHoverEvent = &mhEvent;
+        }
+        else if (type == "bool-attribute")
+        {
+            scene->AddComponent<BoolAttribute>(entity, data.value("name", ""), data.value("value", false));
+        }
+        else if (type == "attribute")
+        {
+            // TODO: SWITCH OVER TO THIS IN FUTURE, BUT FOR NOW, USING BOOL ATTRIB
+            std::string attribType = data.value("type", "");
+            if (attribType == "bool")
+            {
+                scene->AddComponent<Attribute<bool>>(entity, data.value("name", ""), data.value("value", false));
+            }
         }
     }
 }
@@ -230,7 +314,7 @@ void GetObjects(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
     {
         for (const auto &object : sceneJson["objects"])
         {
-            auto entity = scene->AddEntity(object.value("name", ""));
+            auto entity = scene->AddEntity(object.value("name", ""), object.value("parent", ""));
             std::cout << "[PROJECT] [SCENE] [OBJECT] Loading object:\n[PROJECT] [SCENE] [OBJECT] \tName: " << object.value("name", "") << '\n';
 
             if (!object.contains("components") || !object["components"].is_array())

@@ -102,21 +102,38 @@ editor/CMakeFiles/lapEditor.dir/source/fpslabel.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapEditor.dir/source/fpslabel.cpp.s"
 	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/Documents/projects/lapEngine/editor/source/fpslabel.cpp -o CMakeFiles/lapEditor.dir/source/fpslabel.cpp.s
 
+editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj: editor/CMakeFiles/lapEditor.dir/flags.make
+editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj: editor/CMakeFiles/lapEditor.dir/includes_CXX.rsp
+editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj: C:/Users/WellH/Documents/projects/lapEngine/editor/source/selectionMenu.cpp
+editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj: editor/CMakeFiles/lapEditor.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj"
+	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj -MF CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj.d -o CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/editor/source/selectionMenu.cpp
+
+editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.i"
+	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/Documents/projects/lapEngine/editor/source/selectionMenu.cpp > CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.i
+
+editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.s"
+	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/Documents/projects/lapEngine/editor/source/selectionMenu.cpp -o CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.s
+
 # Object files for target lapEditor
 lapEditor_OBJECTS = \
 "CMakeFiles/lapEditor.dir/source/editor.cpp.obj" \
-"CMakeFiles/lapEditor.dir/source/fpslabel.cpp.obj"
+"CMakeFiles/lapEditor.dir/source/fpslabel.cpp.obj" \
+"CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj"
 
 # External object files for target lapEditor
 lapEditor_EXTERNAL_OBJECTS =
 
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/fpslabel.cpp.obj
+editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/build.make
 editor/debug/lapEditor.exe: C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/linkLibs.rsp
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/objects1.rsp
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable debug/lapEditor.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable debug/lapEditor.exe"
 	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && "C:/Program Files/CMake/bin/cmake.exe" -E rm -f CMakeFiles/lapEditor.dir/objects.a
 	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/ar.exe qc CMakeFiles/lapEditor.dir/objects.a @CMakeFiles/lapEditor.dir/objects1.rsp
 	cd C:/Users/WellH/Documents/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe -g -Wl,--whole-archive CMakeFiles/lapEditor.dir/objects.a -Wl,--no-whole-archive -o debug/lapEditor.exe -Wl,--out-implib,liblapEditor.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/lapEditor.dir/linkLibs.rsp

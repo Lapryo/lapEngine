@@ -12,6 +12,12 @@
   "output": "editor/CMakeFiles/lapEditor.dir/source/fpslabel.cpp.obj"
 },
 {
+  "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/editor",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/editor/source/selectionMenu.cpp",
+  "file": "C:/Users/WellH/Documents/projects/lapEngine/editor/source/selectionMenu.cpp",
+  "output": "editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj"
+},
+{
   "directory": "C:/Users/WellH/Documents/projects/lapEngine/build/core",
   "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/app.cpp.obj -c C:/Users/WellH/Documents/projects/lapEngine/core/source/app.cpp",
   "file": "C:/Users/WellH/Documents/projects/lapEngine/core/source/app.cpp",

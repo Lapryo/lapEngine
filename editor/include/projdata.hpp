@@ -26,6 +26,7 @@ const char proj_json[] = R"json(
             [
                 {
                     "name": "background",
+                    "parent": "",
                     "components":
                     [
                         {
@@ -48,7 +49,107 @@ const char proj_json[] = R"json(
                     ]
                 },
                 {
+                    "name": "sidebar",
+                    "parent": "",
+                    "components":
+                    [
+                        {
+                            "type": "frame",
+                            "data":
+                            {
+                                "position": [0, 0, 0, 0],
+                                "size": [0.2, 1, 0, 0],
+                                "rotation": 0,
+                                "anchor": [0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 1,
+                                    "isScreenSpace": true,
+                                    "visible": true,
+                                    "tint": [18, 17, 41, 255]
+                                }
+                            }
+                        },
+                        {
+                            "type": "bool-attribute",
+                            "data":
+                            {
+                                "name": "opensSelectionMenu",
+                                "value": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "selectionMenu",
+                    "parent": "",
+                    "components":
+                    [
+                        {
+                            "type": "frame",
+                            "data":
+                            {
+                                "position": [0, 0, 0, 0],
+                                "size": [0.15, 0.4, 0, 0],
+                                "rotation": 0,
+                                "anchor": [0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 99,
+                                    "isScreenSpace": true,
+                                    "visible": false,
+                                    "tint": [26, 24, 59, 255]
+                                }
+                            }
+                        },
+                        {
+                            "type": "scrolling-frame",
+                            "data":
+                            {
+                                "scroll-size": [1, 1, 0, 0],
+                                "display-size": [1, 0.1, 0, 0]
+                            }
+                        },
+                        {
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "",
+                                "onUpdate": "selectionmenu",
+                                "onDestroy": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "add-object",
+                    "parent": "selectionMenu",
+                    "components":
+                    [
+                        {
+                            "type": "textlabel",
+                            "data":
+                            {
+                                "text": "Add Object",
+                                "size": 15,
+                                "bounds": [0, 0],
+                                "horizontal-alignment": "left",
+                                "vertical-alignment": "top",
+                                "padding": [0, 0, 0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 100,
+                                    "isScreenSpace": true,
+                                    "visible": true,
+                                    "tint": [125, 97, 103, 255]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
                     "name": "fpslabel",
+                    "parent": "",
                     "components":
                     [
                         {
@@ -56,13 +157,14 @@ const char proj_json[] = R"json(
                             "data":
                             {
                                 "text": "FPS: ___",
-                                "size": 20,
-                                "bounds": [800, 30],
-                                "horizontal-alignment": "middle",
-                                "vertical-alignment": "middle",
+                                "size": 10,
+                                "bounds": [0, 0],
+                                "horizontal-alignment": "left",
+                                "vertical-alignment": "top",
+                                "padding": [0, 0, 160, 0],
                                 "renderable":
                                 {
-                                    "zlayer": 1,
+                                    "zlayer": 2,
                                     "isScreenSpace": true,
                                     "visible": true,
                                     "tint": [179, 95, 76, 255]
@@ -80,6 +182,50 @@ const char proj_json[] = R"json(
                         }
                     ]
                 }
+            ]
+        },
+        {
+            "name": "level-editor",
+            "assets":
+            [
+
+            ],
+            "systems":
+            [
+                {
+                    "type": "render",
+                    "order": 1
+                },
+                {
+                    "type": "script",
+                    "order": 0
+                }
+            ],
+            "objects":
+            [
+
+            ]
+        },
+        {
+            "name": "play-testing",
+            "assets":
+            [
+
+            ],
+            "systems":
+            [
+                {
+                    "type": "render",
+                    "order": 1
+                },
+                {
+                    "type": "script",
+                    "order": 0
+                }
+            ],
+            "objects":
+            [
+
             ]
         }
     ]

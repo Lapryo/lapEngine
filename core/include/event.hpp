@@ -16,33 +16,24 @@ namespace lapCore
         // Store all event listeners — type-erased using std::any
         inline static std::unordered_map<std::string, std::any> eventCallbacks;
 
-        // Connect a listener to an event (typed)
-        template<typename... Args>
-        static void Connect(const std::string& name, std::function<void(Args...)> func)
+        // Overload to allow lambdas directly without manually writing std::function<>
+        template<typename... Args, typename Func>
+        static void Connect(const std::string& name, Func&& func)
         {
-            // Each event type has its own vector of functions with a specific signature
+            using Fn = std::function<void(Args...)>;
+
             auto& anyRef = eventCallbacks[name];
             if (!anyRef.has_value())
-            {
-                anyRef = std::vector<std::function<void(Args...)>>{};
-            }
+                anyRef = std::vector<Fn>{};
 
-            // Check type safety — prevents connecting a mismatched signature
-            auto* listeners = std::any_cast<std::vector<std::function<void(Args...)>>>(&anyRef);
+            auto* listeners = std::any_cast<std::vector<Fn>>(&anyRef);
             if (!listeners)
             {
                 std::cerr << "[EventRegistry] Mismatched event signature for '" << name << "'\n";
                 return;
             }
 
-            listeners->push_back(std::move(func));
-        }
-
-        // Overload to allow lambdas directly without manually writing std::function<>
-        template<typename... Args, typename Func>
-        static void Connect(const std::string& name, Func&& func)
-        {
-            Connect<Args...>(name, std::function<void(Args...)>(std::forward<Func>(func)));
+            listeners->emplace_back(std::forward<Func>(func));
         }
 
         // Fire all listeners for a given event name with arguments

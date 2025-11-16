@@ -2,6 +2,7 @@
 #define COMPONENTS_HPP
 
 #include "raylib/raylib.h"
+#include "event.hpp"
 #include <functional>
 #include <any>
 
@@ -19,8 +20,8 @@ namespace lapCore
         bool visible = true;
         Color tint;
 
-        Renderable(unsigned int zlayer, bool isScreenSpace, Color tint)
-            : zlayer(zlayer), isScreenSpace(isScreenSpace), tint(tint) {}
+        Renderable(unsigned int zlayer, bool isScreenSpace, bool visible, Color tint)
+            : zlayer(zlayer), isScreenSpace(isScreenSpace), visible(visible), tint(tint) {}
     };
 
     enum class HorizontalAlignment
@@ -57,10 +58,7 @@ namespace lapCore
 
     struct Padding
     {
-        float top, right, bottom, left;
-
-        Padding(float top, float right, float bottom, float left)
-            : top(top), right(right), bottom(bottom), left(left) {}
+        float top, bottom, left, right;
     };
 
     // New version of RectVisualizer, the basis of all GUI components (needed for all of them)
@@ -78,6 +76,15 @@ namespace lapCore
 
         Frame(Renderable renderable, FrameVector position, FrameVector size, float rotation, Vector2 anchor)
             : renderable(renderable), size(size), position(position), anchor(anchor) {}
+    };
+
+    struct ScrollingFrame
+    {
+        FrameVector scrollSize;
+        FrameVector displaySize;
+
+        ScrollingFrame(FrameVector scrollSize, FrameVector displaySize)
+            : scrollSize(scrollSize), displaySize(displaySize) {}
     };
 
     struct [[deprecated("Use Origin and Physics2D instead, will not work")]] Transform2D
@@ -118,7 +125,7 @@ namespace lapCore
         Color tint;
 
         RectVisualizer(Vector2 offset, Vector2 size, Color tint, unsigned int zlayer, bool isScreenSpace)
-            : Renderable(zlayer, isScreenSpace, tint), offset(offset), size(size), tint(tint) {}
+            : Renderable(zlayer, isScreenSpace, true, tint), offset(offset), size(size), tint(tint) {}
     };
 
     struct TextLabel
@@ -132,50 +139,51 @@ namespace lapCore
         VerticalAlignment vertical;
 
         Vector2 bounds;
+        Padding padding;
 
-        TextLabel(Renderable renderable, std::string text, float textSize, HorizontalAlignment horizontal, VerticalAlignment vertical, Vector2 bounds)
-            : renderable(renderable), text(text), textSize(textSize), horizontal(horizontal), vertical(vertical), bounds(bounds) {}
+        TextLabel(Renderable renderable, std::string text, float textSize, HorizontalAlignment horizontal, VerticalAlignment vertical, Vector2 bounds, Padding padding)
+            : renderable(renderable), text(text), textSize(textSize), horizontal(horizontal), vertical(vertical), bounds(bounds), padding(padding) {}
     };
 
     struct EventListener
     {
-        std::string event;
-        std::function<void(const std::vector<std::any> &)> connectedFunc;
+        std::string eventName;
+        bool active = true;
 
-        template <typename... Args>
-        void Connect(std::function<void(Args...)> func)
-        {
-            connectedFunc = [func](const std::vector<std::any> &args)
-            {
-                Call(func, args, std::index_sequence_for<Args...>{});
-            };
-        }
+        EventListener() = default;
+        EventListener(const std::string& name) : eventName(name) {}
 
-        template <typename... Args, size_t... I>
-        static void Call(const std::function<void(Args...)> &func, const std::vector<std::any> &args, std::index_sequence<I...>)
+        template <typename... Args, typename Func>
+        void Connect(Func&& func)
         {
-            func(std::any_cast<Args>(args[I])...);
+            lapCore::EventRegistry::Connect<Args...>(eventName, std::forward<Func>(func));
         }
 
         template <typename... Args>
-        void Fire(Args &&...args)
+        void Fire(Args&&... args)
         {
-            if (connectedFunc)
-                connectedFunc({std::forward<Args>(args)...});
+            if (active)
+                lapCore::EventRegistry::Fire<Args...>(eventName, std::forward<Args>(args)...);
         }
     };
 
     // Incomplete
     struct Button
     {
-        EventListener *event;
+        EventListener* leftClickEvent;
+        EventListener* rightClickEvent;
+        EventListener* middleClickEvent;
+        EventListener* mouseEnterEvent;
+        EventListener* mouseLeaveEvent;
+        EventListener* mouseHoverEvent;
+        
         Rectangle bounds;
 
         bool interactable = true;
         Color active, inactive;
 
-        Button(EventListener *event, bool interactable, Color active, Color inactive)
-            : event(event), interactable(interactable), active(active), inactive(inactive) {}
+        Button(Rectangle bounds, bool interactable, Color active, Color inactive)
+            : bounds(bounds), interactable(interactable), active(active), inactive(inactive) {}
     };
 
     struct Cam2D
@@ -192,6 +200,25 @@ namespace lapCore
 
         bool active = true;
         bool initiated = false;
+    };
+
+    template <typename T>
+    struct Attribute
+    {
+        std::string name;
+        T value;
+
+        Attribute(std::string name, T value)
+            : name(name), value(value) {}
+    };
+
+    struct BoolAttribute
+    {
+        std::string name;
+        bool value;
+
+        BoolAttribute(std::string name, bool value)
+            : name(name), value(value) {}
     };
 
 }

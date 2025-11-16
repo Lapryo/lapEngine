@@ -106,10 +106,12 @@ void Scene::Update(float deltaTime, RenderTexture2D &target)
     }
 }
 
-entt::entity Scene::AddEntity(const std::string &name)
+entt::entity Scene::AddEntity(const std::string &name, const std::string &parent)
 {
-    const auto entity = entities.create();
-    nameToEntity[name] = entity;
+    const auto entity = entities.create(); // create entity
+    nameToEntity[name] = entity; // assign the entry to the dictionary
+    entityToParent[entity] = nameToEntity[parent];
+    entityToChildren[nameToEntity[parent]].push_back(entity);
     return entity;
 }
 

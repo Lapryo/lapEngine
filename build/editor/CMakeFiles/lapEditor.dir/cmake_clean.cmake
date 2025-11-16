@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/lapEditor.dir/source/editor.cpp.obj.d"
   "CMakeFiles/lapEditor.dir/source/fpslabel.cpp.obj"
   "CMakeFiles/lapEditor.dir/source/fpslabel.cpp.obj.d"
+  "CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj"
+  "CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj.d"
   "debug/lapEditor.exe"
   "debug/lapEditor.exe.manifest"
   "debug/lapEditor.pdb"

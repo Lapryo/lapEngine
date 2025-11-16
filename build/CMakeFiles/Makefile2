@@ -127,12 +127,12 @@ editor/clean: editor/CMakeFiles/lapEditor.dir/clean
 editor/CMakeFiles/lapEditor.dir/all: core/CMakeFiles/lapCore.dir/all
 	$(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/depend
 	$(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=8,9,10 "Built target lapEditor"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=8,9,10,11 "Built target lapEditor"
 .PHONY : editor/CMakeFiles/lapEditor.dir/all
 
 # Build rule for subdir invocation for target.
 editor/CMakeFiles/lapEditor.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles 10
+	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles 11
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 editor/CMakeFiles/lapEditor.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles 0
 .PHONY : editor/CMakeFiles/lapEditor.dir/rule
@@ -144,7 +144,7 @@ lapEditor: editor/CMakeFiles/lapEditor.dir/rule
 # codegen rule for target.
 editor/CMakeFiles/lapEditor.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=8,9,10 "Finished codegen for target lapEditor"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/Documents/projects/lapEngine/build/CMakeFiles --progress-num=8,9,10,11 "Finished codegen for target lapEditor"
 .PHONY : editor/CMakeFiles/lapEditor.dir/codegen
 
 # clean rule for target.

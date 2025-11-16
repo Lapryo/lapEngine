@@ -6,6 +6,7 @@ core/CMakeFiles/lapCore.dir/source/app.cpp.obj
  C:/Users/WellH/Documents/projects/lapEngine/core/include/app.hpp
  C:/Users/WellH/Documents/projects/lapEngine/core/include/components.hpp
  C:/Users/WellH/Documents/projects/lapEngine/core/include/entt/entt.hpp
+ C:/Users/WellH/Documents/projects/lapEngine/core/include/event.hpp
  C:/Users/WellH/Documents/projects/lapEngine/core/include/project.hpp
  C:/Users/WellH/Documents/projects/lapEngine/core/include/raylib/raylib.h
  C:/Users/WellH/Documents/projects/lapEngine/core/include/resource_manager.hpp
@@ -990,6 +991,7 @@ core/CMakeFiles/lapCore.dir/source/scene.cpp.obj
  C:/Users/WellH/Documents/projects/lapEngine/core/source/scene.cpp
  C:/Users/WellH/Documents/projects/lapEngine/core/include/components.hpp
  C:/Users/WellH/Documents/projects/lapEngine/core/include/entt/entt.hpp
+ C:/Users/WellH/Documents/projects/lapEngine/core/include/event.hpp
  C:/Users/WellH/Documents/projects/lapEngine/core/include/raylib/raylib.h
  C:/Users/WellH/Documents/projects/lapEngine/core/include/resource_manager.hpp
  C:/Users/WellH/Documents/projects/lapEngine/core/include/scene.hpp

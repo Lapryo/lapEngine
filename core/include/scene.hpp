@@ -22,6 +22,8 @@ namespace lapCore
         std::string name;
         entt::registry entities;
         std::unordered_map<std::string, entt::entity> nameToEntity;
+        std::unordered_map<entt::entity, entt::entity> entityToParent;
+        std::unordered_map<entt::entity, std::vector<entt::entity>> entityToChildren;
         std::vector<std::unique_ptr<System>> systems;
         std::vector<AssetLoadRequest> queuedAssets;
         ResourceManager resources;
@@ -57,7 +59,7 @@ namespace lapCore
             std::cout << "got to here.\n";
         }
 
-        entt::entity AddEntity(const std::string &name);
+        entt::entity AddEntity(const std::string &name, const std::string &parent);
         void DestroyEntity(entt::entity &entity);
         entt::entity FindEntity(const std::string &name);
 
