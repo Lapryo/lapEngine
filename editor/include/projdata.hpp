@@ -15,10 +15,14 @@ const char proj_json[] = R"json(
             [
                 {
                     "type": "render",
-                    "order": 1
+                    "order": 2
                 },
                 {
                     "type": "script",
+                    "order": 1
+                },
+                {
+                    "type": "gui",
                     "order": 0
                 }
             ],
@@ -103,11 +107,16 @@ const char proj_json[] = R"json(
                             }
                         },
                         {
-                            "type": "scrolling-frame",
+                            "type": "UIList",
                             "data":
                             {
                                 "scroll-size": [1, 1, 0, 0],
-                                "display-size": [1, 0.1, 0, 0]
+                                "display-size": [1, 0.1, 0, 0],
+                                "horizontal-scroll-bar": "right",
+                                "vertical-scroll-bar": "bottom",
+                                "mask-outside-content": true,
+                                "scroll-offset": 0,
+                                "scroll-speed": 20
                             }
                         },
                         {
@@ -131,11 +140,13 @@ const char proj_json[] = R"json(
                             "data":
                             {
                                 "text": "Add Object",
-                                "size": 15,
+                                "text-size": 15.0,
                                 "bounds": [0, 0],
                                 "horizontal-alignment": "left",
                                 "vertical-alignment": "top",
                                 "padding": [0, 0, 0, 0],
+                                "position": [0, 0, 0, 0],
+                                "size": [0, 0, 0, 0],
                                 "renderable":
                                 {
                                     "zlayer": 100,
@@ -162,6 +173,8 @@ const char proj_json[] = R"json(
                                 "horizontal-alignment": "left",
                                 "vertical-alignment": "top",
                                 "padding": [0, 0, 160, 0],
+                                "position": [0, 0, 0, 0],
+                                "size": [0, 0, 0, 0],
                                 "renderable":
                                 {
                                     "zlayer": 2,

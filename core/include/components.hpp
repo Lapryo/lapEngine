@@ -61,30 +61,46 @@ namespace lapCore
         float top, bottom, left, right;
     };
 
+    struct UIOrigin
+    {
+        FrameVector position;
+        FrameVector size;
+
+        UIOrigin(FrameVector position, FrameVector size)
+            : position(position), size(size) {}
+    };
+
     // New version of RectVisualizer, the basis of all GUI components (needed for all of them)
     struct Frame
     {
         Renderable renderable;
 
-        FrameVector size;
-        FrameVector position;
-        float rotation;
-
+        UIOrigin origin;
         Vector2 anchor;
+        float rotation;
 
         bool useOrigin = true;
 
         Frame(Renderable renderable, FrameVector position, FrameVector size, float rotation, Vector2 anchor)
-            : renderable(renderable), size(size), position(position), anchor(anchor) {}
+            : renderable(renderable), origin(position, size), anchor(anchor) {}
     };
 
-    struct ScrollingFrame
+    struct UIList
     {
         FrameVector scrollSize;
         FrameVector displaySize;
 
-        ScrollingFrame(FrameVector scrollSize, FrameVector displaySize)
-            : scrollSize(scrollSize), displaySize(displaySize) {}
+        bool hScrollRight = true;
+        bool vScrollBottom = true;
+
+        bool maskOutsideContent = true;
+
+        float scrollOffset = 0.f;
+        float scrollSpeed = 20.f; // in pixels
+
+        UIList(FrameVector scrollSize, FrameVector displaySize, bool hScrollRight, bool vScrollBottom, bool maskOutsideContent, float scrollOffset, float scrollSpeed)
+            : scrollSize(scrollSize), displaySize(displaySize), hScrollRight(hScrollRight), vScrollBottom(vScrollBottom), maskOutsideContent(maskOutsideContent),
+            scrollOffset(scrollOffset), scrollSpeed(scrollSpeed) {}
     };
 
     struct [[deprecated("Use Origin and Physics2D instead, will not work")]] Transform2D
@@ -96,6 +112,7 @@ namespace lapCore
     struct Sprite
     {
         Renderable renderable;
+
         Texture2D *texture = nullptr;
         std::string textureName;
 
@@ -112,10 +129,12 @@ namespace lapCore
     {
         Sprite sprite;
 
+        UIOrigin origin;
+
         bool useOrigin = true;
 
-        Image(Sprite sprite)
-            : sprite(sprite) {}
+        Image(Sprite sprite, FrameVector position, FrameVector size)
+            : sprite(sprite), origin(position, size) {}
     };
 
     struct [[deprecated("Use Frame instead")]] RectVisualizer : Renderable
@@ -132,6 +151,8 @@ namespace lapCore
     {
         Renderable renderable;
 
+        UIOrigin origin;
+
         std::string text;
         float textSize;
 
@@ -141,8 +162,10 @@ namespace lapCore
         Vector2 bounds;
         Padding padding;
 
-        TextLabel(Renderable renderable, std::string text, float textSize, HorizontalAlignment horizontal, VerticalAlignment vertical, Vector2 bounds, Padding padding)
-            : renderable(renderable), text(text), textSize(textSize), horizontal(horizontal), vertical(vertical), bounds(bounds), padding(padding) {}
+        Vector2 computedPosition;
+
+        TextLabel(Renderable renderable, std::string text, float textSize, HorizontalAlignment horizontal, VerticalAlignment vertical, Vector2 bounds, Padding padding, FrameVector position, FrameVector size)
+            : renderable(renderable), text(text), textSize(textSize), horizontal(horizontal), vertical(vertical), bounds(bounds), padding(padding), origin(position, size) {}
     };
 
     struct EventListener
@@ -167,7 +190,6 @@ namespace lapCore
         }
     };
 
-    // Incomplete
     struct Button
     {
         EventListener* leftClickEvent;
@@ -177,13 +199,14 @@ namespace lapCore
         EventListener* mouseLeaveEvent;
         EventListener* mouseHoverEvent;
         
-        Rectangle bounds;
+        UIOrigin bounds;
 
         bool interactable = true;
+        bool mouseHovering = false;
         Color active, inactive;
 
-        Button(Rectangle bounds, bool interactable, Color active, Color inactive)
-            : bounds(bounds), interactable(interactable), active(active), inactive(inactive) {}
+        Button(FrameVector position, FrameVector size, bool interactable, Color active, Color inactive)
+            : bounds(position, size), interactable(interactable), active(active), inactive(inactive) {}
     };
 
     struct Cam2D

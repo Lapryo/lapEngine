@@ -16,14 +16,14 @@ namespace SelectionMenuObject {
                 for (auto [entity, otherframe, boolAttrib] : view.each())
                 {
                     Rectangle bounds;
-                    bounds.x = otherframe.position.scale.x * scene->logicalResolution.x;
-                    bounds.y = otherframe.position.scale.y * scene->logicalResolution.y;
-                    bounds.width = otherframe.size.scale.x * scene->logicalResolution.x;
-                    bounds.height = otherframe.size.scale.y * scene->logicalResolution.y;
+                    bounds.x = otherframe.origin.position.scale.x * scene->logicalResolution.x;
+                    bounds.y = otherframe.origin.position.scale.y * scene->logicalResolution.y;
+                    bounds.width = otherframe.origin.size.scale.x * scene->logicalResolution.x;
+                    bounds.height = otherframe.origin.size.scale.y * scene->logicalResolution.y;
 
                     if (boolAttrib.name == "opensSelectionMenu" && boolAttrib.value == true && CheckCollisionPointRec(mousePos, bounds))
                     {
-                        frame.position.offset = mousePos;
+                        frame.origin.position.offset = mousePos;
                         frame.renderable.visible = true;
                     }
                 }
@@ -32,10 +32,10 @@ namespace SelectionMenuObject {
             {
 
                 Rectangle bounds;
-                bounds.x = frame.position.offset.x;
-                bounds.y = frame.position.offset.y;
-                bounds.width = frame.size.scale.x * scene->logicalResolution.x;
-                bounds.height = frame.size.scale.y * scene->logicalResolution.y;
+                bounds.x = frame.origin.position.offset.x;
+                bounds.y = frame.origin.position.offset.y;
+                bounds.width = frame.origin.size.scale.x * scene->logicalResolution.x;
+                bounds.height = frame.origin.size.scale.y * scene->logicalResolution.y;
 
                 if (!CheckCollisionPointRec(mousePos, bounds))
                 {

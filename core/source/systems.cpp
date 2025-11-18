@@ -515,10 +515,10 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         if (frame)
         {
-            pos.x = frame->position.scale.x * scene->logicalResolution.x + frame->position.offset.x;
-            pos.y = frame->position.scale.y * scene->logicalResolution.y + frame->position.offset.y;
-            size.x = frame->size.scale.x * scene->logicalResolution.x + frame->size.offset.x;
-            size.y = frame->size.scale.y * scene->logicalResolution.y + frame->size.offset.y;
+            pos.x = frame->origin.position.scale.x * scene->logicalResolution.x + frame->origin.position.offset.x;
+            pos.y = frame->origin.position.scale.y * scene->logicalResolution.y + frame->origin.position.offset.y;
+            size.x = frame->origin.size.scale.x * scene->logicalResolution.x + frame->origin.size.offset.x;
+            size.y = frame->origin.size.scale.y * scene->logicalResolution.y + frame->origin.size.offset.y;
             rotation = frame->rotation;
 
             if (frame->useOrigin && origin)
@@ -553,11 +553,11 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             return;
 
         Vector2 pos{
-            frame->position.scale.x * scene->logicalResolution.x + frame->position.offset.x,
-            frame->position.scale.y * scene->logicalResolution.y + frame->position.offset.y};
+            frame->origin.position.scale.x * scene->logicalResolution.x + frame->origin.position.offset.x,
+            frame->origin.position.scale.y * scene->logicalResolution.y + frame->origin.position.offset.y};
         Vector2 size{
-            frame->size.scale.x * scene->logicalResolution.x + frame->size.offset.x,
-            frame->size.scale.y * scene->logicalResolution.y + frame->size.offset.y};
+            frame->origin.size.scale.x * scene->logicalResolution.x + frame->origin.size.offset.x,
+            frame->origin.size.scale.y * scene->logicalResolution.y + frame->origin.size.offset.y};
 
         if (frame->useOrigin)
         {
@@ -573,96 +573,63 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         DrawRectangle(pos.x, pos.y, size.x, size.y, frame->renderable.tint);
     };
 
-    auto drawText = [&](entt::entity e, const Scene *scene)
+    auto drawText = [&](entt::entity e, const Scene *scene, bool isUI)
     {
         auto *text = registry.try_get<TextLabel>(e);
-        if (!text)
+        if (!text || !text->renderable.visible)
             return;
-        
+
         float x = 0.f, y = 0.f;
-        
-        if (scene->entityToParent.contains(e))
+
+        if (isUI)
         {
-            auto parent = scene->entityToParent.at(e);
-            auto scrollFrame = scene->entities.try_get<ScrollingFrame>(parent);
-            if (scrollFrame)
+            // For UI elements, origin.position.offset contains the final screen position
+            x = text->origin.position.offset.x;
+            y = text->origin.position.offset.y;
+        }
+        else
+        {
+            // World-space: calculate from frame + origin if present
+            auto *frame = registry.try_get<Frame>(e);
+            auto *origin = registry.try_get<Origin2D>(e);
+
+            if (frame)
             {
-                auto frame = scene->entities.try_get<Frame>(parent);
-                if (frame)
+                x = frame->origin.position.scale.x * scene->logicalResolution.x + frame->origin.position.offset.x;
+                y = frame->origin.position.scale.y * scene->logicalResolution.y + frame->origin.position.offset.y;
+
+                if (frame->useOrigin && origin)
                 {
-                    x += frame->position.scale.x * scene->logicalResolution.x + frame->position.offset.x;
-                    y += frame->position.scale.y * scene->logicalResolution.y + frame->position.offset.y;
-
-                    text->renderable.visible = frame->renderable.visible;
+                    x += origin->position.x;
+                    y += origin->position.y;
                 }
+
+                // Apply padding
+                x += text->padding.left;
+                y += text->padding.top;
             }
-        }
-
-        if (!text->renderable.visible)
-            return;
-
-        auto *frame = registry.try_get<Frame>(e);
-        auto *origin = registry.try_get<Origin2D>(e);
-
-        
-
-        if (frame)
-        {
-            x = frame->position.scale.x * scene->logicalResolution.x + frame->position.offset.x;
-            y = frame->position.scale.y * scene->logicalResolution.y + frame->position.offset.y;
-
-            if (frame->useOrigin && origin)
+            else if (origin)
             {
-                x += origin->position.x;
-                y += origin->position.y;
+                x = origin->position.x + text->padding.left;
+                y = origin->position.y + text->padding.top;
             }
         }
-        else if (origin)
-        {
-            x = origin->position.x;
-            y = origin->position.y;
-        }
 
-        x += text->padding.left;
-        y += text->padding.top;
-
+        // Handle horizontal alignment
         float textWidth = MeasureText(text->text.c_str(), text->textSize);
         switch (text->horizontal)
         {
-            case HorizontalAlignment::LEFT:
-            {
-                // Do nothing
-                break;
-            }
-            case HorizontalAlignment::MIDDLE:
-            {
-                x += (text->bounds.x - textWidth - text->padding.right) * 0.5f;
-                break;
-            }
-            case HorizontalAlignment::RIGHT:
-            {
-                x += text->bounds.x - textWidth - text->padding.right;
-                break;
-            }
+            case HorizontalAlignment::LEFT: break;
+            case HorizontalAlignment::MIDDLE: x += (text->bounds.x - textWidth - text->padding.right) * 0.5f; break;
+            case HorizontalAlignment::RIGHT: x += text->bounds.x - textWidth - text->padding.right; break;
         }
 
+        // Handle vertical alignment
         switch (text->vertical)
         {
-            case VerticalAlignment::TOP:
-            {
-                // Do nothing
-                break;
-            }
-            case VerticalAlignment::MIDDLE:
-            {
-                y += (text->bounds.y - text->textSize - text->padding.bottom) * 0.5f;
-                break;
-            }
-            case VerticalAlignment::BOTTOM:
-            {
-                y += text->bounds.y - text->textSize - text->padding.bottom;
-                break;
-            }
+            case VerticalAlignment::TOP: break;
+            case VerticalAlignment::MIDDLE: y += (text->bounds.y - text->textSize - text->padding.bottom) * 0.5f; break;
+            case VerticalAlignment::BOTTOM: y += text->bounds.y - text->textSize - text->padding.bottom; break;
         }
 
         DrawText(text->text.c_str(), x, y, text->textSize, text->renderable.tint);
@@ -686,7 +653,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
                         drawRect(entry.entity, scene);
                         break;
                     case RenderEntry::Type::Text:
-                        drawText(entry.entity, scene);
+                        drawText(entry.entity, scene, !entry.isScreenSpace);
                         break;
                     case RenderEntry::Type::Image:
                         drawImage(entry.entity, scene);
@@ -709,7 +676,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
                     drawRect(entry.entity, scene);
                     break;
                 case RenderEntry::Type::Text:
-                    drawText(entry.entity, scene);
+                    drawText(entry.entity, scene, !entry.isScreenSpace);
                     break;
                 case RenderEntry::Type::Image:
                     drawImage(entry.entity, scene);
@@ -758,6 +725,43 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
 {
     Vector2 mouse = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
 
+auto uilistView = registry.view<UIList, Frame>();
+for (auto [entity, list, frame] : uilistView.each())
+{
+    auto children = scene->entityToChildren[entity];
+    float offsetY = 0.0f;
+
+    for (auto e : children)
+    {
+        auto *label = registry.try_get<TextLabel>(e);
+        if (!label) continue;
+
+        // Base position from parent frame
+        Vector2 parentPos{
+            frame.origin.position.scale.x * scene->logicalResolution.x + frame.origin.position.offset.x,
+            frame.origin.position.scale.y * scene->logicalResolution.y + frame.origin.position.offset.y
+        };
+
+        // Child offset relative to parent frame
+        label->origin.position.x = parentPos.x + label->padding.left;
+        label->origin.position.y = parentPos.y + offsetY + label->padding.top;
+
+        // Update offsetY for next child
+        float childHeight = 0.f;
+        if (auto *childFrame = registry.try_get<Frame>(e))
+        {
+            childHeight = childFrame->origin.size.scale.y * scene->logicalResolution.y + childFrame->origin.size.offset.y;
+        }
+        if (childHeight <= 0)
+            childHeight = label->textSize; // fallback
+
+        offsetY += childHeight;
+    }
+}
+
+
+
+
     auto buttonView = registry.view<Button>();
     for (auto entity : buttonView)
     {
@@ -765,7 +769,9 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
         if (!button.interactable)
             continue;
 
-        bool hovered = CheckCollisionPointRec(mouse, button.bounds);
+        Rectangle rect = UIOriginToRect(button.bounds, scene->logicalResolution.x, scene->logicalResolution.y);
+
+        bool hovered = CheckCollisionPointRec(mouse, rect);
         auto *frame = registry.try_get<Frame>(entity);
         if (frame)
             frame->renderable.tint = hovered ? button.active : button.inactive;
@@ -781,7 +787,17 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
             if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON))
                 button.middleClickEvent->Fire();
 
-            button.mouseHoverEvent->Fire();
+            if (!button.mouseHovering)
+                button.mouseEnterEvent->Fire();
+
+            button.mouseHovering = true;
+        }
+        else
+        {
+            if (button.mouseHovering)
+                button.mouseLeaveEvent->Fire();
+            
+            button.mouseHovering = false;
         }
     }
 }

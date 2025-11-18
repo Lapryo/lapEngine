@@ -60,3 +60,16 @@ Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight)
 
     return mouse;
 }
+
+Rectangle lapCore::UIOriginToRect(UIOrigin origin, int logicalWidth, int logicalHeight)
+{
+    Rectangle rect;
+
+    rect.x = origin.position.scale.x * logicalWidth + origin.position.offset.x;
+    rect.y = origin.position.scale.y * logicalHeight + origin.position.offset.y;
+
+    rect.width = origin.size.scale.x * logicalWidth + origin.size.offset.x;
+    rect.height = origin.size.scale.y * logicalHeight + origin.size.offset.y;
+
+    return rect;
+}
