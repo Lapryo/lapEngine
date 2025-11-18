@@ -8,9 +8,9 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "C:/Users/WellH/Documents/projects/lapEngine/editor/source/editor.cpp" "editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj.d"
-  "C:/Users/WellH/Documents/projects/lapEngine/editor/source/fpslabel.cpp" "editor/CMakeFiles/lapEditor.dir/source/fpslabel.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/fpslabel.cpp.obj.d"
-  "C:/Users/WellH/Documents/projects/lapEngine/editor/source/selectionMenu.cpp" "editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj.d"
+  "C:/Users/wellh/Documents/engine/engine/editor/source/editor.cpp" "editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj.d"
+  "C:/Users/wellh/Documents/engine/engine/editor/source/fpslabel.cpp" "editor/CMakeFiles/lapEditor.dir/source/fpslabel.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/fpslabel.cpp.obj.d"
+  "C:/Users/wellh/Documents/engine/engine/editor/source/selectionMenu.cpp" "editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/selectionMenu.cpp.obj.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

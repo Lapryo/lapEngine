@@ -743,8 +743,8 @@ for (auto [entity, list, frame] : uilistView.each())
         };
 
         // Child offset relative to parent frame
-        label->origin.position.x = parentPos.x + label->padding.left;
-        label->origin.position.y = parentPos.y + offsetY + label->padding.top;
+        label->origin.position.offset.x = parentPos.x + label->padding.left;
+        label->origin.position.offset.y = parentPos.y + offsetY + label->padding.top;
 
         // Update offsetY for next child
         float childHeight = 0.f;
