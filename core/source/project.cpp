@@ -55,6 +55,10 @@ void GetSystems(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
             {
                 scene->AddSystem<ScriptSystem>(systemOrder);
             }
+            else if (systemType == "gui")
+            {
+                scene->AddSystem<GUISystem>(systemOrder);
+            }
         }
     }
     else
@@ -177,9 +181,19 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
                 std::cout << "got here.\n";
 
-            // Renderable renderable, std::string text, float textSize, HorizontalAlignment horizontal, VerticalAlignment vertical, Vector2 bounds, Padding padding, FrameVector position, FrameVector size
+            UIOrigin origin(position, size);
+            Frame frame(renderable, origin);
 
-            scene->AddComponent<TextLabel>(entity, renderable, text, textSize, hAlign, vAlign, bounds, padding, position, size);
+            Alignment textAlignment;
+            textAlignment.horizontal = hAlign;
+            textAlignment.vertical = vAlign;
+
+            FrameVector textBounds;
+            textBounds.offset.x = bounds.x;
+            textBounds.offset.y = bounds.y;
+
+            // Frame frame, std::string text, float textSize, Alignment textAlignment, FrameVector textBounds, Padding textPadding
+            scene->AddComponent<TextLabel>(entity, frame, text, textSize, textAlignment, textBounds, padding);
         }
         else if (type == "cam2d")
         {
@@ -227,7 +241,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             std::string updateFuncName = data["onUpdate"];
             std::string destroyFuncName = data["onDestroy"];
 
-            scene->AddComponent<Script>(entity, ScriptRegistry::onCreateFunctions[createFuncName], ScriptRegistry::onUpdateFunctions[updateFuncName], ScriptRegistry::onDestroyFunctions[destroyFuncName], false);
+            scene->AddComponent<Script>(entity, ScriptRegistry::onCreateFunctions[createFuncName], ScriptRegistry::onUpdateFunctions[updateFuncName], ScriptRegistry::onDestroyFunctions[destroyFuncName]);
         }
         else if (type == "frame")
         {
@@ -243,11 +257,6 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 {data["size"].at(2).get<float>(),
                  data["size"].at(3).get<float>()}};
 
-            float rotation = data.value("rotation", 0.0f);
-            Vector2 anchor{
-                data["anchor"].at(0).get<float>(),
-                data["anchor"].at(1).get<float>()};
-
             Color tint{
                 data["renderable"]["tint"].at(0).get<unsigned char>(),
                 data["renderable"]["tint"].at(1).get<unsigned char>(),
@@ -259,8 +268,10 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 data["renderable"]["isScreenSpace"].get<bool>(), data["renderable"]["visible"].get<bool>(),
                 tint);
 
-            // Renderable renderable, FrameVector position, FrameVector size, float rotation, Alignment horizontal, Alignment vertical, Vector2 anchor
-            scene->AddComponent<Frame>(entity, renderable, position, size, rotation, anchor);
+            UIOrigin origin(position, size);
+
+            // Renderable renderable, UIOrigin origin
+            scene->AddComponent<Frame>(entity, renderable, origin);
         }
         else if (type == "UIList")
         {
@@ -301,57 +312,40 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
         else if (type == "physics2d")
         {
         }
-        else if (type == "button")
+        else if (type == "ui-button")
         {
-            auto &eventsJson = data["events"];
-
-            Rectangle bounds;
-            bounds.x = data["bounds"].at(0).get<float>();
-            bounds.y = data["bounds"].at(1).get<float>();
-            bounds.width = data["bounds"].at(2).get<float>();
-            bounds.height = data["bounds"].at(3).get<float>();
+            EventBus eventBus;
+            for (auto &eventJson : data["button-events"])
+            {
+                std::string name = eventJson.value("name", "");
+                std::string event = eventJson.value("event", "");
+                eventBus.events[name] = event;
+            }
 
             FrameVector position;
-            position.offset = {bounds.x, bounds.y};
+            position.scale = {
+                data["bounds"]["position"]["scale"].at(0).get<float>(),
+                data["bounds"]["position"]["scale"].at(1).get<float>()
+            };
+            position.offset = {
+                data["bounds"]["position"]["offset"].at(0).get<float>(),
+                data["bounds"]["position"]["offset"].at(1).get<float>()
+            };
+
             FrameVector size;
-            size.offset = {bounds.width, bounds.height};
-
-            bool interactable = data.value("interactable", false);
-
-            Color activeCol{
-                data["active"].at(0).get<unsigned char>(),
-                data["active"].at(1).get<unsigned char>(),
-                data["active"].at(2).get<unsigned char>(),
-                data["active"].at(3).get<unsigned char>(),
+            size.scale = {
+                data["bounds"]["size"]["scale"].at(0).get<float>(),
+                data["bounds"]["size"]["scale"].at(1).get<float>()
+            };
+            size.offset = {
+                data["bounds"]["size"]["offset"].at(0).get<float>(),
+                data["bounds"]["size"]["offset"].at(1).get<float>()
             };
 
-            Color inactiveCol{
-                data["inactive"].at(0).get<unsigned char>(),
-                data["inactive"].at(1).get<unsigned char>(),
-                data["inactive"].at(2).get<unsigned char>(),
-                data["inactive"].at(3).get<unsigned char>(),
-            };
+            UIOrigin bounds(position, size);
 
-            EventListener rcEvent(eventsJson.value("right-click", ""));
-            EventListener lcEvent(eventsJson.value("left-click", ""));
-            EventListener mcEvent(eventsJson.value("middle-click", ""));
-            
-            EventListener meEvent(eventsJson.value("mouse-enter", ""));
-            EventListener mlEvent(eventsJson.value("mouse-leave", ""));
-            EventListener mhEvent(eventsJson.value("mouse-hover", ""));
-
-            auto &button = scene->AddComponent<Button>(entity, position, size, interactable, activeCol, inactiveCol);
-            button.rightClickEvent = &rcEvent;
-            button.leftClickEvent = &lcEvent;
-            button.middleClickEvent = &mcEvent;
-
-            button.mouseEnterEvent = &meEvent;
-            button.mouseLeaveEvent = &mlEvent;
-            button.mouseHoverEvent = &mhEvent;
-        }
-        else if (type == "bool-attribute")
-        {
-            scene->AddComponent<BoolAttribute>(entity, data.value("name", ""), data.value("value", false));
+            // EventBus buttonEvents, UIOrigin bound
+            auto &button = scene->AddComponent<UIButton>(entity, eventBus, bounds);
         }
         else if (type == "attribute")
         {
@@ -361,6 +355,16 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             {
                 scene->AddComponent<Attribute<bool>>(entity, data.value("name", ""), data.value("value", false));
             }
+        }
+        else if (type == "event-bus")
+        {
+            std::unordered_map<std::string, std::string> events;
+            for (auto &eventJson : data["events"])
+            {
+                events[eventJson.value("name", "")] = eventJson.value("event", "");
+            }
+
+            scene->AddComponent<EventBus>(entity, events);
         }
     }
 }

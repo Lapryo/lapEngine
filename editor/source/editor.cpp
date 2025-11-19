@@ -37,6 +37,8 @@ void EditorApp::Init()
 
     SetWindowTitle(windowTitle.c_str());
 
+    // setup events here
+
     state = AppState::RUNNING;
 }
 

@@ -14,12 +14,7 @@ void Scene::QueueAsset(const AssetLoadRequest &asset)
 
 void Scene::ReloadTextures()
 {
-    auto view = entities.view<Sprite>();
-    for (auto entity : view)
-    {
-        auto &sprite = view.get<Sprite>(entity);
-        sprite.texture = &resources.textures[sprite.textureName];
-    }
+    
 }
 
 void Scene::LoadQueuedAssets()

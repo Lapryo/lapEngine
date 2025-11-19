@@ -12,31 +12,23 @@ namespace SelectionMenuObject {
             Vector2 mousePos = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
             if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
             {
-                auto view = scene->entities.view<Frame, BoolAttribute>();
+                auto view = scene->entities.view<Frame, Attribute<bool>>();
+
+                // change this to grab the one highest on top
                 for (auto [entity, otherframe, boolAttrib] : view.each())
                 {
-                    Rectangle bounds;
-                    bounds.x = otherframe.origin.position.scale.x * scene->logicalResolution.x;
-                    bounds.y = otherframe.origin.position.scale.y * scene->logicalResolution.y;
-                    bounds.width = otherframe.origin.size.scale.x * scene->logicalResolution.x;
-                    bounds.height = otherframe.origin.size.scale.y * scene->logicalResolution.y;
-
+                    Rectangle bounds = UIOriginToRect(otherframe.origin, scene->logicalResolution.x, scene->logicalResolution.y);
                     if (boolAttrib.name == "opensSelectionMenu" && boolAttrib.value == true && CheckCollisionPointRec(mousePos, bounds))
                     {
                         frame.origin.position.offset = mousePos;
                         frame.renderable.visible = true;
+                        break;
                     }
                 }
             }
             else if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
             {
-
-                Rectangle bounds;
-                bounds.x = frame.origin.position.offset.x;
-                bounds.y = frame.origin.position.offset.y;
-                bounds.width = frame.origin.size.scale.x * scene->logicalResolution.x;
-                bounds.height = frame.origin.size.scale.y * scene->logicalResolution.y;
-
+                Rectangle bounds = UIOriginToRect(frame.origin, scene->logicalResolution.x, scene->logicalResolution.y);
                 if (!CheckCollisionPointRec(mousePos, bounds))
                 {
                     frame.renderable.visible = false;
