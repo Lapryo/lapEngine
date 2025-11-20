@@ -8,7 +8,9 @@
 
 namespace lapCore
 {
-    const unsigned int LOGICAL_RESOLUTION_REFERENCE = 6400;
+    const unsigned int LOGICAL_RESOLUTION_REFERENCE = 800;
+
+    using Object = entt::entity;
 
     struct AssetLoadRequest
     {
@@ -17,14 +19,21 @@ namespace lapCore
         std::string path;
     };
 
+    struct ObjectEntry
+    {
+        Object object;
+        Object parent;
+        std::vector<Object> children;
+    };
+
     struct Scene
     {
         std::string name;
-        entt::registry entities;
-        std::unordered_map<std::string, entt::entity> nameToEntity;
-        std::unordered_map<entt::entity, entt::entity> entityToParent;
-        std::unordered_map<entt::entity, std::vector<entt::entity>> entityToChildren;
+        entt::registry objects;
+        std::unordered_map<std::string, ObjectEntry> objectMap;
+
         std::vector<std::unique_ptr<System>> systems;
+
         std::vector<AssetLoadRequest> queuedAssets;
         ResourceManager resources;
 
@@ -34,49 +43,69 @@ namespace lapCore
 
         void QueueAsset(const std::string &name, const std::string &type, const std::string &path);
         void QueueAsset(const AssetLoadRequest &asset);
-
         void LoadQueuedAssets();
-        void ReloadTextures();
 
         void Update(float deltaTime, RenderTexture2D &target);
 
-        template <typename T, typename... Args>
-        void AddSystem(unsigned int order, Args&&... args)
+        template <typename SystemType, typename... SystemArgs>
+        void AddSystem(unsigned int order, SystemArgs&&... args)
         {
-            std::cout << "got to here.\n";
-            auto sys = std::make_unique<T>(this, order, std::forward<Args>(args)...);
-            std::cout << "got to here.\n";
-
-            if constexpr (requires(T& t, entt::registry& r) { t.Connect(r); })
-                sys->Connect(entities);
-            
-            std::cout << "got to here.\n";
+            auto sys = std::make_unique<SystemType>(this, order, std::forward<SystemArgs>(args)...);
+            if constexpr (requires(SystemType& t, entt::registry& r) { t.Connect(r); })
+                sys->Connect(objects);
 
             if (order > systems.size())
                 systems.resize(order + 1);
 
             systems[order] = std::move(sys);
-            std::cout << "got to here.\n";
         }
 
-        entt::entity AddEntity(const std::string &name, const std::string &parent);
-        void DestroyEntity(entt::entity &entity);
-        entt::entity FindEntity(const std::string &name);
+        template <typename T>
+        T* GetSystem() const {
+            for (const auto& systemPtr : systems) {
+                if (T* foundSystem = dynamic_cast<T*>(systemPtr.get())) {
+                    return foundSystem;
+                }
+            }
 
-        template <typename Comp, typename... CompArgs>
-        Comp &AddComponent(entt::entity &entity, CompArgs&&... args)
-        {
-            return entities.emplace<Comp>(entity, std::forward<CompArgs>(args)...);
+            std::cerr << "Error: System of type " << typeid(T).name() << " not found!" << std::endl;
+            return nullptr;
         }
 
-        template <typename Comp>
-        void DestroyComponent(entt::entity &entity)
+        Object AddObject(const std::string &name, const std::string &parent);
+        void RemoveObject(Object &object);
+        Object FindObject(const std::string &name);
+
+        std::string GetObjectName(Object &object);
+
+        std::vector<Object> GetChildren(Object &object);
+        Object FindChild(Object &object, const std::string &name);
+
+        template <typename Element, typename... ElementArgs>
+        Element AddElement(Object &object, ElementArgs&&... args)
         {
-            entities.remove<Comp>(entity);
+            return objects.emplace<Element>(object, std::forward<ElementArgs>(args)...);
+        }
+
+        template <typename Element>
+        void RemoveElement(Object &object)
+        {
+            objects.remove<Element>(object);
+        }
+
+        template <typename Element>
+        Element &FindElement(Object &object)
+        {
+            return objects.get<Element>(object);
+        }
+
+        template <typename Element>
+        entt::view<Element> GetElements()
+        {
+            return objects.view<Element>();
         }
 
         void Clear();
-        void ClearComponents();
     };
 }
 

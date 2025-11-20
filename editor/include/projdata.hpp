@@ -135,6 +135,19 @@ const char proj_json[] = R"json(
                                 "onUpdate": "",
                                 "onDestroy": ""
                             }
+                        },
+                        {
+                            "type": "UIList",
+                            "data":
+                            {
+                                "scroll-size": [1, 1, 0, 0],
+                                "display-size": [1, 0.1, 0, 0],
+                                "horizontal-scroll-bar": "right",
+                                "vertical-scroll-bar": "bottom",
+                                "mask-outside-content": true,
+                                "scroll-offset": 0,
+                                "scroll-speed": 20
+                            }
                         }
                     ]
                 },

@@ -41,6 +41,7 @@ namespace lapCore
             : renderable(renderable), origin(origin) {}
     };
 
+    // TODO: NEED TO ACTUALLY IMPLEMENT, ONLY ACTS AS A TAG FOR RIGHT NOW
     struct UIList
     {
         FrameVector scrollSize;
@@ -126,14 +127,12 @@ namespace lapCore
 
     struct Script
     {
-        std::function<void(Scene*, entt::entity)> onCreateFunction;
-        std::function<void(Scene*, entt::entity, float)> onUpdateFunction;
-        std::function<void(Scene*, entt::entity)> onDestroyFunction;
+        std::string onCreateFunction, onUpdateFunction, onDestroyFunction;
 
         bool active = true;
         bool initiated = false;
 
-        Script(std::function<void(Scene*, entt::entity)> onCreateFunction, std::function<void(Scene*, entt::entity, float)> onUpdateFunction, std::function<void(Scene*, entt::entity)> onDestroyFunction)
+        Script(std::string onCreateFunction, std::string onUpdateFunction, std::string onDestroyFunction)
             : onCreateFunction(onCreateFunction), onUpdateFunction(onUpdateFunction), onDestroyFunction(onDestroyFunction) {}
     };
 

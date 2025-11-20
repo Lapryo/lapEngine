@@ -15,6 +15,8 @@ namespace lapCore
     // This tells the compiler that 'Scene' is a class defined elsewhere.
     class Scene; 
 
+    using Object = entt::entity;
+
     class EventRegistry
     {
     // ... (rest of the EventRegistry class implementation is correct) ...
@@ -62,28 +64,28 @@ namespace lapCore
     // =======================================================================
     
     template<typename SystemFunc>
-    void ConnectECSEvent(Scene* scene, entt::entity entity, const std::string& eventName, SystemFunc&& systemHandler)
+    void ConnectECSEvent(Scene* scene, Object &object, const std::string& eventName, SystemFunc&& systemHandler)
     {
         auto wrapper_callback = [
             scene, 
-            entity,
+            object,
             handler = std::forward<SystemFunc>(systemHandler)
         ]() { 
-            handler(scene, entity);
+            handler(scene, object);
         };
         
         EventRegistry::Connect(eventName, wrapper_callback); 
     }
     
     template<typename EventType, typename SystemFunc>
-    void ConnectECSEvent(Scene* scene, entt::entity entity, const std::string& eventName, SystemFunc&& systemHandler)
+    void ConnectECSEvent(Scene* scene, Object &object, const std::string& eventName, SystemFunc&& systemHandler)
     {
         auto wrapper_callback = [
             scene, 
-            entity, 
+            object, 
             handler = std::forward<SystemFunc>(systemHandler)
         ](const EventType& eventData) {
-            handler(eventData, scene, entity);
+            handler(eventData, scene, object);
         };
         EventRegistry::Connect<const EventType&>(eventName, wrapper_callback);
     }

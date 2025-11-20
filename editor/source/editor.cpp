@@ -9,6 +9,7 @@
 using namespace lapEditor;
 using namespace lapCore;
 
+// TODO: Move this to its own file
 std::vector<std::string> windowSubTitles = {
     "For the love of the game.",
     "Don't feed the bugs!",
@@ -37,19 +38,17 @@ void EditorApp::Init()
 
     SetWindowTitle(windowTitle.c_str());
 
-    // setup events here
+    // setup objects here
+    SelectionMenuObject::RegisterLogic();
+    FPSLabelObject::RegisterLogic();
+    SidebarObject::RegisterLogic();
+    AddObjectObject::RegisterLogic();
 
     state = AppState::RUNNING;
 }
 
 void EditorApp::Update(float deltaTime)
 {
-    if (WindowShouldClose())
-    {
-        state = AppState::DEAD;
-        return;
-    }
-
     if (IsKeyReleased(KEY_F11))
     {
         ToggleFullscreen();
@@ -57,11 +56,6 @@ void EditorApp::Update(float deltaTime)
     }
 
     project.main_scene->Update(deltaTime, project.target);
-}
-
-void EditorApp::Draw()
-{
-    
 }
 
 int main()

@@ -36,17 +36,26 @@ namespace lapCore
     {
         HorizontalAlignment horizontal;
         VerticalAlignment vertical;
+
+        Alignment(HorizontalAlignment horizontal, VerticalAlignment vertical)
+            : horizontal(horizontal), vertical(vertical) {}
     };
 
     struct FrameVector
     {
         Vector2 scale;
         Vector2 offset;
+
+        FrameVector(Vector2 scale, Vector2 offset)
+            : scale(scale), offset(offset) {}
     };
 
     struct Padding
     {
         float top, bottom, left, right;
+
+        Padding(float top, float bottom, float left, float right)
+            : top(top), bottom(bottom), left(left), right(right) {}
     };
 
     struct UIOrigin

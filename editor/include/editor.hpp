@@ -2,6 +2,7 @@
 #define EDITOR_HPP
 
 #include "core.hpp"
+#include "objects.hpp"
 
 namespace lapEditor
 {
@@ -12,7 +13,6 @@ namespace lapEditor
 
         void Init() override;
         void Update(float deltaTime) override;
-        void Draw() override;
     };
 }
 

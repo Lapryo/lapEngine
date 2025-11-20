@@ -12,11 +12,6 @@ void Scene::QueueAsset(const AssetLoadRequest &asset)
     queuedAssets.push_back(asset);
 }
 
-void Scene::ReloadTextures()
-{
-    
-}
-
 void Scene::LoadQueuedAssets()
 {
     for (auto &asset : queuedAssets)
@@ -28,7 +23,6 @@ void Scene::LoadQueuedAssets()
     }
 
     queuedAssets.clear();
-    ReloadTextures();
 }
 
 // figure this out later
@@ -52,7 +46,7 @@ void Scene::Update(float deltaTime, RenderTexture2D &target)
             ClearBackground(WHITE);
         }
 
-        system->Update(deltaTime, entities);
+        system->Update(deltaTime, objects);
 
         if (drawing)
         {
@@ -101,23 +95,28 @@ void Scene::Update(float deltaTime, RenderTexture2D &target)
     }
 }
 
-entt::entity Scene::AddEntity(const std::string &name, const std::string &parent)
+Object Scene::AddObject(const std::string &name, const std::string &parent)
 {
-    const auto entity = entities.create(); // create entity
-    nameToEntity[name] = entity; // assign the entry to the dictionary
-    entityToParent[entity] = nameToEntity[parent];
-    entityToChildren[nameToEntity[parent]].push_back(entity);
-    return entity;
+    auto object = objects.create();
+
+    ObjectEntry entry;
+    entry.object = object;
+    entry.parent = objectMap[parent].object;
+    objectMap[name] = entry;
+
+    objectMap[parent].children.push_back(object);
+
+    return object;
 }
 
-void Scene::DestroyEntity(entt::entity &entity)
+void Scene::RemoveObject(Object &object)
 {
-    entities.destroy(entity);
+    objects.destroy(object);
 }
 
 void Scene::Clear()
 {
-    entities.clear();
+    objects.clear();
     systems.clear();
 
     for (auto &texture : resources.textures)
@@ -131,7 +130,33 @@ void Scene::Clear()
     }
 }
 
-entt::entity Scene::FindEntity(const std::string &name)
+Object Scene::FindObject(const std::string &name)
 {
-    return nameToEntity[name];
+    return objectMap[name].object;
+}
+
+std::string lapCore::Scene::GetObjectName(Object &object)
+{
+    for (auto entry : objectMap)
+    {
+        if (entry.second.object == object)
+            return entry.first;
+    }
+
+    return "";
+}
+
+std::vector<Object> lapCore::Scene::GetChildren(Object &object)
+{
+    return objectMap[GetObjectName(object)].children;
+}
+
+Object lapCore::Scene::FindChild(Object &object, const std::string &name)
+{
+    std::string objName = GetObjectName(object);
+    for (auto &child : objectMap[objName].children)
+    {
+        if (GetObjectName(child) == name)
+            return child;
+    }
 }

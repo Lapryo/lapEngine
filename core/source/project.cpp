@@ -67,11 +67,11 @@ void GetSystems(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
     }
 }
 
-void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &object, entt::entity &entity)
+void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &objectJson, Object &object)
 {
     std::cout << "[PROJECT] [SCENE] [OBJECT] \tComponents:\n";
 
-    for (const auto &comp : object["components"])
+    for (const auto &comp : objectJson["components"])
     {
         const auto &type = comp.value("type", "");
         std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] \t\tType: " << type << '\n';
@@ -96,7 +96,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             std::string texName = data["texture"].get<std::string>();
 
             Renderable renderable(zlayer, isScreenSpace, visible, tint);
-            scene->AddComponent<Sprite>(entity, renderable, texName);
+            scene->AddElement<Sprite>(object, renderable, texName);
         }
         else if (type == "textlabel")
         {
@@ -184,16 +184,11 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             UIOrigin origin(position, size);
             Frame frame(renderable, origin);
 
-            Alignment textAlignment;
-            textAlignment.horizontal = hAlign;
-            textAlignment.vertical = vAlign;
-
-            FrameVector textBounds;
-            textBounds.offset.x = bounds.x;
-            textBounds.offset.y = bounds.y;
+            Alignment textAlignment(hAlign, vAlign);
+            FrameVector textBounds((Vector2){0, 0}, (Vector2){bounds.x, bounds.y});
 
             // Frame frame, std::string text, float textSize, Alignment textAlignment, FrameVector textBounds, Padding textPadding
-            scene->AddComponent<TextLabel>(entity, frame, text, textSize, textAlignment, textBounds, padding);
+            scene->AddElement<TextLabel>(object, frame, text, textSize, textAlignment, textBounds, padding);
         }
         else if (type == "cam2d")
         {
@@ -209,7 +204,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             }
             */
 
-            std::vector<entt::entity> excludeList;
+            std::vector<Object> excludeList;
 
             Vector2 offset{
                 data["offset"].at(0).get<float>(),
@@ -233,15 +228,15 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [CAM2D] \t\t\t\t" << static_cast<std::uint16_t>(entity) << '\n';
             }
 
-            scene->AddComponent<Cam2D>(entity, camera, excludeList);
+            scene->AddElement<Cam2D>(object, camera, excludeList);
         }
         else if (type == "script")
         {
-            std::string createFuncName = data["onCreate"];
-            std::string updateFuncName = data["onUpdate"];
-            std::string destroyFuncName = data["onDestroy"];
+            std::string createFuncName = data.value("onCreate", "");
+            std::string updateFuncName = data.value("onUpdate", "");
+            std::string destroyFuncName = data.value("onDestroy", "");
 
-            scene->AddComponent<Script>(entity, ScriptRegistry::onCreateFunctions[createFuncName], ScriptRegistry::onUpdateFunctions[updateFuncName], ScriptRegistry::onDestroyFunctions[destroyFuncName]);
+            scene->AddElement<Script>(object, createFuncName, updateFuncName, destroyFuncName);
         }
         else if (type == "frame")
         {
@@ -271,7 +266,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             UIOrigin origin(position, size);
 
             // Renderable renderable, UIOrigin origin
-            scene->AddComponent<Frame>(entity, renderable, origin);
+            scene->AddElement<Frame>(object, renderable, origin);
         }
         else if (type == "UIList")
         {
@@ -304,7 +299,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             float scrollOffset = data.value("scroll-offset", 0.0f);
             float scrollSpeed = data.value("scroll-speed", 20.0f);
 
-            scene->AddComponent<UIList>(entity, scrollSize, displaySize, hScrollBarRight, vScrollBarBottom, maskOutsideContent, scrollOffset, scrollSpeed);
+            scene->AddElement<UIList>(object, scrollSize, displaySize, hScrollBarRight, vScrollBarBottom, maskOutsideContent, scrollOffset, scrollSpeed);
         }
         else if (type == "origin2d")
         {
@@ -322,30 +317,28 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 eventBus.events[name] = event;
             }
 
-            FrameVector position;
-            position.scale = {
+            Vector2 scalePosition = {
                 data["bounds"]["position"]["scale"].at(0).get<float>(),
                 data["bounds"]["position"]["scale"].at(1).get<float>()
             };
-            position.offset = {
+            Vector2 offsetPosition = {
                 data["bounds"]["position"]["offset"].at(0).get<float>(),
                 data["bounds"]["position"]["offset"].at(1).get<float>()
             };
 
-            FrameVector size;
-            size.scale = {
+            Vector2 scaleSize = {
                 data["bounds"]["size"]["scale"].at(0).get<float>(),
                 data["bounds"]["size"]["scale"].at(1).get<float>()
             };
-            size.offset = {
+            Vector2 offsetSize = {
                 data["bounds"]["size"]["offset"].at(0).get<float>(),
                 data["bounds"]["size"]["offset"].at(1).get<float>()
             };
 
-            UIOrigin bounds(position, size);
+            UIOrigin bounds(FrameVector(scalePosition, offsetPosition), FrameVector(scaleSize, offsetSize));
 
             // EventBus buttonEvents, UIOrigin bound
-            auto &button = scene->AddComponent<UIButton>(entity, eventBus, bounds);
+            scene->AddElement<UIButton>(object, eventBus, bounds);
         }
         else if (type == "attribute")
         {
@@ -353,7 +346,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             std::string attribType = data.value("type", "");
             if (attribType == "bool")
             {
-                scene->AddComponent<Attribute<bool>>(entity, data.value("name", ""), data.value("value", false));
+                scene->AddElement<Attribute<bool>>(object, data.value("name", ""), data.value("value", false));
             }
         }
         else if (type == "event-bus")
@@ -364,7 +357,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 events[eventJson.value("name", "")] = eventJson.value("event", "");
             }
 
-            scene->AddComponent<EventBus>(entity, events);
+            scene->AddElement<EventBus>(object, events);
         }
     }
 }
@@ -377,7 +370,7 @@ void GetObjects(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
     {
         for (const auto &object : sceneJson["objects"])
         {
-            auto entity = scene->AddEntity(object.value("name", ""), object.value("parent", ""));
+            auto entity = scene->AddObject(object.value("name", ""), object.value("parent", ""));
             std::cout << "[PROJECT] [SCENE] [OBJECT] Loading object:\n[PROJECT] [SCENE] [OBJECT] \tName: " << object.value("name", "") << '\n';
 
             if (!object.contains("components") || !object["components"].is_array())

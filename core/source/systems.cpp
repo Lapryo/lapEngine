@@ -16,13 +16,20 @@ void PhysicsSystem::Update(float deltaTime, entt::registry &registry)
 
 void RenderSystem::Connect(entt::registry &registry)
 {
+    // Rebuild when a property changes
     registry.on_update<Sprite>().connect<&RenderSystem::OnRenderableUpdated>(*this);
     registry.on_update<TextLabel>().connect<&RenderSystem::OnRenderableUpdated>(*this);
     registry.on_update<Image>().connect<&RenderSystem::OnRenderableUpdated>(*this);
     registry.on_update<Frame>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+
+    // Rebuild when one is added
+    registry.on_construct<Sprite>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_construct<TextLabel>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_construct<Image>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_construct<Frame>().connect<&RenderSystem::OnRenderableUpdated>(*this);
 }
 
-void RenderSystem::OnRenderableUpdated(entt::registry &registry, entt::entity entity)
+void RenderSystem::OnRenderableUpdated(entt::registry &registry, Object object)
 {
     needsResort = true;
 }
@@ -83,9 +90,9 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
     for (const auto &entry : renderList)
         (entry.isScreenSpace ? screenSpace : worldSpace).push_back(entry);
 
-    auto drawSprite = [&](entt::entity e, const Scene *scene)
+    auto drawSprite = [&](Object obj, const Scene *scene)
     {
-        auto *sprite = registry.try_get<Sprite>(e);
+        auto *sprite = registry.try_get<Sprite>(obj);
 
         const Texture2D* texture;
 
@@ -100,13 +107,13 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         if (!sprite || !sprite->renderable.visible)
             return;
 
-        auto *origin = registry.try_get<Origin2D>(e);
+        auto *origin = registry.try_get<Origin2D>(obj);
 
         Vector2 pos{0.f, 0.f};
         Vector2 size{(float)texture->width, (float)texture->height};
         float rotation = 0.f;
 
-        auto *rotData = registry.try_get<RotationalData>(e);
+        auto *rotData = registry.try_get<RotationalData>(obj);
         if (rotData)
         {
             rotation = rotData->rotation;
@@ -128,9 +135,9 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             sprite->renderable.tint);
     };
 
-    auto drawImage = [&](entt::entity e, const Scene *scene)
+    auto drawImage = [&](Object obj, const Scene *scene)
     {
-        auto *image = registry.try_get<Image>(e);
+        auto *image = registry.try_get<Image>(obj);
 
         const Texture2D* texture;
 
@@ -145,9 +152,9 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         if (!image || !image->sprite.renderable.visible)
             return;
 
-        auto *frame = registry.try_get<Frame>(e);
-        auto *origin = registry.try_get<Origin2D>(e);
-        auto *rotData = registry.try_get<RotationalData>(e);
+        auto *frame = registry.try_get<Frame>(obj);
+        auto *origin = registry.try_get<Origin2D>(obj);
+        auto *rotData = registry.try_get<RotationalData>(obj);
 
         Vector2 pos{0, 0}, size{(float)texture->width, (float)texture->height};
         float rotation = 0.f;
@@ -159,22 +166,17 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         if (frame)
         {
-            pos.x = frame->origin.position.scale.x * scene->logicalResolution.x + frame->origin.position.offset.x;
-            pos.y = frame->origin.position.scale.y * scene->logicalResolution.y + frame->origin.position.offset.y;
-            size.x = frame->origin.size.scale.x * scene->logicalResolution.x + frame->origin.size.offset.x;
-            size.y = frame->origin.size.scale.y * scene->logicalResolution.y + frame->origin.size.offset.y;
-
-            if (origin)
-            {
-                pos.x += origin->position.x;
-                pos.y += origin->position.y;
-                size.x *= origin->scale.x;
-                size.y *= origin->scale.y;
-            }
+            pos.x += frame->origin.position.scale.x * scene->logicalResolution.x + frame->origin.position.offset.x;
+            pos.y += frame->origin.position.scale.y * scene->logicalResolution.y + frame->origin.position.offset.y;
+            size.x += frame->origin.size.scale.x * scene->logicalResolution.x + frame->origin.size.offset.x;
+            size.y += frame->origin.size.scale.y * scene->logicalResolution.y + frame->origin.size.offset.y;
         }
-        else if (origin)
+
+        if (origin)
         {
-            pos = origin->position;
+            pos.x += origin->position.x;
+            pos.y += origin->position.y;
+
             size.x *= origin->scale.x;
             size.y *= origin->scale.y;
         }
@@ -188,71 +190,49 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             image->sprite.renderable.tint);
     };
 
-    auto drawRect = [&](entt::entity e, const Scene *scene)
+    auto drawRect = [&](Object obj, const Scene *scene)
     {
-        auto *frame = registry.try_get<Frame>(e);
+        auto *frame = registry.try_get<Frame>(obj);
         if (!frame || !frame->renderable.visible)
             return;
 
-        Vector2 pos{
-            frame->origin.position.scale.x * scene->logicalResolution.x + frame->origin.position.offset.x,
-            frame->origin.position.scale.y * scene->logicalResolution.y + frame->origin.position.offset.y};
-        Vector2 size{
-            frame->origin.size.scale.x * scene->logicalResolution.x + frame->origin.size.offset.x,
-            frame->origin.size.scale.y * scene->logicalResolution.y + frame->origin.size.offset.y};
+        Rectangle rect = UIOriginToRect(frame->origin, scene->logicalResolution.x, scene->logicalResolution.y);
 
-        if (auto *origin = registry.try_get<Origin2D>(e))
+        if (auto *origin = registry.try_get<Origin2D>(obj))
         {
-            pos.x += origin->position.x;
-            pos.y += origin->position.y;
-            size.x *= origin->scale.x;
-            size.y *= origin->scale.y;
+            rect.x += origin->position.x;
+            rect.y += origin->position.y;
+            rect.width *= origin->scale.x;
+            rect.height *= origin->scale.y;
         }
 
-        DrawRectangle(pos.x, pos.y, size.x, size.y, frame->renderable.tint);
+        DrawRectangle(rect.x, rect.y, rect.width, rect.height, frame->renderable.tint);
     };
 
-    auto drawText = [&](entt::entity e, const Scene *scene, bool isUI)
+    auto drawText = [&](Object obj, const Scene *scene)
     {
-        auto *text = registry.try_get<TextLabel>(e);
+        auto *text = registry.try_get<TextLabel>(obj);
         if (!text || !text->frame.renderable.visible)
             return;
 
         float x = 0.f, y = 0.f;
 
-        // TODO: REMOVE ISUI FROM HERE
-        if (isUI)
+        x = text->frame.origin.position.scale.x * scene->logicalResolution.x + text->frame.origin.position.offset.x + text->textPadding.left;
+        y = text->frame.origin.position.scale.y * scene->logicalResolution.y + text->frame.origin.position.offset.y + text->textPadding.top;
+
+        auto *frame = registry.try_get<Frame>(obj);
+        auto *origin = registry.try_get<Origin2D>(obj);
+
+        if (frame)
         {
-            // For UI elements, origin.position.offset contains the final screen position
-            x = text->frame.origin.position.scale.x * scene->logicalResolution.x + text->frame.origin.position.offset.x;
-            y = text->frame.origin.position.scale.y * scene->logicalResolution.y + text->frame.origin.position.offset.y;
+            x += frame->origin.position.scale.x * scene->logicalResolution.x + frame->origin.position.offset.x;
+            y += frame->origin.position.scale.y * scene->logicalResolution.y + frame->origin.position.offset.y;
         }
-        else
+
+        if (origin)
         {
-            // World-space: calculate from frame + origin if present
-            auto *frame = registry.try_get<Frame>(e);
-            auto *origin = registry.try_get<Origin2D>(e);
-
-            if (frame)
-            {
-                x = frame->origin.position.scale.x * scene->logicalResolution.x + frame->origin.position.offset.x;
-                y = frame->origin.position.scale.y * scene->logicalResolution.y + frame->origin.position.offset.y;
-
-                if (origin)
-                {
-                    x += origin->position.x;
-                    y += origin->position.y;
-                }
-
-                // Apply padding
-                x += text->textPadding.left;
-                y += text->textPadding.top;
-            }
-            else if (origin)
-            {
-                x = origin->position.x + text->textPadding.left;
-                y = origin->position.y + text->textPadding.top;
-            }
+            x += origin->position.x;
+            y += origin->position.y;
         }
 
         // Handle horizontal alignment
@@ -293,7 +273,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
                         drawRect(entry.entity, scene);
                         break;
                     case RenderEntry::Type::Text:
-                        drawText(entry.entity, scene, entry.isScreenSpace);
+                        drawText(entry.entity, scene);
                         break;
                     case RenderEntry::Type::Image:
                         drawImage(entry.entity, scene);
@@ -316,7 +296,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
                     drawRect(entry.entity, scene);
                     break;
                 case RenderEntry::Type::Text:
-                    drawText(entry.entity, scene, entry.isScreenSpace);
+                    drawText(entry.entity, scene);
                     break;
                 case RenderEntry::Type::Image:
                     drawImage(entry.entity, scene);
@@ -341,13 +321,16 @@ void ScriptSystem::Update(float deltaTime, entt::registry &registry)
 
         if (!script.initiated)
         {
-            if (script.onCreateFunction)
-                script.onCreateFunction(scene, entity);
+            auto createFunc = ScriptRegistry::onCreateFunctions[script.onCreateFunction];
+
+            if (createFunc)
+                createFunc(scene, entity);
             script.initiated = true;
         }
 
-        if (script.onUpdateFunction)
-            script.onUpdateFunction(scene, entity, deltaTime);
+        auto updateFunc = ScriptRegistry::onUpdateFunctions[script.onUpdateFunction];
+        if (updateFunc)
+            updateFunc(scene, entity, deltaTime);
     }
 }
 
@@ -357,8 +340,11 @@ void ScriptSystem::OnDestroy(entt::registry &registry)
     for (auto entity : view)
     {
         auto &script = view.get<Script>(entity);
-        if (script.onDestroyFunction && script.active)
-            script.onDestroyFunction(scene, entity);
+        if (!script.active) continue;
+
+        auto destroyFunc = ScriptRegistry::onDestroyFunctions[script.onDestroyFunction];
+        if (destroyFunc)
+            destroyFunc(scene, entity);
     }
 }
 
@@ -370,7 +356,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
     auto uilistView = registry.view<UIList, Frame>();
     for (auto [entity, list, frame] : uilistView.each())
     {
-        auto children = scene->entityToChildren[entity];
+        auto children = scene->GetChildren(entity);
         float offsetY = 0.0f;
 
         for (auto e : children)

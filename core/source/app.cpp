@@ -11,9 +11,14 @@ void App::Run()
 {
     while (state == AppState::RUNNING)
     {
+        if (WindowShouldClose())
+        {
+            state = AppState::DEAD;
+            return;
+        }
+
         const float delta = GetFrameTime();
         Update(delta);
-        Draw();
     }
 }
 
