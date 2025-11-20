@@ -1,3 +1,3 @@
 file(REMOVE_RECURSE
-  "C:/Users/wellh/Documents/engine/engine/lib/liblapCore.a"
+  "C:/Users/WellH/Documents/projects/lapEngine/lib/liblapCore.a"
 )

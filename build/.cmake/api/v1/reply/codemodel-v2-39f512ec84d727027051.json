@@ -1,0 +1,124 @@
+{
+	"configurations" : 
+	[
+		{
+			"abstractTargets" : [],
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"jsonFile" : "directory-.-Debug-f6f22219c74102c3da70.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.1.2"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "editor",
+					"jsonFile" : "directory-editor-Debug-a27bbbf6135c891d9319.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.1.2"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "editor",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "core",
+					"jsonFile" : "directory-core-Debug-c640fa7ec313229a1e93.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "4.1.2"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "core",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "lapEngine"
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "lapEditor",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "lapCore",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 2,
+					"id" : "lapCore::@57760688d1f824db5d9c",
+					"jsonFile" : "target-lapCore-Debug-18fa11926fc1c63aa09e.json",
+					"name" : "lapCore",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "lapEditor::@ed37844f285895dce70e",
+					"jsonFile" : "target-lapEditor-Debug-82f092d2193ff84857ce.json",
+					"name" : "lapEditor",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/WellH/Documents/projects/lapEngine/build",
+		"source" : "C:/Users/WellH/Documents/projects/lapEngine"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	}
+}

@@ -80,6 +80,61 @@ const char proj_json[] = R"json(
                                 "type": "bool",
                                 "value": true
                             }
+                        },
+                        {
+                            "type": "ui-button",
+                            "data":
+                            {
+                                "bounds":
+                                {
+                                    "position":
+                                    {
+                                        "scale": [0, 0],
+                                        "offset": [0, 0]
+                                    },
+                                    "size":
+                                    {
+                                        "scale": [0.2, 1],
+                                        "offset": [0, 15]
+                                    }
+                                },
+                                "button-events":
+                                [
+                                    {
+                                        "name": "left-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "right-click",
+                                        "event": "open-selection-menu"
+                                    },
+                                    {
+                                        "name": "middle-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "mouse-enter",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "mouse-leave",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "mouse-hover",
+                                        "event": ""
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "setup-sidebar",
+                                "onUpdate": "",
+                                "onDestroy": ""
+                            }
                         }
                     ]
                 },
@@ -198,6 +253,15 @@ const char proj_json[] = R"json(
                                     }
                                 ]
                             }
+                        },
+                        {
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "connect-add-object",
+                                "onUpdate": "",
+                                "onDestroy": ""
+                            }
                         }
                     ]
                 },
@@ -215,8 +279,8 @@ const char proj_json[] = R"json(
                                 "bounds": [0, 0],
                                 "horizontal-alignment": "left",
                                 "vertical-alignment": "top",
-                                "padding": [0, 0, 160, 0],
-                                "position": [0, 0, 0, 0],
+                                "padding": [0, 0, 0, 0],
+                                "position": [0.2, 0, 0, 0],
                                 "size": [0, 0, 0, 0],
                                 "renderable":
                                 {

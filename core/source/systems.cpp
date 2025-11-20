@@ -220,11 +220,12 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         float x = 0.f, y = 0.f;
 
+        // TODO: REMOVE ISUI FROM HERE
         if (isUI)
         {
             // For UI elements, origin.position.offset contains the final screen position
-            x = text->frame.origin.position.offset.x;
-            y = text->frame.origin.position.offset.y;
+            x = text->frame.origin.position.scale.x * scene->logicalResolution.x + text->frame.origin.position.offset.x;
+            y = text->frame.origin.position.scale.y * scene->logicalResolution.y + text->frame.origin.position.offset.y;
         }
         else
         {
@@ -365,49 +366,50 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
 {
     Vector2 mouse = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
 
-auto uilistView = registry.view<UIList, Frame>();
-for (auto [entity, list, frame] : uilistView.each())
-{
-    auto children = scene->entityToChildren[entity];
-    float offsetY = 0.0f;
-
-    for (auto e : children)
+    // This needs to be adjusted for an index value
+    auto uilistView = registry.view<UIList, Frame>();
+    for (auto [entity, list, frame] : uilistView.each())
     {
-        auto *label = registry.try_get<TextLabel>(e);
+        auto children = scene->entityToChildren[entity];
+        float offsetY = 0.0f;
 
-        if (!label) continue;
-
-        label->frame.renderable.visible = frame.renderable.visible;
-
-        Vector2 parentPos{
-            frame.origin.position.scale.x * scene->logicalResolution.x + frame.origin.position.offset.x,
-            frame.origin.position.scale.y * scene->logicalResolution.y + frame.origin.position.offset.y
-        };
-
-        label->frame.origin.position = frame.origin.position;
-
-        auto *button = registry.try_get<UIButton>(e);
-        if (button)
+        for (auto e : children)
         {
-            button->bounds.position = label->frame.origin.position;
+            auto *label = registry.try_get<TextLabel>(e);
+
+            if (!label) continue;
+
+            label->frame.renderable.visible = frame.renderable.visible;
+
+            Vector2 parentPos{
+                frame.origin.position.scale.x * scene->logicalResolution.x + frame.origin.position.offset.x,
+                frame.origin.position.scale.y * scene->logicalResolution.y + frame.origin.position.offset.y
+            };
+
+            label->frame.origin.position = frame.origin.position;
+
+            auto *button = registry.try_get<UIButton>(e);
+            if (button)
+            {
+                button->bounds.position = label->frame.origin.position;
+            }
+
+            // Child offset relative to parent frame
+            //label->frame.origin.position.offset.x = parentPos.x + label->textPadding.left;
+            //label->frame.origin.position.offset.y = parentPos.y + offsetY + label->textPadding.top;
+
+            // Update offsetY for next child
+            float childHeight = 0.f;
+            if (auto *childFrame = registry.try_get<Frame>(e))
+            {
+                childHeight = childFrame->origin.size.scale.y * scene->logicalResolution.y + childFrame->origin.size.offset.y;
+            }
+            if (childHeight <= 0)
+                childHeight = label->textSize; // fallback
+
+            offsetY += childHeight;
         }
-
-        // Child offset relative to parent frame
-        //label->frame.origin.position.offset.x = parentPos.x + label->textPadding.left;
-        //label->frame.origin.position.offset.y = parentPos.y + offsetY + label->textPadding.top;
-
-        // Update offsetY for next child
-        float childHeight = 0.f;
-        if (auto *childFrame = registry.try_get<Frame>(e))
-        {
-            childHeight = childFrame->origin.size.scale.y * scene->logicalResolution.y + childFrame->origin.size.offset.y;
-        }
-        if (childHeight <= 0)
-            childHeight = label->textSize; // fallback
-
-        offsetY += childHeight;
     }
-}
 
 
 
