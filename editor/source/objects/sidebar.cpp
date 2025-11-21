@@ -1,7 +1,16 @@
 #include "objects/sidebar.hpp"
+#include "editor.hpp"
 
 void OpenSelectionMenu(Scene* scene, Object &object)
 {
+    // Check here for if the laodProject has any scenes, if not, change the menu list to "Add Scene" only
+    if (lapEditor::loadedProjectJson["scenes"].empty()) {
+        std::cout << "[SidebarObject] No project loaded or project has no scenes.\n";
+
+        // Change menu list here
+        
+    }
+
     auto selectionMenu = scene->FindObject("selectionMenu");
     auto &frame = scene->FindElement<Frame>(selectionMenu);
 

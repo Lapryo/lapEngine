@@ -3,6 +3,7 @@
 
 #include "core.hpp"
 #include "objects.hpp"
+#include "json.hpp"
 
 namespace lapEditor
 {
@@ -14,6 +15,8 @@ namespace lapEditor
         void Init() override;
         void Update(float deltaTime) override;
     };
+
+    static nlohmann::json loadedProjectJson;
 }
 
 #endif

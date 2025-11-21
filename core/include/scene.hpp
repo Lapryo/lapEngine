@@ -72,7 +72,7 @@ namespace lapCore
             return nullptr;
         }
 
-        Object AddObject(const std::string &name, const std::string &parent);
+        Object AddObject(const std::string &name, const std::string &parent, int childIndex);
         void RemoveObject(Object &object);
         Object FindObject(const std::string &name);
 

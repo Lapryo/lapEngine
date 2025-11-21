@@ -95,7 +95,7 @@ void Scene::Update(float deltaTime, RenderTexture2D &target)
     }
 }
 
-Object Scene::AddObject(const std::string &name, const std::string &parent)
+Object Scene::AddObject(const std::string &name, const std::string &parent, int childIndex)
 {
     auto object = objects.create();
 
@@ -104,7 +104,13 @@ Object Scene::AddObject(const std::string &name, const std::string &parent)
     entry.parent = objectMap[parent].object;
     objectMap[name] = entry;
 
-    objectMap[parent].children.push_back(object);
+    if (childIndex == -1)
+        objectMap[parent].children.push_back(object);
+    else
+    {
+        objectMap[parent].children.resize(childIndex + 1);
+        objectMap[parent].children[childIndex] = object;
+    }
 
     return object;
 }
@@ -148,12 +154,18 @@ std::string lapCore::Scene::GetObjectName(Object &object)
 
 std::vector<Object> lapCore::Scene::GetChildren(Object &object)
 {
+    std::cout << "Getting children of object: " << GetObjectName(object) << "\n";
+    if (GetObjectName(object) == "")
+        return {};
     return objectMap[GetObjectName(object)].children;
 }
 
 Object lapCore::Scene::FindChild(Object &object, const std::string &name)
 {
     std::string objName = GetObjectName(object);
+    std::cout << "objName: " << objName << "\n";
+    if (objName == "")
+        return Object{entt::null};
     for (auto &child : objectMap[objName].children)
     {
         if (GetObjectName(child) == name)

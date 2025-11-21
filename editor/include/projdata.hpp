@@ -31,6 +31,7 @@ const char proj_json[] = R"json(
                 {
                     "name": "background",
                     "parent": "",
+                    "child-index": -1,
                     "components":
                     [
                         {
@@ -53,8 +54,339 @@ const char proj_json[] = R"json(
                     ]
                 },
                 {
+                    "name": "topbar",
+                    "parent": "",
+                    "child-index": -1,
+                    "components":
+                    [
+                        {
+                            "type": "frame",
+                            "data":
+                            {
+                                "position": [0, 0, 0, 0],
+                                "size": [1, 0.05, 0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 2,
+                                    "isScreenSpace": true,
+                                    "visible": true,
+                                    "tint": [18, 17, 41, 255]
+                                }
+                            }
+                        },
+                        {
+                            "type": "UIList",
+                            "data":
+                            {
+                                "scroll-size": [1, 1, 0, 0],
+                                "display-size": [1, 0.05, 0, 0],
+                                "horizontal-scroll-bar": "right",
+                                "vertical-scroll-bar": "bottom",
+                                "mask-outside-content": true,
+                                "scroll-offset": 0,
+                                "scroll-speed": 20,
+                                "direction": "horizontal"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "file-button",
+                    "parent": "topbar",
+                    "child-index": 0,
+                    "components":
+                    [
+                        {
+                            "type": "frame",
+                            "data":
+                            {
+                                "position": [0, 0, 0, 0],
+                                "size": [0, 0.05, 50, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 3,
+                                    "isScreenSpace": true,
+                                    "visible": true,
+                                    "tint": [255, 255, 255, 0]
+                                }
+                            }
+                        },
+                        {
+                            "type": "textlabel",
+                            "data":
+                            {
+                                "text": "File",
+                                "text-size": 15.0,
+                                "bounds": [50, 30],
+                                "horizontal-alignment": "middle",
+                                "vertical-alignment": "middle",
+                                "padding": [0, 0, 0, 0],
+                                "position": [0, 0, 0, 0],
+                                "size": [0, 0, 0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 4,
+                                    "isScreenSpace": true,
+                                    "visible": true,
+                                    "tint": [125, 97, 103, 255]
+                                }
+                            }
+                        },
+                        {
+                            "type": "ui-button",
+                            "data":
+                            {
+                                "active": true,
+                                "bounds":
+                                {
+                                    "position":
+                                    {
+                                        "scale": [0, 0],
+                                        "offset": [0, 0]
+                                    },
+                                    "size":
+                                    {
+                                        "scale": [0, 0.05],
+                                        "offset": [50, 0]
+                                    }
+                                },
+                                "button-events":
+                                [
+                                    {
+                                        "name": "left-click",
+                                        "event": "open-file-dropdown"
+                                    },
+                                    {
+                                        "name": "right-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "middle-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "mouse-enter",
+                                        "event": "highlight-file-button"
+                                    },
+                                    {
+                                        "name": "mouse-leave",
+                                        "event": "unhighlight-file-button"
+                                    },
+                                    {
+                                        "name": "mouse-hover",
+                                        "event": ""
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "setup-file-button",
+                                "onUpdate": "",
+                                "onDestroy": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "file-dropdown",
+                    "parent": "",
+                    "child-index": -1,
+                    "components":
+                    [
+                        {
+                            "type": "frame",
+                            "data":
+                            {
+                                "position": [0, 0.05, 0, 0],
+                                "size": [0.15, 0.2, 0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 4,
+                                    "isScreenSpace": true,
+                                    "visible": false,
+                                    "tint": [26, 24, 59, 255]
+                                }
+                            }
+                        },
+                        {
+                            "type": "ui-button",
+                            "data":
+                            {
+                                "active": false,
+                                "bounds":
+                                {
+                                    "position":
+                                    {
+                                        "scale": [0, 0.05],
+                                        "offset": [0, 0]
+                                    },
+                                    "size":
+                                    {
+                                        "scale": [0.15, 0.2],
+                                        "offset": [0, 0]
+                                    }
+                                },
+                                "button-events":
+                                [
+                                    {
+                                        "name": "left-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "right-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "middle-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "mouse-enter",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "mouse-leave",
+                                        "event": "close-file-dropdown"
+                                    },
+                                    {
+                                        "name": "mouse-hover",
+                                        "event": ""
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "UIList",
+                            "data":
+                            {
+                                "scroll-size": [1, 1, 0, 0],
+                                "display-size": [1, 0.1, 0, 0],
+                                "horizontal-scroll-bar": "right",
+                                "vertical-scroll-bar": "bottom",
+                                "mask-outside-content": true,
+                                "scroll-offset": 0,
+                                "scroll-speed": 20,
+                                "direction": "vertical"
+                            }
+                        },
+                        {
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "setup-file-dropdown",
+                                "onUpdate": "",
+                                "onDestroy": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "open-project-button",
+                    "parent": "file-dropdown",
+                    "child-index": 0,
+                    "components":
+                    [
+                        {
+                            "type": "frame",
+                            "data":
+                            {
+                                "position": [0, 0.05, 0, 0],
+                                "size": [0.15, 0, 0, 15],
+                                "renderable":
+                                {
+                                    "zlayer": 5,
+                                    "isScreenSpace": true,
+                                    "visible": false,
+                                    "tint": [255, 255, 255, 0]
+                                }
+                            }
+                        },
+                        {
+                            "type": "textlabel",
+                            "data":
+                            {
+                                "text": "Open Project",
+                                "text-size": 15.0,
+                                "bounds": [0, 0],
+                                "horizontal-alignment": "left",
+                                "vertical-alignment": "top",
+                                "padding": [0, 0, 0, 0],
+                                "position": [0, 0, 0, 0],
+                                "size": [0, 0, 0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 6,
+                                    "isScreenSpace": true,
+                                    "visible": false,
+                                    "tint": [125, 97, 103, 255]
+                                }
+                            }
+                        },
+                        {
+                            "type": "ui-button",
+                            "data":
+                            {
+                                "active": false,
+                                "bounds":
+                                {
+                                    "position":
+                                    {
+                                        "scale": [0, 0],
+                                        "offset": [0, 0]
+                                    },
+                                    "size":
+                                    {
+                                        "scale": [0.15, 0],
+                                        "offset": [0, 15]
+                                    }
+                                },
+                                "button-events":
+                                [
+                                    {
+                                        "name": "left-click",
+                                        "event": "open-project"
+                                    },
+                                    {
+                                        "name": "right-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "middle-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "mouse-enter",
+                                        "event": "highlight-open-project-button"
+                                    },
+                                    {
+                                        "name": "mouse-leave",
+                                        "event": "unhighlight-open-project-button"
+                                    },
+                                    {
+                                        "name": "mouse-hover",
+                                        "event": ""
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "setup-open-project-button",
+                                "onUpdate": "",
+                                "onDestroy": ""
+                            }
+                        }
+                    ]
+                },
+                {
                     "name": "sidebar",
                     "parent": "",
+                    "child-index": -1,
                     "components":
                     [
                         {
@@ -67,24 +399,16 @@ const char proj_json[] = R"json(
                                 {
                                     "zlayer": 1,
                                     "isScreenSpace": true,
-                                    "visible": true,
+                                    "visible": false,
                                     "tint": [18, 17, 41, 255]
                                 }
-                            }
-                        },
-                        {
-                            "type": "attribute",
-                            "data":
-                            {
-                                "name": "opensSelectionMenu",
-                                "type": "bool",
-                                "value": true
                             }
                         },
                         {
                             "type": "ui-button",
                             "data":
                             {
+                                "active": false,
                                 "bounds":
                                 {
                                     "position":
@@ -146,7 +470,8 @@ const char proj_json[] = R"json(
                                 "vertical-scroll-bar": "bottom",
                                 "mask-outside-content": true,
                                 "scroll-offset": 0,
-                                "scroll-speed": 20
+                                "scroll-speed": 20,
+                                "direction": "vertical"
                             }
                         }
                     ]
@@ -154,6 +479,7 @@ const char proj_json[] = R"json(
                 {
                     "name": "selectionMenu",
                     "parent": "",
+                    "child-index": -1,
                     "components":
                     [
                         {
@@ -181,7 +507,8 @@ const char proj_json[] = R"json(
                                 "vertical-scroll-bar": "bottom",
                                 "mask-outside-content": true,
                                 "scroll-offset": 0,
-                                "scroll-speed": 20
+                                "scroll-speed": 20,
+                                "direction": "vertical"
                             }
                         },
                         {
@@ -198,6 +525,7 @@ const char proj_json[] = R"json(
                 {
                     "name": "add-object",
                     "parent": "selectionMenu",
+                    "child-index": 0,
                     "components":
                     [
                         {
@@ -225,6 +553,7 @@ const char proj_json[] = R"json(
                             "type": "ui-button",
                             "data":
                             {
+                                "active": false,
                                 "bounds":
                                 {
                                     "position":
@@ -281,6 +610,7 @@ const char proj_json[] = R"json(
                 {
                     "name": "fpslabel",
                     "parent": "",
+                    "child-index": -1,
                     "components":
                     [
                         {
@@ -288,7 +618,7 @@ const char proj_json[] = R"json(
                             "data":
                             {
                                 "text": "FPS: ___",
-                                "size": 10,
+                                "text-size": 10,
                                 "bounds": [0, 0],
                                 "horizontal-alignment": "left",
                                 "vertical-alignment": "top",

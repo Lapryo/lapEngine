@@ -40,6 +40,12 @@ namespace lapCore
         Alignment(HorizontalAlignment horizontal, VerticalAlignment vertical)
             : horizontal(horizontal), vertical(vertical) {}
     };
+    
+    enum class Axis2D
+    {
+        HORIZONTAL,
+        VERTICAL
+    };
 
     struct FrameVector
     {

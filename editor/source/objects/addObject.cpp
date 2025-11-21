@@ -1,6 +1,7 @@
 #include "objects/addObject.hpp"
+#include "editor.hpp"
 
-void AddObject(Scene* scene, Object object)
+void AddObject(Scene* scene, Object &object)
 {
     auto selectionMenu = scene->FindObject("selectionMenu");
 
@@ -8,10 +9,11 @@ void AddObject(Scene* scene, Object object)
 
     // TODO: Add an object to the project map if one has not been created yet
 
+
     // TODO: IMPLEMENT PREFABS
 
     std::string objectName = "Object";
-    auto obj = scene->AddObject(objectName, "sidebar");
+    auto obj = scene->AddObject(objectName, "sidebar", -1);
 
     Renderable renderable(30, true, true, (Color){125, 97, 103, 255});
     UIOrigin origin(

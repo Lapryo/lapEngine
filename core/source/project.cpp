@@ -299,7 +299,12 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             float scrollOffset = data.value("scroll-offset", 0.0f);
             float scrollSpeed = data.value("scroll-speed", 20.0f);
 
-            scene->AddElement<UIList>(object, scrollSize, displaySize, hScrollBarRight, vScrollBarBottom, maskOutsideContent, scrollOffset, scrollSpeed);
+            Axis2D direction = Axis2D::VERTICAL;
+            std::string dirText = data.value("direction", "vertical");
+            if (dirText == "horizontal")
+                direction = Axis2D::HORIZONTAL;
+
+            scene->AddElement<UIList>(object, scrollSize, displaySize, hScrollBarRight, vScrollBarBottom, maskOutsideContent, scrollOffset, scrollSpeed, direction);
         }
         else if (type == "origin2d")
         {
@@ -336,9 +341,10 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             };
 
             UIOrigin bounds(FrameVector(scalePosition, offsetPosition), FrameVector(scaleSize, offsetSize));
+            bool active = data.value("active", true);
 
             // EventBus buttonEvents, UIOrigin bound
-            scene->AddElement<UIButton>(object, eventBus, bounds);
+            scene->AddElement<UIButton>(object, eventBus, bounds, active);
         }
         else if (type == "attribute")
         {
@@ -370,7 +376,7 @@ void GetObjects(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
     {
         for (const auto &object : sceneJson["objects"])
         {
-            auto entity = scene->AddObject(object.value("name", ""), object.value("parent", ""));
+            auto entity = scene->AddObject(object.value("name", ""), object.value("parent", ""), object.value("child-index", -1));
             std::cout << "[PROJECT] [SCENE] [OBJECT] Loading object:\n[PROJECT] [SCENE] [OBJECT] \tName: " << object.value("name", "") << '\n';
 
             if (!object.contains("components") || !object["components"].is_array())

@@ -38,11 +38,21 @@ void EditorApp::Init()
 
     SetWindowTitle(windowTitle.c_str());
 
+    // Setup project JSON here
+    lapEditor::loadedProjectJson = {
+        {"name", "Untitled Project"},
+        {"version", "1.0.0"},
+        {"scenes", nlohmann::json::array()}
+    };
+
     // setup objects here
     SelectionMenuObject::RegisterLogic();
     FPSLabelObject::RegisterLogic();
     SidebarObject::RegisterLogic();
     AddObjectObject::RegisterLogic();
+    FileButtonObject::RegisterLogic();
+    FileDropdownObject::RegisterLogic();
+    OpenProjectObject::RegisterLogic();
 
     state = AppState::RUNNING;
 }
@@ -62,6 +72,9 @@ int main()
 {
     Project editorProject = UnpackProject(proj_json);
     EditorApp editor(editorProject);
+
+    // Start by asking if the user wants to load a project or create a new one
+    
 
     editor.Init();
     editor.Run();

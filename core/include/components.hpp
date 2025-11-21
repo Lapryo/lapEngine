@@ -47,6 +47,8 @@ namespace lapCore
         FrameVector scrollSize;
         FrameVector displaySize;
 
+        Axis2D direction;
+
         bool hScrollRight = true;
         bool vScrollBottom = true;
 
@@ -55,9 +57,9 @@ namespace lapCore
         float scrollOffset = 0.f;
         float scrollSpeed = 20.f; // in pixels
 
-        UIList(FrameVector scrollSize, FrameVector displaySize, bool hScrollRight, bool vScrollBottom, bool maskOutsideContent, float scrollOffset, float scrollSpeed)
+        UIList(FrameVector scrollSize, FrameVector displaySize, bool hScrollRight, bool vScrollBottom, bool maskOutsideContent, float scrollOffset, float scrollSpeed, Axis2D direction)
             : scrollSize(scrollSize), displaySize(displaySize), hScrollRight(hScrollRight), vScrollBottom(vScrollBottom), maskOutsideContent(maskOutsideContent),
-            scrollOffset(scrollOffset), scrollSpeed(scrollSpeed) {}
+            scrollOffset(scrollOffset), scrollSpeed(scrollSpeed), direction(direction) {}
     };
 
     struct Sprite // Uses Origin2D instead
@@ -105,8 +107,8 @@ namespace lapCore
         UIOrigin bounds;
         bool mouseHovering = false;
 
-        UIButton(EventBus buttonEvents, UIOrigin bounds)
-            : events(buttonEvents), bounds(bounds) {}
+        UIButton(EventBus buttonEvents, UIOrigin bounds, bool active = true)
+            : events(buttonEvents), bounds(bounds), active(active) {}
     };
 
     struct Cam2D

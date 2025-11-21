@@ -87,14 +87,18 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
     worldSpace.reserve(renderList.size());
     screenSpace.reserve(renderList.size());
 
+    std::cout << "Got to render loop.\n";
+
     for (const auto &entry : renderList)
         (entry.isScreenSpace ? screenSpace : worldSpace).push_back(entry);
+
+    std::cout << "Got to render loop. 2\n";
 
     auto drawSprite = [&](Object obj, const Scene *scene)
     {
         auto *sprite = registry.try_get<Sprite>(obj);
 
-        const Texture2D* texture;
+        const Texture2D *texture;
 
         auto it = scene->resources.textures.find(sprite->textureName);
         if (it != scene->resources.textures.end())
@@ -139,7 +143,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
     {
         auto *image = registry.try_get<Image>(obj);
 
-        const Texture2D* texture;
+        const Texture2D *texture;
 
         auto it = scene->resources.textures.find(image->sprite.textureName);
         if (it != scene->resources.textures.end())
@@ -196,7 +200,11 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         if (!frame || !frame->renderable.visible)
             return;
 
+        std::cout << "Got to render loop 3.\n";
+
         Rectangle rect = UIOriginToRect(frame->origin, scene->logicalResolution.x, scene->logicalResolution.y);
+
+        std::cout << "Got to render loop 4.\n";
 
         if (auto *origin = registry.try_get<Origin2D>(obj))
         {
@@ -205,6 +213,8 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             rect.width *= origin->scale.x;
             rect.height *= origin->scale.y;
         }
+
+        std::cout << "Got to render loop 5.\n";
 
         DrawRectangle(rect.x, rect.y, rect.width, rect.height, frame->renderable.tint);
     };
@@ -217,40 +227,41 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         float x = 0.f, y = 0.f;
 
+        std::cout << "Got to render loop 6.\n";
+
         x = text->frame.origin.position.scale.x * scene->logicalResolution.x + text->frame.origin.position.offset.x + text->textPadding.left;
         y = text->frame.origin.position.scale.y * scene->logicalResolution.y + text->frame.origin.position.offset.y + text->textPadding.top;
 
-        auto *frame = registry.try_get<Frame>(obj);
-        auto *origin = registry.try_get<Origin2D>(obj);
-
-        if (frame)
-        {
-            x += frame->origin.position.scale.x * scene->logicalResolution.x + frame->origin.position.offset.x;
-            y += frame->origin.position.scale.y * scene->logicalResolution.y + frame->origin.position.offset.y;
-        }
-
-        if (origin)
-        {
-            x += origin->position.x;
-            y += origin->position.y;
-        }
+        std::cout << "Got to render loop 7.\n";
 
         // Handle horizontal alignment
         float textWidth = MeasureText(text->text.c_str(), text->textSize);
         switch (text->textAlignment.horizontal)
         {
-            case HorizontalAlignment::LEFT: break;
-            case HorizontalAlignment::MIDDLE: x += (text->textBounds.offset.x - textWidth - text->textPadding.right) * 0.5f; break;
-            case HorizontalAlignment::RIGHT: x += text->textBounds.offset.x - textWidth - text->textPadding.right; break;
+        case HorizontalAlignment::LEFT:
+            break;
+        case HorizontalAlignment::MIDDLE:
+            x += (text->textBounds.offset.x - textWidth - text->textPadding.right) * 0.5f;
+            break;
+        case HorizontalAlignment::RIGHT:
+            x += text->textBounds.offset.x - textWidth - text->textPadding.right;
+            break;
         }
 
         // Handle vertical alignment
         switch (text->textAlignment.vertical)
         {
-            case VerticalAlignment::TOP: break;
-            case VerticalAlignment::MIDDLE: y += (text->textBounds.offset.y - text->textSize - text->textPadding.bottom) * 0.5f; break;
-            case VerticalAlignment::BOTTOM: y += text->textBounds.offset.y - text->textSize - text->textPadding.bottom; break;
+        case VerticalAlignment::TOP:
+            break;
+        case VerticalAlignment::MIDDLE:
+            y += (text->textBounds.offset.y - text->textSize - text->textPadding.bottom) * 0.5f;
+            break;
+        case VerticalAlignment::BOTTOM:
+            y += text->textBounds.offset.y - text->textSize - text->textPadding.bottom;
+            break;
         }
+
+        std::cout << "Got to render loop 8.\n";
 
         DrawText(text->text.c_str(), x, y, text->textSize, text->frame.renderable.tint);
     };
@@ -306,8 +317,12 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         }
     };
 
+    std::cout << "Got to render loop 9.\n";
+
     drawEntries(worldSpace, true);
     drawEntries(screenSpace, false);
+
+    std::cout << "Got to render loop 10.\n";
 }
 
 void ScriptSystem::Update(float deltaTime, entt::registry &registry)
@@ -317,7 +332,8 @@ void ScriptSystem::Update(float deltaTime, entt::registry &registry)
     for (auto entity : view)
     {
         auto &script = view.get<Script>(entity);
-        if (!script.active) continue;
+        if (!script.active)
+            continue;
 
         if (!script.initiated)
         {
@@ -340,7 +356,8 @@ void ScriptSystem::OnDestroy(entt::registry &registry)
     for (auto entity : view)
     {
         auto &script = view.get<Script>(entity);
-        if (!script.active) continue;
+        if (!script.active)
+            continue;
 
         auto destroyFunc = ScriptRegistry::onDestroyFunctions[script.onDestroyFunction];
         if (destroyFunc)
@@ -351,64 +368,118 @@ void ScriptSystem::OnDestroy(entt::registry &registry)
 void GUISystem::Update(float deltaTime, entt::registry &registry)
 {
     Vector2 mouse = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
-
-    // This needs to be adjusted for an index value
+    
     auto uilistView = registry.view<UIList, Frame>();
     for (auto [entity, list, frame] : uilistView.each())
     {
         auto children = scene->GetChildren(entity);
-        float offsetY = 0.0f;
 
-        for (auto e : children)
+        if (list.direction == Axis2D::VERTICAL)
         {
-            auto *label = registry.try_get<TextLabel>(e);
+            float offsetY = -(list.displaySize.scale.y * scene->logicalResolution.y + list.displaySize.offset.y); // start above first item
 
-            if (!label) continue;
-
-            label->frame.renderable.visible = frame.renderable.visible;
-
-            Vector2 parentPos{
-                frame.origin.position.scale.x * scene->logicalResolution.x + frame.origin.position.offset.x,
-                frame.origin.position.scale.y * scene->logicalResolution.y + frame.origin.position.offset.y
-            };
-
-            label->frame.origin.position = frame.origin.position;
-
-            auto *button = registry.try_get<UIButton>(e);
-            if (button)
+            for (int i = 0; i < children.size(); i++)
             {
-                button->bounds.position = label->frame.origin.position;
+                std::cout << "got to here. 1\n";
+                auto e = children[i];
+                std::cout << "got to here. 2\n";
+
+                offsetY += list.displaySize.scale.y * scene->logicalResolution.y + list.displaySize.offset.y;
+
+                auto *label = registry.try_get<TextLabel>(e);
+                if (label)
+                {
+                    label->frame.renderable.visible = frame.renderable.visible;
+                    label->frame.origin.position = frame.origin.position;
+
+                    label->frame.origin.position.offset.y += offsetY;
+                }
+
+                auto *frameComp = registry.try_get<Frame>(e);
+                if (frameComp)
+                {
+                    frameComp->renderable.visible = frame.renderable.visible;
+                    frameComp->origin.position = frame.origin.position;
+
+                    frameComp->origin.position.offset.y += offsetY;
+                }
+
+                auto *button = registry.try_get<UIButton>(e);
+                if (button)
+                {
+                    button->bounds.position = frame.origin.position;
+                    button->active = frame.renderable.visible;
+
+                    button->bounds.position.offset.y += offsetY;
+                }
+                std::cout << "got to here. 3\n";
+            }
+        }
+        else
+        {
+            float offsetX = -(list.displaySize.scale.x * scene->logicalResolution.x + list.displaySize.offset.x); // start next to first item
+
+            for (int i = 0; i < children.size(); i++)
+            {
+                std::cout << "got to here.\n";
+                auto e = children[i];
+                std::cout << "got to here.\n";
+
+                offsetX += list.displaySize.scale.x * scene->logicalResolution.x + list.displaySize.offset.x;
+
+                auto *label = registry.try_get<TextLabel>(e);
+                if (label)
+                {
+                    label->frame.renderable.visible = frame.renderable.visible;
+                    label->frame.origin.position = frame.origin.position;
+
+                    label->frame.origin.position.offset.x += offsetX;
+                }
+
+                auto *frameComp = registry.try_get<Frame>(e);
+                if (frameComp)
+                {
+                    frameComp->renderable.visible = frame.renderable.visible;
+                    frameComp->origin.position = frame.origin.position;
+
+                    frameComp->origin.position.offset.x += offsetX;
+                }
+
+                auto *button = registry.try_get<UIButton>(e);
+                if (button)
+                {
+                    button->bounds.position = frame.origin.position;
+                    button->active = frame.renderable.visible;
+
+                    button->bounds.position.offset.x += offsetX;
+                }
+
+                std::cout << "got to here.\n";
             }
 
-            // Child offset relative to parent frame
-            //label->frame.origin.position.offset.x = parentPos.x + label->textPadding.left;
-            //label->frame.origin.position.offset.y = parentPos.y + offsetY + label->textPadding.top;
-
-            // Update offsetY for next child
-            float childHeight = 0.f;
-            if (auto *childFrame = registry.try_get<Frame>(e))
-            {
-                childHeight = childFrame->origin.size.scale.y * scene->logicalResolution.y + childFrame->origin.size.offset.y;
-            }
-            if (childHeight <= 0)
-                childHeight = label->textSize; // fallback
-
-            offsetY += childHeight;
+            std::cout << "finished horizontal list update.\n";
         }
     }
 
-
-
+    std::cout << "finished UIList update.\n";
 
     auto buttonView = registry.view<UIButton>();
     for (auto entity : buttonView)
     {
-        auto &button = buttonView.get<UIButton>(entity);
+        auto *try_button = registry.try_get<UIButton>(entity);
+        if (!try_button)
+            continue;
+
+        auto &button = *try_button;
+        std::cout << "got to here.\n";
+
         if (!button.active)
             continue;
 
         Rectangle rect = UIOriginToRect(button.bounds, scene->logicalResolution.x, scene->logicalResolution.y);
         bool hovered = CheckCollisionPointRec(mouse, rect);
+
+        std::cout << "got to here.\n";
 
         if (hovered)
         {
@@ -434,8 +505,12 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
         {
             if (button.mouseHovering)
                 EventRegistry::Fire<>(button.events.events["mouse-leave"]);
-            
+
             button.mouseHovering = false;
         }
+
+        std::cout << "got to here. end\n";
     }
+
+    std::cout << "finished GUI update.\n";
 }

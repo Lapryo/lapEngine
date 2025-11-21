@@ -68,7 +68,7 @@ namespace lapCore
     {
         auto wrapper_callback = [
             scene, 
-            object,
+            &object,
             handler = std::forward<SystemFunc>(systemHandler)
         ]() { 
             handler(scene, object);
@@ -82,7 +82,7 @@ namespace lapCore
     {
         auto wrapper_callback = [
             scene, 
-            object, 
+            &object, 
             handler = std::forward<SystemFunc>(systemHandler)
         ](const EventType& eventData) {
             handler(eventData, scene, object);
