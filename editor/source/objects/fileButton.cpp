@@ -1,41 +1,37 @@
 #include "objects/fileButton.hpp"
 #include "editor.hpp"
 
-void OpenDropdown(Scene* scene, Object &object)
+void OpenDropdown(Scene* scene, Object object)
 {
-    std::cout << "open file drop down.\n";
-
     auto fileDropdown = scene->FindObject("file-dropdown");
-    auto &frame = scene->FindElement<Frame>(fileDropdown);
-    auto &button = scene->FindElement<UIButton>(fileDropdown);
+    auto *frame = scene->FindElement<Frame>(fileDropdown);
+    auto *button = scene->FindElement<UIButton>(fileDropdown);
 
-    auto openProjObject = scene->FindObject("open-project-button");
-    auto &openProjText = scene->FindElement<TextLabel>(openProjObject);
-    auto &openProjButton = scene->FindElement<UIButton>(openProjObject);
-    auto &openProjFrame = scene->FindElement<Frame>(openProjObject);
-
-    frame.renderable.visible = true;
-    button.active = true;
-    openProjButton.active = true;
-    openProjText.frame.renderable.visible = true;
-    openProjFrame.renderable.visible = true;
+    if (frame)
+        frame->renderable.visible = true;
+    if (button)
+        button->active = true;
 }
 
-void HighlightFileButton(Scene* scene, Object &object)
+void HighlightFileButton(Scene* scene, Object object)
 {
-    auto &frame = scene->FindElement<Frame>(object);
-    frame.renderable.tint = (Color){255, 255, 255, 25};
+    auto *frame = scene->FindElement<Frame>(object);
+    if (frame)
+        frame->renderable.tint = (Color){255, 255, 255, 25};
 }
 
-void UnhighlightFileButton(Scene* scene, Object &object)
+void UnhighlightFileButton(Scene* scene, Object object)
 {
-    auto &frame = scene->FindElement<Frame>(object);
-    frame.renderable.tint = (Color){255, 255, 255, 0};
+    auto *frame = scene->FindElement<Frame>(object);
+    if (frame)
+        frame->renderable.tint = (Color){255, 255, 255, 0};
+    else
+        std::cout << "for some reason, the file button doesn't think it has a frame?\n";
 }
 
 void FileButtonObject::RegisterLogic()
 {
-    ScriptRegistry::onCreateFunctions["setup-file-button"] = [](Scene* scene, Object &object) {
+    ScriptRegistry::onCreateFunctions["setup-file-button"] = [](Scene* scene, Object object) {
         ConnectECSEvent(scene, object, "open-file-dropdown", OpenDropdown);
         ConnectECSEvent(scene, object, "highlight-file-button", HighlightFileButton);
         ConnectECSEvent(scene, object, "unhighlight-file-button", UnhighlightFileButton);

@@ -73,30 +73,30 @@ namespace lapCore
         }
 
         Object AddObject(const std::string &name, const std::string &parent, int childIndex);
-        void RemoveObject(Object &object);
+        void RemoveObject(Object object);
         Object FindObject(const std::string &name);
 
-        std::string GetObjectName(Object &object);
+        std::string GetObjectName(Object object);
 
-        std::vector<Object> GetChildren(Object &object);
-        Object FindChild(Object &object, const std::string &name);
+        std::vector<Object> GetChildren(Object object);
+        Object FindChild(Object object, const std::string &name);
 
         template <typename Element, typename... ElementArgs>
-        Element AddElement(Object &object, ElementArgs&&... args)
+        Element AddElement(Object object, ElementArgs&&... args)
         {
             return objects.emplace<Element>(object, std::forward<ElementArgs>(args)...);
         }
 
         template <typename Element>
-        void RemoveElement(Object &object)
+        void RemoveElement(Object object)
         {
             objects.remove<Element>(object);
         }
 
         template <typename Element>
-        Element &FindElement(Object &object)
+        Element *FindElement(Object object)
         {
-            return objects.get<Element>(object);
+            return objects.try_get<Element>(object);
         }
 
         template <typename Element>

@@ -1,11 +1,13 @@
 #include "objects/addObject.hpp"
 #include "editor.hpp"
 
-void AddObject(Scene* scene, Object &object)
+void AddObject(Scene* scene, Object object)
 {
     auto selectionMenu = scene->FindObject("selectionMenu");
 
-    scene->FindElement<Frame>(selectionMenu).renderable.visible = false;
+    auto *frame = scene->FindElement<Frame>(selectionMenu);
+    if (frame)
+        frame->renderable.visible = false;
 
     // TODO: Add an object to the project map if one has not been created yet
 
@@ -21,15 +23,15 @@ void AddObject(Scene* scene, Object &object)
         FrameVector((Vector2){0.2, 0.05}, (Vector2){0, 0})
     );
 
-    Frame frame(renderable, origin);
+    Frame textframe(renderable, origin);
     Alignment textAlignment(HorizontalAlignment::LEFT, VerticalAlignment::TOP);
 
-    scene->AddElement<TextLabel>(obj, frame, objectName, 20, textAlignment, FrameVector{{0.2, 0.05}, {0, 0}}, Padding{5, 0, 5, 0});
+    scene->AddElement<TextLabel>(obj, textframe, objectName, 20, textAlignment, FrameVector{{0.2, 0.05}, {0, 0}}, Padding{5, 0, 5, 0});
 }
 
 void AddObjectObject::RegisterLogic()
 {
-    ScriptRegistry::onCreateFunctions["connect-add-object"] = [](Scene* scene, Object &object) {
+    ScriptRegistry::onCreateFunctions["connect-add-object"] = [](Scene* scene, Object object) {
         ConnectECSEvent(scene, object, "add-object", AddObject);
     };
 }

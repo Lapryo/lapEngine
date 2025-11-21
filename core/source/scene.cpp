@@ -115,7 +115,7 @@ Object Scene::AddObject(const std::string &name, const std::string &parent, int 
     return object;
 }
 
-void Scene::RemoveObject(Object &object)
+void Scene::RemoveObject(Object object)
 {
     objects.destroy(object);
 }
@@ -141,7 +141,7 @@ Object Scene::FindObject(const std::string &name)
     return objectMap[name].object;
 }
 
-std::string lapCore::Scene::GetObjectName(Object &object)
+std::string lapCore::Scene::GetObjectName(Object object)
 {
     for (auto entry : objectMap)
     {
@@ -152,18 +152,16 @@ std::string lapCore::Scene::GetObjectName(Object &object)
     return "";
 }
 
-std::vector<Object> lapCore::Scene::GetChildren(Object &object)
+std::vector<Object> lapCore::Scene::GetChildren(Object object)
 {
-    std::cout << "Getting children of object: " << GetObjectName(object) << "\n";
     if (GetObjectName(object) == "")
         return {};
     return objectMap[GetObjectName(object)].children;
 }
 
-Object lapCore::Scene::FindChild(Object &object, const std::string &name)
+Object lapCore::Scene::FindChild(Object object, const std::string &name)
 {
     std::string objName = GetObjectName(object);
-    std::cout << "objName: " << objName << "\n";
     if (objName == "")
         return Object{entt::null};
     for (auto &child : objectMap[objName].children)
@@ -171,4 +169,5 @@ Object lapCore::Scene::FindChild(Object &object, const std::string &name)
         if (GetObjectName(child) == name)
             return child;
     }
+    return Object{entt::null};
 }

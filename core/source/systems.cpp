@@ -87,12 +87,8 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
     worldSpace.reserve(renderList.size());
     screenSpace.reserve(renderList.size());
 
-    std::cout << "Got to render loop.\n";
-
     for (const auto &entry : renderList)
         (entry.isScreenSpace ? screenSpace : worldSpace).push_back(entry);
-
-    std::cout << "Got to render loop. 2\n";
 
     auto drawSprite = [&](Object obj, const Scene *scene)
     {
@@ -200,11 +196,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         if (!frame || !frame->renderable.visible)
             return;
 
-        std::cout << "Got to render loop 3.\n";
-
         Rectangle rect = UIOriginToRect(frame->origin, scene->logicalResolution.x, scene->logicalResolution.y);
-
-        std::cout << "Got to render loop 4.\n";
 
         if (auto *origin = registry.try_get<Origin2D>(obj))
         {
@@ -213,8 +205,6 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             rect.width *= origin->scale.x;
             rect.height *= origin->scale.y;
         }
-
-        std::cout << "Got to render loop 5.\n";
 
         DrawRectangle(rect.x, rect.y, rect.width, rect.height, frame->renderable.tint);
     };
@@ -227,12 +217,8 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         float x = 0.f, y = 0.f;
 
-        std::cout << "Got to render loop 6.\n";
-
         x = text->frame.origin.position.scale.x * scene->logicalResolution.x + text->frame.origin.position.offset.x + text->textPadding.left;
         y = text->frame.origin.position.scale.y * scene->logicalResolution.y + text->frame.origin.position.offset.y + text->textPadding.top;
-
-        std::cout << "Got to render loop 7.\n";
 
         // Handle horizontal alignment
         float textWidth = MeasureText(text->text.c_str(), text->textSize);
@@ -260,8 +246,6 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             y += text->textBounds.offset.y - text->textSize - text->textPadding.bottom;
             break;
         }
-
-        std::cout << "Got to render loop 8.\n";
 
         DrawText(text->text.c_str(), x, y, text->textSize, text->frame.renderable.tint);
     };
@@ -317,12 +301,8 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         }
     };
 
-    std::cout << "Got to render loop 9.\n";
-
     drawEntries(worldSpace, true);
     drawEntries(screenSpace, false);
-
-    std::cout << "Got to render loop 10.\n";
 }
 
 void ScriptSystem::Update(float deltaTime, entt::registry &registry)
@@ -380,9 +360,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
 
             for (int i = 0; i < children.size(); i++)
             {
-                std::cout << "got to here. 1\n";
                 auto e = children[i];
-                std::cout << "got to here. 2\n";
 
                 offsetY += list.displaySize.scale.y * scene->logicalResolution.y + list.displaySize.offset.y;
 
@@ -412,7 +390,6 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
 
                     button->bounds.position.offset.y += offsetY;
                 }
-                std::cout << "got to here. 3\n";
             }
         }
         else
@@ -421,9 +398,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
 
             for (int i = 0; i < children.size(); i++)
             {
-                std::cout << "got to here.\n";
                 auto e = children[i];
-                std::cout << "got to here.\n";
 
                 offsetX += list.displaySize.scale.x * scene->logicalResolution.x + list.displaySize.offset.x;
 
@@ -453,64 +428,46 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
 
                     button->bounds.position.offset.x += offsetX;
                 }
-
-                std::cout << "got to here.\n";
             }
-
-            std::cout << "finished horizontal list update.\n";
         }
     }
 
-    std::cout << "finished UIList update.\n";
-
     auto buttonView = registry.view<UIButton>();
-    for (auto entity : buttonView)
+    for (auto &entity : buttonView)
     {
-        auto *try_button = registry.try_get<UIButton>(entity);
-        if (!try_button)
+        auto *button = &buttonView.get<UIButton>(entity);
+        if (!button || !button->active)
             continue;
-
-        auto &button = *try_button;
-        std::cout << "got to here.\n";
-
-        if (!button.active)
-            continue;
-
-        Rectangle rect = UIOriginToRect(button.bounds, scene->logicalResolution.x, scene->logicalResolution.y);
+        
+        
+        Rectangle rect = UIOriginToRect(button->bounds, scene->logicalResolution.x, scene->logicalResolution.y);
         bool hovered = CheckCollisionPointRec(mouse, rect);
-
-        std::cout << "got to here.\n";
 
         if (hovered)
         {
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             {
-                EventRegistry::Fire<>(button.events.events["left-click"]);
+                EventRegistry::Fire<>(button->events.events["left-click"]);
             }
 
             if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
-                EventRegistry::Fire<>(button.events.events["right-click"]);
-
+                EventRegistry::Fire<>(button->events.events["right-click"]);
             if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON))
-                EventRegistry::Fire<>(button.events.events["middle-click"]);
+                EventRegistry::Fire<>(button->events.events["middle-click"]);
 
-            if (!button.mouseHovering)
-                EventRegistry::Fire<>(button.events.events["mouse-enter"]);
+            if (button->mouseHovering == false)
+                EventRegistry::Fire<>(button->events.events["mouse-enter"]);
 
-            button.mouseHovering = true;
+            button->mouseHovering = true;
 
-            EventRegistry::Fire<>(button.events.events["mouse-hover"]);
+            EventRegistry::Fire<>(button->events.events["mouse-hover"]);
         }
         else
         {
-            if (button.mouseHovering)
-                EventRegistry::Fire<>(button.events.events["mouse-leave"]);
+            if (button->mouseHovering == true)
+                EventRegistry::Fire<>(button->events.events["mouse-leave"]);
 
-            button.mouseHovering = false;
+            button->mouseHovering = false;
         }
-
-        std::cout << "got to here. end\n";
     }
-
-    std::cout << "finished GUI update.\n";
 }

@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor
+# Install script for directory: C:/Users/wellh/Documents/engine/engine/editor
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,12 +34,12 @@ endif()
 
 # Set path to fallback-tool for dependency-resolution.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/msys64/mingw64/bin/objdump.exe")
+  set(CMAKE_OBJDUMP "C:/other/ucrt64/bin/objdump.exe")
 endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor/install_local_manifest.txt"
+  file(WRITE "C:/Users/wellh/Documents/engine/engine/build/editor/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

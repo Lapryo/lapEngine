@@ -1,86 +1,86 @@
 [
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/editor.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/editor.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/editor.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/editor",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/editor.cpp.obj -c C:/Users/wellh/Documents/engine/engine/editor/source/editor.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/editor/source/editor.cpp",
   "output": "editor/CMakeFiles/lapEditor.dir/source/editor.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/addObject.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/addObject.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/addObject.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/editor",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/addObject.cpp.obj -c C:/Users/wellh/Documents/engine/engine/editor/source/objects/addObject.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/editor/source/objects/addObject.cpp",
   "output": "editor/CMakeFiles/lapEditor.dir/source/objects/addObject.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/fileButton.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/fileButton.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/fileButton.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/editor",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/fileButton.cpp.obj -c C:/Users/wellh/Documents/engine/engine/editor/source/objects/fileButton.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/editor/source/objects/fileButton.cpp",
   "output": "editor/CMakeFiles/lapEditor.dir/source/objects/fileButton.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/fileDropdown.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/fileDropdown.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/fileDropdown.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/editor",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/fileDropdown.cpp.obj -c C:/Users/wellh/Documents/engine/engine/editor/source/objects/fileDropdown.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/editor/source/objects/fileDropdown.cpp",
   "output": "editor/CMakeFiles/lapEditor.dir/source/objects/fileDropdown.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/fpslabel.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/fpslabel.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/fpslabel.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/editor",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/fpslabel.cpp.obj -c C:/Users/wellh/Documents/engine/engine/editor/source/objects/fpslabel.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/editor/source/objects/fpslabel.cpp",
   "output": "editor/CMakeFiles/lapEditor.dir/source/objects/fpslabel.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/openProject.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/openProject.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/editor",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj -c C:/Users/wellh/Documents/engine/engine/editor/source/objects/openProject.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/editor/source/objects/openProject.cpp",
   "output": "editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/selectionMenu.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/selectionMenu.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/editor",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj -c C:/Users/wellh/Documents/engine/engine/editor/source/objects/selectionMenu.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/editor/source/objects/selectionMenu.cpp",
   "output": "editor/CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/sidebar.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/sidebar.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/editor",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj -c C:/Users/wellh/Documents/engine/engine/editor/source/objects/sidebar.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/editor/source/objects/sidebar.cpp",
   "output": "editor/CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/app.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/app.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/app.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/core",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/app.cpp.obj -c C:/Users/wellh/Documents/engine/engine/core/source/app.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/core/source/app.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/app.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/core.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/core.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/core.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/core",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/core.cpp.obj -c C:/Users/wellh/Documents/engine/engine/core/source/core.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/core/source/core.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/core.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/project.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/project.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/project.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/core",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/project.cpp.obj -c C:/Users/wellh/Documents/engine/engine/core/source/project.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/core/source/project.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/project.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/resource_manager.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/resource_manager.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/core",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj -c C:/Users/wellh/Documents/engine/engine/core/source/resource_manager.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/core/source/resource_manager.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/scene.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/scene.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/scene.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/core",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/scene.cpp.obj -c C:/Users/wellh/Documents/engine/engine/core/source/scene.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/core/source/scene.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/scene.cpp.obj"
 },
 {
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/systems.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems.cpp",
+  "directory": "C:/Users/wellh/Documents/engine/engine/build/core",
+  "command": "C:/other/ucrt64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/systems.cpp.obj -c C:/Users/wellh/Documents/engine/engine/core/source/systems.cpp",
+  "file": "C:/Users/wellh/Documents/engine/engine/core/source/systems.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/systems.cpp.obj"
 }
 ]

@@ -67,7 +67,7 @@ const char proj_json[] = R"json(
                                 "size": [1, 0.05, 0, 0],
                                 "renderable":
                                 {
-                                    "zlayer": 2,
+                                    "zlayer": 1,
                                     "isScreenSpace": true,
                                     "visible": true,
                                     "tint": [18, 17, 41, 255]
@@ -297,7 +297,7 @@ const char proj_json[] = R"json(
                                 "size": [0.15, 0, 0, 15],
                                 "renderable":
                                 {
-                                    "zlayer": 5,
+                                    "zlayer": 6,
                                     "isScreenSpace": true,
                                     "visible": false,
                                     "tint": [255, 255, 255, 0]
@@ -318,7 +318,7 @@ const char proj_json[] = R"json(
                                 "size": [0, 0, 0, 0],
                                 "renderable":
                                 {
-                                    "zlayer": 6,
+                                    "zlayer": 7,
                                     "isScreenSpace": true,
                                     "visible": false,
                                     "tint": [125, 97, 103, 255]
@@ -623,13 +623,13 @@ const char proj_json[] = R"json(
                                 "horizontal-alignment": "left",
                                 "vertical-alignment": "top",
                                 "padding": [0, 0, 0, 0],
-                                "position": [0.2, 0, 0, 0],
+                                "position": [0.2, 0.05, 0, 0],
                                 "size": [0, 0, 0, 0],
                                 "renderable":
                                 {
                                     "zlayer": 2,
                                     "isScreenSpace": true,
-                                    "visible": true,
+                                    "visible": false,
                                     "tint": [179, 95, 76, 255]
                                 }
                             }

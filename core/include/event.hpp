@@ -64,11 +64,11 @@ namespace lapCore
     // =======================================================================
     
     template<typename SystemFunc>
-    void ConnectECSEvent(Scene* scene, Object &object, const std::string& eventName, SystemFunc&& systemHandler)
+    void ConnectECSEvent(Scene* scene, Object object, const std::string& eventName, SystemFunc&& systemHandler)
     {
         auto wrapper_callback = [
             scene, 
-            &object,
+            object,
             handler = std::forward<SystemFunc>(systemHandler)
         ]() { 
             handler(scene, object);
@@ -78,11 +78,11 @@ namespace lapCore
     }
     
     template<typename EventType, typename SystemFunc>
-    void ConnectECSEvent(Scene* scene, Object &object, const std::string& eventName, SystemFunc&& systemHandler)
+    void ConnectECSEvent(Scene* scene, Object object, const std::string& eventName, SystemFunc&& systemHandler)
     {
         auto wrapper_callback = [
             scene, 
-            &object, 
+            object, 
             handler = std::forward<SystemFunc>(systemHandler)
         ](const EventType& eventData) {
             handler(eventData, scene, object);
