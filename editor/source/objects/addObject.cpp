@@ -16,10 +16,10 @@ void AddObject(Scene *scene, Object object)
     std::string objectName = "Object";
     auto obj = scene->AddObject(objectName, "sidebar", -1);
 
-    Renderable renderable(30, true, true, (Color){125, 97, 103, 255});
+    Renderable renderable(30, true, true, (rl::Color){125, 97, 103, 255});
     UIOrigin origin(
-        FrameVector((Vector2){0, 0}, (Vector2){0, 0}),
-        FrameVector((Vector2){0.2, 0.05}, (Vector2){0, 0}));
+        FrameVector((rl::Vector2){0, 0}, (rl::Vector2){0, 0}),
+        FrameVector((rl::Vector2){0.2, 0.05}, (rl::Vector2){0, 0}));
 
     Frame textframe(renderable, origin);
     Alignment textAlignment(HorizontalAlignment::LEFT, VerticalAlignment::TOP);

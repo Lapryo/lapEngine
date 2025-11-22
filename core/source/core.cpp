@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 
+
 std::string lapCore::ReadFileToString(const std::string &filePath)
 {
     std::ifstream file(filePath);
@@ -21,12 +22,12 @@ std::string lapCore::ReadFileToString(const std::string &filePath)
     return buffer.str();
 }
 
-Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight)
+rl::Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight)
 {
-    Vector2 mouse = GetMousePosition();
+    rl::Vector2 mouse = rl::GetMousePosition();
 
-    float screenWidth = (float)GetScreenWidth();
-    float screenHeight = (float)GetScreenHeight();
+    float screenWidth = (float)rl::GetScreenWidth();
+    float screenHeight = (float)rl::GetScreenHeight();
 
     float screenAspect = screenWidth / screenHeight;
     float targetAspect = (float)logicalWidth / logicalHeight;
@@ -61,9 +62,9 @@ Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight)
     return mouse;
 }
 
-Rectangle lapCore::UIOriginToRect(UIOrigin origin, int logicalWidth, int logicalHeight)
+rl::Rectangle lapCore::UIOriginToRect(UIOrigin origin, int logicalWidth, int logicalHeight)
 {
-    Rectangle rect;
+    rl::Rectangle rect;
 
     rect.x = origin.position.scale.x * logicalWidth + origin.position.offset.x;
     rect.y = origin.position.scale.y * logicalHeight + origin.position.offset.y;

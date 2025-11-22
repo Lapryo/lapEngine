@@ -37,15 +37,15 @@ namespace lapCore
         std::vector<AssetLoadRequest> queuedAssets;
         ResourceManager resources;
 
-        Vector2 logicalWindowPos;
-        Vector2 logicalResolution;
+        rl::Vector2 logicalWindowPos;
+        rl::Vector2 logicalResolution;
         double resolutionScale = 1;
 
         void QueueAsset(const std::string &name, const std::string &type, const std::string &path);
         void QueueAsset(const AssetLoadRequest &asset);
         void LoadQueuedAssets();
 
-        void Update(float deltaTime, RenderTexture2D &target);
+        void Update(float deltaTime, rl::RenderTexture2D &target);
 
         template <typename SystemType, typename... SystemArgs>
         void AddSystem(unsigned int order, SystemArgs &&...args)

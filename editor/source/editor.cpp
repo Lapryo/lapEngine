@@ -36,7 +36,7 @@ void EditorApp::Init()
     std::uniform_int_distribution<int> intDist(0, windowSubTitles.size() - 1);
     std::string windowTitle = "lapEditor - " + windowSubTitles[intDist(rng)];
 
-    SetWindowTitle(windowTitle.c_str());
+    rl::SetWindowTitle(windowTitle.c_str());
 
     // Setup project JSON here
     lapEditor::loadedProjectJson = {
@@ -59,10 +59,10 @@ void EditorApp::Init()
 
 void EditorApp::Update(float deltaTime)
 {
-    if (IsKeyReleased(KEY_F11))
+    if (rl::IsKeyReleased(rl::KEY_F11))
     {
-        ToggleFullscreen();
-        SetWindowPosition(100, 100);
+        rl::ToggleFullscreen();
+        rl::SetWindowPosition(100, 100);
     }
 
     project.main_scene->Update(deltaTime, project.target);

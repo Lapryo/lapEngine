@@ -94,7 +94,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
     {
         auto *sprite = registry.try_get<Sprite>(obj);
 
-        const Texture2D *texture;
+        const rl::Texture2D *texture;
 
         auto it = scene->resources.textures.find(sprite->textureName);
         if (it != scene->resources.textures.end())
@@ -109,8 +109,8 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         auto *origin = registry.try_get<Origin2D>(obj);
 
-        Vector2 pos{0.f, 0.f};
-        Vector2 size{(float)texture->width, (float)texture->height};
+        rl::Vector2 pos{0.f, 0.f};
+        rl::Vector2 size{(float)texture->width, (float)texture->height};
         float rotation = 0.f;
 
         auto *rotData = registry.try_get<RotationalData>(obj);
@@ -126,11 +126,11 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             size.y *= origin->scale.y;
         }
 
-        DrawTexturePro(
+        rl::DrawTexturePro(
             *texture,
             {0.f, 0.f, (float)texture->width, (float)texture->height},
             {pos.x, pos.y, size.x, size.y},
-            (rotData ? rotData->anchor : (Vector2){0.0f, 0.0f}),
+            (rotData ? rotData->anchor : (rl::Vector2){0.0f, 0.0f}),
             rotation,
             sprite->renderable.tint);
     };
@@ -139,7 +139,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
     {
         auto *image = registry.try_get<Image>(obj);
 
-        const Texture2D *texture;
+        const rl::Texture2D *texture;
 
         auto it = scene->resources.textures.find(image->sprite.textureName);
         if (it != scene->resources.textures.end())
@@ -156,7 +156,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         auto *origin = registry.try_get<Origin2D>(obj);
         auto *rotData = registry.try_get<RotationalData>(obj);
 
-        Vector2 pos{0, 0}, size{(float)texture->width, (float)texture->height};
+        rl::Vector2 pos{0, 0}, size{(float)texture->width, (float)texture->height};
         float rotation = 0.f;
 
         if (rotData)
@@ -181,11 +181,11 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             size.y *= origin->scale.y;
         }
 
-        DrawTexturePro(
+        rl::DrawTexturePro(
             *texture,
             {0.f, 0.f, (float)texture->width, (float)texture->height},
             {pos.x, pos.y, size.x, size.y},
-            (rotData ? rotData->anchor : (Vector2){0.0f, 0.0f}),
+            (rotData ? rotData->anchor : (rl::Vector2){0.0f, 0.0f}),
             rotation,
             image->sprite.renderable.tint);
     };
@@ -196,7 +196,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         if (!frame || !frame->renderable.visible)
             return;
 
-        Rectangle rect = UIOriginToRect(frame->origin, scene->logicalResolution.x, scene->logicalResolution.y);
+        rl::Rectangle rect = UIOriginToRect(frame->origin, scene->logicalResolution.x, scene->logicalResolution.y);
 
         if (auto *origin = registry.try_get<Origin2D>(obj))
         {
@@ -206,7 +206,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             rect.height *= origin->scale.y;
         }
 
-        DrawRectangle(rect.x, rect.y, rect.width, rect.height, frame->renderable.tint);
+        rl::DrawRectangle(rect.x, rect.y, rect.width, rect.height, frame->renderable.tint);
     };
 
     auto drawText = [&](Object obj, const Scene *scene)
@@ -221,7 +221,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         y = text->frame.origin.position.scale.y * scene->logicalResolution.y + text->frame.origin.position.offset.y + text->textPadding.top;
 
         // Handle horizontal alignment
-        float textWidth = MeasureText(text->text.c_str(), text->textSize);
+        float textWidth = rl::MeasureText(text->text.c_str(), text->textSize);
         switch (text->textAlignment.horizontal)
         {
         case HorizontalAlignment::LEFT:
@@ -247,7 +247,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             break;
         }
 
-        DrawText(text->text.c_str(), x, y, text->textSize, text->frame.renderable.tint);
+        rl::DrawText(text->text.c_str(), x, y, text->textSize, text->frame.renderable.tint);
     };
 
     auto drawEntries = [&](const std::vector<RenderEntry> &entries, bool worldSpace)
@@ -256,7 +256,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         {
             for (auto [camEntity, cam] : registry.view<Cam2D>().each())
             {
-                BeginMode2D(cam.camera);
+                rl::BeginMode2D(cam.camera);
                 for (const auto &entry : entries)
                 {
                     switch (entry.type)
@@ -275,7 +275,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
                         break;
                     }
                 }
-                EndMode2D();
+                rl::EndMode2D();
             }
         }
         else
@@ -347,7 +347,7 @@ void ScriptSystem::OnDestroy(entt::registry &registry)
 
 void GUISystem::Update(float deltaTime, entt::registry &registry)
 {
-    Vector2 mouse = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
+    rl::Vector2 mouse = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
 
     auto uilistView = registry.view<UIList, Frame>();
     for (auto [entity, list, frame] : uilistView.each())
@@ -439,19 +439,19 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
         if (!button || !button->active)
             continue;
 
-        Rectangle rect = UIOriginToRect(button->bounds, scene->logicalResolution.x, scene->logicalResolution.y);
-        bool hovered = CheckCollisionPointRec(mouse, rect);
+        rl::Rectangle rect = UIOriginToRect(button->bounds, scene->logicalResolution.x, scene->logicalResolution.y);
+        bool hovered = rl::CheckCollisionPointRec(mouse, rect);
 
         if (hovered)
         {
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            if (rl::IsMouseButtonPressed(rl::MOUSE_LEFT_BUTTON))
             {
                 EventRegistry::Fire<>(button->events.events["left-click"]);
             }
 
-            if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
+            if (rl::IsMouseButtonPressed(rl::MOUSE_RIGHT_BUTTON))
                 EventRegistry::Fire<>(button->events.events["right-click"]);
-            if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON))
+            if (rl::IsMouseButtonPressed(rl::MOUSE_MIDDLE_BUTTON))
                 EventRegistry::Fire<>(button->events.events["middle-click"]);
 
             if (button->mouseHovering == false)

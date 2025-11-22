@@ -8,11 +8,11 @@ void SelectionMenuObject::RegisterLogic()
         if (!frame || !frame->renderable.visible)
             return;
 
-        Vector2 mousePos = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
-        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+        rl::Vector2 mousePos = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
+        if (rl::IsMouseButtonDown(rl::MOUSE_LEFT_BUTTON))
         {
-            Rectangle bounds = UIOriginToRect(frame->origin, scene->logicalResolution.x, scene->logicalResolution.y);
-            if (!CheckCollisionPointRec(mousePos, bounds))
+            rl::Rectangle bounds = UIOriginToRect(frame->origin, scene->logicalResolution.x, scene->logicalResolution.y);
+            if (!rl::CheckCollisionPointRec(mousePos, bounds))
             {
                 frame->renderable.visible = false;
             }

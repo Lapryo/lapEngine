@@ -84,7 +84,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
         if (type == "sprite")
         {
-            Color tint{
+            rl::Color tint{
                 data["tint"].at(0).get<unsigned char>(),
                 data["tint"].at(1).get<unsigned char>(),
                 data["tint"].at(2).get<unsigned char>(),
@@ -106,7 +106,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
             std::cout << "got here.\n";
 
-            Color textColor{
+            rl::Color textColor{
                 data["renderable"]["tint"].at(0).get<unsigned char>(),
                 data["renderable"]["tint"].at(1).get<unsigned char>(),
                 data["renderable"]["tint"].at(2).get<unsigned char>(),
@@ -114,7 +114,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
             std::cout << "got here.\n";
 
-            Vector2 bounds{
+            rl::Vector2 bounds{
                 data["bounds"].at(0).get<float>(),
                 data["bounds"].at(1).get<float>()};
 
@@ -185,7 +185,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             Frame frame(renderable, origin);
 
             Alignment textAlignment(hAlign, vAlign);
-            FrameVector textBounds((Vector2){0, 0}, (Vector2){bounds.x, bounds.y});
+            FrameVector textBounds((rl::Vector2){0, 0}, (rl::Vector2){bounds.x, bounds.y});
 
             // Frame frame, std::string text, float textSize, Alignment textAlignment, FrameVector textBounds, Padding textPadding
             scene->AddElement<TextLabel>(object, frame, text, textSize, textAlignment, textBounds, padding);
@@ -206,18 +206,18 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
             std::vector<Object> excludeList;
 
-            Vector2 offset{
+            rl::Vector2 offset{
                 data["offset"].at(0).get<float>(),
                 data["offset"].at(1).get<float>()};
 
-            Vector2 target{
+            rl::Vector2 target{
                 data["target"].at(0).get<float>(),
                 data["target"].at(1).get<float>()};
 
             float rotation = data["rotation"].get<float>();
             float zoom = data["zoom"].get<float>();
 
-            Camera2D camera;
+            rl::Camera2D camera;
             camera.offset = offset;
             camera.target = target;
             camera.rotation = rotation;
@@ -252,7 +252,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 {data["size"].at(2).get<float>(),
                  data["size"].at(3).get<float>()}};
 
-            Color tint{
+            rl::Color tint{
                 data["renderable"]["tint"].at(0).get<unsigned char>(),
                 data["renderable"]["tint"].at(1).get<unsigned char>(),
                 data["renderable"]["tint"].at(2).get<unsigned char>(),
@@ -320,17 +320,17 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 eventBus.events[name] = event;
             }
 
-            Vector2 scalePosition = {
+            rl::Vector2 scalePosition = {
                 data["bounds"]["position"]["scale"].at(0).get<float>(),
                 data["bounds"]["position"]["scale"].at(1).get<float>()};
-            Vector2 offsetPosition = {
+            rl::Vector2 offsetPosition = {
                 data["bounds"]["position"]["offset"].at(0).get<float>(),
                 data["bounds"]["position"]["offset"].at(1).get<float>()};
 
-            Vector2 scaleSize = {
+            rl::Vector2 scaleSize = {
                 data["bounds"]["size"]["scale"].at(0).get<float>(),
                 data["bounds"]["size"]["scale"].at(1).get<float>()};
-            Vector2 offsetSize = {
+            rl::Vector2 offsetSize = {
                 data["bounds"]["size"]["offset"].at(0).get<float>(),
                 data["bounds"]["size"]["offset"].at(1).get<float>()};
 
@@ -469,10 +469,10 @@ void Project::LoadSettings(const std::string &settingsFilePath)
 
     std::string windowMode = windowJson.value("mode", "windowed");
     bool resizable = windowJson.value("resizable", false);
-    Vector2 windowRes{
+    rl::Vector2 windowRes{
         windowJson["resolution"].at(0),
         windowJson["resolution"].at(1)};
-    Vector2 logicalRes{
+    rl::Vector2 logicalRes{
         windowJson["logical-resolution"].at(0),
         windowJson["logical-resolution"].at(1)};
 
@@ -482,7 +482,7 @@ void Project::LoadSettings(const std::string &settingsFilePath)
 
     std::string windowTitle = windowJson.value("title", "");
 
-    InitWindow(windowRes.x, windowRes.y, windowTitle.c_str());
+    rl::InitWindow(windowRes.x, windowRes.y, windowTitle.c_str());
     for (auto &scene : scenes)
     {
         scene->LoadQueuedAssets();
@@ -490,23 +490,23 @@ void Project::LoadSettings(const std::string &settingsFilePath)
     }
 
     if (resizable)
-        SetWindowState(FLAG_WINDOW_RESIZABLE);
+        rl::SetWindowState(rl::FLAG_WINDOW_RESIZABLE);
 
     if (!decorated)
-        SetWindowState(FLAG_WINDOW_UNDECORATED);
+        rl::SetWindowState(rl::FLAG_WINDOW_UNDECORATED);
 
     if (windowMode == "fullscreen")
-        SetWindowState(FLAG_FULLSCREEN_MODE);
+        rl::SetWindowState(rl::FLAG_FULLSCREEN_MODE);
 
     if (!vsync)
         if (inf_fps)
-            SetTargetFPS(-1);
+            rl::SetTargetFPS(-1);
         else
-            SetTargetFPS(windowJson["max-fps"].get<int>());
+            rl::SetTargetFPS(windowJson["max-fps"].get<int>());
     else
-        SetWindowState(FLAG_VSYNC_HINT);
+        rl::SetWindowState(rl::FLAG_VSYNC_HINT);
 
     main_scene = GetMainScene();
 
-    target = LoadRenderTexture(logicalRes.x, logicalRes.y);
+    target = rl::LoadRenderTexture(logicalRes.x, logicalRes.y);
 }

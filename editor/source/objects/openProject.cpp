@@ -14,14 +14,14 @@ void HighlightOpenProjectButton(Scene *scene, Object object)
 {
     auto *frame = scene->FindElement<Frame>(object);
     if (frame)
-        frame->renderable.tint = (Color){255, 255, 255, 25};
+        frame->renderable.tint = (rl::Color){255, 255, 255, 25};
 }
 
 void UnhighlightOpenProjectButton(Scene *scene, Object object)
 {
     auto *frame = scene->FindElement<Frame>(object);
     if (frame)
-        frame->renderable.tint = (Color){255, 255, 255, 0};
+        frame->renderable.tint = (rl::Color){255, 255, 255, 0};
 }
 
 void OpenProjectObject::RegisterLogic()

@@ -9,6 +9,7 @@ core/CMakeFiles/lapCore.dir/source/app.cpp.obj: C:/Users/WellH/OneDrive/Document
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/event.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/project.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib.h \
+  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib_namespace.h \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/resource_manager.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/scene.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/systems.hpp \
@@ -148,6 +149,7 @@ core/CMakeFiles/lapCore.dir/source/app.cpp.obj: C:/Users/WellH/OneDrive/Document
   C:/msys64/mingw64/include/c++/14.2.0/cmath \
   C:/msys64/mingw64/include/c++/14.2.0/compare \
   C:/msys64/mingw64/include/c++/14.2.0/concepts \
+  C:/msys64/mingw64/include/c++/14.2.0/cstdarg \
   C:/msys64/mingw64/include/c++/14.2.0/cstddef \
   C:/msys64/mingw64/include/c++/14.2.0/cstdint \
   C:/msys64/mingw64/include/c++/14.2.0/cstdio \
@@ -283,7 +285,9 @@ core/CMakeFiles/lapCore.dir/source/core.cpp.obj: C:/Users/WellH/OneDrive/Documen
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/event.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/project.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib.h \
+  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib_namespace.h \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/rlgl.h \
+  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/rlgl_namespace.h \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/resource_manager.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/scene.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/scriptregistry.hpp \
@@ -426,10 +430,12 @@ core/CMakeFiles/lapCore.dir/source/core.cpp.obj: C:/Users/WellH/OneDrive/Documen
   C:/msys64/mingw64/include/c++/14.2.0/cmath \
   C:/msys64/mingw64/include/c++/14.2.0/compare \
   C:/msys64/mingw64/include/c++/14.2.0/concepts \
+  C:/msys64/mingw64/include/c++/14.2.0/cstdarg \
   C:/msys64/mingw64/include/c++/14.2.0/cstddef \
   C:/msys64/mingw64/include/c++/14.2.0/cstdint \
   C:/msys64/mingw64/include/c++/14.2.0/cstdio \
   C:/msys64/mingw64/include/c++/14.2.0/cstdlib \
+  C:/msys64/mingw64/include/c++/14.2.0/cstring \
   C:/msys64/mingw64/include/c++/14.2.0/ctime \
   C:/msys64/mingw64/include/c++/14.2.0/cwchar \
   C:/msys64/mingw64/include/c++/14.2.0/cwctype \
@@ -534,6 +540,7 @@ core/CMakeFiles/lapCore.dir/source/core.cpp.obj: C:/Users/WellH/OneDrive/Documen
   C:/msys64/mingw64/include/sdks/_mingw_ddk.h \
   C:/msys64/mingw64/include/sec_api/stdio_s.h \
   C:/msys64/mingw64/include/sec_api/stdlib_s.h \
+  C:/msys64/mingw64/include/sec_api/string_s.h \
   C:/msys64/mingw64/include/sec_api/sys/timeb_s.h \
   C:/msys64/mingw64/include/sec_api/wchar_s.h \
   C:/msys64/mingw64/include/signal.h \
@@ -542,6 +549,7 @@ core/CMakeFiles/lapCore.dir/source/core.cpp.obj: C:/Users/WellH/OneDrive/Documen
   C:/msys64/mingw64/include/stdint.h \
   C:/msys64/mingw64/include/stdio.h \
   C:/msys64/mingw64/include/stdlib.h \
+  C:/msys64/mingw64/include/string.h \
   C:/msys64/mingw64/include/swprintf.inl \
   C:/msys64/mingw64/include/sys/timeb.h \
   C:/msys64/mingw64/include/sys/types.h \
@@ -560,6 +568,7 @@ core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj: C:/Users/WellH/OneDrive/Docume
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/eutil.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/portable-file-dialogs.h \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib.h \
+  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib_namespace.h \
   C:/msys64/mingw64/include/_mingw.h \
   C:/msys64/mingw64/include/_mingw_mac.h \
   C:/msys64/mingw64/include/_mingw_off_t.h \
@@ -712,6 +721,7 @@ core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj: C:/Users/WellH/OneDrive/Docume
   C:/msys64/mingw64/include/c++/14.2.0/compare \
   C:/msys64/mingw64/include/c++/14.2.0/concepts \
   C:/msys64/mingw64/include/c++/14.2.0/condition_variable \
+  C:/msys64/mingw64/include/c++/14.2.0/cstdarg \
   C:/msys64/mingw64/include/c++/14.2.0/cstddef \
   C:/msys64/mingw64/include/c++/14.2.0/cstdint \
   C:/msys64/mingw64/include/c++/14.2.0/cstdio \
@@ -1066,7 +1076,9 @@ core/CMakeFiles/lapCore.dir/source/project.cpp.obj: C:/Users/WellH/OneDrive/Docu
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/json.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/project.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib.h \
+  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib_namespace.h \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/rlgl.h \
+  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/rlgl_namespace.h \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/resource_manager.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/scene.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/scriptregistry.hpp \
@@ -1227,6 +1239,7 @@ core/CMakeFiles/lapCore.dir/source/project.cpp.obj: C:/Users/WellH/OneDrive/Docu
   C:/msys64/mingw64/include/c++/14.2.0/codecvt \
   C:/msys64/mingw64/include/c++/14.2.0/compare \
   C:/msys64/mingw64/include/c++/14.2.0/concepts \
+  C:/msys64/mingw64/include/c++/14.2.0/cstdarg \
   C:/msys64/mingw64/include/c++/14.2.0/cstddef \
   C:/msys64/mingw64/include/c++/14.2.0/cstdint \
   C:/msys64/mingw64/include/c++/14.2.0/cstdio \
@@ -1366,6 +1379,7 @@ core/CMakeFiles/lapCore.dir/source/project.cpp.obj: C:/Users/WellH/OneDrive/Docu
 
 core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/resource_manager.cpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib.h \
+  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib_namespace.h \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/resource_manager.hpp \
   C:/msys64/mingw64/include/_mingw.h \
   C:/msys64/mingw64/include/_mingw_mac.h \
@@ -1432,6 +1446,7 @@ core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj: C:/Users/WellH/OneD
   C:/msys64/mingw64/include/c++/14.2.0/clocale \
   C:/msys64/mingw64/include/c++/14.2.0/compare \
   C:/msys64/mingw64/include/c++/14.2.0/concepts \
+  C:/msys64/mingw64/include/c++/14.2.0/cstdarg \
   C:/msys64/mingw64/include/c++/14.2.0/cstddef \
   C:/msys64/mingw64/include/c++/14.2.0/cstdio \
   C:/msys64/mingw64/include/c++/14.2.0/cstdlib \
@@ -1492,6 +1507,7 @@ core/CMakeFiles/lapCore.dir/source/scene.cpp.obj: C:/Users/WellH/OneDrive/Docume
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/eutil.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/event.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib.h \
+  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib_namespace.h \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/resource_manager.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/scene.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/systems.hpp \
@@ -1631,6 +1647,7 @@ core/CMakeFiles/lapCore.dir/source/scene.cpp.obj: C:/Users/WellH/OneDrive/Docume
   C:/msys64/mingw64/include/c++/14.2.0/cmath \
   C:/msys64/mingw64/include/c++/14.2.0/compare \
   C:/msys64/mingw64/include/c++/14.2.0/concepts \
+  C:/msys64/mingw64/include/c++/14.2.0/cstdarg \
   C:/msys64/mingw64/include/c++/14.2.0/cstddef \
   C:/msys64/mingw64/include/c++/14.2.0/cstdint \
   C:/msys64/mingw64/include/c++/14.2.0/cstdio \
@@ -1766,7 +1783,9 @@ core/CMakeFiles/lapCore.dir/source/systems.cpp.obj: C:/Users/WellH/OneDrive/Docu
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/event.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/project.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib.h \
+  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib_namespace.h \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/rlgl.h \
+  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/rlgl_namespace.h \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/resource_manager.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/scene.hpp \
   C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/scriptregistry.hpp \
@@ -1907,10 +1926,12 @@ core/CMakeFiles/lapCore.dir/source/systems.cpp.obj: C:/Users/WellH/OneDrive/Docu
   C:/msys64/mingw64/include/c++/14.2.0/cmath \
   C:/msys64/mingw64/include/c++/14.2.0/compare \
   C:/msys64/mingw64/include/c++/14.2.0/concepts \
+  C:/msys64/mingw64/include/c++/14.2.0/cstdarg \
   C:/msys64/mingw64/include/c++/14.2.0/cstddef \
   C:/msys64/mingw64/include/c++/14.2.0/cstdint \
   C:/msys64/mingw64/include/c++/14.2.0/cstdio \
   C:/msys64/mingw64/include/c++/14.2.0/cstdlib \
+  C:/msys64/mingw64/include/c++/14.2.0/cstring \
   C:/msys64/mingw64/include/c++/14.2.0/ctime \
   C:/msys64/mingw64/include/c++/14.2.0/cwchar \
   C:/msys64/mingw64/include/c++/14.2.0/cwctype \
@@ -2011,6 +2032,7 @@ core/CMakeFiles/lapCore.dir/source/systems.cpp.obj: C:/Users/WellH/OneDrive/Docu
   C:/msys64/mingw64/include/sdks/_mingw_ddk.h \
   C:/msys64/mingw64/include/sec_api/stdio_s.h \
   C:/msys64/mingw64/include/sec_api/stdlib_s.h \
+  C:/msys64/mingw64/include/sec_api/string_s.h \
   C:/msys64/mingw64/include/sec_api/sys/timeb_s.h \
   C:/msys64/mingw64/include/sec_api/wchar_s.h \
   C:/msys64/mingw64/include/signal.h \
@@ -2019,6 +2041,7 @@ core/CMakeFiles/lapCore.dir/source/systems.cpp.obj: C:/Users/WellH/OneDrive/Docu
   C:/msys64/mingw64/include/stdint.h \
   C:/msys64/mingw64/include/stdio.h \
   C:/msys64/mingw64/include/stdlib.h \
+  C:/msys64/mingw64/include/string.h \
   C:/msys64/mingw64/include/swprintf.inl \
   C:/msys64/mingw64/include/sys/timeb.h \
   C:/msys64/mingw64/include/sys/types.h \
@@ -2037,6 +2060,8 @@ core/CMakeFiles/lapCore.dir/source/systems.cpp.obj: C:/Users/WellH/OneDrive/Docu
 C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/app.cpp:
 
 C:/msys64/mingw64/include/c++/14.2.0/bits/functional_hash.h:
+
+C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib_namespace.h:
 
 C:/msys64/mingw64/include/c++/14.2.0/bits/cpp_type_traits.h:
 
@@ -2131,8 +2156,6 @@ C:/msys64/mingw64/include/_mingw_mac.h:
 C:/msys64/mingw64/include/combaseapi.h:
 
 C:/msys64/mingw64/include/_mingw_off_t.h:
-
-C:/msys64/mingw64/include/c++/14.2.0/bits/locale_conv.h:
 
 C:/msys64/mingw64/include/c++/14.2.0/bits/hashtable_policy.h:
 
@@ -2289,6 +2312,8 @@ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/enqcmdintrin.h:
 C:/msys64/mingw64/include/c++/14.2.0/bits/istream.tcc:
 
 C:/msys64/mingw64/include/propsys.h:
+
+C:/msys64/mingw64/include/c++/14.2.0/bits/locale_conv.h:
 
 C:/msys64/mingw64/include/c++/14.2.0/bits/regex_executor.h:
 
@@ -2540,6 +2565,12 @@ C:/msys64/mingw64/include/c++/14.2.0/compare:
 
 C:/msys64/mingw64/include/c++/14.2.0/concepts:
 
+C:/msys64/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/ctype_inline.h:
+
+C:/msys64/mingw64/include/cguid.h:
+
+C:/msys64/mingw64/include/c++/14.2.0/cstdarg:
+
 C:/msys64/mingw64/include/c++/14.2.0/tr1/hypergeometric.tcc:
 
 C:/msys64/mingw64/include/c++/14.2.0/cstddef:
@@ -2718,10 +2749,6 @@ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/xtestintrin.h:
 
 C:/msys64/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/cpu_defines.h:
 
-C:/msys64/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/ctype_inline.h:
-
-C:/msys64/mingw64/include/cguid.h:
-
 C:/msys64/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/error_constants.h:
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/avx512pfintrin.h:
@@ -2790,9 +2817,9 @@ C:/msys64/mingw64/include/stdint.h:
 
 C:/msys64/mingw64/include/stdlib.h:
 
-C:/msys64/mingw64/include/ole2.h:
-
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/gfniintrin.h:
+
+C:/msys64/mingw64/include/ole2.h:
 
 C:/msys64/mingw64/include/swprintf.inl:
 
@@ -2802,9 +2829,9 @@ C:/msys64/mingw64/include/time.h:
 
 C:/msys64/mingw64/include/vadefs.h:
 
-C:/msys64/mingw64/include/wchar.h:
-
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/immintrin.h:
+
+C:/msys64/mingw64/include/wchar.h:
 
 C:/msys64/mingw64/include/fltwinerror.h:
 
@@ -2830,17 +2857,29 @@ C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/rlgl.h
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/cldemoteintrin.h:
 
+C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/wmmintrin.h:
+
+C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/rlgl_namespace.h:
+
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/usermsrintrin.h:
 
 C:/msys64/mingw64/include/c++/14.2.0/bits/fstream.tcc:
 
 C:/msys64/mingw64/include/c++/14.2.0/bits/sstream.tcc:
 
+C:/msys64/mingw64/include/c++/14.2.0/cstring:
+
 C:/msys64/mingw64/include/c++/14.2.0/sstream:
 
 C:/msys64/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/basic_file.h:
 
 C:/msys64/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/c++io.h:
+
+C:/msys64/mingw64/include/sec_api/string_s.h:
+
+C:/msys64/mingw64/include/interlockedapi.h:
+
+C:/msys64/mingw64/include/string.h:
 
 C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/portable-file-dialogs.h:
 
@@ -2928,10 +2967,6 @@ C:/msys64/mingw64/include/isguids.h:
 
 C:/msys64/mingw64/include/handleapi.h:
 
-C:/msys64/mingw64/include/interlockedapi.h:
-
-C:/msys64/mingw64/include/sec_api/string_s.h:
-
 C:/msys64/mingw64/include/ioapiset.h:
 
 C:/msys64/mingw64/include/ktmtypes.h:
@@ -2953,10 +2988,6 @@ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/avx512vbmi2intrin.h:
 C:/msys64/mingw64/include/ocidl.h:
 
 C:/msys64/mingw64/include/processenv.h:
-
-C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/wbnoinvdintrin.h:
-
-C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/ia32intrin.h:
 
 C:/msys64/mingw64/include/profileapi.h:
 
@@ -3007,8 +3038,6 @@ C:/msys64/mingw64/include/shlobj.h:
 C:/msys64/mingw64/include/shtypes.h:
 
 C:/msys64/mingw64/include/specstrings.h:
-
-C:/msys64/mingw64/include/string.h:
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/bmi2intrin.h:
 
@@ -3108,6 +3137,10 @@ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/fxsrintrin.h:
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/hresetintrin.h:
 
+C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/wbnoinvdintrin.h:
+
+C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/ia32intrin.h:
+
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/keylockerintrin.h:
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/mwaitintrin.h:
@@ -3143,8 +3176,6 @@ C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/vaesintrin.h:
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/vpclmulqdqintrin.h:
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/waitpkgintrin.h:
-
-C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/wmmintrin.h:
 
 C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/x86intrin.h:
 
@@ -3185,8 +3216,6 @@ C:/msys64/mingw64/include/c++/14.2.0/bits/valarray_array.tcc:
 C:/msys64/mingw64/include/c++/14.2.0/bits/valarray_before.h:
 
 C:/msys64/mingw64/include/c++/14.2.0/codecvt:
-
-C:/msys64/mingw64/include/c++/14.2.0/cstring:
 
 C:/msys64/mingw64/include/c++/14.2.0/forward_list:
 

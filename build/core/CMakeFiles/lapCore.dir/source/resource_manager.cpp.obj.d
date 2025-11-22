@@ -1,7 +1,12 @@
 core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj: \
  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/resource_manager.cpp \
  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/resource_manager.hpp \
- C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib.h \
+ C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib_namespace.h \
+ C:/msys64/mingw64/include/c++/14.2.0/cstdarg \
+ C:/msys64/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/c++config.h \
+ C:/msys64/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/os_defines.h \
+ C:/msys64/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/cpu_defines.h \
+ C:/msys64/mingw64/include/c++/14.2.0/pstl/pstl_config.h \
  C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/14.2.0/include/stdarg.h \
  C:/msys64/mingw64/include/stdarg.h \
  C:/msys64/mingw64/include/_mingw_stdarg.h \
@@ -9,12 +14,9 @@ core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj: \
  C:/msys64/mingw64/include/_mingw_mac.h \
  C:/msys64/mingw64/include/_mingw_secapi.h \
  C:/msys64/mingw64/include/sdks/_mingw_ddk.h \
+ C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/raylib/raylib.h \
  C:/msys64/mingw64/include/c++/14.2.0/unordered_map \
  C:/msys64/mingw64/include/c++/14.2.0/bits/requires_hosted.h \
- C:/msys64/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/c++config.h \
- C:/msys64/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/os_defines.h \
- C:/msys64/mingw64/include/c++/14.2.0/x86_64-w64-mingw32/bits/cpu_defines.h \
- C:/msys64/mingw64/include/c++/14.2.0/pstl/pstl_config.h \
  C:/msys64/mingw64/include/c++/14.2.0/initializer_list \
  C:/msys64/mingw64/include/c++/14.2.0/bits/unordered_map.h \
  C:/msys64/mingw64/include/c++/14.2.0/bits/hashtable.h \

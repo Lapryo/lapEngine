@@ -26,7 +26,7 @@ void Scene::LoadQueuedAssets()
 }
 
 // figure this out later
-void Scene::Update(float deltaTime, RenderTexture2D &target)
+void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
 {
     resolutionScale = logicalResolution.x / LOGICAL_RESOLUTION_REFERENCE;
 
@@ -41,21 +41,21 @@ void Scene::Update(float deltaTime, RenderTexture2D &target)
 
         if (drawing)
         {
-            BeginDrawing();
-            BeginTextureMode(target);
-            ClearBackground(WHITE);
+            rl::BeginDrawing();
+            rl::BeginTextureMode(target);
+            rl::ClearBackground(rl::RayWhite);
         }
 
         system->Update(deltaTime, objects);
 
         if (drawing)
         {
-            EndTextureMode();
-            ClearBackground(BLACK);
+            rl::EndTextureMode();
+            rl::ClearBackground(rl::Black);
 
             // Now draw render texture to the screen, scaled and letterboxed
-            int screenW = GetScreenWidth();
-            int screenH = GetScreenHeight();
+            int screenW = rl::GetScreenWidth();
+            int screenH = rl::GetScreenHeight();
             float screenAspect = (float)screenW / screenH;
             float targetAspect = (float)logicalResolution.x / logicalResolution.y;
 
@@ -82,15 +82,15 @@ void Scene::Update(float deltaTime, RenderTexture2D &target)
             logicalWindowPos = {(float)offsetX, (float)offsetY};
 
             // Draw the render texture to the screen, scaling it
-            DrawTexturePro(
+            rl::DrawTexturePro(
                 target.texture,
                 {0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height}, // source rect (flip y)
                 {(float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight},    // dest rect
                 {0.0f, 0.0f},                                                             // origin
                 0.0f,                                                                     // rotation
-                WHITE);
+                rl::White);
 
-            EndDrawing();
+            rl::EndDrawing();
         }
     }
 }

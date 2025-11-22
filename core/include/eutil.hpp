@@ -1,23 +1,23 @@
 #ifndef EUTIL_HPP
 #define EUTIL_HPP
 
-#include "raylib/raylib.h"
+#include "raylib/raylib_namespace.h"
 
-#include <string>
 #include <vector>
+#include <string>
 
 namespace lapCore
 {
     struct Renderable
     {
-        Rectangle space;
+        rl::Rectangle space;
 
         unsigned int zlayer;
         bool isScreenSpace;
         bool visible = true;
-        Color tint;
+        rl::Color tint;
 
-        Renderable(unsigned int zlayer, bool isScreenSpace, bool visible, Color tint)
+        Renderable(unsigned int zlayer, bool isScreenSpace, bool visible, rl::Color tint)
             : zlayer(zlayer), isScreenSpace(isScreenSpace), visible(visible), tint(tint) {}
     };
 
@@ -52,10 +52,10 @@ namespace lapCore
 
     struct FrameVector
     {
-        Vector2 scale;
-        Vector2 offset;
+        rl::Vector2 scale;
+        rl::Vector2 offset;
 
-        FrameVector(Vector2 scale, Vector2 offset)
+        FrameVector(rl::Vector2 scale, rl::Vector2 offset)
             : scale(scale), offset(offset) {}
     };
 

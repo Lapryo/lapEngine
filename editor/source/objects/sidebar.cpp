@@ -16,7 +16,7 @@ void OpenSelectionMenu(Scene* scene, Object object)
         
     }
 
-    Vector2 mousePos = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
+    rl::Vector2 mousePos = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
 
     frame->origin.position.offset = mousePos;
     frame->renderable.visible = true;

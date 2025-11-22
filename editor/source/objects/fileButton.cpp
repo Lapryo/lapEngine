@@ -17,14 +17,14 @@ void HighlightFileButton(Scene *scene, Object object)
 {
     auto *frame = scene->FindElement<Frame>(object);
     if (frame)
-        frame->renderable.tint = (Color){255, 255, 255, 25};
+        frame->renderable.tint = (rl::Color){255, 255, 255, 25};
 }
 
 void UnhighlightFileButton(Scene *scene, Object object)
 {
     auto *frame = scene->FindElement<Frame>(object);
     if (frame)
-        frame->renderable.tint = (Color){255, 255, 255, 0};
+        frame->renderable.tint = (rl::Color){255, 255, 255, 0};
     else
         std::cout << "for some reason, the file button doesn't think it has a frame?\n";
 }

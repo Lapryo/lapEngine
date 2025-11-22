@@ -16,18 +16,18 @@ namespace lapCore
 {
     struct Origin2D
     {
-        Vector2 position, scale;
+        rl::Vector2 position, scale;
     };
 
     struct Physics2D
     {
-        Vector2 velocity;
-        Vector2 gravity;
+        rl::Vector2 velocity;
+        rl::Vector2 gravity;
     };
 
     struct RotationalData
     {
-        Vector2 anchor;
+        rl::Vector2 anchor;
         float rotation;
     };
 
@@ -113,7 +113,7 @@ namespace lapCore
 
     struct Cam2D
     {
-        Camera2D camera;
+        rl::Camera2D camera;
         std::vector<entt::entity> exclude;
     };
 

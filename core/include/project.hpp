@@ -16,8 +16,8 @@ namespace lapCore
         Scene *main_scene;
         std::vector<std::unique_ptr<Scene>> scenes;
 
-        Vector2 logicalResolution;
-        RenderTexture target;
+        rl::Vector2 logicalResolution;
+        rl::RenderTexture target;
 
         Scene *GetMainScene();
         void Clear();
