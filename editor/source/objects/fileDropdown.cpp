@@ -1,7 +1,7 @@
 #include "objects/fileDropdown.hpp"
 #include "editor.hpp"
 
-void CloseDropdown(Scene* scene, Object object)
+void CloseDropdown(Scene *scene, Object object)
 {
     auto fileDropdown = scene->FindObject("file-dropdown");
     auto *frame = scene->FindElement<Frame>(fileDropdown);
@@ -15,7 +15,8 @@ void CloseDropdown(Scene* scene, Object object)
 
 void FileDropdownObject::RegisterLogic()
 {
-    ScriptRegistry::onCreateFunctions["setup-file-dropdown"] = [](Scene* scene, Object object) {
+    ScriptRegistry::onCreateFunctions["setup-file-dropdown"] = [](Scene *scene, Object object)
+    {
         ConnectECSEvent(scene, object, "close-file-dropdown", CloseDropdown);
     };
 }

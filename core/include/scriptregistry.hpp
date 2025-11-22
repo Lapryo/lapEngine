@@ -8,15 +8,12 @@ using namespace lapCore;
 
 struct ScriptRegistry
 {
-    inline static std::unordered_map<std::string, std::function<void(Scene*, Object&)>> onCreateFunctions = {
-        {"", [](Scene*, Object) {}}
-    };
-    inline static std::unordered_map<std::string, std::function<void(Scene*, Object&, float)>> onUpdateFunctions = {
-        {"", [](Scene*, Object, float) {}}
-    };
-    inline static std::unordered_map<std::string, std::function<void(Scene*, Object&)>> onDestroyFunctions = {
-        {"", [](Scene*, Object) {}}
-    };
+    inline static std::unordered_map<std::string, std::function<void(Scene *, Object &)>> onCreateFunctions = {
+        {"", [](Scene *, Object) {}}};
+    inline static std::unordered_map<std::string, std::function<void(Scene *, Object &, float)>> onUpdateFunctions = {
+        {"", [](Scene *, Object, float) {}}};
+    inline static std::unordered_map<std::string, std::function<void(Scene *, Object &)>> onDestroyFunctions = {
+        {"", [](Scene *, Object) {}}};
 };
 
 #endif

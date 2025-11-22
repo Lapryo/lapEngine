@@ -3,6 +3,9 @@
 
 #include "raylib/raylib.h"
 
+#include <string>
+#include <vector>
+
 namespace lapCore
 {
     struct Renderable
@@ -40,7 +43,7 @@ namespace lapCore
         Alignment(HorizontalAlignment horizontal, VerticalAlignment vertical)
             : horizontal(horizontal), vertical(vertical) {}
     };
-    
+
     enum class Axis2D
     {
         HORIZONTAL,
@@ -71,6 +74,13 @@ namespace lapCore
 
         UIOrigin(FrameVector position, FrameVector size)
             : position(position), size(size) {}
+    };
+
+    class FileDialogs
+    {
+    public:
+        static std::string OpenFile(std::vector<std::string> filters);
+        static std::string SaveFile(std::vector<std::string> filters);
     };
 }
 

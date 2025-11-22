@@ -1,7 +1,7 @@
 #include "objects/addObject.hpp"
 #include "editor.hpp"
 
-void AddObject(Scene* scene, Object object)
+void AddObject(Scene *scene, Object object)
 {
     auto selectionMenu = scene->FindObject("selectionMenu");
 
@@ -11,7 +11,6 @@ void AddObject(Scene* scene, Object object)
 
     // TODO: Add an object to the project map if one has not been created yet
 
-
     // TODO: IMPLEMENT PREFABS
 
     std::string objectName = "Object";
@@ -20,8 +19,7 @@ void AddObject(Scene* scene, Object object)
     Renderable renderable(30, true, true, (Color){125, 97, 103, 255});
     UIOrigin origin(
         FrameVector((Vector2){0, 0}, (Vector2){0, 0}),
-        FrameVector((Vector2){0.2, 0.05}, (Vector2){0, 0})
-    );
+        FrameVector((Vector2){0.2, 0.05}, (Vector2){0, 0}));
 
     Frame textframe(renderable, origin);
     Alignment textAlignment(HorizontalAlignment::LEFT, VerticalAlignment::TOP);
@@ -31,7 +29,8 @@ void AddObject(Scene* scene, Object object)
 
 void AddObjectObject::RegisterLogic()
 {
-    ScriptRegistry::onCreateFunctions["connect-add-object"] = [](Scene* scene, Object object) {
+    ScriptRegistry::onCreateFunctions["connect-add-object"] = [](Scene *scene, Object object)
+    {
         ConnectECSEvent(scene, object, "add-object", AddObject);
     };
 }

@@ -13,19 +13,19 @@ namespace lapCore
         std::string version;
         std::string path;
         int main_scene_index;
-        Scene* main_scene;
+        Scene *main_scene;
         std::vector<std::unique_ptr<Scene>> scenes;
 
         Vector2 logicalResolution;
         RenderTexture target;
 
-        Scene* GetMainScene();
+        Scene *GetMainScene();
         void Clear();
 
         void LoadSettings(const std::string &settingsFilePath);
     };
 
-    void PackProject(Project& project);
+    void PackProject(Project &project);
     Project UnpackProject(const char projJson[]);
 }
 

@@ -348,7 +348,7 @@ void ScriptSystem::OnDestroy(entt::registry &registry)
 void GUISystem::Update(float deltaTime, entt::registry &registry)
 {
     Vector2 mouse = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
-    
+
     auto uilistView = registry.view<UIList, Frame>();
     for (auto [entity, list, frame] : uilistView.each())
     {
@@ -438,8 +438,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
         auto *button = &buttonView.get<UIButton>(entity);
         if (!button || !button->active)
             continue;
-        
-        
+
         Rectangle rect = UIOriginToRect(button->bounds, scene->logicalResolution.x, scene->logicalResolution.y);
         bool hovered = CheckCollisionPointRec(mouse, rect);
 

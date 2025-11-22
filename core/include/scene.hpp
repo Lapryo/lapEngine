@@ -48,10 +48,10 @@ namespace lapCore
         void Update(float deltaTime, RenderTexture2D &target);
 
         template <typename SystemType, typename... SystemArgs>
-        void AddSystem(unsigned int order, SystemArgs&&... args)
+        void AddSystem(unsigned int order, SystemArgs &&...args)
         {
             auto sys = std::make_unique<SystemType>(this, order, std::forward<SystemArgs>(args)...);
-            if constexpr (requires(SystemType& t, entt::registry& r) { t.Connect(r); })
+            if constexpr (requires(SystemType &t, entt::registry &r) { t.Connect(r); })
                 sys->Connect(objects);
 
             if (order > systems.size())
@@ -61,9 +61,12 @@ namespace lapCore
         }
 
         template <typename T>
-        T* GetSystem() const {
-            for (const auto& systemPtr : systems) {
-                if (T* foundSystem = dynamic_cast<T*>(systemPtr.get())) {
+        T *GetSystem() const
+        {
+            for (const auto &systemPtr : systems)
+            {
+                if (T *foundSystem = dynamic_cast<T *>(systemPtr.get()))
+                {
                     return foundSystem;
                 }
             }
@@ -82,7 +85,7 @@ namespace lapCore
         Object FindChild(Object object, const std::string &name);
 
         template <typename Element, typename... ElementArgs>
-        Element AddElement(Object object, ElementArgs&&... args)
+        Element AddElement(Object object, ElementArgs &&...args)
         {
             return objects.emplace<Element>(object, std::forward<ElementArgs>(args)...);
         }

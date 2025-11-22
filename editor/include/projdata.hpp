@@ -629,7 +629,7 @@ const char proj_json[] = R"json(
                                 {
                                     "zlayer": 2,
                                     "isScreenSpace": true,
-                                    "visible": false,
+                                    "visible": true,
                                     "tint": [179, 95, 76, 255]
                                 }
                             }

@@ -116,8 +116,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
             Vector2 bounds{
                 data["bounds"].at(0).get<float>(),
-                data["bounds"].at(1).get<float>()
-            };
+                data["bounds"].at(1).get<float>()};
 
             std::cout << "got here.\n";
 
@@ -125,8 +124,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 data["padding"].at(0).get<float>(),
                 data["padding"].at(1).get<float>(),
                 data["padding"].at(2).get<float>(),
-                data["padding"].at(3).get<float>()
-            };
+                data["padding"].at(3).get<float>()};
 
             std::cout << "got here.\n";
 
@@ -156,11 +154,13 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
             std::cout << "got here.\n";
 
-            if (!data.contains("position")) {
+            if (!data.contains("position"))
+            {
                 std::cout << "Component missing position: " << data.dump(4) << "\n";
             }
 
-            if (!data.contains("position") || !data["position"].is_array() || data["position"].size() < 4) {
+            if (!data.contains("position") || !data["position"].is_array() || data["position"].size() < 4)
+            {
                 // handle missing or malformed position
                 std::cerr << "Invalid position field\n";
             }
@@ -171,7 +171,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 {data["position"][2].get<float>(),
                  data["position"][3].get<float>()}};
 
-                std::cout << "got here.\n";
+            std::cout << "got here.\n";
 
             FrameVector size{
                 {data["size"][0].get<float>(),
@@ -179,7 +179,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 {data["size"][2].get<float>(),
                  data["size"][3].get<float>()}};
 
-                std::cout << "got here.\n";
+            std::cout << "got here.\n";
 
             UIOrigin origin(position, size);
             Frame frame(renderable, origin);
@@ -274,15 +274,13 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 {data["scroll-size"].at(0).get<float>(),
                  data["scroll-size"].at(1).get<float>()},
                 {data["scroll-size"].at(2).get<float>(),
-                 data["scroll-size"].at(3).get<float>()}
-            };
+                 data["scroll-size"].at(3).get<float>()}};
 
             FrameVector displaySize{
                 {data["display-size"].at(0).get<float>(),
                  data["display-size"].at(1).get<float>()},
                 {data["display-size"].at(2).get<float>(),
-                 data["display-size"].at(3).get<float>()}
-            };
+                 data["display-size"].at(3).get<float>()}};
 
             bool hScrollBarRight = true;
             std::string horizontalScrollBar = data.value("horizontal-scroll-bar", "right");
@@ -295,7 +293,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 vScrollBarBottom = false;
 
             bool maskOutsideContent = data.value("mask-outside-content", true);
-                
+
             float scrollOffset = data.value("scroll-offset", 0.0f);
             float scrollSpeed = data.value("scroll-speed", 20.0f);
 
@@ -324,21 +322,17 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
             Vector2 scalePosition = {
                 data["bounds"]["position"]["scale"].at(0).get<float>(),
-                data["bounds"]["position"]["scale"].at(1).get<float>()
-            };
+                data["bounds"]["position"]["scale"].at(1).get<float>()};
             Vector2 offsetPosition = {
                 data["bounds"]["position"]["offset"].at(0).get<float>(),
-                data["bounds"]["position"]["offset"].at(1).get<float>()
-            };
+                data["bounds"]["position"]["offset"].at(1).get<float>()};
 
             Vector2 scaleSize = {
                 data["bounds"]["size"]["scale"].at(0).get<float>(),
-                data["bounds"]["size"]["scale"].at(1).get<float>()
-            };
+                data["bounds"]["size"]["scale"].at(1).get<float>()};
             Vector2 offsetSize = {
                 data["bounds"]["size"]["offset"].at(0).get<float>(),
-                data["bounds"]["size"]["offset"].at(1).get<float>()
-            };
+                data["bounds"]["size"]["offset"].at(1).get<float>()};
 
             UIOrigin bounds(FrameVector(scalePosition, offsetPosition), FrameVector(scaleSize, offsetSize));
             bool active = data.value("active", true);

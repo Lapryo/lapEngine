@@ -59,7 +59,7 @@ namespace lapCore
 
         UIList(FrameVector scrollSize, FrameVector displaySize, bool hScrollRight, bool vScrollBottom, bool maskOutsideContent, float scrollOffset, float scrollSpeed, Axis2D direction)
             : scrollSize(scrollSize), displaySize(displaySize), hScrollRight(hScrollRight), vScrollBottom(vScrollBottom), maskOutsideContent(maskOutsideContent),
-            scrollOffset(scrollOffset), scrollSpeed(scrollSpeed), direction(direction) {}
+              scrollOffset(scrollOffset), scrollSpeed(scrollSpeed), direction(direction) {}
     };
 
     struct Sprite // Uses Origin2D instead
@@ -103,7 +103,7 @@ namespace lapCore
     {
         EventBus events;
         bool active = true;
-        
+
         UIOrigin bounds;
         bool mouseHovering = false;
 
