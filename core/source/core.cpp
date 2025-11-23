@@ -22,6 +22,19 @@ std::string lapCore::ReadFileToString(const std::string &filePath)
     return buffer.str();
 }
 
+void lapCore::WriteStringToFile(const std::string &filePath, const std::string &data)
+{
+    std::ofstream file(filePath);
+    if (!file.is_open())
+    {
+        std::cerr << "Failed to open file for writing: " << filePath << "\n";
+        return;
+    }
+
+    file << data;
+    file.close();
+}
+
 rl::Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight)
 {
     rl::Vector2 mouse = rl::GetMousePosition();

@@ -16,7 +16,10 @@ namespace lapEditor
         void Update(float deltaTime) override;
     };
 
-    static nlohmann::json loadedProjectJson;
+    void LoadProjectFromFile(const std::string &filePath);
+    void SaveProjectToFile(const std::string &filePath);
+
+    extern nlohmann::json loadedProjectJson;
 }
 
 #endif

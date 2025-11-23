@@ -286,6 +286,8 @@ editor/CMakeFiles/lapEditor.dir/source/objects/fileButton.cpp.obj: \
  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/include/objects/addObject.hpp \
  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/include/objects/fileDropdown.hpp \
  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/include/objects/openProject.hpp \
+ C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/include/objects/saveProject.hpp \
+ C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/include/objects/newProject.hpp \
  C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/include/json.hpp \
  C:/msys64/mingw64/include/c++/14.2.0/forward_list \
  C:/msys64/mingw64/include/c++/14.2.0/bits/forward_list.h \

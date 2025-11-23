@@ -31,9 +31,21 @@
 },
 {
   "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/newProject.cpp",
+  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/newProject.cpp",
+  "output": "editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj"
+},
+{
+  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor",
   "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/openProject.cpp",
   "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/openProject.cpp",
   "output": "editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj"
+},
+{
+  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapEditor.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/saveProject.cpp",
+  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/saveProject.cpp",
+  "output": "editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj"
 },
 {
   "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor",

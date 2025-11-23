@@ -7,7 +7,9 @@ void OpenProject(Scene *scene, Object object)
     if (filePath.empty())
         return;
 
-    std::cout << filePath << "\n";
+    lapEditor::LoadProjectFromFile(filePath);
+
+    // Refresh editor with new project
 }
 
 void HighlightOpenProjectButton(Scene *scene, Object object)

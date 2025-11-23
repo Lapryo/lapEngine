@@ -147,11 +147,26 @@ editor/CMakeFiles/lapEditor.dir/source/objects/fpslabel.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapEditor.dir/source/objects/fpslabel.cpp.s"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/fpslabel.cpp -o CMakeFiles/lapEditor.dir/source/objects/fpslabel.cpp.s
 
+editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj: editor/CMakeFiles/lapEditor.dir/flags.make
+editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj: editor/CMakeFiles/lapEditor.dir/includes_CXX.rsp
+editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/newProject.cpp
+editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj: editor/CMakeFiles/lapEditor.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj -MF CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj.d -o CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/newProject.cpp
+
+editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.i"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/newProject.cpp > CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.i
+
+editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.s"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/newProject.cpp -o CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.s
+
 editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj: editor/CMakeFiles/lapEditor.dir/flags.make
 editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj: editor/CMakeFiles/lapEditor.dir/includes_CXX.rsp
 editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/openProject.cpp
 editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj: editor/CMakeFiles/lapEditor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj -MF CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj.d -o CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/openProject.cpp
 
 editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.i: cmake_force
@@ -162,11 +177,26 @@ editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.s"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/openProject.cpp -o CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.s
 
+editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj: editor/CMakeFiles/lapEditor.dir/flags.make
+editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj: editor/CMakeFiles/lapEditor.dir/includes_CXX.rsp
+editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/saveProject.cpp
+editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj: editor/CMakeFiles/lapEditor.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj -MF CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj.d -o CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/saveProject.cpp
+
+editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.i"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/saveProject.cpp > CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.i
+
+editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.s"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/saveProject.cpp -o CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.s
+
 editor/CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj: editor/CMakeFiles/lapEditor.dir/flags.make
 editor/CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj: editor/CMakeFiles/lapEditor.dir/includes_CXX.rsp
 editor/CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/selectionMenu.cpp
 editor/CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj: editor/CMakeFiles/lapEditor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object editor/CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object editor/CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT editor/CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj -MF CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj.d -o CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/selectionMenu.cpp
 
 editor/CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.i: cmake_force
@@ -181,7 +211,7 @@ editor/CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj: editor/CMakeFile
 editor/CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj: editor/CMakeFiles/lapEditor.dir/includes_CXX.rsp
 editor/CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/sidebar.cpp
 editor/CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj: editor/CMakeFiles/lapEditor.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object editor/CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object editor/CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT editor/CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj -MF CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj.d -o CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/sidebar.cpp
 
 editor/CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.i: cmake_force
@@ -199,7 +229,9 @@ lapEditor_OBJECTS = \
 "CMakeFiles/lapEditor.dir/source/objects/fileButton.cpp.obj" \
 "CMakeFiles/lapEditor.dir/source/objects/fileDropdown.cpp.obj" \
 "CMakeFiles/lapEditor.dir/source/objects/fpslabel.cpp.obj" \
+"CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj" \
 "CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj" \
+"CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj" \
 "CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj" \
 "CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj"
 
@@ -211,14 +243,16 @@ editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/objects/addOb
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/objects/fileButton.cpp.obj
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/objects/fileDropdown.cpp.obj
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/objects/fpslabel.cpp.obj
+editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj
+editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/build.make
 editor/debug/lapEditor.exe: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/linkLibs.rsp
 editor/debug/lapEditor.exe: editor/CMakeFiles/lapEditor.dir/objects1.rsp
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable debug/lapEditor.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX executable debug/lapEditor.exe"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && "C:/Program Files/CMake/bin/cmake.exe" -E rm -f CMakeFiles/lapEditor.dir/objects.a
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/ar.exe qc CMakeFiles/lapEditor.dir/objects.a @CMakeFiles/lapEditor.dir/objects1.rsp
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/editor && C:/msys64/mingw64/bin/g++.exe -g -Wl,--whole-archive CMakeFiles/lapEditor.dir/objects.a -Wl,--no-whole-archive -o debug/lapEditor.exe -Wl,--out-implib,liblapEditor.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles/lapEditor.dir/linkLibs.rsp

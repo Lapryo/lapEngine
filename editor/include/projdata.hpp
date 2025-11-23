@@ -384,6 +384,106 @@ const char proj_json[] = R"json(
                     ]
                 },
                 {
+                    "name": "save-project-button",
+                    "parent": "file-dropdown",
+                    "child-index": 1,
+                    "components":
+                    [
+                        {
+                            "type": "frame",
+                            "data":
+                            {
+                                "position": [0, 0.05, 0, 0],
+                                "size": [0.15, 0, 0, 15],
+                                "renderable":
+                                {
+                                    "zlayer": 7,
+                                    "isScreenSpace": true,
+                                    "visible": false,
+                                    "tint": [255, 255, 255, 100]
+                                }
+                            }
+                        },
+                        {
+                            "type": "textlabel",
+                            "data":
+                            {
+                                "text": "Save Project",
+                                "text-size": 15.0,
+                                "bounds": [0, 0],
+                                "horizontal-alignment": "left",
+                                "vertical-alignment": "top",
+                                "padding": [0, 0, 0, 0],
+                                "position": [0, 0, 0, 0],
+                                "size": [0, 0, 0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 8,
+                                    "isScreenSpace": true,
+                                    "visible": false,
+                                    "tint": [125, 97, 103, 255]
+                                }
+                            }
+                        },
+                        {
+                            "type": "ui-button",
+                            "data":
+                            {
+                                "active": false,
+                                "bounds":
+                                {
+                                    "position":
+                                    {
+                                        "scale": [0, 0],
+                                        "offset": [0, 0]
+                                    },
+                                    "size":
+                                    {
+                                        "scale": [0.15, 0],
+                                        "offset": [0, 15]
+                                    }
+                                },
+                                "button-events":
+                                [
+                                    {
+                                        "name": "left-click",
+                                        "event": "save-project"
+                                    },
+                                    {
+                                        "name": "right-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "middle-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "mouse-enter",
+                                        "event": "highlight-save-project-button"
+                                    },
+                                    {
+                                        "name": "mouse-leave",
+                                        "event": "unhighlight-save-project-button"
+                                    },
+                                    {
+                                        "name": "mouse-hover",
+                                        "event": ""
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "setup-save-project-button",
+                                "onUpdate": "",
+                                "onDestroy": ""
+                            }
+                        }
+                    ]
+                },
+                {
                     "name": "sidebar",
                     "parent": "",
                     "child-index": -1,

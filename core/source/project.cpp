@@ -422,7 +422,103 @@ void GetScenes(Project &project, const nlohmann::json_abi_v3_12_0::json &j, cons
     }
 }
 
-Project lapCore::UnpackProject(const char projJson[])
+std::string lapCore::PackProject(Project project)
+{
+    std::cout << "[PROJECT] Packing project\n";
+    nlohmann::json j;
+
+    j["name"] = project.name;
+    j["version"] = project.version;
+    j["scenes"] = nlohmann::json::array();
+
+    for (const auto &scenePtr : project.scenes)
+    {
+        nlohmann::json sceneJson;
+        sceneJson["name"] = scenePtr->name;
+
+        // Assets
+        sceneJson["assets"] = nlohmann::json::array();
+        for (const auto &asset : scenePtr->resources.textures)
+        {
+            nlohmann::json assetJson;
+            assetJson["name"] = asset.first;
+            assetJson["type"] = "texture";
+            assetJson["path"] = ""; // You would need to store the path somewhere to retrieve it here
+
+            sceneJson["assets"].push_back(assetJson);
+        }
+
+        for (const auto &asset : scenePtr->resources.shaders)
+        {
+            nlohmann::json assetJson;
+            assetJson["name"] = asset.first;
+            assetJson["type"] = "shader";
+            assetJson["path"] = ""; // You would need to store the path somewhere to retrieve it here
+
+            sceneJson["assets"].push_back(assetJson);
+        }
+
+        // Systems
+        sceneJson["systems"] = nlohmann::json::array();
+        for (const auto &systemPtr : scenePtr->systems)
+        {
+            if (systemPtr)
+            {
+                nlohmann::json systemJson;
+                // Here you would need a way to get the type of the system
+                // For simplicity, let's assume each system has a GetType() method
+                // systemJson["type"] = systemPtr->GetType();
+                systemJson["order"] = systemPtr->order;
+
+                sceneJson["systems"].push_back(systemJson);
+            }
+        }
+
+        // Objects would be packed here similarly
+
+        for (const auto &objectEntryPair : scenePtr->objectMap)
+        {
+            const auto &objectEntry = objectEntryPair.second;
+            nlohmann::json objectJson;
+            objectJson["name"] = objectEntryPair.first;
+            if (objectEntry.parent != entt::null)
+            {
+                objectJson["parent"] = scenePtr->GetObjectName(objectEntry.parent);
+            }
+            objectJson["child-index"] = 0; // You would need to determine the correct child index
+
+            // Components would be packed here
+
+            /*objectJson["components"] = nlohmann::json::array();
+            auto origin2d = scenePtr->FindElement<Origin2D>(objectEntry.object);
+            if (origin2d)
+            {
+                nlohmann::json compJson;
+                compJson["type"] = "origin2d";
+                compJson["data"] = nlohmann::json::object();
+                // Fill in origin2d data here
+
+
+
+                objectJson["components"].push_back(compJson);
+            }*/
+
+            // Doing components later...
+
+
+
+            sceneJson["objects"].push_back(objectJson);
+        }
+
+        j["scenes"].push_back(sceneJson);
+    }
+
+    std::cout << "[PROJECT] Project packed successfully\n";
+    return j.dump(4);
+
+}
+
+Project lapCore::UnpackProject(const std::string &projJson)
 {
     std::cout << "[PROJECT] Unpacking project\n";
     Project project;

@@ -257,6 +257,30 @@ source/objects/fpslabel.cpp.s:
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/source/objects/fpslabel.cpp.s
 .PHONY : source/objects/fpslabel.cpp.s
 
+source/objects/newProject.obj: source/objects/newProject.cpp.obj
+.PHONY : source/objects/newProject.obj
+
+# target to build an object file
+source/objects/newProject.cpp.obj:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj
+.PHONY : source/objects/newProject.cpp.obj
+
+source/objects/newProject.i: source/objects/newProject.cpp.i
+.PHONY : source/objects/newProject.i
+
+# target to preprocess a source file
+source/objects/newProject.cpp.i:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.i
+.PHONY : source/objects/newProject.cpp.i
+
+source/objects/newProject.s: source/objects/newProject.cpp.s
+.PHONY : source/objects/newProject.s
+
+# target to generate assembly for a file
+source/objects/newProject.cpp.s:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.s
+.PHONY : source/objects/newProject.cpp.s
+
 source/objects/openProject.obj: source/objects/openProject.cpp.obj
 .PHONY : source/objects/openProject.obj
 
@@ -280,6 +304,30 @@ source/objects/openProject.s: source/objects/openProject.cpp.s
 source/objects/openProject.cpp.s:
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.s
 .PHONY : source/objects/openProject.cpp.s
+
+source/objects/saveProject.obj: source/objects/saveProject.cpp.obj
+.PHONY : source/objects/saveProject.obj
+
+# target to build an object file
+source/objects/saveProject.cpp.obj:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj
+.PHONY : source/objects/saveProject.cpp.obj
+
+source/objects/saveProject.i: source/objects/saveProject.cpp.i
+.PHONY : source/objects/saveProject.i
+
+# target to preprocess a source file
+source/objects/saveProject.cpp.i:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.i
+.PHONY : source/objects/saveProject.cpp.i
+
+source/objects/saveProject.s: source/objects/saveProject.cpp.s
+.PHONY : source/objects/saveProject.s
+
+# target to generate assembly for a file
+source/objects/saveProject.cpp.s:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.s
+.PHONY : source/objects/saveProject.cpp.s
 
 source/objects/selectionMenu.obj: source/objects/selectionMenu.cpp.obj
 .PHONY : source/objects/selectionMenu.obj
@@ -354,9 +402,15 @@ help:
 	@echo "... source/objects/fpslabel.obj"
 	@echo "... source/objects/fpslabel.i"
 	@echo "... source/objects/fpslabel.s"
+	@echo "... source/objects/newProject.obj"
+	@echo "... source/objects/newProject.i"
+	@echo "... source/objects/newProject.s"
 	@echo "... source/objects/openProject.obj"
 	@echo "... source/objects/openProject.i"
 	@echo "... source/objects/openProject.s"
+	@echo "... source/objects/saveProject.obj"
+	@echo "... source/objects/saveProject.i"
+	@echo "... source/objects/saveProject.s"
 	@echo "... source/objects/selectionMenu.obj"
 	@echo "... source/objects/selectionMenu.i"
 	@echo "... source/objects/selectionMenu.s"

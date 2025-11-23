@@ -446,6 +446,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
         {
             if (rl::IsMouseButtonPressed(rl::MOUSE_LEFT_BUTTON))
             {
+                std::cout << "hovered\n";
                 EventRegistry::Fire<>(button->events.events["left-click"]);
             }
 

@@ -13,7 +13,9 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/fileButton.cpp" "editor/CMakeFiles/lapEditor.dir/source/objects/fileButton.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/objects/fileButton.cpp.obj.d"
   "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/fileDropdown.cpp" "editor/CMakeFiles/lapEditor.dir/source/objects/fileDropdown.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/objects/fileDropdown.cpp.obj.d"
   "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/fpslabel.cpp" "editor/CMakeFiles/lapEditor.dir/source/objects/fpslabel.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/objects/fpslabel.cpp.obj.d"
+  "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/newProject.cpp" "editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/objects/newProject.cpp.obj.d"
   "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/openProject.cpp" "editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/objects/openProject.cpp.obj.d"
+  "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/saveProject.cpp" "editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/objects/saveProject.cpp.obj.d"
   "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/selectionMenu.cpp" "editor/CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/objects/selectionMenu.cpp.obj.d"
   "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/editor/source/objects/sidebar.cpp" "editor/CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj" "gcc" "editor/CMakeFiles/lapEditor.dir/source/objects/sidebar.cpp.obj.d"
   )

@@ -25,8 +25,8 @@ namespace lapCore
         void LoadSettings(const std::string &settingsFilePath);
     };
 
-    void PackProject(Project &project);
-    Project UnpackProject(const char projJson[]);
+    std::string PackProject(Project project);
+    Project UnpackProject(const std::string &projJson);
 }
 
 #endif

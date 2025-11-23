@@ -9,6 +9,8 @@
 using namespace lapEditor;
 using namespace lapCore;
 
+nlohmann::json lapEditor::loadedProjectJson;
+
 // TODO: Move this to its own file
 std::vector<std::string> windowSubTitles = {
     "For the love of the game.",
@@ -39,7 +41,7 @@ void EditorApp::Init()
     rl::SetWindowTitle(windowTitle.c_str());
 
     // Setup project JSON here
-    lapEditor::loadedProjectJson = {
+    loadedProjectJson = {
         {"name", "Untitled Project"},
         {"version", "1.0.0"},
         {"scenes", nlohmann::json::array()}
@@ -53,6 +55,8 @@ void EditorApp::Init()
     FileButtonObject::RegisterLogic();
     FileDropdownObject::RegisterLogic();
     OpenProjectObject::RegisterLogic();
+    SaveProjectObject::RegisterLogic();
+    NewProjectObject::RegisterLogic();
 
     state = AppState::RUNNING;
 }
@@ -66,6 +70,23 @@ void EditorApp::Update(float deltaTime)
     }
 
     project.main_scene->Update(deltaTime, project.target);
+}
+
+void lapEditor::LoadProjectFromFile(const std::string &filePath)
+{
+    auto projJson = nlohmann::json::parse(ReadFileToString(filePath));
+    std::cout << "Loaded Project JSON:\n" << projJson.dump(4) << "\n";
+    loadedProjectJson = projJson;
+
+    // Refresh editor with new project
+}
+
+void lapEditor::SaveProjectToFile(const std::string &filePath)
+{
+    std::string projJsonString = loadedProjectJson.dump(4);
+    std::cout << "Project JSON to save:\n" << projJsonString << "\n";
+
+    WriteStringToFile(filePath, loadedProjectJson.dump(4));
 }
 
 int main()

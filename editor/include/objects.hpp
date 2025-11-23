@@ -7,3 +7,5 @@
 #include "objects/fileButton.hpp"
 #include "objects/fileDropdown.hpp"
 #include "objects/openProject.hpp"
+#include "objects/saveProject.hpp"
+#include "objects/newProject.hpp"
