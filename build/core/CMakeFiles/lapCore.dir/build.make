@@ -87,26 +87,11 @@ core/CMakeFiles/lapCore.dir/source/app.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapCore.dir/source/app.cpp.s"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/app.cpp -o CMakeFiles/lapCore.dir/source/app.cpp.s
 
-core/CMakeFiles/lapCore.dir/source/core.cpp.obj: core/CMakeFiles/lapCore.dir/flags.make
-core/CMakeFiles/lapCore.dir/source/core.cpp.obj: core/CMakeFiles/lapCore.dir/includes_CXX.rsp
-core/CMakeFiles/lapCore.dir/source/core.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/core.cpp
-core/CMakeFiles/lapCore.dir/source/core.cpp.obj: core/CMakeFiles/lapCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object core/CMakeFiles/lapCore.dir/source/core.cpp.obj"
-	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT core/CMakeFiles/lapCore.dir/source/core.cpp.obj -MF CMakeFiles/lapCore.dir/source/core.cpp.obj.d -o CMakeFiles/lapCore.dir/source/core.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/core.cpp
-
-core/CMakeFiles/lapCore.dir/source/core.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapCore.dir/source/core.cpp.i"
-	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/core.cpp > CMakeFiles/lapCore.dir/source/core.cpp.i
-
-core/CMakeFiles/lapCore.dir/source/core.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapCore.dir/source/core.cpp.s"
-	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/core.cpp -o CMakeFiles/lapCore.dir/source/core.cpp.s
-
 core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj: core/CMakeFiles/lapCore.dir/flags.make
 core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj: core/CMakeFiles/lapCore.dir/includes_CXX.rsp
 core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/eutil.cpp
 core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj: core/CMakeFiles/lapCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj -MF CMakeFiles/lapCore.dir/source/eutil.cpp.obj.d -o CMakeFiles/lapCore.dir/source/eutil.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/eutil.cpp
 
 core/CMakeFiles/lapCore.dir/source/eutil.cpp.i: cmake_force
@@ -121,7 +106,7 @@ core/CMakeFiles/lapCore.dir/source/project.cpp.obj: core/CMakeFiles/lapCore.dir/
 core/CMakeFiles/lapCore.dir/source/project.cpp.obj: core/CMakeFiles/lapCore.dir/includes_CXX.rsp
 core/CMakeFiles/lapCore.dir/source/project.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/project.cpp
 core/CMakeFiles/lapCore.dir/source/project.cpp.obj: core/CMakeFiles/lapCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object core/CMakeFiles/lapCore.dir/source/project.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object core/CMakeFiles/lapCore.dir/source/project.cpp.obj"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT core/CMakeFiles/lapCore.dir/source/project.cpp.obj -MF CMakeFiles/lapCore.dir/source/project.cpp.obj.d -o CMakeFiles/lapCore.dir/source/project.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/project.cpp
 
 core/CMakeFiles/lapCore.dir/source/project.cpp.i: cmake_force
@@ -136,7 +121,7 @@ core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj: core/CMakeFiles/lap
 core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj: core/CMakeFiles/lapCore.dir/includes_CXX.rsp
 core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/resource_manager.cpp
 core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj: core/CMakeFiles/lapCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj -MF CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj.d -o CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/resource_manager.cpp
 
 core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.i: cmake_force
@@ -151,7 +136,7 @@ core/CMakeFiles/lapCore.dir/source/scene.cpp.obj: core/CMakeFiles/lapCore.dir/fl
 core/CMakeFiles/lapCore.dir/source/scene.cpp.obj: core/CMakeFiles/lapCore.dir/includes_CXX.rsp
 core/CMakeFiles/lapCore.dir/source/scene.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/scene.cpp
 core/CMakeFiles/lapCore.dir/source/scene.cpp.obj: core/CMakeFiles/lapCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object core/CMakeFiles/lapCore.dir/source/scene.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object core/CMakeFiles/lapCore.dir/source/scene.cpp.obj"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT core/CMakeFiles/lapCore.dir/source/scene.cpp.obj -MF CMakeFiles/lapCore.dir/source/scene.cpp.obj.d -o CMakeFiles/lapCore.dir/source/scene.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/scene.cpp
 
 core/CMakeFiles/lapCore.dir/source/scene.cpp.i: cmake_force
@@ -162,44 +147,93 @@ core/CMakeFiles/lapCore.dir/source/scene.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapCore.dir/source/scene.cpp.s"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/scene.cpp -o CMakeFiles/lapCore.dir/source/scene.cpp.s
 
-core/CMakeFiles/lapCore.dir/source/systems.cpp.obj: core/CMakeFiles/lapCore.dir/flags.make
-core/CMakeFiles/lapCore.dir/source/systems.cpp.obj: core/CMakeFiles/lapCore.dir/includes_CXX.rsp
-core/CMakeFiles/lapCore.dir/source/systems.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems.cpp
-core/CMakeFiles/lapCore.dir/source/systems.cpp.obj: core/CMakeFiles/lapCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object core/CMakeFiles/lapCore.dir/source/systems.cpp.obj"
-	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT core/CMakeFiles/lapCore.dir/source/systems.cpp.obj -MF CMakeFiles/lapCore.dir/source/systems.cpp.obj.d -o CMakeFiles/lapCore.dir/source/systems.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems.cpp
+core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj: core/CMakeFiles/lapCore.dir/flags.make
+core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj: core/CMakeFiles/lapCore.dir/includes_CXX.rsp
+core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/gui_sys.cpp
+core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj: core/CMakeFiles/lapCore.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj -MF CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj.d -o CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/gui_sys.cpp
 
-core/CMakeFiles/lapCore.dir/source/systems.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapCore.dir/source/systems.cpp.i"
-	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems.cpp > CMakeFiles/lapCore.dir/source/systems.cpp.i
+core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.i"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/gui_sys.cpp > CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.i
 
-core/CMakeFiles/lapCore.dir/source/systems.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapCore.dir/source/systems.cpp.s"
-	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems.cpp -o CMakeFiles/lapCore.dir/source/systems.cpp.s
+core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.s"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/gui_sys.cpp -o CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.s
+
+core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj: core/CMakeFiles/lapCore.dir/flags.make
+core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj: core/CMakeFiles/lapCore.dir/includes_CXX.rsp
+core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/physics_sys.cpp
+core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj: core/CMakeFiles/lapCore.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj -MF CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj.d -o CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/physics_sys.cpp
+
+core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.i"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/physics_sys.cpp > CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.i
+
+core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.s"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/physics_sys.cpp -o CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.s
+
+core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj: core/CMakeFiles/lapCore.dir/flags.make
+core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj: core/CMakeFiles/lapCore.dir/includes_CXX.rsp
+core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/render_sys.cpp
+core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj: core/CMakeFiles/lapCore.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj -MF CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj.d -o CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/render_sys.cpp
+
+core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.i"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/render_sys.cpp > CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.i
+
+core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.s"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/render_sys.cpp -o CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.s
+
+core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj: core/CMakeFiles/lapCore.dir/flags.make
+core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj: core/CMakeFiles/lapCore.dir/includes_CXX.rsp
+core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj: C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/script_sys.cpp
+core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj: core/CMakeFiles/lapCore.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj -MF CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj.d -o CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/script_sys.cpp
+
+core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.i"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/script_sys.cpp > CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.i
+
+core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.s"
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && C:/msys64/mingw64/bin/g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/script_sys.cpp -o CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.s
 
 # Object files for target lapCore
 lapCore_OBJECTS = \
 "CMakeFiles/lapCore.dir/source/app.cpp.obj" \
-"CMakeFiles/lapCore.dir/source/core.cpp.obj" \
 "CMakeFiles/lapCore.dir/source/eutil.cpp.obj" \
 "CMakeFiles/lapCore.dir/source/project.cpp.obj" \
 "CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj" \
 "CMakeFiles/lapCore.dir/source/scene.cpp.obj" \
-"CMakeFiles/lapCore.dir/source/systems.cpp.obj"
+"CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj" \
+"CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj" \
+"CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj" \
+"CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj"
 
 # External object files for target lapCore
 lapCore_EXTERNAL_OBJECTS =
 
 C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/source/app.cpp.obj
-C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/source/core.cpp.obj
 C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj
 C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/source/project.cpp.obj
 C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj
 C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/source/scene.cpp.obj
-C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/source/systems.cpp.obj
+C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj
+C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj
+C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj
+C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj
 C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/build.make
 C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a: core/CMakeFiles/lapCore.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX static library C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX static library C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/lib/liblapCore.a"
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && $(CMAKE_COMMAND) -P CMakeFiles/lapCore.dir/cmake_clean_target.cmake
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/lapCore.dir/link.txt --verbose=$(VERBOSE)
 

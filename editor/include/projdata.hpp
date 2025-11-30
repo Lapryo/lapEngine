@@ -26,6 +26,53 @@ const char proj_json[] = R"json(
                     "order": 0
                 }
             ],
+            "prefabs":
+            [
+                {
+                    "name": "object-entry-gui",
+                    "parent": "sidebar",
+                    "child-index": -1,
+                    "components":
+                    [
+                        {
+                            "type": "frame",
+                            "data":
+                            {
+                                "position": [0, 0, 0, 0],
+                                "size": [0.2, 0.05, 0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 100,
+                                    "isScreenSpace": true,
+                                    "visible": true,
+                                    "tint": [255, 255, 255, 0]
+                                }
+                            }
+                        },
+                        {
+                            "type": "textlabel",
+                            "data":
+                            {
+                                "text": "Object",
+                                "text-size": 15.0,
+                                "bounds": [0.2, 0.05],
+                                "horizontal-alignment": "left",
+                                "vertical-alignment": "top",
+                                "padding": [5, 0, 5, 0],
+                                "position": [0, 0, 0, 0],
+                                "size": [0, 0, 0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 101,
+                                    "isScreenSpace": true,
+                                    "visible": true,
+                                    "tint": [125, 97, 103, 255]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ],
             "objects":
             [
                 {
@@ -263,7 +310,7 @@ const char proj_json[] = R"json(
                             "data":
                             {
                                 "scroll-size": [1, 1, 0, 0],
-                                "display-size": [1, 0.1, 0, 0],
+                                "display-size": [1, 0.2, 0, 0],
                                 "horizontal-scroll-bar": "right",
                                 "vertical-scroll-bar": "bottom",
                                 "mask-outside-content": true,
@@ -284,9 +331,109 @@ const char proj_json[] = R"json(
                     ]
                 },
                 {
-                    "name": "open-project-button",
+                    "name": "new-project-button",
                     "parent": "file-dropdown",
                     "child-index": 0,
+                    "components":
+                    [
+                        {
+                            "type": "frame",
+                            "data":
+                            {
+                                "position": [0, 0.05, 0, 0],
+                                "size": [0.15, 0, 0, 15],
+                                "renderable":
+                                {
+                                    "zlayer": 6,
+                                    "isScreenSpace": true,
+                                    "visible": false,
+                                    "tint": [255, 255, 255, 0]
+                                }
+                            }
+                        },
+                        {
+                            "type": "textlabel",
+                            "data":
+                            {
+                                "text": "New Project",
+                                "text-size": 15.0,
+                                "bounds": [0, 0],
+                                "horizontal-alignment": "left",
+                                "vertical-alignment": "top",
+                                "padding": [0, 0, 0, 0],
+                                "position": [0, 0, 0, 0],
+                                "size": [0, 0, 0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 7,
+                                    "isScreenSpace": true,
+                                    "visible": false,
+                                    "tint": [125, 97, 103, 255]
+                                }
+                            }
+                        },
+                        {
+                            "type": "ui-button",
+                            "data":
+                            {
+                                "active": false,
+                                "bounds":
+                                {
+                                    "position":
+                                    {
+                                        "scale": [0, 0],
+                                        "offset": [0, 0]
+                                    },
+                                    "size":
+                                    {
+                                        "scale": [0.15, 0],
+                                        "offset": [0, 15]
+                                    }
+                                },
+                                "button-events":
+                                [
+                                    {
+                                        "name": "left-click",
+                                        "event": "new-project"
+                                    },
+                                    {
+                                        "name": "right-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "middle-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "mouse-enter",
+                                        "event": "highlight-new-project-button"
+                                    },
+                                    {
+                                        "name": "mouse-leave",
+                                        "event": "unhighlight-new-project-button"
+                                    },
+                                    {
+                                        "name": "mouse-hover",
+                                        "event": ""
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "setup-new-project-button",
+                                "onUpdate": "",
+                                "onDestroy": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "open-project-button",
+                    "parent": "file-dropdown",
+                    "child-index": 1,
                     "components":
                     [
                         {
@@ -386,7 +533,7 @@ const char proj_json[] = R"json(
                 {
                     "name": "save-project-button",
                     "parent": "file-dropdown",
-                    "child-index": 1,
+                    "child-index": 2,
                     "components":
                     [
                         {
@@ -400,7 +547,7 @@ const char proj_json[] = R"json(
                                     "zlayer": 7,
                                     "isScreenSpace": true,
                                     "visible": false,
-                                    "tint": [255, 255, 255, 100]
+                                    "tint": [255, 255, 255, 0]
                                 }
                             }
                         },
@@ -479,6 +626,15 @@ const char proj_json[] = R"json(
                                 "onCreate": "setup-save-project-button",
                                 "onUpdate": "",
                                 "onDestroy": ""
+                            }
+                        },
+                        {
+                            "type": "attribute",
+                            "data":
+                            {
+                                "name": "uses-ui-list-visiblity",
+                                "type": "bool",
+                                "value": false
                             }
                         }
                     ]
@@ -729,7 +885,7 @@ const char proj_json[] = R"json(
                                 {
                                     "zlayer": 2,
                                     "isScreenSpace": true,
-                                    "visible": true,
+                                    "visible": false,
                                     "tint": [179, 95, 76, 255]
                                 }
                             }

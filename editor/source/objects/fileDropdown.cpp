@@ -3,9 +3,9 @@
 
 void CloseDropdown(Scene *scene, Object object)
 {
-    auto fileDropdown = scene->FindObject("file-dropdown");
-    auto *frame = scene->FindElement<Frame>(fileDropdown);
-    auto *button = scene->FindElement<UIButton>(fileDropdown);
+    auto fileDropdown = scene->FindObject("file-dropdown").info.object;
+    auto *frame = scene->FindElement<Frame>(scene->objects, fileDropdown);
+    auto *button = scene->FindElement<UIButton>(scene->objects, fileDropdown);
 
     if (frame)
         frame->renderable.visible = false;

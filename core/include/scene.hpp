@@ -19,18 +19,29 @@ namespace lapCore
         std::string path;
     };
 
+    struct ObjectInfo
+    {
+        std::string name;
+        Object object;
+    };
+ 
     struct ObjectEntry
     {
-        Object object;
-        Object parent;
-        std::vector<Object> children;
+        ObjectInfo info;
+        ObjectInfo parent;
+        std::vector<ObjectInfo> children;
+        int childIndex;
     };
 
     struct Scene
     {
         std::string name;
+
         entt::registry objects;
         std::unordered_map<std::string, ObjectEntry> objectMap;
+
+        entt::registry prefabs;
+        std::unordered_map<std::string, ObjectEntry> prefabMap;
 
         std::vector<std::unique_ptr<System>> systems;
 
@@ -77,35 +88,40 @@ namespace lapCore
 
         Object AddObject(const std::string &name, const std::string &parent, int childIndex);
         void RemoveObject(Object object);
-        Object FindObject(const std::string &name);
+        ObjectEntry FindObject(const std::string &name);
+
+        Object AddPrefab(const std::string &name, const std::string &parent, int childIndex);
+        ObjectEntry FindPrefab(const std::string &name);
+
+        Object AddObjectFromPrefab(const std::string &prefabName, const std::string &newName);
 
         std::string GetObjectName(Object object);
 
-        std::vector<Object> GetChildren(Object object);
+        std::vector<ObjectInfo> GetChildren(Object object);
         Object FindChild(Object object, const std::string &name);
 
         template <typename Element, typename... ElementArgs>
-        Element AddElement(Object object, ElementArgs &&...args)
+        Element AddElement(entt::registry &registry, Object object, ElementArgs &&...args)
         {
-            return objects.emplace<Element>(object, std::forward<ElementArgs>(args)...);
+            return registry.emplace<Element>(object, std::forward<ElementArgs>(args)...);
         }
 
         template <typename Element>
-        void RemoveElement(Object object)
+        void RemoveElement(entt::registry &registry, Object object)
         {
-            objects.remove<Element>(object);
+            registry.remove<Element>(object);
         }
 
         template <typename Element>
-        Element *FindElement(Object object)
+        Element *FindElement(entt::registry &registry, Object object)
         {
-            return objects.try_get<Element>(object);
+            return registry.try_get<Element>(object);
         }
 
         template <typename Element>
-        entt::view<Element> GetElements()
+        entt::view<Element> GetElements(entt::registry &registry)
         {
-            return objects.view<Element>();
+            return registry.view<Element>();
         }
 
         void Clear();

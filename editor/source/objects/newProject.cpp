@@ -3,21 +3,39 @@
 
 void NewProject(Scene *scene, Object object)
 {
-    
+    std::cout << "Creating new project...\n";
+
+    std::string filePath = FileDialogs::SaveFile({"lapEngine Project Files", "*.lapengine"});
+    if (filePath.empty())
+        return;
+
+    lapEditor::loadedProjectFilePath = filePath;
+    lapEditor::loadedProjectJson = {
+        {"name", "Untitled Project"},
+        {"version", "1.0.0"},
+        {"scenes", nlohmann::json::array()}
+    };
+
+    auto saveProjButtonObj = scene->FindObject("save-project-button").info.object;
+    auto *saveProjButtonVisibilityAttr = scene->FindElement<Attribute<bool>>(scene->objects, saveProjButtonObj);
+    if (saveProjButtonVisibilityAttr)
+        saveProjButtonVisibilityAttr->value = true;
+
+    EventRegistry::Fire<>("refresh-sidebar");
+
+    // TODO: Refresh sidebar with new project (in form of event)
 }
 
 void HighlightNewProjectButton(Scene *scene, Object object)
 {
-    std::cout << "mouse enter\n";
-    auto *frame = scene->FindElement<Frame>(object);
+    auto *frame = scene->FindElement<Frame>(scene->objects, object);
     if (frame)
         frame->renderable.tint = (rl::Color){255, 255, 255, 25};
 }
 
 void UnhighlightNewProjectButton(Scene *scene, Object object)
 {
-    std::cout << "mouse leave\n";
-    auto *frame = scene->FindElement<Frame>(object);
+    auto *frame = scene->FindElement<Frame>(scene->objects, object);
     if (frame)
         frame->renderable.tint = (rl::Color){255, 255, 255, 0};
 }

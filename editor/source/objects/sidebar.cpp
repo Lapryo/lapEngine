@@ -3,8 +3,8 @@
 
 void OpenSelectionMenu(Scene* scene, Object object)
 {
-    auto selectionMenu = scene->FindObject("selectionMenu");
-    auto *frame = scene->FindElement<Frame>(selectionMenu);
+    auto selectionMenu = scene->FindObject("selectionMenu").info.object;
+    auto *frame = scene->FindElement<Frame>(scene->objects, selectionMenu);
     if (!frame)
         return;
 
@@ -22,9 +22,15 @@ void OpenSelectionMenu(Scene* scene, Object object)
     frame->renderable.visible = true;
 }
 
+void RefreshSidebar(Scene* scene, Object object)
+{
+    std::cout << "refreshing sidebar...\n";
+}
+
 void SidebarObject::RegisterLogic()
 {
     ScriptRegistry::onCreateFunctions["setup-sidebar"] = [](Scene* scene, Object object) {
         ConnectECSEvent(scene, object, "open-selection-menu", OpenSelectionMenu);
+        ConnectECSEvent(scene, object, "refresh-sidebar", RefreshSidebar);
     };
 }

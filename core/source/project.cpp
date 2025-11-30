@@ -67,7 +67,13 @@ void GetSystems(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
     }
 }
 
-void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &objectJson, Object &object)
+enum class RegistryType
+{
+    OBJECTS,
+    PREFABS
+};
+
+void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &objectJson, Object &object, RegistryType registryType)
 {
     std::cout << "[PROJECT] [SCENE] [OBJECT] \tComponents:\n";
 
@@ -96,7 +102,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             std::string texName = data["texture"].get<std::string>();
 
             Renderable renderable(zlayer, isScreenSpace, visible, tint);
-            scene->AddElement<Sprite>(object, renderable, texName);
+            scene->AddElement<Sprite>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, renderable, texName);
         }
         else if (type == "textlabel")
         {
@@ -188,7 +194,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             FrameVector textBounds((rl::Vector2){0, 0}, (rl::Vector2){bounds.x, bounds.y});
 
             // Frame frame, std::string text, float textSize, Alignment textAlignment, FrameVector textBounds, Padding textPadding
-            scene->AddElement<TextLabel>(object, frame, text, textSize, textAlignment, textBounds, padding);
+            scene->AddElement<TextLabel>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, frame, text, textSize, textAlignment, textBounds, padding);
         }
         else if (type == "cam2d")
         {
@@ -228,7 +234,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [CAM2D] \t\t\t\t" << static_cast<std::uint16_t>(entity) << '\n';
             }
 
-            scene->AddElement<Cam2D>(object, camera, excludeList);
+            scene->AddElement<Cam2D>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, camera, excludeList);
         }
         else if (type == "script")
         {
@@ -236,7 +242,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             std::string updateFuncName = data.value("onUpdate", "");
             std::string destroyFuncName = data.value("onDestroy", "");
 
-            scene->AddElement<Script>(object, createFuncName, updateFuncName, destroyFuncName);
+            scene->AddElement<Script>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, createFuncName, updateFuncName, destroyFuncName);
         }
         else if (type == "frame")
         {
@@ -266,7 +272,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             UIOrigin origin(position, size);
 
             // Renderable renderable, UIOrigin origin
-            scene->AddElement<Frame>(object, renderable, origin);
+            scene->AddElement<Frame>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, renderable, origin);
         }
         else if (type == "UIList")
         {
@@ -302,7 +308,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             if (dirText == "horizontal")
                 direction = Axis2D::HORIZONTAL;
 
-            scene->AddElement<UIList>(object, scrollSize, displaySize, hScrollBarRight, vScrollBarBottom, maskOutsideContent, scrollOffset, scrollSpeed, direction);
+            scene->AddElement<UIList>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, scrollSize, displaySize, hScrollBarRight, vScrollBarBottom, maskOutsideContent, scrollOffset, scrollSpeed, direction);
         }
         else if (type == "origin2d")
         {
@@ -338,15 +344,14 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             bool active = data.value("active", true);
 
             // EventBus buttonEvents, UIOrigin bound
-            scene->AddElement<UIButton>(object, eventBus, bounds, active);
+            scene->AddElement<UIButton>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, eventBus, bounds, active);
         }
         else if (type == "attribute")
         {
-            // TODO: SWITCH OVER TO THIS IN FUTURE, BUT FOR NOW, USING BOOL ATTRIB
             std::string attribType = data.value("type", "");
             if (attribType == "bool")
             {
-                scene->AddElement<Attribute<bool>>(object, data.value("name", ""), data.value("value", false));
+                scene->AddElement<Attribute<bool>>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, data.value("name", ""), data.value("value", false));
             }
         }
         else if (type == "event-bus")
@@ -357,7 +362,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 events[eventJson.value("name", "")] = eventJson.value("event", "");
             }
 
-            scene->AddElement<EventBus>(object, events);
+            scene->AddElement<EventBus>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, events);
         }
     }
 }
@@ -376,12 +381,37 @@ void GetObjects(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
             if (!object.contains("components") || !object["components"].is_array())
                 continue;
 
-            GetComponents(scene, object, entity);
+            GetComponents(scene, object, entity, RegistryType::OBJECTS);
         }
     }
     else
     {
         std::cout << "[WARNING] Project: \"" << projectName << "\", Scene: \"" << scene->name << "\" either did not contain objects or objects was not an array\n";
+    }
+}
+
+void GetPrefabs(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson, const std::string &projectName)
+{
+    std::cout << "[PROJECT] [SCENE] Getting prefabs...\n";
+
+    if (sceneJson.contains("prefabs") && sceneJson["prefabs"].is_array())
+    {
+        for (const auto &prefabJson : sceneJson["prefabs"])
+        {
+            const auto &prefabName = prefabJson.value("name", "");
+            std::cout << "[PROJECT] [SCENE] [PREFAB] Loading prefab:\n[PROJECT] [SCENE] [PREFAB] \tName: " << prefabName << '\n';
+
+            Object prefabObject = scene->AddPrefab(prefabName, prefabJson.value("parent", ""), prefabJson.value("child-index", -1));
+
+            if (!prefabJson.contains("components") || !prefabJson["components"].is_array())
+                continue;
+
+            GetComponents(scene, prefabJson, prefabObject, RegistryType::PREFABS);
+        }
+    }
+    else
+    {
+        std::cout << "[WARNING] Project: \"" << projectName << "\", Scene: \"" << scene->name << "\" either did not contain prefabs or prefabs was not an array\n";
     }
 }
 
@@ -409,6 +439,7 @@ void GetScenes(Project &project, const nlohmann::json_abi_v3_12_0::json &j, cons
 
             GetAssets(scene, sceneJson);
             GetSystems(scene, sceneJson, projectName);
+            GetPrefabs(scene, sceneJson, projectName);
             GetObjects(scene, sceneJson, projectName);
 
             std::cout << "[PROJECT] [SCENE] Finished loading scene\n";
@@ -481,9 +512,9 @@ std::string lapCore::PackProject(Project project)
             const auto &objectEntry = objectEntryPair.second;
             nlohmann::json objectJson;
             objectJson["name"] = objectEntryPair.first;
-            if (objectEntry.parent != entt::null)
+            if (objectEntry.parent.object != entt::null)
             {
-                objectJson["parent"] = scenePtr->GetObjectName(objectEntry.parent);
+                objectJson["parent"] = objectEntry.parent.name;
             }
             objectJson["child-index"] = 0; // You would need to determine the correct child index
 

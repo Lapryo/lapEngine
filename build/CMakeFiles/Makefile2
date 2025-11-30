@@ -127,12 +127,12 @@ editor/clean: editor/CMakeFiles/lapEditor.dir/clean
 editor/CMakeFiles/lapEditor.dir/all: core/CMakeFiles/lapCore.dir/all
 	$(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/depend
 	$(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=9,10,11,12,13,14,15,16,17,18,19 "Built target lapEditor"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=11,12,13,14,15,16,17,18,19,20,21 "Built target lapEditor"
 .PHONY : editor/CMakeFiles/lapEditor.dir/all
 
 # Build rule for subdir invocation for target.
 editor/CMakeFiles/lapEditor.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles 19
+	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles 21
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 editor/CMakeFiles/lapEditor.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles 0
 .PHONY : editor/CMakeFiles/lapEditor.dir/rule
@@ -144,7 +144,7 @@ lapEditor: editor/CMakeFiles/lapEditor.dir/rule
 # codegen rule for target.
 editor/CMakeFiles/lapEditor.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f editor/CMakeFiles/lapEditor.dir/build.make editor/CMakeFiles/lapEditor.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=9,10,11,12,13,14,15,16,17,18,19 "Finished codegen for target lapEditor"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=11,12,13,14,15,16,17,18,19,20,21 "Finished codegen for target lapEditor"
 .PHONY : editor/CMakeFiles/lapEditor.dir/codegen
 
 # clean rule for target.
@@ -159,12 +159,12 @@ editor/CMakeFiles/lapEditor.dir/clean:
 core/CMakeFiles/lapCore.dir/all:
 	$(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/depend
 	$(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Built target lapCore"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10 "Built target lapCore"
 .PHONY : core/CMakeFiles/lapCore.dir/all
 
 # Build rule for subdir invocation for target.
 core/CMakeFiles/lapCore.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles 10
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 core/CMakeFiles/lapCore.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles 0
 .PHONY : core/CMakeFiles/lapCore.dir/rule
@@ -176,7 +176,7 @@ lapCore: core/CMakeFiles/lapCore.dir/rule
 # codegen rule for target.
 core/CMakeFiles/lapCore.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Finished codegen for target lapCore"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10 "Finished codegen for target lapCore"
 .PHONY : core/CMakeFiles/lapCore.dir/codegen
 
 # clean rule for target.

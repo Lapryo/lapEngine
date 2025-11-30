@@ -9,12 +9,14 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/app.cpp" "core/CMakeFiles/lapCore.dir/source/app.cpp.obj" "gcc" "core/CMakeFiles/lapCore.dir/source/app.cpp.obj.d"
-  "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/core.cpp" "core/CMakeFiles/lapCore.dir/source/core.cpp.obj" "gcc" "core/CMakeFiles/lapCore.dir/source/core.cpp.obj.d"
   "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/eutil.cpp" "core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj" "gcc" "core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj.d"
   "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/project.cpp" "core/CMakeFiles/lapCore.dir/source/project.cpp.obj" "gcc" "core/CMakeFiles/lapCore.dir/source/project.cpp.obj.d"
   "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/resource_manager.cpp" "core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj" "gcc" "core/CMakeFiles/lapCore.dir/source/resource_manager.cpp.obj.d"
   "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/scene.cpp" "core/CMakeFiles/lapCore.dir/source/scene.cpp.obj" "gcc" "core/CMakeFiles/lapCore.dir/source/scene.cpp.obj.d"
-  "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems.cpp" "core/CMakeFiles/lapCore.dir/source/systems.cpp.obj" "gcc" "core/CMakeFiles/lapCore.dir/source/systems.cpp.obj.d"
+  "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/gui_sys.cpp" "core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj" "gcc" "core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj.d"
+  "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/physics_sys.cpp" "core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj" "gcc" "core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj.d"
+  "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/render_sys.cpp" "core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj" "gcc" "core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj.d"
+  "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/script_sys.cpp" "core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj" "gcc" "core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

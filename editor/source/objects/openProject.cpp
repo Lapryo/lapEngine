@@ -8,20 +8,21 @@ void OpenProject(Scene *scene, Object object)
         return;
 
     lapEditor::LoadProjectFromFile(filePath);
+    EventRegistry::Fire<>("refresh-sidebar");
 
-    // Refresh editor with new project
+    // TODO: Refresh editor with new project
 }
 
 void HighlightOpenProjectButton(Scene *scene, Object object)
 {
-    auto *frame = scene->FindElement<Frame>(object);
+    auto *frame = scene->FindElement<Frame>(scene->objects, object);
     if (frame)
         frame->renderable.tint = (rl::Color){255, 255, 255, 25};
 }
 
 void UnhighlightOpenProjectButton(Scene *scene, Object object)
 {
-    auto *frame = scene->FindElement<Frame>(object);
+    auto *frame = scene->FindElement<Frame>(scene->objects, object);
     if (frame)
         frame->renderable.tint = (rl::Color){255, 255, 255, 0};
 }

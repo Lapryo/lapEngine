@@ -3,9 +3,9 @@
 
 void OpenDropdown(Scene *scene, Object object)
 {
-    auto fileDropdown = scene->FindObject("file-dropdown");
-    auto *frame = scene->FindElement<Frame>(fileDropdown);
-    auto *button = scene->FindElement<UIButton>(fileDropdown);
+    auto fileDropdownObj = scene->FindObject("file-dropdown").info.object;
+    auto *frame = scene->FindElement<Frame>(scene->objects, fileDropdownObj);
+    auto *button = scene->FindElement<UIButton>(scene->objects, fileDropdownObj);
 
     if (frame)
         frame->renderable.visible = true;
@@ -15,18 +15,16 @@ void OpenDropdown(Scene *scene, Object object)
 
 void HighlightFileButton(Scene *scene, Object object)
 {
-    auto *frame = scene->FindElement<Frame>(object);
+    auto *frame = scene->FindElement<Frame>(scene->objects, object);
     if (frame)
         frame->renderable.tint = (rl::Color){255, 255, 255, 25};
 }
 
 void UnhighlightFileButton(Scene *scene, Object object)
 {
-    auto *frame = scene->FindElement<Frame>(object);
+    auto *frame = scene->FindElement<Frame>(scene->objects, object);
     if (frame)
         frame->renderable.tint = (rl::Color){255, 255, 255, 0};
-    else
-        std::cout << "for some reason, the file button doesn't think it has a frame?\n";
 }
 
 void FileButtonObject::RegisterLogic()

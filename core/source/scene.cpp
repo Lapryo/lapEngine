@@ -99,17 +99,30 @@ Object Scene::AddObject(const std::string &name, const std::string &parent, int 
 {
     auto object = objects.create();
 
+    // Create object info
+    ObjectInfo objInfo;
+    objInfo.name = name;
+    objInfo.object = object;
+
+    // Create parent info
+    ObjectInfo parentInfo;
+    parentInfo.name = parent;
+    parentInfo.object = objectMap[parent].info.object;
+
+    // Create the object entry for the map
     ObjectEntry entry;
-    entry.object = object;
-    entry.parent = objectMap[parent].object;
+    entry.info = objInfo;
+    entry.parent = parentInfo;
+    entry.childIndex = childIndex;
+
     objectMap[name] = entry;
 
     if (childIndex == -1)
-        objectMap[parent].children.push_back(object);
+        objectMap[parent].children.push_back(objInfo);
     else
     {
         objectMap[parent].children.resize(childIndex + 1);
-        objectMap[parent].children[childIndex] = object;
+        objectMap[parent].children[childIndex] = objInfo;
     }
 
     return object;
@@ -136,26 +149,82 @@ void Scene::Clear()
     }
 }
 
-Object Scene::FindObject(const std::string &name)
+ObjectEntry Scene::FindObject(const std::string &name)
 {
-    return objectMap[name].object;
+    return objectMap[name];
+}
+
+Object lapCore::Scene::AddPrefab(const std::string &name, const std::string &parent, int childIndex)
+{
+    auto object = prefabs.create();
+
+    // Create object info
+    ObjectInfo objInfo;
+    objInfo.name = name;
+    objInfo.object = object;
+
+    // Create parent info
+    ObjectInfo parentInfo;
+    parentInfo.name = parent;
+    parentInfo.object = prefabMap[parent].info.object;
+
+    // Create the object entry for the map
+    ObjectEntry entry;
+    entry.info = objInfo;
+    entry.parent = parentInfo;
+    entry.childIndex = childIndex;
+
+    prefabMap[name] = entry;
+
+    if (childIndex == -1)
+        prefabMap[parent].children.push_back(objInfo);
+    else
+    {
+        prefabMap[parent].children.resize(childIndex + 1);
+        prefabMap[parent].children[childIndex] = objInfo;
+    }
+
+    return object;
+}
+
+ObjectEntry lapCore::Scene::FindPrefab(const std::string &name)
+{
+    if (prefabMap.find(name) != prefabMap.end())
+        return prefabMap[name];
+
+    return ObjectEntry();
+}
+
+Object lapCore::Scene::AddObjectFromPrefab(const std::string &prefabName, const std::string &newName)
+{
+    auto object = objects.create();
+
+    ObjectEntry entry;
+    entry = FindPrefab(prefabName);
+
+    entry.info.object = object;
+    entry.info.name = newName;
+    objectMap[newName] = entry;
+
+    return object;
 }
 
 std::string lapCore::Scene::GetObjectName(Object object)
 {
     for (auto entry : objectMap)
     {
-        if (entry.second.object == object)
-            return entry.first;
+        if (entry.second.info.object == object)
+            return entry.second.info.name;
     }
 
     return "";
 }
 
-std::vector<Object> lapCore::Scene::GetChildren(Object object)
+std::vector<ObjectInfo> lapCore::Scene::GetChildren(Object object)
 {
     if (GetObjectName(object) == "")
         return {};
+
     return objectMap[GetObjectName(object)].children;
 }
 
@@ -166,8 +235,8 @@ Object lapCore::Scene::FindChild(Object object, const std::string &name)
         return Object{entt::null};
     for (auto &child : objectMap[objName].children)
     {
-        if (GetObjectName(child) == name)
-            return child;
+        if (child.name == name)
+            return child.object;
     }
     return Object{entt::null};
 }

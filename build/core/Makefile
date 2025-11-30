@@ -161,30 +161,6 @@ source/app.cpp.s:
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/app.cpp.s
 .PHONY : source/app.cpp.s
 
-source/core.obj: source/core.cpp.obj
-.PHONY : source/core.obj
-
-# target to build an object file
-source/core.cpp.obj:
-	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/core.cpp.obj
-.PHONY : source/core.cpp.obj
-
-source/core.i: source/core.cpp.i
-.PHONY : source/core.i
-
-# target to preprocess a source file
-source/core.cpp.i:
-	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/core.cpp.i
-.PHONY : source/core.cpp.i
-
-source/core.s: source/core.cpp.s
-.PHONY : source/core.s
-
-# target to generate assembly for a file
-source/core.cpp.s:
-	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/core.cpp.s
-.PHONY : source/core.cpp.s
-
 source/eutil.obj: source/eutil.cpp.obj
 .PHONY : source/eutil.obj
 
@@ -281,29 +257,101 @@ source/scene.cpp.s:
 	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/scene.cpp.s
 .PHONY : source/scene.cpp.s
 
-source/systems.obj: source/systems.cpp.obj
-.PHONY : source/systems.obj
+source/systems/gui_sys.obj: source/systems/gui_sys.cpp.obj
+.PHONY : source/systems/gui_sys.obj
 
 # target to build an object file
-source/systems.cpp.obj:
-	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems.cpp.obj
-.PHONY : source/systems.cpp.obj
+source/systems/gui_sys.cpp.obj:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj
+.PHONY : source/systems/gui_sys.cpp.obj
 
-source/systems.i: source/systems.cpp.i
-.PHONY : source/systems.i
+source/systems/gui_sys.i: source/systems/gui_sys.cpp.i
+.PHONY : source/systems/gui_sys.i
 
 # target to preprocess a source file
-source/systems.cpp.i:
-	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems.cpp.i
-.PHONY : source/systems.cpp.i
+source/systems/gui_sys.cpp.i:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.i
+.PHONY : source/systems/gui_sys.cpp.i
 
-source/systems.s: source/systems.cpp.s
-.PHONY : source/systems.s
+source/systems/gui_sys.s: source/systems/gui_sys.cpp.s
+.PHONY : source/systems/gui_sys.s
 
 # target to generate assembly for a file
-source/systems.cpp.s:
-	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems.cpp.s
-.PHONY : source/systems.cpp.s
+source/systems/gui_sys.cpp.s:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.s
+.PHONY : source/systems/gui_sys.cpp.s
+
+source/systems/physics_sys.obj: source/systems/physics_sys.cpp.obj
+.PHONY : source/systems/physics_sys.obj
+
+# target to build an object file
+source/systems/physics_sys.cpp.obj:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj
+.PHONY : source/systems/physics_sys.cpp.obj
+
+source/systems/physics_sys.i: source/systems/physics_sys.cpp.i
+.PHONY : source/systems/physics_sys.i
+
+# target to preprocess a source file
+source/systems/physics_sys.cpp.i:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.i
+.PHONY : source/systems/physics_sys.cpp.i
+
+source/systems/physics_sys.s: source/systems/physics_sys.cpp.s
+.PHONY : source/systems/physics_sys.s
+
+# target to generate assembly for a file
+source/systems/physics_sys.cpp.s:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.s
+.PHONY : source/systems/physics_sys.cpp.s
+
+source/systems/render_sys.obj: source/systems/render_sys.cpp.obj
+.PHONY : source/systems/render_sys.obj
+
+# target to build an object file
+source/systems/render_sys.cpp.obj:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj
+.PHONY : source/systems/render_sys.cpp.obj
+
+source/systems/render_sys.i: source/systems/render_sys.cpp.i
+.PHONY : source/systems/render_sys.i
+
+# target to preprocess a source file
+source/systems/render_sys.cpp.i:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.i
+.PHONY : source/systems/render_sys.cpp.i
+
+source/systems/render_sys.s: source/systems/render_sys.cpp.s
+.PHONY : source/systems/render_sys.s
+
+# target to generate assembly for a file
+source/systems/render_sys.cpp.s:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.s
+.PHONY : source/systems/render_sys.cpp.s
+
+source/systems/script_sys.obj: source/systems/script_sys.cpp.obj
+.PHONY : source/systems/script_sys.obj
+
+# target to build an object file
+source/systems/script_sys.cpp.obj:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj
+.PHONY : source/systems/script_sys.cpp.obj
+
+source/systems/script_sys.i: source/systems/script_sys.cpp.i
+.PHONY : source/systems/script_sys.i
+
+# target to preprocess a source file
+source/systems/script_sys.cpp.i:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.i
+.PHONY : source/systems/script_sys.cpp.i
+
+source/systems/script_sys.s: source/systems/script_sys.cpp.s
+.PHONY : source/systems/script_sys.s
+
+# target to generate assembly for a file
+source/systems/script_sys.cpp.s:
+	cd C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build && $(MAKE) $(MAKESILENT) -f core/CMakeFiles/lapCore.dir/build.make core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.s
+.PHONY : source/systems/script_sys.cpp.s
 
 # Help Target
 help:
@@ -318,9 +366,6 @@ help:
 	@echo "... source/app.obj"
 	@echo "... source/app.i"
 	@echo "... source/app.s"
-	@echo "... source/core.obj"
-	@echo "... source/core.i"
-	@echo "... source/core.s"
 	@echo "... source/eutil.obj"
 	@echo "... source/eutil.i"
 	@echo "... source/eutil.s"
@@ -333,9 +378,18 @@ help:
 	@echo "... source/scene.obj"
 	@echo "... source/scene.i"
 	@echo "... source/scene.s"
-	@echo "... source/systems.obj"
-	@echo "... source/systems.i"
-	@echo "... source/systems.s"
+	@echo "... source/systems/gui_sys.obj"
+	@echo "... source/systems/gui_sys.i"
+	@echo "... source/systems/gui_sys.s"
+	@echo "... source/systems/physics_sys.obj"
+	@echo "... source/systems/physics_sys.i"
+	@echo "... source/systems/physics_sys.s"
+	@echo "... source/systems/render_sys.obj"
+	@echo "... source/systems/render_sys.i"
+	@echo "... source/systems/render_sys.s"
+	@echo "... source/systems/script_sys.obj"
+	@echo "... source/systems/script_sys.i"
+	@echo "... source/systems/script_sys.s"
 .PHONY : help
 
 

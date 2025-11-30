@@ -20,6 +20,9 @@ namespace lapEditor
     void SaveProjectToFile(const std::string &filePath);
 
     extern nlohmann::json loadedProjectJson;
+    extern std::string loadedProjectFilePath;
+
+    extern unsigned int currentSceneIndex;
 }
 
 #endif

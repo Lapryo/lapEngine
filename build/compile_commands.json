@@ -67,12 +67,6 @@
 },
 {
   "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/core.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/core.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/core.cpp",
-  "output": "core/CMakeFiles/lapCore.dir/source/core.cpp.obj"
-},
-{
-  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core",
   "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/eutil.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/eutil.cpp",
   "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/eutil.cpp",
   "output": "core/CMakeFiles/lapCore.dir/source/eutil.cpp.obj"
@@ -97,8 +91,26 @@
 },
 {
   "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core",
-  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/systems.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems.cpp",
-  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems.cpp",
-  "output": "core/CMakeFiles/lapCore.dir/source/systems.cpp.obj"
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/gui_sys.cpp",
+  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/gui_sys.cpp",
+  "output": "core/CMakeFiles/lapCore.dir/source/systems/gui_sys.cpp.obj"
+},
+{
+  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/physics_sys.cpp",
+  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/physics_sys.cpp",
+  "output": "core/CMakeFiles/lapCore.dir/source/systems/physics_sys.cpp.obj"
+},
+{
+  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/render_sys.cpp",
+  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/render_sys.cpp",
+  "output": "core/CMakeFiles/lapCore.dir/source/systems/render_sys.cpp.obj"
+},
+{
+  "directory": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/build/core",
+  "command": "C:/msys64/mingw64/bin/g++.exe  @CMakeFiles/lapCore.dir/includes_CXX.rsp -g -std=c++23 -o CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj -c C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/script_sys.cpp",
+  "file": "C:/Users/WellH/OneDrive/Documentos/projects/lapEngine/core/source/systems/script_sys.cpp",
+  "output": "core/CMakeFiles/lapCore.dir/source/systems/script_sys.cpp.obj"
 }
 ]

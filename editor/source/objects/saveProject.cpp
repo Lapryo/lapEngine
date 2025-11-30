@@ -3,7 +3,6 @@
 
 void SaveProject(Scene *scene, Object object)
 {
-    std::cout << "saving\n";
     std::string filePath = FileDialogs::SaveFile({"lapEngine Project Files", "*.lapengine"});
     if (filePath.empty())
         return;
@@ -13,16 +12,14 @@ void SaveProject(Scene *scene, Object object)
 
 void HighlightSaveProjectButton(Scene *scene, Object object)
 {
-    std::cout << "mouse enter\n";
-    auto *frame = scene->FindElement<Frame>(object);
+    auto *frame = scene->FindElement<Frame>(scene->objects, object);
     if (frame)
         frame->renderable.tint = (rl::Color){255, 255, 255, 25};
 }
 
 void UnhighlightSaveProjectButton(Scene *scene, Object object)
 {
-    std::cout << "mouse leave\n";
-    auto *frame = scene->FindElement<Frame>(object);
+    auto *frame = scene->FindElement<Frame>(scene->objects, object);
     if (frame)
         frame->renderable.tint = (rl::Color){255, 255, 255, 0};
 }
