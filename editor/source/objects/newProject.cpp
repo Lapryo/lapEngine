@@ -21,9 +21,12 @@ void NewProject(Scene *scene, Object object)
     if (saveProjButtonVisibilityAttr)
         saveProjButtonVisibilityAttr->value = true;
 
-    EventRegistry::Fire<>("refresh-sidebar");
+    auto closeProjBtnObj = scene->FindObject("close-project-button").info.object;
+    auto *closeProjBtnVisibilityAttr = scene->FindElement<Attribute<bool>>(scene->objects, closeProjBtnObj);
+    if (closeProjBtnVisibilityAttr)
+        closeProjBtnVisibilityAttr->value = true;
 
-    // TODO: Refresh sidebar with new project (in form of event)
+    EventRegistry::Fire<>("refresh-sidebar");
 }
 
 void HighlightNewProjectButton(Scene *scene, Object object)

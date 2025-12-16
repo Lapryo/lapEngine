@@ -238,6 +238,106 @@ const char proj_json[] = R"json(
                     ]
                 },
                 {
+                    "name": "scene-button",
+                    "parent": "topbar",
+                    "child-index": 1,
+                    "components":
+                    [
+                        {
+                            "type": "frame",
+                            "data":
+                            {
+                                "position": [0, 0, 0, 0],
+                                "size": [0, 0.05, 50, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 3,
+                                    "isScreenSpace": true,
+                                    "visible": true,
+                                    "tint": [255, 255, 255, 0]
+                                }
+                            }
+                        },
+                        {
+                            "type": "textlabel",
+                            "data":
+                            {
+                                "text": "Scene",
+                                "text-size": 15.0,
+                                "bounds": [50, 30],
+                                "horizontal-alignment": "middle",
+                                "vertical-alignment": "middle",
+                                "padding": [0, 0, 0, 0],
+                                "position": [0, 0, 0, 0],
+                                "size": [0, 0, 0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 4,
+                                    "isScreenSpace": true,
+                                    "visible": true,
+                                    "tint": [125, 97, 103, 255]
+                                }
+                            }
+                        },
+                        {
+                            "type": "ui-button",
+                            "data":
+                            {
+                                "active": true,
+                                "bounds":
+                                {
+                                    "position":
+                                    {
+                                        "scale": [0, 0],
+                                        "offset": [0, 0]
+                                    },
+                                    "size":
+                                    {
+                                        "scale": [0, 0.05],
+                                        "offset": [50, 0]
+                                    }
+                                },
+                                "button-events":
+                                [
+                                    {
+                                        "name": "left-click",
+                                        "event": "open-scene-dropdown"
+                                    },
+                                    {
+                                        "name": "right-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "middle-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "mouse-enter",
+                                        "event": "highlight-scene-button"
+                                    },
+                                    {
+                                        "name": "mouse-leave",
+                                        "event": "unhighlight-scene-button"
+                                    },
+                                    {
+                                        "name": "mouse-hover",
+                                        "event": ""
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "setup-scene-button",
+                                "onUpdate": "",
+                                "onDestroy": ""
+                            }
+                        }
+                    ]
+                },
+                {
                     "name": "file-dropdown",
                     "parent": "",
                     "child-index": -1,
@@ -640,6 +740,115 @@ const char proj_json[] = R"json(
                     ]
                 },
                 {
+                    "name": "close-project-button",
+                    "parent": "file-dropdown",
+                    "child-index": 3,
+                    "components":
+                    [
+                        {
+                            "type": "frame",
+                            "data":
+                            {
+                                "position": [0, 0.05, 0, 0],
+                                "size": [0.15, 0, 0, 15],
+                                "renderable":
+                                {
+                                    "zlayer": 50,
+                                    "isScreenSpace": true,
+                                    "visible": false,
+                                    "tint": [255, 255, 255, 0]
+                                }
+                            }
+                        },
+                        {
+                            "type": "textlabel",
+                            "data":
+                            {
+                                "text": "Close Project",
+                                "text-size": 15.0,
+                                "bounds": [0, 0],
+                                "horizontal-alignment": "left",
+                                "vertical-alignment": "top",
+                                "padding": [0, 0, 0, 0],
+                                "position": [0, 0, 0, 0],
+                                "size": [0, 0, 0, 0],
+                                "renderable":
+                                {
+                                    "zlayer": 51,
+                                    "isScreenSpace": true,
+                                    "visible": false,
+                                    "tint": [125, 97, 103, 255]
+                                }
+                            }
+                        },
+                        {
+                            "type": "ui-button",
+                            "data":
+                            {
+                                "active": false,
+                                "bounds":
+                                {
+                                    "position":
+                                    {
+                                        "scale": [0, 0],
+                                        "offset": [0, 0]
+                                    },
+                                    "size":
+                                    {
+                                        "scale": [0.15, 0],
+                                        "offset": [0, 15]
+                                    }
+                                },
+                                "button-events":
+                                [
+                                    {
+                                        "name": "left-click",
+                                        "event": "close-project"
+                                    },
+                                    {
+                                        "name": "right-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "middle-click",
+                                        "event": ""
+                                    },
+                                    {
+                                        "name": "mouse-enter",
+                                        "event": "highlight-close-project-button"
+                                    },
+                                    {
+                                        "name": "mouse-leave",
+                                        "event": "unhighlight-close-project-button"
+                                    },
+                                    {
+                                        "name": "mouse-hover",
+                                        "event": ""
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "script",
+                            "data":
+                            {
+                                "onCreate": "setup-close-project-button",
+                                "onUpdate": "",
+                                "onDestroy": ""
+                            }
+                        },
+                        {
+                            "type": "attribute",
+                            "data":
+                            {
+                                "name": "uses-ui-list-visiblity",
+                                "type": "bool",
+                                "value": false
+                            }
+                        }
+                    ]
+                },
+                {
                     "name": "sidebar",
                     "parent": "",
                     "child-index": -1,
@@ -653,7 +862,7 @@ const char proj_json[] = R"json(
                                 "size": [0.2, 1, 0, 0],
                                 "renderable":
                                 {
-                                    "zlayer": 1,
+                                    "zlayer": 2,
                                     "isScreenSpace": true,
                                     "visible": false,
                                     "tint": [18, 17, 41, 255]

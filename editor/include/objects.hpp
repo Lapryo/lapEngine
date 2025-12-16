@@ -9,3 +9,5 @@
 #include "objects/openProject.hpp"
 #include "objects/saveProject.hpp"
 #include "objects/newProject.hpp"
+#include "objects/closeProject.hpp"
+#include "objects/sceneButton.hpp"

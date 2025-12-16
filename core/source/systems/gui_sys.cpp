@@ -22,8 +22,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
             for (int i = 0; i < children.size(); i++)
             {
                 auto e = children[i].object;
-
-                offsetY += list.displaySize.scale.y * logicalY + list.displaySize.offset.y;
+                float o_y = offsetY + (scene->objectMap[children[i].name].childIndex + 1) * (list.displaySize.scale.y * logicalY + list.displaySize.offset.y);
 
                 auto *attribute = registry.try_get<Attribute<bool>>(e);
                 bool use_visibility = attribute ? attribute->value : true;
@@ -34,7 +33,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
                     if (use_visibility) label->frame.renderable.visible = frame.renderable.visible;
                     label->frame.origin.position = frame.origin.position;
 
-                    label->frame.origin.position.offset.y += offsetY;
+                    label->frame.origin.position.offset.y += o_y;
                 }
 
                 auto *frameComp = registry.try_get<Frame>(e);
@@ -43,7 +42,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
                     if (use_visibility) frameComp->renderable.visible = frame.renderable.visible;
                     frameComp->origin.position = frame.origin.position;
 
-                    frameComp->origin.position.offset.y += offsetY;
+                    frameComp->origin.position.offset.y += o_y;
                 }
 
                 auto *button = registry.try_get<UIButton>(e);
@@ -52,7 +51,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
                     button->bounds.position = frame.origin.position;
                     if (use_visibility) button->active = frame.renderable.visible;
 
-                    button->bounds.position.offset.y += offsetY;
+                    button->bounds.position.offset.y += o_y;
                 }
             }
         }
@@ -65,6 +64,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
             for (int i = 0; i < children.size(); i++)
             {
                 auto e = children[i].object;
+                float o_x = offsetX + (scene->objectMap[children[i].name].childIndex + 1) * (list.displaySize.scale.x * logicalX + list.displaySize.offset.x);
 
                 auto *attribute = registry.try_get<Attribute<bool>>(e);
                 bool use_visibility = attribute ? attribute->value : true;
@@ -77,7 +77,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
                     if (use_visibility) label->frame.renderable.visible = frame.renderable.visible;
                     label->frame.origin.position = frame.origin.position;
 
-                    label->frame.origin.position.offset.x += offsetX;
+                    label->frame.origin.position.offset.x += o_x;
                 }
 
                 auto *frameComp = registry.try_get<Frame>(e);
@@ -86,7 +86,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
                     if (use_visibility) frameComp->renderable.visible = frame.renderable.visible;
                     frameComp->origin.position = frame.origin.position;
 
-                    frameComp->origin.position.offset.x += offsetX;
+                    frameComp->origin.position.offset.x += o_x;
                 }
 
                 auto *button = registry.try_get<UIButton>(e);
@@ -95,7 +95,7 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
                     button->bounds.position = frame.origin.position;
                     if (use_visibility) button->active = frame.renderable.visible;
 
-                    button->bounds.position.offset.x += offsetX;
+                    button->bounds.position.offset.x += o_x;
                 }
             }
         }

@@ -10,6 +10,16 @@ void OpenProject(Scene *scene, Object object)
     lapEditor::LoadProjectFromFile(filePath);
     EventRegistry::Fire<>("refresh-sidebar");
 
+    auto saveProjButtonObj = scene->FindObject("save-project-button").info.object;
+    auto *saveProjButtonVisibilityAttr = scene->FindElement<Attribute<bool>>(scene->objects, saveProjButtonObj);
+    if (saveProjButtonVisibilityAttr)
+        saveProjButtonVisibilityAttr->value = true;
+
+    auto closeProjBtnObj = scene->FindObject("close-project-button").info.object;
+    auto *closeProjBtnVisibilityAttr = scene->FindElement<Attribute<bool>>(scene->objects, closeProjBtnObj);
+    if (closeProjBtnVisibilityAttr)
+        closeProjBtnVisibilityAttr->value = true;
+
     // TODO: Refresh editor with new project
 }
 

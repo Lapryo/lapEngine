@@ -13,17 +13,18 @@ using namespace lapCore;
 
 void GetAssets(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson)
 {
-    std::cout << "[PROJECT] [SCENE] Getting assets...\n";
+    std::cout << "[SCENE] Getting assets...\n";
 
     if (sceneJson.contains("assets") && sceneJson["assets"].is_array())
     {
+        std::cout << "[ASSETS]\n";
         for (const auto &assetJson : sceneJson["assets"])
         {
             const auto &assetName = assetJson.value("name", "");
             const auto &assetType = assetJson.value("type", "");
             const auto &assetPath = assetJson.value("path", "");
 
-            std::cout << "[PROJECT] [SCENE] [ASSET] Queueing asset:\n[PROJECT] [SCENE] [ASSET] \tName: " << assetName << "\n[PROJECT] [SCENE] [ASSET] \tType: " << assetType << "[PROJECT] [SCENE] [ASSET] \tPath: " << assetPath << '\n';
+            std::cout << "Queueing asset:\nName: " << assetName << "\nType: " << assetType << "\nPath: " << assetPath << '\n';
 
             scene->QueueAsset(assetName, assetType, assetPath);
         }
@@ -32,15 +33,16 @@ void GetAssets(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::
 
 void GetSystems(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson, const std::string &projectName)
 {
-    std::cout << "[PROJECT] [SCENE] Getting systems...\n";
+    std::cout << "[SCENE] Getting systems...\n";
 
     if (sceneJson.contains("systems") && sceneJson["systems"].is_array())
     {
+        std::cout << "[SYSTEM]\n";
         for (const auto &systemJson : sceneJson["systems"])
         {
             std::string systemType = systemJson.value("type", "");
             unsigned int systemOrder = systemJson.value("order", -1);
-            std::cout << "[PROJECT] [SCENE] [SYSTEM] Adding system type: " << systemType << '\n';
+            std::cout << "Adding system type: " << systemType << '\n';
 
             if (systemType == "physics")
             {
@@ -75,18 +77,18 @@ enum class RegistryType
 
 void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &objectJson, Object &object, RegistryType registryType)
 {
-    std::cout << "[PROJECT] [SCENE] [OBJECT] \tComponents:\n";
+    std::cout << "[OBJECT] Getting components...";
 
     for (const auto &comp : objectJson["components"])
     {
         const auto &type = comp.value("type", "");
-        std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] \t\tType: " << type << '\n';
+        std::cout << "[COMPONENT]\nType: " << type << '\n';
 
         if (!comp.contains("data"))
             continue;
         const auto &data = comp["data"];
 
-        std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] \t\tData: " << type << '\n';
+        std::cout << "Data: " << type << '\n';
 
         if (type == "sprite")
         {
@@ -106,11 +108,8 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
         }
         else if (type == "textlabel")
         {
-            std::cout << "got here.\n";
             std::string text = data.value("text", "");
             float textSize = data.value("text-size", 0.0f);
-
-            std::cout << "got here.\n";
 
             rl::Color textColor{
                 data["renderable"]["tint"].at(0).get<unsigned char>(),
@@ -118,21 +117,15 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 data["renderable"]["tint"].at(2).get<unsigned char>(),
                 data["renderable"]["tint"].at(3).get<unsigned char>()};
 
-            std::cout << "got here.\n";
-
             rl::Vector2 bounds{
                 data["bounds"].at(0).get<float>(),
                 data["bounds"].at(1).get<float>()};
-
-            std::cout << "got here.\n";
 
             Padding padding{
                 data["padding"].at(0).get<float>(),
                 data["padding"].at(1).get<float>(),
                 data["padding"].at(2).get<float>(),
                 data["padding"].at(3).get<float>()};
-
-            std::cout << "got here.\n";
 
             HorizontalAlignment hAlign = HorizontalAlignment::LEFT;
             VerticalAlignment vAlign = VerticalAlignment::TOP;
@@ -149,16 +142,12 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             else if (hAlign_text == "bottom")
                 vAlign = VerticalAlignment::BOTTOM;
 
-            std::cout << "got here.\n";
-
             bool isScreenSpace = data["renderable"]["isScreenSpace"].get<bool>();
             unsigned int zlayer = data["renderable"]["zlayer"].get<unsigned int>();
             bool visible = data["renderable"]["visible"].get<bool>();
 
             Renderable renderable(zlayer, isScreenSpace, visible, textColor);
             renderable.visible = visible;
-
-            std::cout << "got here.\n";
 
             if (!data.contains("position"))
             {
@@ -177,15 +166,11 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 {data["position"][2].get<float>(),
                  data["position"][3].get<float>()}};
 
-            std::cout << "got here.\n";
-
             FrameVector size{
                 {data["size"][0].get<float>(),
                  data["size"][1].get<float>()},
                 {data["size"][2].get<float>(),
                  data["size"][3].get<float>()}};
-
-            std::cout << "got here.\n";
 
             UIOrigin origin(position, size);
             Frame frame(renderable, origin);
@@ -369,14 +354,14 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
 void GetObjects(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson, const std::string &projectName)
 {
-    std::cout << "[PROJECT] [SCENE] Gettings objects...";
+    std::cout << "[SCENE] Gettings objects...";
 
     if (sceneJson.contains("objects") && sceneJson["objects"].is_array())
     {
         for (const auto &object : sceneJson["objects"])
         {
             auto entity = scene->AddObject(object.value("name", ""), object.value("parent", ""), object.value("child-index", -1));
-            std::cout << "[PROJECT] [SCENE] [OBJECT] Loading object:\n[PROJECT] [SCENE] [OBJECT] \tName: " << object.value("name", "") << '\n';
+            std::cout << "[OBJECT]\nLoading object:\nName: " << object.value("name", "") << '\n';
 
             if (!object.contains("components") || !object["components"].is_array())
                 continue;
@@ -392,14 +377,14 @@ void GetObjects(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
 
 void GetPrefabs(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson, const std::string &projectName)
 {
-    std::cout << "[PROJECT] [SCENE] Getting prefabs...\n";
+    std::cout << "[SCENE] Getting prefabs...\n";
 
     if (sceneJson.contains("prefabs") && sceneJson["prefabs"].is_array())
     {
         for (const auto &prefabJson : sceneJson["prefabs"])
         {
             const auto &prefabName = prefabJson.value("name", "");
-            std::cout << "[PROJECT] [SCENE] [PREFAB] Loading prefab:\n[PROJECT] [SCENE] [PREFAB] \tName: " << prefabName << '\n';
+            std::cout << "[PREFAB] Loading prefab:\nName: " << prefabName << '\n';
 
             Object prefabObject = scene->AddPrefab(prefabName, prefabJson.value("parent", ""), prefabJson.value("child-index", -1));
 
@@ -429,11 +414,11 @@ void GetScenes(Project &project, const nlohmann::json_abi_v3_12_0::json &j, cons
             auto scene = std::make_unique<Scene>();
             scene->name = sceneJson.value("name", "Unnamed Scene");
 
-            std::cout << "[PROJECT] [SCENE] Name: " << scene->name << '\n';
+            std::cout << "Name: " << scene->name << '\n';
 
             if (scene->name == "main")
             {
-                std::cout << "[PROJECT] [SCENE] Current scene is the main scene\n";
+                std::cout << "Current scene is the main scene\n";
                 project.main_scene_index = static_cast<int>(project.scenes.size());
             }
 
@@ -442,7 +427,7 @@ void GetScenes(Project &project, const nlohmann::json_abi_v3_12_0::json &j, cons
             GetPrefabs(scene, sceneJson, projectName);
             GetObjects(scene, sceneJson, projectName);
 
-            std::cout << "[PROJECT] [SCENE] Finished loading scene\n";
+            std::cout << "Finished loading scene\n";
 
             project.scenes.push_back(std::move(scene));
         }

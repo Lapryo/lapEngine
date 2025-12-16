@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/lapEditor.dir/source/editor.cpp.obj.d"
   "CMakeFiles/lapEditor.dir/source/objects/addObject.cpp.obj"
   "CMakeFiles/lapEditor.dir/source/objects/addObject.cpp.obj.d"
+  "CMakeFiles/lapEditor.dir/source/objects/closeProject.cpp.obj"
+  "CMakeFiles/lapEditor.dir/source/objects/closeProject.cpp.obj.d"
   "CMakeFiles/lapEditor.dir/source/objects/fileButton.cpp.obj"
   "CMakeFiles/lapEditor.dir/source/objects/fileButton.cpp.obj.d"
   "CMakeFiles/lapEditor.dir/source/objects/fileDropdown.cpp.obj"

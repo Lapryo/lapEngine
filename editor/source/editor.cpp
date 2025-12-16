@@ -56,6 +56,7 @@ void EditorApp::Init()
     OpenProjectObject::RegisterLogic();
     SaveProjectObject::RegisterLogic();
     NewProjectObject::RegisterLogic();
+    CloseProjectObject::RegisterLogic();
 
     state = AppState::RUNNING;
 }
