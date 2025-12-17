@@ -3,8 +3,18 @@
 
 using namespace lapCore;
 
-void GUISystem::Update(float deltaTime, entt::registry &registry)
+/*
+TODO: [KNOWN ISSUE]
+Adding space inbetween a child indice causes graphical issues (white screen)
+Example:
+New Project (indice 0)
+Open Project (indice 1)
+Save Project (indice 2)
+___ (indice 3)
+Close Project (indice 4)
+*/
 
+void GUISystem::Update(float deltaTime, entt::registry &registry)
 {
     rl::Vector2 mouse = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
 

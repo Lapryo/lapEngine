@@ -240,3 +240,13 @@ Object lapCore::Scene::FindChild(Object object, const std::string &name)
     }
     return Object{entt::null};
 }
+
+void lapCore::Scene::SetParent(const std::string &name, Object parent)
+{
+    FindObject(name).parent = FindObject(GetObjectName(parent)).info;
+}
+
+ObjectInfo lapCore::Scene::GetParent(const std::string &name)
+{
+    return FindObject(name).parent;
+}

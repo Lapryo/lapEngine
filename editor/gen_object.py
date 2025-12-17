@@ -31,7 +31,7 @@ with open("editor/source/objects/" + camel_name + ".cpp", "a") as f:
     f.write("#include \"objects/" + camel_name + ".hpp\"\n\n")
     f.write("void " + name + "Object::RegisterLogic()\n")
     f.write("{\n")
-    f.write("\tScriptRegistry::onCreateFunctions[\"" + kebab_name + "\"] = [](Scene *scene, Object object)\n")
+    f.write("\tScriptRegistry::onCreateFunctions[\"setup-" + kebab_name + "\"] = [](Scene *scene, Object object)\n")
     f.write("\t{\n")
     f.write("\t\t\n")
     f.write("\t};\n")

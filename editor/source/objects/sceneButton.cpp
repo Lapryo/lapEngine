@@ -1,8 +1,8 @@
 #include "objects/sceneButton.hpp"
 
-void OpenDropdown(Scene* scene, Object object)
+void OpenSceneDropdown(Scene* scene, Object object)
 {
-
+    std::cout << "open scene dropdown.\n";
 }
 
 void HighlightSceneButton(Scene *scene, Object object)
@@ -21,9 +21,9 @@ void UnhighlightSceneButton(Scene *scene, Object object)
 
 void SceneButtonObject::RegisterLogic()
 {
-	ScriptRegistry::onCreateFunctions["scene-button"] = [](Scene *scene, Object object)
+	ScriptRegistry::onCreateFunctions["setup-scene-button"] = [](Scene *scene, Object object)
 	{
-		ConnectECSEvent(scene, object, "open-scene-dropdown", OpenDropdown);
+		ConnectECSEvent(scene, object, "open-scene-dropdown", OpenSceneDropdown);
 		ConnectECSEvent(scene, object, "highlight-scene-button", HighlightSceneButton);
         ConnectECSEvent(scene, object, "unhighlight-scene-button", UnhighlightSceneButton);
 	};

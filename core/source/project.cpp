@@ -183,7 +183,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
         }
         else if (type == "cam2d")
         {
-            // THIS ALSO NEEDS TO BE PUSHED TO AFTER THE UNPACKING IS COMPLETE
+            // TODO: THIS ALSO NEEDS TO BE PUSHED TO AFTER THE UNPACKING IS COMPLETE
 
             /*
             std::vector<entt::entity> excludeList;
@@ -574,9 +574,33 @@ void Project::Clear()
     }
 }
 
+std::string defaultSettingsStr = R"(
+{
+    "window":
+    {
+        "title": "lapHub",
+        "mode": "windowed",
+        "decorated": true,
+        "resizable": true,
+        "resolution": [1200, 900],
+        "logical-resolution": [800, 600],
+        "vsync": false,
+        "inf-fps": true,
+        "max-fps": 60
+    }
+}
+)";
+
 void Project::LoadSettings(const std::string &settingsFilePath)
 {
-    auto settingsJson = nlohmann::json::parse(ReadFileToString(settingsFilePath));
+    std::string fileStr = ReadFileToString(settingsFilePath);
+    if (fileStr == "")
+    {
+        std::cout << "Could not get settings file, loading default.\n";
+        fileStr = defaultSettingsStr;
+    }
+
+    auto settingsJson = nlohmann::json::parse(fileStr);
     auto &windowJson = settingsJson["window"];
 
     std::string windowMode = windowJson.value("mode", "windowed");

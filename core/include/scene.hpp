@@ -100,6 +100,9 @@ namespace lapCore
         std::vector<ObjectInfo> GetChildren(Object object);
         Object FindChild(Object object, const std::string &name);
 
+        void SetParent(const std::string &name, Object parent);
+        ObjectInfo GetParent(const std::string &name);
+
         template <typename Element, typename... ElementArgs>
         Element AddElement(entt::registry &registry, Object object, ElementArgs &&...args)
         {

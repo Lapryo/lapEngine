@@ -57,9 +57,11 @@ void EditorApp::Init()
     SaveProjectObject::RegisterLogic();
     NewProjectObject::RegisterLogic();
     CloseProjectObject::RegisterLogic();
+    SceneButtonObject::RegisterLogic();
 
     state = AppState::RUNNING;
 }
+
 
 void EditorApp::Update(float deltaTime)
 {

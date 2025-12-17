@@ -126,7 +126,7 @@ const char proj_json[] = R"json(
                             "data":
                             {
                                 "scroll-size": [1, 1, 0, 0],
-                                "display-size": [1, 0.05, 0, 0],
+                                "display-size": [0, 1, 50, 0],
                                 "horizontal-scroll-bar": "right",
                                 "vertical-scroll-bar": "bottom",
                                 "mask-outside-content": true,
@@ -251,7 +251,7 @@ const char proj_json[] = R"json(
                                 "size": [0, 0.05, 50, 0],
                                 "renderable":
                                 {
-                                    "zlayer": 3,
+                                    "zlayer": 5,
                                     "isScreenSpace": true,
                                     "visible": true,
                                     "tint": [255, 255, 255, 0]
@@ -272,7 +272,7 @@ const char proj_json[] = R"json(
                                 "size": [0, 0, 0, 0],
                                 "renderable":
                                 {
-                                    "zlayer": 4,
+                                    "zlayer": 6,
                                     "isScreenSpace": true,
                                     "visible": true,
                                     "tint": [125, 97, 103, 255]
@@ -333,6 +333,15 @@ const char proj_json[] = R"json(
                                 "onCreate": "setup-scene-button",
                                 "onUpdate": "",
                                 "onDestroy": ""
+                            }
+                        },
+                        {
+                            "type": "attribute",
+                            "data":
+                            {
+                                "name": "uses-ui-list-visiblity",
+                                "type": "bool",
+                                "value": true
                             }
                         }
                     ]
@@ -742,7 +751,7 @@ const char proj_json[] = R"json(
                 {
                     "name": "close-project-button",
                     "parent": "file-dropdown",
-                    "child-index": 3,
+                    "child-index": 4,
                     "components":
                     [
                         {
