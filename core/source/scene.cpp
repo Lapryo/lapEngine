@@ -12,16 +12,6 @@ void Scene::QueueAsset(const AssetLoadRequest &asset)
     queuedAssets.push_back(asset);
 }
 
-void Scene::ReloadTextures()
-{
-    auto view = entities.view<Sprite>();
-    for (auto entity : view)
-    {
-        auto &sprite = view.get<Sprite>(entity);
-        sprite.texture = &resources.textures[sprite.textureName];
-    }
-}
-
 void Scene::LoadQueuedAssets()
 {
     for (auto &asset : queuedAssets)
@@ -33,11 +23,10 @@ void Scene::LoadQueuedAssets()
     }
 
     queuedAssets.clear();
-    ReloadTextures();
 }
 
 // figure this out later
-void Scene::Update(float deltaTime, RenderTexture2D &target)
+void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
 {
     resolutionScale = logicalResolution.x / LOGICAL_RESOLUTION_REFERENCE;
 
@@ -52,21 +41,21 @@ void Scene::Update(float deltaTime, RenderTexture2D &target)
 
         if (drawing)
         {
-            BeginDrawing();
-            BeginTextureMode(target);
-            ClearBackground(WHITE);
+            rl::BeginDrawing();
+            rl::BeginTextureMode(target);
+            rl::ClearBackground(rl::RayWhite);
         }
 
-        system->Update(deltaTime, entities);
+        system->Update(deltaTime, objects);
 
         if (drawing)
         {
-            EndTextureMode();
-            ClearBackground(BLACK);
+            rl::EndTextureMode();
+            rl::ClearBackground(rl::Black);
 
             // Now draw render texture to the screen, scaled and letterboxed
-            int screenW = GetScreenWidth();
-            int screenH = GetScreenHeight();
+            int screenW = rl::GetScreenWidth();
+            int screenH = rl::GetScreenHeight();
             float screenAspect = (float)screenW / screenH;
             float targetAspect = (float)logicalResolution.x / logicalResolution.y;
 
@@ -93,36 +82,60 @@ void Scene::Update(float deltaTime, RenderTexture2D &target)
             logicalWindowPos = {(float)offsetX, (float)offsetY};
 
             // Draw the render texture to the screen, scaling it
-            DrawTexturePro(
+            rl::DrawTexturePro(
                 target.texture,
                 {0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height}, // source rect (flip y)
                 {(float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight},    // dest rect
                 {0.0f, 0.0f},                                                             // origin
                 0.0f,                                                                     // rotation
-                WHITE);
+                rl::White);
 
-            EndDrawing();
+            rl::EndDrawing();
         }
     }
 }
 
-entt::entity Scene::AddEntity(const std::string &name, const std::string &parent)
+Object Scene::AddObject(const std::string &name, const std::string &parent, int childIndex)
 {
-    const auto entity = entities.create(); // create entity
-    nameToEntity[name] = entity; // assign the entry to the dictionary
-    entityToParent[entity] = nameToEntity[parent];
-    entityToChildren[nameToEntity[parent]].push_back(entity);
-    return entity;
+    auto object = objects.create();
+
+    // Create object info
+    ObjectInfo objInfo;
+    objInfo.name = name;
+    objInfo.object = object;
+
+    // Create parent info
+    ObjectInfo parentInfo;
+    parentInfo.name = parent;
+    parentInfo.object = objectMap[parent].info.object;
+
+    // Create the object entry for the map
+    ObjectEntry entry;
+    entry.info = objInfo;
+    entry.parent = parentInfo;
+    entry.childIndex = childIndex;
+
+    objectMap[name] = entry;
+
+    if (childIndex == -1)
+        objectMap[parent].children.push_back(objInfo);
+    else
+    {
+        objectMap[parent].children.resize(childIndex + 1);
+        objectMap[parent].children[childIndex] = objInfo;
+    }
+
+    return object;
 }
 
-void Scene::DestroyEntity(entt::entity &entity)
+void Scene::RemoveObject(Object object)
 {
-    entities.destroy(entity);
+    objects.destroy(object);
 }
 
 void Scene::Clear()
 {
-    entities.clear();
+    objects.clear();
     systems.clear();
 
     for (auto &texture : resources.textures)
@@ -136,7 +149,104 @@ void Scene::Clear()
     }
 }
 
-entt::entity Scene::FindEntity(const std::string &name)
+ObjectEntry Scene::FindObject(const std::string &name)
 {
-    return nameToEntity[name];
+    return objectMap[name];
+}
+
+Object lapCore::Scene::AddPrefab(const std::string &name, const std::string &parent, int childIndex)
+{
+    auto object = prefabs.create();
+
+    // Create object info
+    ObjectInfo objInfo;
+    objInfo.name = name;
+    objInfo.object = object;
+
+    // Create parent info
+    ObjectInfo parentInfo;
+    parentInfo.name = parent;
+    parentInfo.object = prefabMap[parent].info.object;
+
+    // Create the object entry for the map
+    ObjectEntry entry;
+    entry.info = objInfo;
+    entry.parent = parentInfo;
+    entry.childIndex = childIndex;
+
+    prefabMap[name] = entry;
+
+    if (childIndex == -1)
+        prefabMap[parent].children.push_back(objInfo);
+    else
+    {
+        prefabMap[parent].children.resize(childIndex + 1);
+        prefabMap[parent].children[childIndex] = objInfo;
+    }
+
+    return object;
+}
+
+ObjectEntry lapCore::Scene::FindPrefab(const std::string &name)
+{
+    if (prefabMap.find(name) != prefabMap.end())
+        return prefabMap[name];
+
+    return ObjectEntry();
+}
+
+Object lapCore::Scene::AddObjectFromPrefab(const std::string &prefabName, const std::string &newName)
+{
+    auto object = objects.create();
+
+    ObjectEntry entry;
+    entry = FindPrefab(prefabName);
+
+    entry.info.object = object;
+    entry.info.name = newName;
+    objectMap[newName] = entry;
+
+    return object;
+}
+
+std::string lapCore::Scene::GetObjectName(Object object)
+{
+    for (auto entry : objectMap)
+    {
+        if (entry.second.info.object == object)
+            return entry.second.info.name;
+    }
+
+    return "";
+}
+
+std::vector<ObjectInfo> lapCore::Scene::GetChildren(Object object)
+{
+    if (GetObjectName(object) == "")
+        return {};
+
+    return objectMap[GetObjectName(object)].children;
+}
+
+Object lapCore::Scene::FindChild(Object object, const std::string &name)
+{
+    std::string objName = GetObjectName(object);
+    if (objName == "")
+        return Object{entt::null};
+    for (auto &child : objectMap[objName].children)
+    {
+        if (child.name == name)
+            return child.object;
+    }
+    return Object{entt::null};
+}
+
+void lapCore::Scene::SetParent(const std::string &name, Object parent)
+{
+    FindObject(name).parent = FindObject(GetObjectName(parent)).info;
+}
+
+ObjectInfo lapCore::Scene::GetParent(const std::string &name)
+{
+    return FindObject(name).parent;
 }

@@ -13,17 +13,18 @@ using namespace lapCore;
 
 void GetAssets(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson)
 {
-    std::cout << "[PROJECT] [SCENE] Getting assets...\n";
+    std::cout << "[SCENE] Getting assets...\n";
 
     if (sceneJson.contains("assets") && sceneJson["assets"].is_array())
     {
+        std::cout << "[ASSETS]\n";
         for (const auto &assetJson : sceneJson["assets"])
         {
             const auto &assetName = assetJson.value("name", "");
             const auto &assetType = assetJson.value("type", "");
             const auto &assetPath = assetJson.value("path", "");
 
-            std::cout << "[PROJECT] [SCENE] [ASSET] Queueing asset:\n[PROJECT] [SCENE] [ASSET] \tName: " << assetName << "\n[PROJECT] [SCENE] [ASSET] \tType: " << assetType << "[PROJECT] [SCENE] [ASSET] \tPath: " << assetPath << '\n';
+            std::cout << "Queueing asset:\nName: " << assetName << "\nType: " << assetType << "\nPath: " << assetPath << '\n';
 
             scene->QueueAsset(assetName, assetType, assetPath);
         }
@@ -32,15 +33,16 @@ void GetAssets(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::
 
 void GetSystems(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson, const std::string &projectName)
 {
-    std::cout << "[PROJECT] [SCENE] Getting systems...\n";
+    std::cout << "[SCENE] Getting systems...\n";
 
     if (sceneJson.contains("systems") && sceneJson["systems"].is_array())
     {
+        std::cout << "[SYSTEM]\n";
         for (const auto &systemJson : sceneJson["systems"])
         {
             std::string systemType = systemJson.value("type", "");
             unsigned int systemOrder = systemJson.value("order", -1);
-            std::cout << "[PROJECT] [SCENE] [SYSTEM] Adding system type: " << systemType << '\n';
+            std::cout << "Adding system type: " << systemType << '\n';
 
             if (systemType == "physics")
             {
@@ -55,6 +57,10 @@ void GetSystems(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
             {
                 scene->AddSystem<ScriptSystem>(systemOrder);
             }
+            else if (systemType == "gui")
+            {
+                scene->AddSystem<GUISystem>(systemOrder);
+            }
         }
     }
     else
@@ -63,24 +69,30 @@ void GetSystems(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
     }
 }
 
-void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &object, entt::entity &entity)
+enum class RegistryType
 {
-    std::cout << "[PROJECT] [SCENE] [OBJECT] \tComponents:\n";
+    OBJECTS,
+    PREFABS
+};
 
-    for (const auto &comp : object["components"])
+void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &objectJson, Object &object, RegistryType registryType)
+{
+    std::cout << "[OBJECT] Getting components...";
+
+    for (const auto &comp : objectJson["components"])
     {
         const auto &type = comp.value("type", "");
-        std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] \t\tType: " << type << '\n';
+        std::cout << "[COMPONENT]\nType: " << type << '\n';
 
         if (!comp.contains("data"))
             continue;
         const auto &data = comp["data"];
 
-        std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] \t\tData: " << type << '\n';
+        std::cout << "Data: " << type << '\n';
 
         if (type == "sprite")
         {
-            Color tint{
+            rl::Color tint{
                 data["tint"].at(0).get<unsigned char>(),
                 data["tint"].at(1).get<unsigned char>(),
                 data["tint"].at(2).get<unsigned char>(),
@@ -92,39 +104,28 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             std::string texName = data["texture"].get<std::string>();
 
             Renderable renderable(zlayer, isScreenSpace, visible, tint);
-            scene->AddComponent<Sprite>(entity, renderable, texName);
+            scene->AddElement<Sprite>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, renderable, texName);
         }
         else if (type == "textlabel")
         {
-            std::cout << "got here.\n";
             std::string text = data.value("text", "");
             float textSize = data.value("text-size", 0.0f);
 
-            std::cout << "got here.\n";
-
-            Color textColor{
+            rl::Color textColor{
                 data["renderable"]["tint"].at(0).get<unsigned char>(),
                 data["renderable"]["tint"].at(1).get<unsigned char>(),
                 data["renderable"]["tint"].at(2).get<unsigned char>(),
                 data["renderable"]["tint"].at(3).get<unsigned char>()};
 
-            std::cout << "got here.\n";
-
-            Vector2 bounds{
+            rl::Vector2 bounds{
                 data["bounds"].at(0).get<float>(),
-                data["bounds"].at(1).get<float>()
-            };
-
-            std::cout << "got here.\n";
+                data["bounds"].at(1).get<float>()};
 
             Padding padding{
                 data["padding"].at(0).get<float>(),
                 data["padding"].at(1).get<float>(),
                 data["padding"].at(2).get<float>(),
-                data["padding"].at(3).get<float>()
-            };
-
-            std::cout << "got here.\n";
+                data["padding"].at(3).get<float>()};
 
             HorizontalAlignment hAlign = HorizontalAlignment::LEFT;
             VerticalAlignment vAlign = VerticalAlignment::TOP;
@@ -141,8 +142,6 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             else if (hAlign_text == "bottom")
                 vAlign = VerticalAlignment::BOTTOM;
 
-            std::cout << "got here.\n";
-
             bool isScreenSpace = data["renderable"]["isScreenSpace"].get<bool>();
             unsigned int zlayer = data["renderable"]["zlayer"].get<unsigned int>();
             bool visible = data["renderable"]["visible"].get<bool>();
@@ -150,13 +149,13 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             Renderable renderable(zlayer, isScreenSpace, visible, textColor);
             renderable.visible = visible;
 
-            std::cout << "got here.\n";
-
-            if (!data.contains("position")) {
+            if (!data.contains("position"))
+            {
                 std::cout << "Component missing position: " << data.dump(4) << "\n";
             }
 
-            if (!data.contains("position") || !data["position"].is_array() || data["position"].size() < 4) {
+            if (!data.contains("position") || !data["position"].is_array() || data["position"].size() < 4)
+            {
                 // handle missing or malformed position
                 std::cerr << "Invalid position field\n";
             }
@@ -167,23 +166,24 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 {data["position"][2].get<float>(),
                  data["position"][3].get<float>()}};
 
-                std::cout << "got here.\n";
-
             FrameVector size{
                 {data["size"][0].get<float>(),
                  data["size"][1].get<float>()},
                 {data["size"][2].get<float>(),
                  data["size"][3].get<float>()}};
 
-                std::cout << "got here.\n";
+            UIOrigin origin(position, size);
+            Frame frame(renderable, origin);
 
-            // Renderable renderable, std::string text, float textSize, HorizontalAlignment horizontal, VerticalAlignment vertical, Vector2 bounds, Padding padding, FrameVector position, FrameVector size
+            Alignment textAlignment(hAlign, vAlign);
+            FrameVector textBounds((rl::Vector2){0, 0}, (rl::Vector2){bounds.x, bounds.y});
 
-            scene->AddComponent<TextLabel>(entity, renderable, text, textSize, hAlign, vAlign, bounds, padding, position, size);
+            // Frame frame, std::string text, float textSize, Alignment textAlignment, FrameVector textBounds, Padding textPadding
+            scene->AddElement<TextLabel>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, frame, text, textSize, textAlignment, textBounds, padding);
         }
         else if (type == "cam2d")
         {
-            // THIS ALSO NEEDS TO BE PUSHED TO AFTER THE UNPACKING IS COMPLETE
+            // TODO: THIS ALSO NEEDS TO BE PUSHED TO AFTER THE UNPACKING IS COMPLETE
 
             /*
             std::vector<entt::entity> excludeList;
@@ -195,20 +195,20 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             }
             */
 
-            std::vector<entt::entity> excludeList;
+            std::vector<Object> excludeList;
 
-            Vector2 offset{
+            rl::Vector2 offset{
                 data["offset"].at(0).get<float>(),
                 data["offset"].at(1).get<float>()};
 
-            Vector2 target{
+            rl::Vector2 target{
                 data["target"].at(0).get<float>(),
                 data["target"].at(1).get<float>()};
 
             float rotation = data["rotation"].get<float>();
             float zoom = data["zoom"].get<float>();
 
-            Camera2D camera;
+            rl::Camera2D camera;
             camera.offset = offset;
             camera.target = target;
             camera.rotation = rotation;
@@ -219,15 +219,15 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [CAM2D] \t\t\t\t" << static_cast<std::uint16_t>(entity) << '\n';
             }
 
-            scene->AddComponent<Cam2D>(entity, camera, excludeList);
+            scene->AddElement<Cam2D>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, camera, excludeList);
         }
         else if (type == "script")
         {
-            std::string createFuncName = data["onCreate"];
-            std::string updateFuncName = data["onUpdate"];
-            std::string destroyFuncName = data["onDestroy"];
+            std::string createFuncName = data.value("onCreate", "");
+            std::string updateFuncName = data.value("onUpdate", "");
+            std::string destroyFuncName = data.value("onDestroy", "");
 
-            scene->AddComponent<Script>(entity, ScriptRegistry::onCreateFunctions[createFuncName], ScriptRegistry::onUpdateFunctions[updateFuncName], ScriptRegistry::onDestroyFunctions[destroyFuncName], false);
+            scene->AddElement<Script>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, createFuncName, updateFuncName, destroyFuncName);
         }
         else if (type == "frame")
         {
@@ -243,12 +243,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 {data["size"].at(2).get<float>(),
                  data["size"].at(3).get<float>()}};
 
-            float rotation = data.value("rotation", 0.0f);
-            Vector2 anchor{
-                data["anchor"].at(0).get<float>(),
-                data["anchor"].at(1).get<float>()};
-
-            Color tint{
+            rl::Color tint{
                 data["renderable"]["tint"].at(0).get<unsigned char>(),
                 data["renderable"]["tint"].at(1).get<unsigned char>(),
                 data["renderable"]["tint"].at(2).get<unsigned char>(),
@@ -259,8 +254,10 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 data["renderable"]["isScreenSpace"].get<bool>(), data["renderable"]["visible"].get<bool>(),
                 tint);
 
-            // Renderable renderable, FrameVector position, FrameVector size, float rotation, Alignment horizontal, Alignment vertical, Vector2 anchor
-            scene->AddComponent<Frame>(entity, renderable, position, size, rotation, anchor);
+            UIOrigin origin(position, size);
+
+            // Renderable renderable, UIOrigin origin
+            scene->AddElement<Frame>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, renderable, origin);
         }
         else if (type == "UIList")
         {
@@ -268,15 +265,13 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 {data["scroll-size"].at(0).get<float>(),
                  data["scroll-size"].at(1).get<float>()},
                 {data["scroll-size"].at(2).get<float>(),
-                 data["scroll-size"].at(3).get<float>()}
-            };
+                 data["scroll-size"].at(3).get<float>()}};
 
             FrameVector displaySize{
                 {data["display-size"].at(0).get<float>(),
                  data["display-size"].at(1).get<float>()},
                 {data["display-size"].at(2).get<float>(),
-                 data["display-size"].at(3).get<float>()}
-            };
+                 data["display-size"].at(3).get<float>()}};
 
             bool hScrollBarRight = true;
             std::string horizontalScrollBar = data.value("horizontal-scroll-bar", "right");
@@ -289,11 +284,16 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
                 vScrollBarBottom = false;
 
             bool maskOutsideContent = data.value("mask-outside-content", true);
-                
+
             float scrollOffset = data.value("scroll-offset", 0.0f);
             float scrollSpeed = data.value("scroll-speed", 20.0f);
 
-            scene->AddComponent<UIList>(entity, scrollSize, displaySize, hScrollBarRight, vScrollBarBottom, maskOutsideContent, scrollOffset, scrollSpeed);
+            Axis2D direction = Axis2D::VERTICAL;
+            std::string dirText = data.value("direction", "vertical");
+            if (dirText == "horizontal")
+                direction = Axis2D::HORIZONTAL;
+
+            scene->AddElement<UIList>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, scrollSize, displaySize, hScrollBarRight, vScrollBarBottom, maskOutsideContent, scrollOffset, scrollSpeed, direction);
         }
         else if (type == "origin2d")
         {
@@ -301,90 +301,102 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
         else if (type == "physics2d")
         {
         }
-        else if (type == "button")
+        else if (type == "ui-button")
         {
-            auto &eventsJson = data["events"];
+            EventBus eventBus;
+            for (auto &eventJson : data["button-events"])
+            {
+                std::string name = eventJson.value("name", "");
+                std::string event = eventJson.value("event", "");
+                eventBus.events[name] = event;
+            }
 
-            Rectangle bounds;
-            bounds.x = data["bounds"].at(0).get<float>();
-            bounds.y = data["bounds"].at(1).get<float>();
-            bounds.width = data["bounds"].at(2).get<float>();
-            bounds.height = data["bounds"].at(3).get<float>();
+            rl::Vector2 scalePosition = {
+                data["bounds"]["position"]["scale"].at(0).get<float>(),
+                data["bounds"]["position"]["scale"].at(1).get<float>()};
+            rl::Vector2 offsetPosition = {
+                data["bounds"]["position"]["offset"].at(0).get<float>(),
+                data["bounds"]["position"]["offset"].at(1).get<float>()};
 
-            FrameVector position;
-            position.offset = {bounds.x, bounds.y};
-            FrameVector size;
-            size.offset = {bounds.width, bounds.height};
+            rl::Vector2 scaleSize = {
+                data["bounds"]["size"]["scale"].at(0).get<float>(),
+                data["bounds"]["size"]["scale"].at(1).get<float>()};
+            rl::Vector2 offsetSize = {
+                data["bounds"]["size"]["offset"].at(0).get<float>(),
+                data["bounds"]["size"]["offset"].at(1).get<float>()};
 
-            bool interactable = data.value("interactable", false);
+            UIOrigin bounds(FrameVector(scalePosition, offsetPosition), FrameVector(scaleSize, offsetSize));
+            bool active = data.value("active", true);
 
-            Color activeCol{
-                data["active"].at(0).get<unsigned char>(),
-                data["active"].at(1).get<unsigned char>(),
-                data["active"].at(2).get<unsigned char>(),
-                data["active"].at(3).get<unsigned char>(),
-            };
-
-            Color inactiveCol{
-                data["inactive"].at(0).get<unsigned char>(),
-                data["inactive"].at(1).get<unsigned char>(),
-                data["inactive"].at(2).get<unsigned char>(),
-                data["inactive"].at(3).get<unsigned char>(),
-            };
-
-            EventListener rcEvent(eventsJson.value("right-click", ""));
-            EventListener lcEvent(eventsJson.value("left-click", ""));
-            EventListener mcEvent(eventsJson.value("middle-click", ""));
-            
-            EventListener meEvent(eventsJson.value("mouse-enter", ""));
-            EventListener mlEvent(eventsJson.value("mouse-leave", ""));
-            EventListener mhEvent(eventsJson.value("mouse-hover", ""));
-
-            auto &button = scene->AddComponent<Button>(entity, position, size, interactable, activeCol, inactiveCol);
-            button.rightClickEvent = &rcEvent;
-            button.leftClickEvent = &lcEvent;
-            button.middleClickEvent = &mcEvent;
-
-            button.mouseEnterEvent = &meEvent;
-            button.mouseLeaveEvent = &mlEvent;
-            button.mouseHoverEvent = &mhEvent;
-        }
-        else if (type == "bool-attribute")
-        {
-            scene->AddComponent<BoolAttribute>(entity, data.value("name", ""), data.value("value", false));
+            // EventBus buttonEvents, UIOrigin bound
+            scene->AddElement<UIButton>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, eventBus, bounds, active);
         }
         else if (type == "attribute")
         {
-            // TODO: SWITCH OVER TO THIS IN FUTURE, BUT FOR NOW, USING BOOL ATTRIB
             std::string attribType = data.value("type", "");
             if (attribType == "bool")
             {
-                scene->AddComponent<Attribute<bool>>(entity, data.value("name", ""), data.value("value", false));
+                scene->AddElement<Attribute<bool>>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, data.value("name", ""), data.value("value", false));
             }
+        }
+        else if (type == "event-bus")
+        {
+            std::unordered_map<std::string, std::string> events;
+            for (auto &eventJson : data["events"])
+            {
+                events[eventJson.value("name", "")] = eventJson.value("event", "");
+            }
+
+            scene->AddElement<EventBus>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, events);
         }
     }
 }
 
 void GetObjects(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson, const std::string &projectName)
 {
-    std::cout << "[PROJECT] [SCENE] Gettings objects...";
+    std::cout << "[SCENE] Gettings objects...";
 
     if (sceneJson.contains("objects") && sceneJson["objects"].is_array())
     {
         for (const auto &object : sceneJson["objects"])
         {
-            auto entity = scene->AddEntity(object.value("name", ""), object.value("parent", ""));
-            std::cout << "[PROJECT] [SCENE] [OBJECT] Loading object:\n[PROJECT] [SCENE] [OBJECT] \tName: " << object.value("name", "") << '\n';
+            auto entity = scene->AddObject(object.value("name", ""), object.value("parent", ""), object.value("child-index", -1));
+            std::cout << "[OBJECT]\nLoading object:\nName: " << object.value("name", "") << '\n';
 
             if (!object.contains("components") || !object["components"].is_array())
                 continue;
 
-            GetComponents(scene, object, entity);
+            GetComponents(scene, object, entity, RegistryType::OBJECTS);
         }
     }
     else
     {
         std::cout << "[WARNING] Project: \"" << projectName << "\", Scene: \"" << scene->name << "\" either did not contain objects or objects was not an array\n";
+    }
+}
+
+void GetPrefabs(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson, const std::string &projectName)
+{
+    std::cout << "[SCENE] Getting prefabs...\n";
+
+    if (sceneJson.contains("prefabs") && sceneJson["prefabs"].is_array())
+    {
+        for (const auto &prefabJson : sceneJson["prefabs"])
+        {
+            const auto &prefabName = prefabJson.value("name", "");
+            std::cout << "[PREFAB] Loading prefab:\nName: " << prefabName << '\n';
+
+            Object prefabObject = scene->AddPrefab(prefabName, prefabJson.value("parent", ""), prefabJson.value("child-index", -1));
+
+            if (!prefabJson.contains("components") || !prefabJson["components"].is_array())
+                continue;
+
+            GetComponents(scene, prefabJson, prefabObject, RegistryType::PREFABS);
+        }
+    }
+    else
+    {
+        std::cout << "[WARNING] Project: \"" << projectName << "\", Scene: \"" << scene->name << "\" either did not contain prefabs or prefabs was not an array\n";
     }
 }
 
@@ -402,19 +414,20 @@ void GetScenes(Project &project, const nlohmann::json_abi_v3_12_0::json &j, cons
             auto scene = std::make_unique<Scene>();
             scene->name = sceneJson.value("name", "Unnamed Scene");
 
-            std::cout << "[PROJECT] [SCENE] Name: " << scene->name << '\n';
+            std::cout << "Name: " << scene->name << '\n';
 
             if (scene->name == "main")
             {
-                std::cout << "[PROJECT] [SCENE] Current scene is the main scene\n";
+                std::cout << "Current scene is the main scene\n";
                 project.main_scene_index = static_cast<int>(project.scenes.size());
             }
 
             GetAssets(scene, sceneJson);
             GetSystems(scene, sceneJson, projectName);
+            GetPrefabs(scene, sceneJson, projectName);
             GetObjects(scene, sceneJson, projectName);
 
-            std::cout << "[PROJECT] [SCENE] Finished loading scene\n";
+            std::cout << "Finished loading scene\n";
 
             project.scenes.push_back(std::move(scene));
         }
@@ -425,7 +438,103 @@ void GetScenes(Project &project, const nlohmann::json_abi_v3_12_0::json &j, cons
     }
 }
 
-Project lapCore::UnpackProject(const char projJson[])
+std::string lapCore::PackProject(Project project)
+{
+    std::cout << "[PROJECT] Packing project\n";
+    nlohmann::json j;
+
+    j["name"] = project.name;
+    j["version"] = project.version;
+    j["scenes"] = nlohmann::json::array();
+
+    for (const auto &scenePtr : project.scenes)
+    {
+        nlohmann::json sceneJson;
+        sceneJson["name"] = scenePtr->name;
+
+        // Assets
+        sceneJson["assets"] = nlohmann::json::array();
+        for (const auto &asset : scenePtr->resources.textures)
+        {
+            nlohmann::json assetJson;
+            assetJson["name"] = asset.first;
+            assetJson["type"] = "texture";
+            assetJson["path"] = ""; // You would need to store the path somewhere to retrieve it here
+
+            sceneJson["assets"].push_back(assetJson);
+        }
+
+        for (const auto &asset : scenePtr->resources.shaders)
+        {
+            nlohmann::json assetJson;
+            assetJson["name"] = asset.first;
+            assetJson["type"] = "shader";
+            assetJson["path"] = ""; // You would need to store the path somewhere to retrieve it here
+
+            sceneJson["assets"].push_back(assetJson);
+        }
+
+        // Systems
+        sceneJson["systems"] = nlohmann::json::array();
+        for (const auto &systemPtr : scenePtr->systems)
+        {
+            if (systemPtr)
+            {
+                nlohmann::json systemJson;
+                // Here you would need a way to get the type of the system
+                // For simplicity, let's assume each system has a GetType() method
+                // systemJson["type"] = systemPtr->GetType();
+                systemJson["order"] = systemPtr->order;
+
+                sceneJson["systems"].push_back(systemJson);
+            }
+        }
+
+        // Objects would be packed here similarly
+
+        for (const auto &objectEntryPair : scenePtr->objectMap)
+        {
+            const auto &objectEntry = objectEntryPair.second;
+            nlohmann::json objectJson;
+            objectJson["name"] = objectEntryPair.first;
+            if (objectEntry.parent.object != entt::null)
+            {
+                objectJson["parent"] = objectEntry.parent.name;
+            }
+            objectJson["child-index"] = 0; // You would need to determine the correct child index
+
+            // Components would be packed here
+
+            /*objectJson["components"] = nlohmann::json::array();
+            auto origin2d = scenePtr->FindElement<Origin2D>(objectEntry.object);
+            if (origin2d)
+            {
+                nlohmann::json compJson;
+                compJson["type"] = "origin2d";
+                compJson["data"] = nlohmann::json::object();
+                // Fill in origin2d data here
+
+
+
+                objectJson["components"].push_back(compJson);
+            }*/
+
+            // Doing components later...
+
+
+
+            sceneJson["objects"].push_back(objectJson);
+        }
+
+        j["scenes"].push_back(sceneJson);
+    }
+
+    std::cout << "[PROJECT] Project packed successfully\n";
+    return j.dump(4);
+
+}
+
+Project lapCore::UnpackProject(const std::string &projJson)
 {
     std::cout << "[PROJECT] Unpacking project\n";
     Project project;
@@ -465,17 +574,41 @@ void Project::Clear()
     }
 }
 
+std::string defaultSettingsStr = R"(
+{
+    "window":
+    {
+        "title": "lapHub",
+        "mode": "windowed",
+        "decorated": true,
+        "resizable": true,
+        "resolution": [1200, 900],
+        "logical-resolution": [800, 600],
+        "vsync": false,
+        "inf-fps": true,
+        "max-fps": 60
+    }
+}
+)";
+
 void Project::LoadSettings(const std::string &settingsFilePath)
 {
-    auto settingsJson = nlohmann::json::parse(ReadFileToString(settingsFilePath));
+    std::string fileStr = ReadFileToString(settingsFilePath);
+    if (fileStr == "")
+    {
+        std::cout << "Could not get settings file, loading default.\n";
+        fileStr = defaultSettingsStr;
+    }
+
+    auto settingsJson = nlohmann::json::parse(fileStr);
     auto &windowJson = settingsJson["window"];
 
     std::string windowMode = windowJson.value("mode", "windowed");
     bool resizable = windowJson.value("resizable", false);
-    Vector2 windowRes{
+    rl::Vector2 windowRes{
         windowJson["resolution"].at(0),
         windowJson["resolution"].at(1)};
-    Vector2 logicalRes{
+    rl::Vector2 logicalRes{
         windowJson["logical-resolution"].at(0),
         windowJson["logical-resolution"].at(1)};
 
@@ -485,7 +618,7 @@ void Project::LoadSettings(const std::string &settingsFilePath)
 
     std::string windowTitle = windowJson.value("title", "");
 
-    InitWindow(windowRes.x, windowRes.y, windowTitle.c_str());
+    rl::InitWindow(windowRes.x, windowRes.y, windowTitle.c_str());
     for (auto &scene : scenes)
     {
         scene->LoadQueuedAssets();
@@ -493,23 +626,23 @@ void Project::LoadSettings(const std::string &settingsFilePath)
     }
 
     if (resizable)
-        SetWindowState(FLAG_WINDOW_RESIZABLE);
+        rl::SetWindowState(rl::FLAG_WINDOW_RESIZABLE);
 
     if (!decorated)
-        SetWindowState(FLAG_WINDOW_UNDECORATED);
+        rl::SetWindowState(rl::FLAG_WINDOW_UNDECORATED);
 
     if (windowMode == "fullscreen")
-        SetWindowState(FLAG_FULLSCREEN_MODE);
+        rl::SetWindowState(rl::FLAG_FULLSCREEN_MODE);
 
     if (!vsync)
         if (inf_fps)
-            SetTargetFPS(-1);
+            rl::SetTargetFPS(-1);
         else
-            SetTargetFPS(windowJson["max-fps"].get<int>());
+            rl::SetTargetFPS(windowJson["max-fps"].get<int>());
     else
-        SetWindowState(FLAG_VSYNC_HINT);
+        rl::SetWindowState(rl::FLAG_VSYNC_HINT);
 
     main_scene = GetMainScene();
 
-    target = LoadRenderTexture(logicalRes.x, logicalRes.y);
+    target = rl::LoadRenderTexture(logicalRes.x, logicalRes.y);
 }

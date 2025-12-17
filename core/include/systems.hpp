@@ -6,6 +6,8 @@
 
 namespace lapCore
 {
+    using Object = entt::entity;
+
     class System
     {
     public:
@@ -31,7 +33,7 @@ namespace lapCore
     public:
         struct RenderEntry
         {
-            entt::entity entity;
+            Object entity;
             unsigned int zlayer;
             bool isScreenSpace;
             enum class Type
@@ -51,7 +53,7 @@ namespace lapCore
         void Update(float deltaTime, entt::registry &reg) override;
 
         void Connect(entt::registry &registry);
-        void OnRenderableUpdated(entt::registry &registry, entt::entity entity);
+        void OnRenderableUpdated(entt::registry &registry, Object entity);
 
         void RebuildRenderList(entt::registry &registry);
 

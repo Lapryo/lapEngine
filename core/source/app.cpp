@@ -11,9 +11,14 @@ void App::Run()
 {
     while (state == AppState::RUNNING)
     {
-        const float delta = GetFrameTime();
+        if (rl::WindowShouldClose())
+        {
+            state = AppState::DEAD;
+            return;
+        }
+
+        const float delta = rl::GetFrameTime();
         Update(delta);
-        Draw();
     }
 }
 
@@ -24,8 +29,8 @@ void App::Shutdown()
         scene->Clear();
     }
 
-    UnloadRenderTexture(project.target);
+    rl::UnloadRenderTexture(project.target);
 
     // shutdown window if it exists
-    CloseWindow();
+    rl::CloseWindow();
 }

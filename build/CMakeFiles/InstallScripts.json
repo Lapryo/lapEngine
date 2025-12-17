@@ -1,9 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"C:/Users/WellH/Documents/projects/lapEngine/build/cmake_install.cmake",
-		"C:/Users/WellH/Documents/projects/lapEngine/build/editor/cmake_install.cmake",
-		"C:/Users/WellH/Documents/projects/lapEngine/build/core/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
