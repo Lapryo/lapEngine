@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.1.2)
-project(lapCore)
+project(lapEngine)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -9,9 +9,9 @@ file(GLOB_RECURSE CORE_SOURCES
 )
 
 # Source files
-add_library(lapCore STATIC ${CORE_SOURCES})
+add_library(lapEngine STATIC ${CORE_SOURCES})
 
 # Include directories
-target_include_directories(lapCore PRIVATE 
+target_include_directories(lapEngine PRIVATE 
     include
 )
