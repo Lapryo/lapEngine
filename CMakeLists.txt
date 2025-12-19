@@ -1,9 +1,17 @@
 cmake_minimum_required(VERSION 4.1.2)
-project(lapEngine)
+project(lapCore)
 
-set(CMAKE_CXX_STANDARD 23)          # or 17 / 23
-set(CMAKE_CXX_STANDARD_REQUIRED ON) # Require it (no fallback to older)
-set(CMAKE_CXX_EXTENSIONS OFF)       # Turn off compiler-specific extensions like GNU++20
+set(CMAKE_CXX_STANDARD 23)
 
-add_subdirectory(editor)
-add_subdirectory(core)
+# Find all source files in the source directory
+file(GLOB_RECURSE CORE_SOURCES 
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp"
+)
+
+# Source files
+add_library(lapCore STATIC ${CORE_SOURCES})
+
+# Include directories
+target_include_directories(lapCore PRIVATE 
+    include
+)
