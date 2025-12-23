@@ -121,8 +121,19 @@ Object Scene::AddObject(const std::string &name, const std::string &parent, int 
         objectMap[parent].children.push_back(objInfo);
     else
     {
-        objectMap[parent].children.resize(childIndex + 1);
-        objectMap[parent].children[childIndex] = objInfo;
+        auto &children = objectMap[parent].children;
+        if (children.size() < (size_t)(childIndex + 1))
+        {
+            size_t old = children.size();
+            children.resize(childIndex + 1);
+            for (size_t k = old; k < children.size(); ++k)
+            {
+                children[k].name = "";
+                children[k].object = entt::null;
+            }
+        }
+
+        children[childIndex] = objInfo;
     }
 
     return object;
@@ -180,8 +191,19 @@ Object lapCore::Scene::AddPrefab(const std::string &name, const std::string &par
         prefabMap[parent].children.push_back(objInfo);
     else
     {
-        prefabMap[parent].children.resize(childIndex + 1);
-        prefabMap[parent].children[childIndex] = objInfo;
+        auto &children = prefabMap[parent].children;
+        if (children.size() < (size_t)(childIndex + 1))
+        {
+            size_t old = children.size();
+            children.resize(childIndex + 1);
+            for (size_t k = old; k < children.size(); ++k)
+            {
+                children[k].name = "";
+                children[k].object = entt::null;
+            }
+        }
+
+        children[childIndex] = objInfo;
     }
 
     return object;

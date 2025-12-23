@@ -30,7 +30,7 @@ namespace lapCore
         ObjectInfo info;
         ObjectInfo parent;
         std::vector<ObjectInfo> children;
-        int childIndex;
+        int childIndex = -1;
     };
 
     struct Scene
