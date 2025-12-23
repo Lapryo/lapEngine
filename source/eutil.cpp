@@ -108,3 +108,13 @@ rl::Rectangle lapCore::UIOriginToRect(UIOrigin origin, int logicalWidth, int log
 
     return rect;
 }
+
+rl::Vector2 lapCore::FrameVectorToVec2(lapCore::FrameVector vector, int logicalWidth, int logicalHeight)
+{
+    rl::Vector2 vec;
+
+    vec.x = vector.scale.x * logicalWidth + vector.offset.x;
+    vec.y = vector.scale.y * logicalHeight + vector.offset.y;
+
+    return vec;
+}

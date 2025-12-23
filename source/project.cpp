@@ -100,10 +100,11 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             unsigned int zlayer = data["zlayer"].get<unsigned int>();
             bool visible = data["renderable"].value("visible", true);
             bool isScreenSpace = data["isScreenSpace"].get<bool>();
+            bool usesListVisiblity = data["usesListVisibility"].get<bool>();
 
             std::string texName = data["texture"].get<std::string>();
 
-            Renderable renderable(zlayer, isScreenSpace, visible, tint);
+            Renderable renderable(zlayer, isScreenSpace, visible, tint, usesListVisiblity);
             scene->AddElement<Sprite>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, renderable, texName);
         }
         else if (type == "textlabel")
@@ -145,8 +146,9 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             bool isScreenSpace = data["renderable"]["isScreenSpace"].get<bool>();
             unsigned int zlayer = data["renderable"]["zlayer"].get<unsigned int>();
             bool visible = data["renderable"]["visible"].get<bool>();
+            bool usesListVisiblity = data["renderable"]["uses-uilist-visibility"].get<bool>();
 
-            Renderable renderable(zlayer, isScreenSpace, visible, textColor);
+            Renderable renderable(zlayer, isScreenSpace, visible, textColor, usesListVisiblity);
             renderable.visible = visible;
 
             if (!data.contains("position"))
@@ -252,7 +254,8 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             Renderable renderable(
                 data["renderable"]["zlayer"].get<unsigned int>(),
                 data["renderable"]["isScreenSpace"].get<bool>(), data["renderable"]["visible"].get<bool>(),
-                tint);
+                tint,
+                data["renderable"]["uses-uilist-visibility"].get<bool>());
 
             UIOrigin origin(position, size);
 
@@ -328,8 +331,10 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             UIOrigin bounds(FrameVector(scalePosition, offsetPosition), FrameVector(scaleSize, offsetSize));
             bool active = data.value("active", true);
 
+            bool usesListVisiblity = data.value("uses-uilist-visibility", false);
+
             // EventBus buttonEvents, UIOrigin bound
-            scene->AddElement<UIButton>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, eventBus, bounds, active);
+            scene->AddElement<UIButton>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, eventBus, bounds, active, usesListVisiblity);
         }
         else if (type == "attribute")
         {
@@ -578,7 +583,7 @@ std::string defaultSettingsStr = R"(
 {
     "window":
     {
-        "title": "lapHub",
+        "title": "Default Window",
         "mode": "windowed",
         "decorated": true,
         "resizable": true,

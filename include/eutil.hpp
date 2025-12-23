@@ -17,8 +17,10 @@ namespace lapCore
         bool visible = true;
         rl::Color tint;
 
-        Renderable(unsigned int zlayer, bool isScreenSpace, bool visible, rl::Color tint)
-            : zlayer(zlayer), isScreenSpace(isScreenSpace), visible(visible), tint(tint) {}
+        bool usesUIListVisiblity;
+
+        Renderable(unsigned int zlayer, bool isScreenSpace, bool visible, rl::Color tint, bool usesUIListVisiblity)
+            : zlayer(zlayer), isScreenSpace(isScreenSpace), visible(visible), tint(tint), usesUIListVisiblity(usesUIListVisiblity) {}
     };
 
     enum class HorizontalAlignment
@@ -89,6 +91,7 @@ namespace lapCore
     rl::Vector2 GetMouseInViewportSpace(int logicalWidth, int logicalHeight);
 
     rl::Rectangle UIOriginToRect(UIOrigin origin, int logicalWidth, int logicalHeight);
+    rl::Vector2 FrameVectorToVec2(lapCore::FrameVector vector, int logicalWidth, int logicalHeight);
 }
 
 #endif
