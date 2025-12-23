@@ -106,8 +106,10 @@ namespace lapCore
         UIOrigin bounds;
         bool mouseHovering = false;
 
-        UIButton(EventBus buttonEvents, UIOrigin bounds, bool active = true)
-            : events(buttonEvents), bounds(bounds), active(active) {}
+        bool usesListVisibility = false;
+
+        UIButton(EventBus buttonEvents, UIOrigin bounds, bool active = true, bool usesListVisibility = false)
+            : events(buttonEvents), bounds(bounds), active(active), usesListVisibility(usesListVisibility) {}
     };
 
     struct Cam2D

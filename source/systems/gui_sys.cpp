@@ -3,106 +3,64 @@
 
 using namespace lapCore;
 
-void GUISystem::Update(float deltaTime, entt::registry &registry)
+void ApplyAxisOffset(UIOrigin &origin, Axis2D axis, float offset)
 {
-    rl::Vector2 mouse = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
+    if (axis == Axis2D::HORIZONTAL)
+        origin.position.offset.x += offset;
+    else
+        origin.position.offset.y += offset;
+}
 
+void ArrangeUIListElements(Scene *scene, entt::registry &registry)
+{
     auto uilistView = registry.view<UIList, Frame>();
     for (auto [entity, list, frame] : uilistView.each())
     {
         auto children = scene->GetChildren(entity);
 
-        if (list.direction == Axis2D::VERTICAL)
+        rl::Vector2 frameSize = FrameVectorToVec2(frame.origin.size, scene->logicalResolution.x, scene->logicalResolution.y);
+        rl::Vector2 scrollSize = FrameVectorToVec2(list.scrollSize, frameSize.x, frameSize.y);
+        rl::Vector2 displaySize = FrameVectorToVec2(list.displaySize, frameSize.x, frameSize.y);
+        float step = (list.direction == Axis2D::VERTICAL) ? displaySize.y : displaySize.x;
+
+        for (size_t i = 0; i < children.size(); i++)
         {
-            float frameY = frame.origin.size.scale.y * scene->logicalResolution.y + frame.origin.size.offset.y;
-            float logicalY = list.scrollSize.scale.y * frameY + list.scrollSize.offset.y;
-            float offsetY = -(list.displaySize.scale.y * logicalY + list.displaySize.offset.y); // start above first item
+            auto e = children[i].object;
 
-            for (int i = 0; i < (int)children.size(); i++)
+            float offset = i * step + list.scrollOffset;
+
+            auto *label = registry.try_get<TextLabel>(e);
+            if (label)
             {
-                auto e = children[i].object;
-                // Use the child's position in the parent vector as the child index.
-                // This avoids accidental insertion into scene->objectMap when a slot is empty (name == "").
-                int idx = i;
-                float o_y = offsetY + (idx + 1) * (list.displaySize.scale.y * logicalY + list.displaySize.offset.y);
+                label->frame.renderable.visible = label->frame.renderable.usesUIListVisiblity && frame.renderable.visible;
+                label->frame.origin.position = frame.origin.position;
 
-                auto *attribute = registry.try_get<Attribute<bool>>(e);
-                bool use_visibility = attribute ? attribute->value : true;
-
-                auto *label = registry.try_get<TextLabel>(e);
-                if (label)
-                {
-                    if (use_visibility) label->frame.renderable.visible = frame.renderable.visible;
-                    label->frame.origin.position = frame.origin.position;
-
-                    label->frame.origin.position.offset.y += o_y;
-                }
-
-                auto *frameComp = registry.try_get<Frame>(e);
-                if (frameComp)
-                {
-                    if (use_visibility) frameComp->renderable.visible = frame.renderable.visible;
-                    frameComp->origin.position = frame.origin.position;
-
-                    frameComp->origin.position.offset.y += o_y;
-                }
-
-                auto *button = registry.try_get<UIButton>(e);
-                if (button)
-                {
-                    button->bounds.position = frame.origin.position;
-                    if (use_visibility) button->active = frame.renderable.visible;
-
-                    button->bounds.position.offset.y += o_y;
-                }
+                ApplyAxisOffset(label->frame.origin, list.direction, offset);
             }
-        }
-        else
-        {
-            float frameX = frame.origin.size.scale.x * scene->logicalResolution.x + frame.origin.size.offset.x;
-            float logicalX = list.scrollSize.scale.x * frameX + list.scrollSize.offset.x;
-            float offsetX = -(list.displaySize.scale.x * logicalX + list.displaySize.offset.x); // start next to first item
 
-            for (int i = 0; i < (int)children.size(); i++)
+            auto *frameComp = registry.try_get<Frame>(e);
+            if (frameComp)
             {
-                auto e = children[i].object;
-                // Use the vector index as the child index to keep spacing consistent even when there are gaps.
-                int idx = i;
-                float o_x = offsetX + (idx + 1) * (list.displaySize.scale.x * logicalX + list.displaySize.offset.x);
+                frameComp->renderable.visible = frameComp->renderable.usesUIListVisiblity && frame.renderable.visible;
+                frameComp->origin.position = frame.origin.position;
 
-                auto *attribute = registry.try_get<Attribute<bool>>(e);
-                bool use_visibility = attribute ? attribute->value : true;
+                ApplyAxisOffset(frameComp->origin, list.direction, offset);
+            }
 
-                auto *label = registry.try_get<TextLabel>(e);
-                if (label)
-                {
-                    if (use_visibility) label->frame.renderable.visible = frame.renderable.visible;
-                    label->frame.origin.position = frame.origin.position;
+            auto *button = registry.try_get<UIButton>(e);
+            if (button)
+            {
+                button->active = button->usesListVisibility && frame.renderable.visible;
+                button->bounds.position = frame.origin.position;
 
-                    label->frame.origin.position.offset.x += o_x;
-                }
-
-                auto *frameComp = registry.try_get<Frame>(e);
-                if (frameComp)
-                {
-                    if (use_visibility) frameComp->renderable.visible = frame.renderable.visible;
-                    frameComp->origin.position = frame.origin.position;
-
-                    frameComp->origin.position.offset.x += o_x;
-                }
-
-                auto *button = registry.try_get<UIButton>(e);
-                if (button)
-                {
-                    button->bounds.position = frame.origin.position;
-                    if (use_visibility) button->active = frame.renderable.visible;
-
-                    button->bounds.position.offset.x += o_x;
-                }
+                ApplyAxisOffset(button->bounds, list.direction, offset);
             }
         }
     }
+}
 
+void HandleButtonInputs(Scene *scene, entt::registry &registry)
+{
     auto buttonView = registry.view<UIButton>();
     for (auto &entity : buttonView)
     {
@@ -111,30 +69,81 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
             continue;
 
         rl::Rectangle rect = UIOriginToRect(button->bounds, scene->logicalResolution.x, scene->logicalResolution.y);
-        bool hovered = rl::CheckCollisionPointRec(mouse, rect);
+        bool hovered = rl::CheckCollisionPointRec(GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y), rect);
 
         if (hovered)
         {
             if (rl::IsMouseButtonPressed(rl::MOUSE_LEFT_BUTTON))
-                EventRegistry::Fire<>(button->events.events["left-click"]);
+            {
+                auto it = button->events.events.find("left-click");
+                if (it != button->events.events.end())
+                    EventRegistry::Fire<>(it->second);
+            }
+
             if (rl::IsMouseButtonPressed(rl::MOUSE_RIGHT_BUTTON))
-                EventRegistry::Fire<>(button->events.events["right-click"]);
+            {
+                auto it = button->events.events.find("right-click");
+                if (it != button->events.events.end())
+                    EventRegistry::Fire<>(it->second);
+            }
+
             if (rl::IsMouseButtonPressed(rl::MOUSE_MIDDLE_BUTTON))
-                EventRegistry::Fire<>(button->events.events["middle-click"]);
+            {
+                auto it = button->events.events.find("middle-click");
+                if (it != button->events.events.end())
+                    EventRegistry::Fire<>(it->second);
+            }
 
             if (button->mouseHovering == false)
-                EventRegistry::Fire<>(button->events.events["mouse-enter"]);
+            {
+                auto it = button->events.events.find("mouse-enter");
+                if (it != button->events.events.end())
+                    EventRegistry::Fire<>(it->second);
+            }
 
             button->mouseHovering = true;
 
-            EventRegistry::Fire<>(button->events.events["mouse-hover"]);
+            auto it = button->events.events.find("mouse-hover");
+            if (it != button->events.events.end())
+                EventRegistry::Fire<>(it->second);
         }
         else
         {
             if (button->mouseHovering == true)
-                EventRegistry::Fire<>(button->events.events["mouse-leave"]);
+            {
+                auto it = button->events.events.find("mouse-leave");
+                if (it != button->events.events.end())
+                    EventRegistry::Fire<>(it->second);
+            }
 
             button->mouseHovering = false;
         }
     }
+}
+
+void HandleUIListScroll(float deltaTime, Scene* scene, entt::registry &registry)
+{
+    float wheel = rl::GetMouseWheelMove();
+    auto uilistView = registry.view<UIList, Frame>();
+    for (auto [entity, list, frame] : uilistView.each())
+    {
+        if (wheel != 0 && rl::CheckCollisionPointRec(GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y), UIOriginToRect(frame.origin, scene->logicalResolution.x, scene->logicalResolution.y)))
+        {
+            list.scrollOffset -= wheel * list.scrollSpeed * deltaTime * 1000.0f;
+            std::cout << list.scrollOffset << std::endl;
+            
+            rl::Vector2 frameSize = FrameVectorToVec2(frame.origin.size, scene->logicalResolution.x, scene->logicalResolution.y);
+            rl::Vector2 scrollSize = FrameVectorToVec2(list.scrollSize, frameSize.x, frameSize.y);
+            rl::Vector2 displaySize = FrameVectorToVec2(list.displaySize, frameSize.x, frameSize.y);
+
+            list.scrollOffset = std::clamp(list.scrollOffset, 0.0f, (list.direction == Axis2D::VERTICAL) ? scrollSize.y - displaySize.y : scrollSize.x - displaySize.x);
+        }
+    }
+}
+
+void GUISystem::Update(float deltaTime, entt::registry &registry)
+{
+    HandleUIListScroll(deltaTime, scene, registry);
+    ArrangeUIListElements(scene, registry);
+    HandleButtonInputs(scene, registry);
 }
