@@ -3,17 +3,6 @@
 
 using namespace lapCore;
 
-/*
-TODO: [KNOWN ISSUE]
-Adding space inbetween a child indice causes graphical issues (white screen)
-Example:
-New Project (indice 0)
-Open Project (indice 1)
-Save Project (indice 2)
-___ (indice 3)
-Close Project (indice 4)
-*/
-
 void GUISystem::Update(float deltaTime, entt::registry &registry)
 {
     rl::Vector2 mouse = GetMouseInViewportSpace(scene->logicalResolution.x, scene->logicalResolution.y);
@@ -29,10 +18,13 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
             float logicalY = list.scrollSize.scale.y * frameY + list.scrollSize.offset.y;
             float offsetY = -(list.displaySize.scale.y * logicalY + list.displaySize.offset.y); // start above first item
 
-            for (int i = 0; i < children.size(); i++)
+            for (int i = 0; i < (int)children.size(); i++)
             {
                 auto e = children[i].object;
-                float o_y = offsetY + (scene->objectMap[children[i].name].childIndex + 1) * (list.displaySize.scale.y * logicalY + list.displaySize.offset.y);
+                // Use the child's position in the parent vector as the child index.
+                // This avoids accidental insertion into scene->objectMap when a slot is empty (name == "").
+                int idx = i;
+                float o_y = offsetY + (idx + 1) * (list.displaySize.scale.y * logicalY + list.displaySize.offset.y);
 
                 auto *attribute = registry.try_get<Attribute<bool>>(e);
                 bool use_visibility = attribute ? attribute->value : true;
@@ -71,15 +63,15 @@ void GUISystem::Update(float deltaTime, entt::registry &registry)
             float logicalX = list.scrollSize.scale.x * frameX + list.scrollSize.offset.x;
             float offsetX = -(list.displaySize.scale.x * logicalX + list.displaySize.offset.x); // start next to first item
 
-            for (int i = 0; i < children.size(); i++)
+            for (int i = 0; i < (int)children.size(); i++)
             {
                 auto e = children[i].object;
-                float o_x = offsetX + (scene->objectMap[children[i].name].childIndex + 1) * (list.displaySize.scale.x * logicalX + list.displaySize.offset.x);
+                // Use the vector index as the child index to keep spacing consistent even when there are gaps.
+                int idx = i;
+                float o_x = offsetX + (idx + 1) * (list.displaySize.scale.x * logicalX + list.displaySize.offset.x);
 
                 auto *attribute = registry.try_get<Attribute<bool>>(e);
                 bool use_visibility = attribute ? attribute->value : true;
-
-                offsetX += list.displaySize.scale.x * logicalX + list.displaySize.offset.x;
 
                 auto *label = registry.try_get<TextLabel>(e);
                 if (label)
