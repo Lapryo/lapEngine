@@ -1,0 +1,23 @@
+{
+    "name": "background",
+    "parent": "",
+    "child-index": -1,
+    "components": [
+        {
+            "type": "frame",
+            "data":
+            {
+                "position": [0, 0, 0, 0],
+                "size": [1, 1, 0, 0],
+                "renderable":
+                {
+                    "zlayer": 0,
+                    "isScreenSpace": true,
+                    "visible": true,
+                    "tint": [255, 0, 255, 255],
+                    "uses-uilist-visibility": false
+                }
+            }
+        }
+    ]
+}

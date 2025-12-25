@@ -1,0 +1,30 @@
+{
+    "name": "main",
+    "assets": [
+
+    ],
+    "systems": [
+        {
+            "type": "render",
+            "order": 3
+        },
+        {
+            "type": "physics",
+            "order": 2
+        },
+        {
+            "type": "script",
+            "order": 1
+        },
+        {
+            "type": "gui",
+            "order": 0
+        }
+    ],
+    "prefabs": [
+        "pipe.json"
+    ],
+    "objects": [
+        "background.json"
+    ]
+}

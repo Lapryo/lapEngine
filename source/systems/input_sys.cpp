@@ -2,6 +2,64 @@
 
 using namespace lapCore;
 
+void HandleKeyboardInput(InputSystem::InputEntry &entry, int key)
+{
+    if (rl::IsKeyDown(key))
+    {
+        if (!entry.active)
+        {
+            entry.pressed = true;
+            EventRegistry::Fire<>(entry.event);
+        }
+    }
+    else
+        entry.pressed = false;
+}
+
+void HandleMouseInput(InputSystem::InputEntry &entry, int button)
+{
+    if (rl::IsMouseButtonDown(button))
+    {
+        if (!entry.active)
+        {
+            entry.pressed = true;
+            EventRegistry::Fire<>(entry.event);
+        }
+    }
+    else
+        entry.pressed = false;
+}
+
+void HandleGamepadInput(InputSystem::InputEntry &entry, InputSystem::ControlType controlType, int button)
+{
+    if (controlType == InputSystem::ControlType::AXIS)
+    {
+        if (rl::GetGamepadAxisMovement(1, button) > entry.deadzone)
+        {
+            if (!entry.active)
+            {
+                entry.pressed = true;
+                EventRegistry::Fire<>(entry.event);
+            }
+        }
+        else
+            entry.pressed = false;
+    }
+    else
+    {
+        if (rl::IsGamepadButtonDown(1, button))
+        {
+            if (!entry.active)
+            {
+                entry.pressed = true;
+                EventRegistry::Fire<>(entry.event);
+            }
+        }
+        else
+            entry.pressed = false;
+    }
+}
+
 void InputSystem::Update(float deltaTime, entt::registry &registry)
 {
     for (auto &inputPair : inputs)
@@ -10,64 +68,19 @@ void InputSystem::Update(float deltaTime, entt::registry &registry)
         {
             case InputType::KEYBOARD:
             {
-                if (rl::IsKeyDown(inputPair.first.code))
-                {
-                    if (!inputPair.second.active)
-                    {
-                        inputPair.second.pressed = true;
-                        EventRegistry::Fire<>(inputPair.second.event);
-                    }
-                }
-                else
-                    inputPair.second.pressed = false;
+                HandleKeyboardInput(inputPair.second, inputPair.first.code);
                 break;
             }
             case InputType::MOUSE:
             {
-                if (rl::IsMouseButtonDown(inputPair.first.code))
-                {
-                    if (!inputPair.second.active)
-                    {
-                        inputPair.second.pressed = true;
-                        EventRegistry::Fire<>(inputPair.second.event);
-                    }
-                }
-                else
-                    inputPair.second.pressed = false;
+                HandleMouseInput(inputPair.second, inputPair.first.code);
                 break;
             }
             case InputType::GAMEPAD:
             {
-                if (inputPair.first.controlType == ControlType::AXIS)
-                {
-                    if (rl::GetGamepadAxisMovement(1, inputPair.first.code) > inputPair.second.deadzone)
-                    {
-                        if (!inputPair.second.active)
-                        {
-                            inputPair.second.pressed = true;
-                            EventRegistry::Fire<>(inputPair.second.event);
-                        }
-                    }
-                    else
-                        inputPair.second.pressed = false;
-                }
-                else
-                {
-                    if (rl::IsGamepadButtonDown(1, inputPair.first.code))
-                    {
-                        if (!inputPair.second.active)
-                        {
-                            inputPair.second.pressed = true;
-                            EventRegistry::Fire<>(inputPair.second.event);
-                        }
-                    }
-                    else
-                        inputPair.second.pressed = false;
-                }
+                HandleGamepadInput(inputPair.second, inputPair.first.controlType, inputPair.first.code);
                 break;
             }
-            default:
-                break;
         }
     }
 }

@@ -8,9 +8,10 @@ using namespace lapCore;
 
 /*
 TODO: 
-1. MAKE PROJECT UNPACKING TAKE IN FILE(S) AS PARAMETERS SO IT CAN LOAD FROM FILE(S) RATHER THAN JUST ONE STRING
-2. PROJECT PACKING
-3. COMMENTING EVERYTHING
+1. PROJECT PACKING
+2. COMMENTING EVERYTHING (OTHER FILES TOO)
+3. DOCUMENTATION
+4. REFACTORING & CLEANING UP CODE
 */
 
 void GetAssets(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson)
@@ -77,7 +78,7 @@ enum class RegistryType
 
 void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &objectJson, Object &object, RegistryType registryType)
 {
-    std::cout << "[OBJECT] Getting components...";
+    std::cout << "[OBJECT] Getting components...\n";
 
     for (const auto &comp : objectJson["components"])
     {
@@ -251,6 +252,8 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
             UIOrigin origin(position, size);
 
+            std::cout << "color: " << (int)tint.r << ", " << (int)tint.g << ", " << (int)tint.b << ", " << (int)tint.a << "\n";
+
             // Renderable renderable, UIOrigin origin
             scene->AddElement<Frame>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, renderable, origin);
         }
@@ -349,27 +352,57 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
     }
 }
 
+void GetObject(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &objectJson)
+{
+    auto entity = scene->AddObject(objectJson.value("name", ""), objectJson.value("parent", ""), objectJson.value("child-index", -1));
+    std::cout << "[OBJECT]\nLoading object:\nName: " << objectJson.value("name", "") << '\n';
+
+    if (!objectJson.contains("components") || !objectJson["components"].is_array())
+        return;
+
+    GetComponents(scene, objectJson, entity, RegistryType::OBJECTS);
+}
+
 void GetObjects(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson, const std::string &projectName)
 {
-    std::cout << "[SCENE] Gettings objects...";
+    std::cout << "[SCENE] Gettings objects...\n";
 
     if (sceneJson.contains("objects") && sceneJson["objects"].is_array())
     {
         for (const auto &object : sceneJson["objects"])
         {
-            auto entity = scene->AddObject(object.value("name", ""), object.value("parent", ""), object.value("child-index", -1));
-            std::cout << "[OBJECT]\nLoading object:\nName: " << object.value("name", "") << '\n';
+            if (object.is_string())
+            {
+                std::cout << "[NOTICE] Loading object from file\n";
 
-            if (!object.contains("components") || !object["components"].is_array())
+                std::string objectFilePathFromBuildDir = object.get<std::string>();
+                std::string objectFileStr = ReadFileToString("assets/project/objects/" + objectFilePathFromBuildDir);
+
+                nlohmann::json objectJsonFromFile = nlohmann::json::parse(objectFileStr);
+
+                GetObject(scene, objectJsonFromFile);
                 continue;
+            }
 
-            GetComponents(scene, object, entity, RegistryType::OBJECTS);
+            GetObject(scene, object);
         }
     }
     else
     {
         std::cout << "[WARNING] Project: \"" << projectName << "\", Scene: \"" << scene->name << "\" either did not contain objects or objects was not an array\n";
     }
+}
+
+void GetPrefab(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &prefabJson)
+{
+    const auto &prefabName = prefabJson.value("name", "");
+    std::cout << "[PREFAB] Loading prefab:\nName: " << prefabName << '\n';
+
+    Object prefabObject = scene->AddPrefab(prefabName, prefabJson.value("parent", ""), prefabJson.value("child-index", -1));
+    if (!prefabJson.contains("components") || !prefabJson["components"].is_array())
+        return;
+
+    GetComponents(scene, prefabJson, prefabObject, RegistryType::PREFABS);
 }
 
 void GetPrefabs(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson, const std::string &projectName)
@@ -380,21 +413,49 @@ void GetPrefabs(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
     {
         for (const auto &prefabJson : sceneJson["prefabs"])
         {
-            const auto &prefabName = prefabJson.value("name", "");
-            std::cout << "[PREFAB] Loading prefab:\nName: " << prefabName << '\n';
+            if (prefabJson.is_string())
+            {
+                std::cout << "[NOTICE] Loading prefab from file\n";
 
-            Object prefabObject = scene->AddPrefab(prefabName, prefabJson.value("parent", ""), prefabJson.value("child-index", -1));
+                std::string prefabFilePathFromBuildDir = prefabJson.get<std::string>();
+                std::string prefabFileStr = ReadFileToString("assets/project/prefabs/" + prefabFilePathFromBuildDir);
 
-            if (!prefabJson.contains("components") || !prefabJson["components"].is_array())
+                nlohmann::json prefabJsonFromFile = nlohmann::json::parse(prefabFileStr);
+
+                GetPrefab(scene, prefabJsonFromFile);
                 continue;
+            }
 
-            GetComponents(scene, prefabJson, prefabObject, RegistryType::PREFABS);
+            GetPrefab(scene, prefabJson);
         }
     }
     else
     {
         std::cout << "[WARNING] Project: \"" << projectName << "\", Scene: \"" << scene->name << "\" either did not contain prefabs or prefabs was not an array\n";
     }
+}
+
+void GetScene(Project &project, const nlohmann::json_abi_v3_12_0::json &sceneJson, const std::string &projectName)
+{
+    auto scene = std::make_unique<Scene>();
+    scene->name = sceneJson.value("name", "Unnamed Scene");
+
+    std::cout << "Name: " << scene->name << '\n';
+
+    if (scene->name == "main")
+    {
+        std::cout << "Current scene is the main scene\n";
+        project.main_scene_index = static_cast<int>(project.scenes.size());
+    }
+
+    GetAssets(scene, sceneJson);
+    GetSystems(scene, sceneJson, projectName);
+    GetPrefabs(scene, sceneJson, projectName);
+    GetObjects(scene, sceneJson, projectName);
+
+    std::cout << "Finished loading scene\n";
+
+    project.scenes.push_back(std::move(scene));
 }
 
 void GetScenes(Project &project, const nlohmann::json_abi_v3_12_0::json &j, const std::string &projectName)
@@ -408,25 +469,21 @@ void GetScenes(Project &project, const nlohmann::json_abi_v3_12_0::json &j, cons
 
         for (const auto &sceneJson : scenesJson)
         {
-            auto scene = std::make_unique<Scene>();
-            scene->name = sceneJson.value("name", "Unnamed Scene");
-
-            std::cout << "Name: " << scene->name << '\n';
-
-            if (scene->name == "main")
+            if (sceneJson.is_string())
             {
-                std::cout << "Current scene is the main scene\n";
-                project.main_scene_index = static_cast<int>(project.scenes.size());
+                std::cout << "[NOTICE] Loading scene from file\n";
+
+                std::string sceneFilePathFromBuildDir = sceneJson.get<std::string>();
+                std::string sceneFileStr = ReadFileToString("assets/project/scenes/" + sceneFilePathFromBuildDir);
+
+                nlohmann::json sceneJsonFromFile = nlohmann::json::parse(sceneFileStr);
+
+                GetScene(project, sceneJsonFromFile, projectName);
+
+                continue;
             }
 
-            GetAssets(scene, sceneJson);
-            GetSystems(scene, sceneJson, projectName);
-            GetPrefabs(scene, sceneJson, projectName);
-            GetObjects(scene, sceneJson, projectName);
-
-            std::cout << "Finished loading scene\n";
-
-            project.scenes.push_back(std::move(scene));
+            GetScene(project, sceneJson, projectName);
         }
     }
     else

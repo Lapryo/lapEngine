@@ -16,7 +16,7 @@ void FlappyBird::FBApp::Init()
 {
     // Anything specific to Flappy Bird initialization can go here (registering logic, loading settings, etc.)
 
-    // lapEngine has a specific function for loading project settings
+    // lapEngine has a specific function for loading settings for the window
     project.LoadSettings("assets/settings.json"); // An example settings file is in this directory, you must create a new assets folder wherever you build this project then copy the settings file there
 
     // Anything else you may want to do is recommended to be done between these two sections of initialization
@@ -40,7 +40,7 @@ void FlappyBird::FBApp::Update(float deltaTime)
 int main()
 {
     // Our actual main function, where we create the project and run the application
-    Project fbProject = UnpackProject(ReadFileToString("assets/project.json")); /* Remember earlier? We are going to read a file into a string and unpack it here
+    Project fbProject = UnpackProject(ReadFileToString("assets/project/project.json")); /* Remember earlier? We are going to read a file into a string and unpack it here
                                                                                     You must also do the same that you did with the settings file to the project file*/
     // lapEngine contains many useful functions like this to just make development easier so you can focus on creating rather than boilerplate code
     FlappyBird::FBApp app(fbProject); // Create the application with the project
