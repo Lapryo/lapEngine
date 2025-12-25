@@ -40,7 +40,7 @@ namespace lapCore
         Frame(Renderable renderable, UIOrigin origin)
             : renderable(renderable), origin(origin) {}
     };
-    
+
     struct UIList
     {
         FrameVector scrollSize;

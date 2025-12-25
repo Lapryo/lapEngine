@@ -25,6 +25,32 @@ void Scene::LoadQueuedAssets()
     queuedAssets.clear();
 }
 
+void lapCore::Scene::QueueCameraExclude(const Object &object, const std::vector<std::string> &excludeList)
+{
+    queuedCameraExcludes.push_back({object, excludeList});
+}
+
+void lapCore::Scene::QueueCameraExclude(const CameraExcludeLoadRequest &request)
+{
+    queuedCameraExcludes.push_back(request);
+}
+
+void lapCore::Scene::LoadQueuedCameraExcludes()
+{
+    for (auto &request : queuedCameraExcludes)
+    {
+        auto &cam2DComp = objects.get<Cam2D>(request.object);
+        for (auto &excludeName : request.excludeList)
+        {
+            ObjectEntry excludedObj = FindObject(excludeName);
+            if (excludedObj.info.object != entt::null)
+                cam2DComp.exclude.push_back(excludedObj.info.object);
+        }
+    }
+
+    queuedCameraExcludes.clear();
+}
+
 // figure this out later
 void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
 {
@@ -162,7 +188,12 @@ void Scene::Clear()
 
 ObjectEntry Scene::FindObject(const std::string &name)
 {
-    return objectMap[name];
+    auto it = objectMap.find(name);
+    if (it != objectMap.end())
+        return it->second;
+
+    std::cout << "Warning: Object '" << name << "' not found in scene '" << this->name << "'\n";
+    return ObjectEntry();
 }
 
 Object lapCore::Scene::AddPrefab(const std::string &name, const std::string &parent, int childIndex)

@@ -15,3 +15,5 @@ add_library(lapEngine STATIC ${CORE_SOURCES})
 target_include_directories(lapEngine PRIVATE 
     include
 )
+
+add_subdirectory(examples/flappy_bird)

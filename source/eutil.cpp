@@ -26,7 +26,6 @@ std::string lapCore::FileDialogs::SaveFile(std::vector<std::string> filters)
     return sfd.result();
 }
 
-
 std::string lapCore::ReadFileToString(const std::string &filePath)
 {
     std::ifstream file(filePath);

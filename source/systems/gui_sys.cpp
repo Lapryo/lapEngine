@@ -121,7 +121,7 @@ void HandleButtonInputs(Scene *scene, entt::registry &registry)
     }
 }
 
-void HandleUIListScroll(float deltaTime, Scene* scene, entt::registry &registry)
+void HandleUIListScroll(float deltaTime, Scene *scene, entt::registry &registry)
 {
     float wheel = rl::GetMouseWheelMove();
     auto uilistView = registry.view<UIList, Frame>();
@@ -131,7 +131,7 @@ void HandleUIListScroll(float deltaTime, Scene* scene, entt::registry &registry)
         {
             list.scrollOffset -= wheel * list.scrollSpeed * deltaTime * 1000.0f;
             std::cout << list.scrollOffset << std::endl;
-            
+
             rl::Vector2 frameSize = FrameVectorToVec2(frame.origin.size, scene->logicalResolution.x, scene->logicalResolution.y);
             rl::Vector2 scrollSize = FrameVectorToVec2(list.scrollSize, frameSize.x, frameSize.y);
             rl::Vector2 displaySize = FrameVectorToVec2(list.displaySize, frameSize.x, frameSize.y);

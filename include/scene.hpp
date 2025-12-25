@@ -19,12 +19,18 @@ namespace lapCore
         std::string path;
     };
 
+    struct CameraExcludeLoadRequest
+    {
+        Object object;
+        std::vector<std::string> excludeList;
+    };
+
     struct ObjectInfo
     {
         std::string name;
         Object object;
     };
- 
+
     struct ObjectEntry
     {
         ObjectInfo info;
@@ -46,6 +52,8 @@ namespace lapCore
         std::vector<std::unique_ptr<System>> systems;
 
         std::vector<AssetLoadRequest> queuedAssets;
+        std::vector<CameraExcludeLoadRequest> queuedCameraExcludes;
+
         ResourceManager resources;
 
         rl::Vector2 logicalWindowPos;
@@ -55,6 +63,10 @@ namespace lapCore
         void QueueAsset(const std::string &name, const std::string &type, const std::string &path);
         void QueueAsset(const AssetLoadRequest &asset);
         void LoadQueuedAssets();
+
+        void QueueCameraExclude(const Object &object, const std::vector<std::string> &excludeList);
+        void QueueCameraExclude(const CameraExcludeLoadRequest &request);
+        void LoadQueuedCameraExcludes();
 
         void Update(float deltaTime, rl::RenderTexture2D &target);
 

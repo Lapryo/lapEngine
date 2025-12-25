@@ -1,0 +1,22 @@
+{
+    "name": "background",
+    "parent": "",
+    "child-index": -1,
+    "components": [
+        {
+            "type": "image",
+            "data": {
+                "asset": "background",
+                "position": [0, 0, 0, 0],
+                "size": [1, 1, 0, 0],
+                "anchor": [0, 0],
+                "renderable": {
+                    "layer": 0,
+                    "visible": true,
+                    "tint": [255, 255, 255, 255],
+                    "uses-ui-list-visibility": false
+                }
+            }
+        }
+    ]
+}

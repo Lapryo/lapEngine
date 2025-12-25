@@ -74,6 +74,43 @@ namespace lapCore
         GUISystem(Scene *scene, unsigned int order) : System(order, scene, false) {}
         void Update(float deltaTime, entt::registry &registry) override;
     };
+
+    class InputSystem : public System
+    {
+    public:
+        enum class ControlType
+        {
+            BUTTON,
+            AXIS
+        };
+
+        enum class InputType
+        {
+            KEYBOARD,
+            MOUSE,
+            GAMEPAD
+        };
+
+        struct InputKey
+        {
+            ControlType controlType;
+            InputType inputType;
+            int code;
+        };
+
+        struct InputEntry
+        {
+            float deadzone;
+            bool active;
+            bool pressed;
+            std::string event;
+        };
+
+        std::map<InputKey, InputEntry> inputs;
+
+        InputSystem(Scene *scene, unsigned int order) : System(order, scene, false) {}
+        void Update(float deltaTime, entt::registry &registry) override;
+    };
 }
 
 #endif

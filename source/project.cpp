@@ -7,8 +7,10 @@
 using namespace lapCore;
 
 /*
-    TODO:
-        REWORK THE OUTPUT FOR THIS, IT LOOKS TRASH
+TODO: 
+1. MAKE PROJECT UNPACKING TAKE IN FILE(S) AS PARAMETERS SO IT CAN LOAD FROM FILE(S) RATHER THAN JUST ONE STRING
+2. PROJECT PACKING
+3. COMMENTING EVERYTHING
 */
 
 void GetAssets(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson)
@@ -17,7 +19,6 @@ void GetAssets(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::
 
     if (sceneJson.contains("assets") && sceneJson["assets"].is_array())
     {
-        std::cout << "[ASSETS]\n";
         for (const auto &assetJson : sceneJson["assets"])
         {
             const auto &assetName = assetJson.value("name", "");
@@ -37,7 +38,6 @@ void GetSystems(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0:
 
     if (sceneJson.contains("systems") && sceneJson["systems"].is_array())
     {
-        std::cout << "[SYSTEM]\n";
         for (const auto &systemJson : sceneJson["systems"])
         {
             std::string systemType = systemJson.value("type", "");
@@ -107,7 +107,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             Renderable renderable(zlayer, isScreenSpace, visible, tint, usesListVisiblity);
             scene->AddElement<Sprite>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, renderable, texName);
         }
-        else if (type == "textlabel")
+        else if (type == "text-label")
         {
             std::string text = data.value("text", "");
             float textSize = data.value("text-size", 0.0f);
@@ -183,21 +183,18 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             // Frame frame, std::string text, float textSize, Alignment textAlignment, FrameVector textBounds, Padding textPadding
             scene->AddElement<TextLabel>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, frame, text, textSize, textAlignment, textBounds, padding);
         }
-        else if (type == "cam2d")
+        else if (type == "cam-2d")
         {
-            // TODO: THIS ALSO NEEDS TO BE PUSHED TO AFTER THE UNPACKING IS COMPLETE
-
-            /*
-            std::vector<entt::entity> excludeList;
+            std::vector<std::string> excludeList;
             if (data["exclude"] && data["exclude"].is_array())
-                for (const auto& objName : data["exclude"])
+            {
+                for (const auto &objName : data["exclude"])
                 {
-                    excludeList.push_back(objName);
+                    excludeList.push_back(objName.get<std::string>());
                 }
             }
-            */
 
-            std::vector<Object> excludeList;
+            scene->QueueCameraExclude(object, excludeList);
 
             rl::Vector2 offset{
                 data["offset"].at(0).get<float>(),
@@ -216,12 +213,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             camera.rotation = rotation;
             camera.zoom = zoom;
 
-            for (auto &entity : excludeList)
-            {
-                std::cout << "[PROJECT] [SCENE] [OBJECT] [COMPONENT] [CAM2D] \t\t\t\t" << static_cast<std::uint16_t>(entity) << '\n';
-            }
-
-            scene->AddElement<Cam2D>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, camera, excludeList);
+            scene->AddElement<Cam2D>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, camera, std::vector<entt::entity>{});
         }
         else if (type == "script")
         {
@@ -262,7 +254,7 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
             // Renderable renderable, UIOrigin origin
             scene->AddElement<Frame>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, renderable, origin);
         }
-        else if (type == "UIList")
+        else if (type == "ui-list")
         {
             FrameVector scrollSize{
                 {data["scroll-size"].at(0).get<float>(),
@@ -298,10 +290,10 @@ void GetComponents(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12
 
             scene->AddElement<UIList>(registryType == RegistryType::OBJECTS ? scene->objects : scene->prefabs, object, scrollSize, displaySize, hScrollBarRight, vScrollBarBottom, maskOutsideContent, scrollOffset, scrollSpeed, direction);
         }
-        else if (type == "origin2d")
+        else if (type == "origin-2d")
         {
         }
-        else if (type == "physics2d")
+        else if (type == "physics-2d")
         {
         }
         else if (type == "ui-button")
@@ -526,8 +518,6 @@ std::string lapCore::PackProject(Project project)
 
             // Doing components later...
 
-
-
             sceneJson["objects"].push_back(objectJson);
         }
 
@@ -536,7 +526,6 @@ std::string lapCore::PackProject(Project project)
 
     std::cout << "[PROJECT] Project packed successfully\n";
     return j.dump(4);
-
 }
 
 Project lapCore::UnpackProject(const std::string &projJson)
@@ -627,6 +616,7 @@ void Project::LoadSettings(const std::string &settingsFilePath)
     for (auto &scene : scenes)
     {
         scene->LoadQueuedAssets();
+        scene->LoadQueuedCameraExcludes();
         scene->logicalResolution = logicalRes;
     }
 
