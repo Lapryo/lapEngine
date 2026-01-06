@@ -1,5 +1,5 @@
 {
-    "name": "main",
+    "name": "game",
     "assets": [
 
     ],
@@ -7,6 +7,10 @@
         {
             "type": "render",
             "order": 3
+        },
+        {
+            "type": "physics",
+            "order": 2
         },
         {
             "type": "script",
@@ -18,7 +22,7 @@
         }
     ],
     "prefabs": [
-        
+        "pipe.json"
     ],
     "objects": [
         "background.json"

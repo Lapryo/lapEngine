@@ -12,6 +12,7 @@ TODO:
 2. COMMENTING EVERYTHING (OTHER FILES TOO)
 3. DOCUMENTATION
 4. REFACTORING & CLEANING UP CODE
+5. CREATE MORE PYTHON TOOLS
 */
 
 void GetAssets(std::unique_ptr<Scene> &scene, const nlohmann::json_abi_v3_12_0::json &sceneJson)
