@@ -1,5 +1,4 @@
 #include "core.hpp"
-#include "scene.hpp"
 
 using namespace lapCore;
 

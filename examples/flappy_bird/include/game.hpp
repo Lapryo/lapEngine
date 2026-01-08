@@ -9,7 +9,7 @@ namespace FlappyBird
     {
     public:
         FBApp(lapCore::Project &project);
-        void Init() override;
+        bool Init() override;
         void Update(float deltaTime) override;
     };
 }

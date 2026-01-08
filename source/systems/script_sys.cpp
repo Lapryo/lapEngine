@@ -1,6 +1,4 @@
-#include "systems.hpp"
-#include "scriptregistry.hpp"
-#include "scene.hpp"
+#include "core.hpp"
 
 using namespace lapCore;
 

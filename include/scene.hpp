@@ -1,7 +1,7 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
-#include "systems.hpp"
+#include "system.hpp"
 #include "resource_manager.hpp"
 
 #include <iostream>

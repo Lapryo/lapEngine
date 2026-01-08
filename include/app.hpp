@@ -4,6 +4,10 @@
 #include <unordered_map>
 #include "project.hpp"
 
+// TODO: Known issue
+// Because the project variable is now private, need to come up with a solution so it's accessible in a way to the developer
+// Maybe after the "World" section of the architecture is implemented, this problem will fix itself
+
 namespace lapCore
 {
     enum class AppState
@@ -19,16 +23,17 @@ namespace lapCore
         virtual ~App() = default;
         App(Project &project);
 
-        virtual void Init() = 0;
-        virtual void Update(float deltaTime) = 0;
-
         void Run();
         void Shutdown();
 
-        AppState state = AppState::DEAD;
-        Project project;
-    };
+    protected:
+        virtual bool Init() = 0;
+        virtual void Update(float deltaTime) = 0;
 
+    private:
+        AppState state = AppState::DEAD;
+        const Project& project;
+    };
 }
 
 #endif

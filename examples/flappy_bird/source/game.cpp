@@ -6,13 +6,18 @@
 // If you're okay with this, you can simply load the project from a separate file instead of including it like this
 // Since we already did this for the pong application, we will instead load from a file in this example
 
+/*
+TODO:
+1. Finish assets for the game
+2. Implement the logic for the game
+3. Comment everything so other developers can look at this as a basis for their games/apps
+*/
+
 // Constructor for the application, takes in the project to run
 FlappyBird::FBApp::FBApp(lapCore::Project &project) : App(project)
-{
-    Init();
-}
+{}
 
-void FlappyBird::FBApp::Init()
+bool FlappyBird::FBApp::Init()
 {
     // Anything specific to Flappy Bird initialization can go here (registering logic, loading settings, etc.)
 
@@ -24,8 +29,9 @@ void FlappyBird::FBApp::Init()
     // This is a good spot to register logic for any objects you may want
     // Since this is flappy bird, we register logic for the pipes and the bird here
 
-    // The current application state is "INITIALIZING", so we must set it to running ourselves
-    state = lapCore::AppState::RUNNING;
+    // ...
+
+    return true; // Return true if initialization was successful, false otherwise
 }
 
 void FlappyBird::FBApp::Update(float deltaTime)
@@ -47,6 +53,5 @@ int main()
     app.Run(); // Now call run on the application, not the update function you have!
     // We do this because the base App class has a run loop that handles window closing and delta time calculation for us
 
-    app.Shutdown(); // Finally, we shutdown the application to clean up resources
     return 0;
 }
