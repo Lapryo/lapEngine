@@ -454,11 +454,11 @@ ProjectElementData GetElement(const nlohmann::json_abi_v3_12_0::json &elementJso
 }
 
 // Loads elements from either object JSONs or external files, returns a vector of ProjectElementData structs
-std::vector<ProjectElementData> GetElements(const nlohmann::json_abi_v3_12_0::json &objectJson, const std::string &sceneName, bool from_prefab = false)
+std::vector<ProjectElementData> GetElements(const nlohmann::json_abi_v3_12_0::json &objectJson, const std::string &sceneName)
 {
     std::vector<ProjectElementData> elements; // Vector to hold the elements
 
-    if (objectJson.contains("elements") && objectJson["elements"].is_array())
+    if (objectJson.contains("elements") && objectJson["elements"].is_array() && !objectJson["elements"].empty())
     {
         for (const auto &elementJson : objectJson["elements"])
         {
@@ -467,7 +467,7 @@ std::vector<ProjectElementData> GetElements(const nlohmann::json_abi_v3_12_0::js
                 std::string elementFilePath = elementJson.get<std::string>();
                 std::cout << "Loading element from file: " << elementFilePath << '\n';
 
-                std::string prefixFilePath = "assets/project/scenes/" + sceneName + '/' + (from_prefab ? "prefabs" : "objects") + '/' + objectJson.value("name", "Unnamed Object") + "/elements/";
+                std::string prefixFilePath = "assets/project/scenes/" + sceneName + "/instances/" + objectJson.value("name", "Unnamed Object") + "/elements/";
                 nlohmann::json elementJsonFromFile = ReadFileToJsonObject(prefixFilePath + elementFilePath);
                 elements.push_back(GetElement(elementJsonFromFile));
             }
@@ -478,13 +478,20 @@ std::vector<ProjectElementData> GetElements(const nlohmann::json_abi_v3_12_0::js
         }
     }
     else
-        std::cout << (objectJson.contains("elements") ? "[NOTICE] Object did not contain any elements\n" : "[WARNING] Object elements was not an array\n");
+        if (!objectJson.contains("elements"))
+            std::cout << "[WARNING] Object did not contain an elements property\n";
+        else if (!objectJson["elements"].is_array())
+            std::cout << "[WARNING] Object elements property was not an array\n";
+        else if (objectJson["elements"].empty())
+            std::cout << "[NOTICE] Object had no elements in the elements property array\n";
+        else
+            std::cout << "[WARNING] Something else went wrong with loading elements\n";
     
     return elements;
 }
 
 // Gathers data from an object JSON object, which should contain name string, parent string, child-index int, and components array, returns a ProjectObjectData struct
-ProjectObjectData GetObject(const nlohmann::json_abi_v3_12_0::json &objectJson, const std::string &sceneName, bool from_prefab = false)
+ProjectObjectData GetObject(const nlohmann::json_abi_v3_12_0::json &objectJson, const std::string &sceneName)
 {
     std::string objectName = objectJson.value("name", "");
     std::string objectParent = objectJson.value("parent", "");
@@ -496,94 +503,119 @@ ProjectObjectData GetObject(const nlohmann::json_abi_v3_12_0::json &objectJson, 
     objectData.parent = objectParent;
     objectData.child_index = objectChildIndex;
 
-    objectData.elements = GetElements(objectJson, sceneName, from_prefab);
+    objectData.elements = GetElements(objectJson, sceneName);
 
     return objectData;
 }
 
-std::vector<ProjectObjectData> GetInstances(const nlohmann::json_abi_v3_12_0::json &objectsJson, const std::string &sceneName)
+std::vector<ProjectObjectData> GetInstances(const nlohmann::json_abi_v3_12_0::json &sceneJson)
 {
     std::vector<ProjectObjectData> instances; // Vector to hold the instances
 
-    if (objectsJson.contains("instances") && objectsJson["instances"].is_array())
+    if (sceneJson.contains("instances") && sceneJson["instances"].is_object() && !sceneJson["instances"].empty())
     {
-        for (const auto &instanceJson : objectsJson["instances"])
+        if (sceneJson["instances"].contains("objects") && sceneJson["instances"]["objects"].is_array() && !sceneJson["instances"]["objects"].empty())
         {
-            if (instanceJson.is_string())
-            {
-                std::string instanceFilePath = instanceJson.get<std::string>();
-                std::cout << "Loading instance from file: " << instanceFilePath << '\n';
-
-                nlohmann::json instanceJsonFromFile = ReadFileToJsonObject("assets/project/" + sceneName + "/instances/" + instanceFilePath);
-                instances.push_back(GetObject(instanceJsonFromFile, "instances", false));
-            }
-            else if (instanceJson.is_object())
-                instances.push_back(GetObject(instanceJson, "instances", false));
-            else
-                std::cout << "[WARNING] Instance entry was neither a string nor an object, skipping...\n";
-        }
-    }
-    else
-        std::cout << (objectsJson.contains("instances") ? "[NOTICE] Scene did not contain any instances\n" : "[WARNING] Scene instances was not an array\n");
-}
-
-// Loads objects from either scene JSONs or external files, assigns them to either objects or prefabs based on the prefabs boolean, returns a vector of ProjectObjectData structs
-std::vector<ProjectObjectData> GetObjects(const nlohmann::json_abi_v3_12_0::json &sceneJson, bool prefabs = false)
-{
-    if (prefabs)
-    {
-        std::vector<ProjectObjectData> prefabs; // Vector to hold the prefabs
-
-        if (sceneJson.contains("prefabs") && sceneJson["prefabs"].is_array()) // Similar to GetAssets(), check if there is an array for prefabs, loop through, gather data
-        {
-            for (const auto &prefabJson : sceneJson["prefabs"])
-            {
-                if (prefabJson.is_string())
-                {
-                    std::string prefabFilePath = prefabJson.get<std::string>();
-                    std::cout << "Loading prefab from file: " << prefabFilePath << '\n';
-
-                    nlohmann::json prefabJsonFromFile = ReadFileToJsonObject("assets/project/" + sceneJson.value("name", "Unnamed Scene") + "/prefabs/" + prefabFilePath);
-                    prefabs.push_back(GetObject(prefabJsonFromFile, sceneJson.value("name", "Unnamed Scene"), true));
-                }
-                else if (prefabJson.is_object())
-                    prefabs.push_back(GetObject(prefabJson, sceneJson.value("name", "Unnamed Scene"), true));
-                else
-                    std::cout << "[WARNING] Prefab entry was neither a string nor an object, skipping...\n";
-            }
-        }
-        else // If not, log a message and continue forward
-            std::cout << (sceneJson.contains("prefabs") ? "[NOTICE] Scene did not contain any prefabs\n" : "[WARNING] Scene prefabs was not an array\n");
-
-        return prefabs;
-    }
-    else
-    {
-        std::vector<ProjectObjectData> objects; // Vector to hold the objects
-
-        if (sceneJson.contains("objects") && sceneJson["objects"].is_array()) // Similar to GetAssets(), check if there is an array for objects, loop through, gather data
-        {
-            for (const auto &objectJson : sceneJson["objects"])
+            for (const auto &objectJson : sceneJson["instances"]["objects"])
             {
                 if (objectJson.is_string())
                 {
                     std::string objectFilePath = objectJson.get<std::string>();
-                    std::cout << "Loading object from file: " << objectFilePath << '\n';
+                    std::cout << "Loading instance from file: " << objectFilePath << '\n';
 
-                    nlohmann::json objectJsonFromFile = ReadFileToJsonObject("assets/project/scenes/" + sceneJson.value("name", "Unnamed Scene") + "/objects/" + objectFilePath);
-                    objects.push_back(GetObject(objectJsonFromFile, sceneJson.value("name", "Unnamed Scene"), false));
+                    nlohmann::json objectJsonFromFile = ReadFileToJsonObject("assets/project/scenes/" + sceneJson.value("name", "") + "/objects/" + objectFilePath);
+                    instances.push_back(GetObject(objectJsonFromFile, sceneJson.value("name", "")));
                 }
                 else if (objectJson.is_object())
-                    objects.push_back(GetObject(objectJson, sceneJson.value("name", "Unnamed Scene"), false));
+                    instances.push_back(GetObject(objectJson, sceneJson.value("name", "")));
                 else
-                    std::cout << "[WARNING] Object entry was neither a string nor an object, skipping...\n";
+                    std::cout << "[WARNING] Object entry was neither a string (file path) nor an object, skipping...\n";
             }
         }
-        else // If not, log a message and continue forward
-            std::cout << (sceneJson.contains("objects") ? "[NOTICE] Scene did not contain any objects\n" : "[WARNING] Scene objects was not an array\n");
-        
-        return objects;
+        else
+            if (!sceneJson["instances"].contains("objects"))
+                std::cout << "[WARNING] Instances did not contain an objects property\n";
+            else if (!sceneJson["instances"]["objects"].is_array())
+                std::cout << "[WARNING] Instances objects property was not an array\n";
+            else if (sceneJson["instances"]["objects"].empty())
+                std::cout << "[NOTICE] Instances had no objects in the objects property array\n";
+            else
+                std::cout << "[WARNING] Something went wrong with loading instanced objects\n";
+
+        if (sceneJson["instances"].contains("prefabs") && sceneJson["instances"]["prefabs"].is_array() && !sceneJson["instances"]["prefabs"].empty())
+        {
+            for (const auto &prefabJson : sceneJson["instances"]["prefabs"])
+            {
+                if (prefabJson.is_string())
+                {
+                    std::string prefabFilePath = prefabJson.get<std::string>();
+                    std::cout << "Loading instance from prefab file: " << prefabFilePath << '\n';
+
+                    nlohmann::json prefabJsonFromFile = ReadFileToJsonObject("assets/project/prefabs/" + prefabFilePath);
+                    instances.push_back(GetObject(prefabJsonFromFile, sceneJson.value("name", "")));
+                }
+                else if (prefabJson.is_object())
+                    instances.push_back(GetObject(prefabJson, sceneJson.value("name", "")));
+                else
+                    std::cout << "[WARNING] Prefab entry was neither a string (file path) nor an object, skipping...\n";
+            }
+        }
+        else
+            if (!sceneJson["instances"].contains("prefabs"))
+                std::cout << "[WARNING] Instances did not contain a prefabs property\n";
+            else if (!sceneJson["instances"]["prefabs"].is_array())
+                std::cout << "[WARNING] Instances prefabs property was not an array\n";
+            else if (sceneJson["instances"]["prefabs"].empty())
+                std::cout << "[NOTICE] Instances had no prefabs in the prefabs property array\n";
+            else
+                std::cout << "[WARNING] Something went wrong with loading instanced prefabs\n";
     }
+    else
+        if (!sceneJson.contains("instances"))
+            std::cout << "[WARNING] Scene did not contain an instances property\n";
+        else if (!sceneJson["instances"].is_object())
+            std::cout << "[WARNING] Scene instances property was not an object\n";
+        else if (sceneJson["instances"].empty())
+            std::cout << "[NOTICE] Scene had no properties in the instances object\n";
+        else
+            std::cout << "[WARNING] Something went wrong with loading instances\n";
+
+    return instances;
+}
+
+std::vector<ProjectObjectData> GetPrefabs(const nlohmann::json_abi_v3_12_0::json &projectJson)
+{
+    std::vector<ProjectObjectData> prefabs; // Vector to hold the prefabs
+
+    if (projectJson.contains("prefabs") && projectJson["prefabs"].is_array() && !projectJson["prefabs"].empty())
+    {
+        for (const auto &prefabJson : projectJson["prefabs"])
+        {
+            if (prefabJson.is_string())
+            {
+                std::string prefabFilePath = prefabJson.get<std::string>();
+                std::cout << "Loading prefab from file: " << prefabFilePath << '\n';
+
+                nlohmann::json prefabJsonFromFile = ReadFileToJsonObject("assets/project/prefabs/" + prefabFilePath);
+                prefabs.push_back(GetObject(prefabJsonFromFile, "prefabs"));
+            }
+            else if (prefabJson.is_object())
+                prefabs.push_back(GetObject(prefabJson, "prefabs"));
+            else
+                std::cout << "[WARNING] Prefab entry was neither a string (file path) nor an object, skipping...\n";
+        }
+    }
+    else
+        if (!projectJson.contains("prefabs"))
+            std::cout << "[WARNING] Project did not contain an prefabs property\n";
+        else if (!projectJson["prefabs"].is_array())
+            std::cout << "[WARNING] Project prefabs property was not an array\n";
+        else if (projectJson["prefabs"].empty())
+            std::cout << "[NOTICE] Project had no prefabs in the prefabs property array\n";
+        else
+            std::cout << "[WARNING] Something else went wrong with loading prefabs\n";
+
+    return prefabs;
 }
 
 // Gathers data from a system JSON object, which should contain a type string and order u-int, returns a ProjectSystemData struct
@@ -607,7 +639,7 @@ std::vector<ProjectSystemData> GetSystems(const nlohmann::json_abi_v3_12_0::json
 {
     std::vector<ProjectSystemData> systems; // Vector to hold the systems
 
-    if (sceneJson.contains("systems") && sceneJson["systems"].is_array()) // Similar to GetAssets(), check if there is an array for systems, loop through, gather data
+    if (sceneJson.contains("systems") && sceneJson["systems"].is_array() && !sceneJson["systems"].empty()) // Similar to GetAssets(), check if there is an array for systems, loop through, gather data
     {
         for (const auto &systemJson : sceneJson["systems"])
         {
@@ -627,7 +659,14 @@ std::vector<ProjectSystemData> GetSystems(const nlohmann::json_abi_v3_12_0::json
         }
     }
     else
-        std::cout << (sceneJson.contains("systems") ? "[NOTICE] Scene did not contain any systems\n" : "[WARNING] Scene systems was not an array\n");
+        if (!sceneJson.contains("systems"))
+            std::cout << "[WARNING] Scene did not contain a systems property\n";
+        else if (!sceneJson["systems"].is_array())
+            std::cout << "[WARNING] Scene systems property was not an array\n";
+        else if (sceneJson["systems"].empty())
+            std::cout << "[NOTICE] Scene had no systems in the systems property array\n";
+        else
+            std::cout << "[WARNING] Something else went wrong with loading systems\n";
 
     return systems; // Return the gathered systems
 }
@@ -635,18 +674,14 @@ std::vector<ProjectSystemData> GetSystems(const nlohmann::json_abi_v3_12_0::json
 // Gathers data from a scene JSON object, which should contain objects, prefabs, and systems arrays, returns a ProjectSceneData struct
 ProjectSceneData GetScene(const nlohmann::json_abi_v3_12_0::json &sceneJson, std::string sceneName = "")
 {
-    if (sceneName.empty())
-        sceneName = sceneJson.value("name", "Unnamed Scene");
-    std::cout << "Gathering scene data from: " << sceneName << '\n';
-
     ProjectSceneData sceneData;
 
     // Gather objects, prefabs, and systems into a ProjectSceneData struct and return it
-    sceneData.instancces = GetObjects(sceneJson, false);
-    sceneData.prefabs = GetObjects(sceneJson, true);
+    sceneData.name = sceneJson.value("name", "Unnamed Scene");
+    sceneData.instances = GetInstances(sceneJson);
     sceneData.systems = GetSystems(sceneJson);
 
-    std::cout << "Finished gathering scene data from: " << sceneName << "\n";
+    std::cout << "Finished gathering scene data from: " << sceneData.name << "\n";
 
     return sceneData;
 }
@@ -656,7 +691,7 @@ std::vector<ProjectSceneData> GetScenes(const nlohmann::json_abi_v3_12_0::json &
 {
     std::vector<ProjectSceneData> scenes; // Vector to hold the scenes
 
-    if (projectJson.contains("scenes") && projectJson["scenes"].is_array()) // Similar to GetAssets(), check if there is an array for scenes, loop through, gather data
+    if (projectJson.contains("scenes") && projectJson["scenes"].is_array() && !projectJson["scenes"].empty()) // Similar to GetAssets(), check if there is an array for scenes, loop through, gather data
     {
         for (const auto &sceneJson : projectJson["scenes"])
         {
@@ -683,8 +718,15 @@ std::vector<ProjectSceneData> GetScenes(const nlohmann::json_abi_v3_12_0::json &
                 std::cout << "[WARNING] Scene entry was neither a string nor an object, skipping...\n";
         }
     }
-    else // If not, log a message and continue forward
-        std::cout << (projectJson.contains("scenes") ? "[NOTICE] Project did not contain any scenes\n" : "[WARNING] Project scenes was not an array\n");
+    else // If not, log a message defining the error and continue forward
+        if (!projectJson.contains("scenes"))
+            std::cout << "[WARNING] Project did not contain an scenes property\n";
+        else if (!projectJson["scenes"].is_array())
+            std::cout << "[WARNING] Scenes property was not an array\n";
+        else if (projectJson["scenes"].empty())
+            std::cout << "[NOTICE] Project had no scenes in the scenes property array\n";
+        else
+            std::cout << "[WARNING] Something else went wrong with loading scenes\n";
 
     return scenes; // Return the gathered scenes
 }
@@ -712,7 +754,7 @@ std::vector<ProjectAssetData> GetAssets(const nlohmann::json_abi_v3_12_0::json &
 {
     std::vector<ProjectAssetData> assets; // Vector to hold the assets
 
-    if (projectJson.contains("assets") && projectJson["assets"].is_array()) // Check if there is an array for assets
+    if (projectJson.contains("assets") && projectJson["assets"].is_array() && !projectJson["assets"].empty()) // Check if there is an array for assets
     {
         for (const auto &assetJson : projectJson["assets"]) // Loop through each asset
         {
@@ -731,9 +773,55 @@ std::vector<ProjectAssetData> GetAssets(const nlohmann::json_abi_v3_12_0::json &
         }
     }
     else // If not, log a message and continue forward
-        std::cout << (projectJson.contains("assets") ? "[NOTICE] Project did not contain any assets\n" : "[WARNING] Project assets was not an array\n");
+        if (!projectJson.contains("assets"))
+            std::cout << "[WARNING] Project did not contain an assets property\n";
+        else if (!projectJson["assets"].is_array())
+            std::cout << "[WARNING] Project assets property was not an array\n";
+        else if (projectJson["assets"].empty())
+            std::cout << "[NOTICE] Project had no assets in the assets property array\n";
+        else
+            std::cout << "[WARNING] Something else went wrong with loading assets\n";
 
     return assets; // Return the gathered assets
+}
+
+size_t GetMainScene(const nlohmann::json_abi_v3_12_0::json &projectJson)
+{
+    if (projectJson.contains("scenes") && projectJson["scenes"].is_array() && !projectJson["scenes"].empty())
+    {
+        for (size_t i = 0; i < projectJson["scenes"].size(); ++i)
+        {
+            const auto &sceneEntry = projectJson["scenes"].at(i);
+            std::string sceneName;
+
+            if (sceneEntry.is_string())
+            {
+                std::string sceneFilePath = sceneEntry.get<std::string>();
+                size_t lastSlash = sceneFilePath.find_last_of("/\\");
+                size_t lastDot = sceneFilePath.find_last_of('.');
+                if (lastDot != std::string::npos)
+                    sceneName = sceneFilePath.substr(lastSlash + 1, lastDot - lastSlash - 1);
+                else
+                    sceneName = sceneFilePath.substr(lastSlash + 1);
+            }
+            else if (sceneEntry.is_object())
+                sceneName = sceneEntry.value("name", "Unnamed Scene");
+            else
+            {
+                std::cout << "[WARNING] Scene entry was neither a string nor an object, skipping...\n";
+                continue;
+            }
+
+            if (sceneName == "main")
+            {
+                std::cout << "Main scene found: " << sceneName << " at index " << i << '\n';
+                return i;
+            }
+        }
+    }
+    else
+        std::cout << "[WARNING] Project did not contain any scenes to search for the main scene\n";
+    return -1; // Return 0 if no main scene is found
 }
 
 // Unpacks a project file from a JSON file path into a project object, returns the Project struct
@@ -750,8 +838,11 @@ Project lapCore::UnpackProject(const std::string projectFilePath)
     project.name = projectName;
     project.version = projectVersion;
 
+    project.main_scene_index = GetMainScene(projectJson);
+
     project.assets = GetAssets(projectJson); // Gather the data from the JSON
     project.scenes = GetScenes(projectJson);
+    project.prefabs = GetPrefabs(projectJson);
 
     return project;
 }

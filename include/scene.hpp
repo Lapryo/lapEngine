@@ -4,28 +4,13 @@
 #include "system.hpp"
 #include "resource_manager.hpp"
 
-//#include "world.hpp"
-
 #include <iostream>
 
 namespace lapCore
 {
-    const unsigned int LOGICAL_RESOLUTION_REFERENCE = 800;
+    struct World;
 
     using Object = entt::entity;
-
-    struct AssetLoadRequest
-    {
-        std::string name;
-        std::string type;
-        std::string path;
-    };
-
-    struct CameraExcludeLoadRequest
-    {
-        Object object;
-        std::vector<std::string> excludeList;
-    };
 
     struct ObjectInfo
     {
@@ -43,6 +28,11 @@ namespace lapCore
 
     struct Scene
     {
+        Scene() {}
+        Scene(World *world, const std::string &name) : world(world), name(name) {}
+
+        World *world;
+
         std::string name;
 
         entt::registry objects;
@@ -52,23 +42,6 @@ namespace lapCore
         std::unordered_map<std::string, ObjectEntry> prefabMap;
 
         std::vector<std::unique_ptr<System>> systems;
-
-        std::vector<AssetLoadRequest> queuedAssets;
-        std::vector<CameraExcludeLoadRequest> queuedCameraExcludes;
-
-        ResourceManager resources;
-
-        rl::Vector2 logicalWindowPos;
-        rl::Vector2 logicalResolution;
-        double resolutionScale = 1;
-
-        void QueueAsset(const std::string &name, const std::string &type, const std::string &path);
-        void QueueAsset(const AssetLoadRequest &asset);
-        void LoadQueuedAssets();
-
-        void QueueCameraExclude(const Object &object, const std::vector<std::string> &excludeList);
-        void QueueCameraExclude(const CameraExcludeLoadRequest &request);
-        void LoadQueuedCameraExcludes();
 
         void Update(float deltaTime, rl::RenderTexture2D &target);
 

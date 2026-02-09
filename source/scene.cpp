@@ -1,61 +1,11 @@
 #include "scene.hpp"
+#include "world.hpp"
 
 using namespace lapCore;
-
-void Scene::QueueAsset(const std::string &name, const std::string &type, const std::string &path)
-{
-    queuedAssets.push_back({name, type, path});
-}
-
-void Scene::QueueAsset(const AssetLoadRequest &asset)
-{
-    queuedAssets.push_back(asset);
-}
-
-void Scene::LoadQueuedAssets()
-{
-    for (auto &asset : queuedAssets)
-    {
-        if (asset.type == "texture")
-            resources.AddTexture(asset.name, asset.path);
-        else if (asset.type == "shader")
-            resources.AddShader(asset.name, asset.path + "/vert.glsl", asset.path + "/frag.glsl");
-    }
-
-    queuedAssets.clear();
-}
-
-void lapCore::Scene::QueueCameraExclude(const Object &object, const std::vector<std::string> &excludeList)
-{
-    queuedCameraExcludes.push_back({object, excludeList});
-}
-
-void lapCore::Scene::QueueCameraExclude(const CameraExcludeLoadRequest &request)
-{
-    queuedCameraExcludes.push_back(request);
-}
-
-void lapCore::Scene::LoadQueuedCameraExcludes()
-{
-    // for (auto &request : queuedCameraExcludes)
-    // {
-    //     auto &cam2DComp = objects.get<Cam2D>(request.object);
-    //     for (auto &excludeName : request.excludeList)
-    //     {
-    //         ObjectEntry excludedObj = FindObject(excludeName);
-    //         if (excludedObj.info.object != entt::null)
-    //             cam2DComp.exclude.push_back(excludedObj.info.object);
-    //     }
-    // }
-
-    // queuedCameraExcludes.clear();
-}
 
 // figure this out later
 void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
 {
-    resolutionScale = logicalResolution.x / LOGICAL_RESOLUTION_REFERENCE;
-
     for (auto &system : systems)
     {
         if (!system || !system->active)
@@ -83,7 +33,7 @@ void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
             int screenW = rl::GetScreenWidth();
             int screenH = rl::GetScreenHeight();
             float screenAspect = (float)screenW / screenH;
-            float targetAspect = (float)logicalResolution.x / logicalResolution.y;
+            float targetAspect = (float)world->logicalResolution.x / world->logicalResolution.y;
 
             int drawWidth, drawHeight;
             int offsetX, offsetY;
@@ -105,7 +55,7 @@ void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
                 offsetY = (screenH - drawHeight) / 2;
             }
 
-            logicalWindowPos = {(float)offsetX, (float)offsetY};
+            // logicalWindowPos = {(float)offsetX, (float)offsetY};
 
             // Draw the render texture to the screen, scaling it
             rl::DrawTexturePro(
@@ -174,16 +124,10 @@ void Scene::Clear()
 {
     objects.clear();
     systems.clear();
+    prefabs.clear();
 
-    for (auto &texture : resources.textures)
-    {
-        resources.RemoveTexture(texture.first);
-    }
-
-    for (auto &shader : resources.shaders)
-    {
-        resources.RemoveShader(shader.first);
-    }
+    objectMap.clear();
+    prefabMap.clear();
 }
 
 ObjectEntry Scene::FindObject(const std::string &name)

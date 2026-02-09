@@ -1,8 +1,15 @@
 {
     "name": "Flappy Bird",
     "version": "1.0.0-1",
+    "assets": [
+
+    ],
     "scenes": [
         "main.json",
         "game.json"
+    ],
+    "prefabs": [
+        "background.json",
+        "pipe.json"
     ]
 }

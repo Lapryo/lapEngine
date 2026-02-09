@@ -40,8 +40,7 @@ void App::Shutdown()
     if (state == AppState::DEAD) // If the app is already dead, do nothing
         return;
 
-    for (auto &scene : world.scenes)
-        scene->Clear();
+    world.main_scene.Clear();
 
     rl::UnloadRenderTexture(world.target);
 

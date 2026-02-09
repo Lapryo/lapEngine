@@ -1,8 +1,5 @@
 {
     "name": "main",
-    "assets": [
-
-    ],
     "systems": [
         {
             "type": "render",
@@ -17,10 +14,12 @@
             "order": 0
         }
     ],
-    "prefabs": [
-        
-    ],
-    "objects": [
-        "background.json"
-    ]
+    "instances": {
+        "prefabs": [
+            "background.json"
+        ],
+        "objects": [
+
+        ]
+    }
 }

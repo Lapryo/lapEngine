@@ -45,6 +45,7 @@ namespace lapCore
 
     struct ProjectSceneData
     {
+        std::string name;
         std::vector<ProjectSystemData> systems;
         std::vector<ProjectObjectData> instances;
     };

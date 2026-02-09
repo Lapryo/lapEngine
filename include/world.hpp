@@ -21,8 +21,7 @@ namespace lapCore
     {
         World(Project project) : project(project) {}
 
-        Scene *main_scene;
-        std::vector<std::unique_ptr<Scene>> scenes;
+        Scene main_scene;
 
         rl::Vector2 logicalResolution;
         rl::RenderTexture target;
@@ -30,7 +29,7 @@ namespace lapCore
         ResourceManager resources;
 
         void LoadSettings(const std::string &settingsFilePath);
-        void ResetSceneToDefault(ProjectSceneData &scene_data);
+        void SetScene(ProjectSceneData &scene_data);
 
     private:
         Project project;
