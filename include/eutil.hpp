@@ -2,6 +2,7 @@
 #define EUTIL_HPP
 
 #include "raylib/raylib_namespace.h"
+#include "json.hpp"
 
 #include <vector>
 #include <string>
@@ -19,6 +20,7 @@ namespace lapCore
 
         bool usesUIListVisiblity;
 
+        Renderable();
         Renderable(unsigned int zlayer, bool isScreenSpace, bool visible, rl::Color tint, bool usesUIListVisiblity)
             : zlayer(zlayer), isScreenSpace(isScreenSpace), visible(visible), tint(tint), usesUIListVisiblity(usesUIListVisiblity) {}
     };
@@ -42,6 +44,7 @@ namespace lapCore
         HorizontalAlignment horizontal;
         VerticalAlignment vertical;
 
+        Alignment();
         Alignment(HorizontalAlignment horizontal, VerticalAlignment vertical)
             : horizontal(horizontal), vertical(vertical) {}
     };
@@ -57,6 +60,7 @@ namespace lapCore
         rl::Vector2 scale;
         rl::Vector2 offset;
 
+        FrameVector();
         FrameVector(rl::Vector2 scale, rl::Vector2 offset)
             : scale(scale), offset(offset) {}
     };
@@ -65,6 +69,7 @@ namespace lapCore
     {
         float top, bottom, left, right;
 
+        Padding();
         Padding(float top, float bottom, float left, float right)
             : top(top), bottom(bottom), left(left), right(right) {}
     };
@@ -74,6 +79,7 @@ namespace lapCore
         FrameVector position;
         FrameVector size;
 
+        UIOrigin();
         UIOrigin(FrameVector position, FrameVector size)
             : position(position), size(size) {}
     };
@@ -87,6 +93,8 @@ namespace lapCore
 
     std::string ReadFileToString(const std::string &filePath);
     void WriteStringToFile(const std::string &filePath, const std::string &data);
+
+    nlohmann::json_abi_v3_12_0::json ReadFileToJsonObject(const std::string &filePath);
 
     rl::Vector2 GetMouseInViewportSpace(int logicalWidth, int logicalHeight);
 

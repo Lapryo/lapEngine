@@ -37,18 +37,18 @@ void lapCore::Scene::QueueCameraExclude(const CameraExcludeLoadRequest &request)
 
 void lapCore::Scene::LoadQueuedCameraExcludes()
 {
-    for (auto &request : queuedCameraExcludes)
-    {
-        auto &cam2DComp = objects.get<Cam2D>(request.object);
-        for (auto &excludeName : request.excludeList)
-        {
-            ObjectEntry excludedObj = FindObject(excludeName);
-            if (excludedObj.info.object != entt::null)
-                cam2DComp.exclude.push_back(excludedObj.info.object);
-        }
-    }
+    // for (auto &request : queuedCameraExcludes)
+    // {
+    //     auto &cam2DComp = objects.get<Cam2D>(request.object);
+    //     for (auto &excludeName : request.excludeList)
+    //     {
+    //         ObjectEntry excludedObj = FindObject(excludeName);
+    //         if (excludedObj.info.object != entt::null)
+    //             cam2DComp.exclude.push_back(excludedObj.info.object);
+    //     }
+    // }
 
-    queuedCameraExcludes.clear();
+    // queuedCameraExcludes.clear();
 }
 
 // figure this out later

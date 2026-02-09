@@ -2,7 +2,8 @@
 #define APP_HPP
 
 #include <unordered_map>
-#include "project.hpp"
+#include "new_project.hpp"
+#include "world.hpp"
 
 // TODO: Known issue
 // Because the project variable is now private, need to come up with a solution so it's accessible in a way to the developer
@@ -26,13 +27,14 @@ namespace lapCore
         void Run();
         void Shutdown();
 
+        World world;
+
     protected:
         virtual bool Init() = 0;
         virtual void Update(float deltaTime) = 0;
 
     private:
         AppState state = AppState::DEAD;
-        const Project& project;
     };
 }
 

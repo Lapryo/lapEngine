@@ -31,28 +31,28 @@ void RenderSystem::RebuildRenderList(entt::registry &registry)
     for (auto e : spriteView)
     {
         const auto &s = spriteView.get<Sprite>(e);
-        renderList.push_back({e, s.renderable.zlayer, s.renderable.isScreenSpace, RenderEntry::Type::Sprite});
+        renderList.push_back({e, s.renderable.zlayer, s.renderable.isScreenSpace, RenderType::Sprite});
     }
 
     auto imageView = registry.view<Image>();
     for (auto e : imageView)
     {
         const auto &s = imageView.get<Image>(e);
-        renderList.push_back({e, s.sprite.renderable.zlayer, s.sprite.renderable.isScreenSpace, RenderEntry::Type::Image});
+        renderList.push_back({e, s.sprite.renderable.zlayer, s.sprite.renderable.isScreenSpace, RenderType::Image});
     }
 
     auto textView = registry.view<TextLabel>();
     for (auto e : textView)
     {
         const auto &t = textView.get<TextLabel>(e);
-        renderList.push_back({e, t.frame.renderable.zlayer, t.frame.renderable.isScreenSpace, RenderEntry::Type::Text});
+        renderList.push_back({e, t.frame.renderable.zlayer, t.frame.renderable.isScreenSpace, RenderType::Text});
     }
 
     auto frameView = registry.view<Frame>();
     for (auto e : frameView)
     {
         const auto &t = frameView.get<Frame>(e);
-        renderList.push_back({e, t.renderable.zlayer, t.renderable.isScreenSpace, RenderEntry::Type::Rect});
+        renderList.push_back({e, t.renderable.zlayer, t.renderable.isScreenSpace, RenderType::Rect});
     }
 
     std::sort(renderList.begin(), renderList.end(), [](const auto &a, const auto &b)
@@ -101,7 +101,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         rl::Vector2 size{(float)texture->width, (float)texture->height};
         float rotation = 0.f;
 
-        auto *rotData = registry.try_get<RotationalData>(obj);
+        auto *rotData = registry.try_get<Rotation2D>(obj);
         if (rotData)
         {
             rotation = rotData->rotation;
@@ -142,7 +142,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         auto *frame = registry.try_get<Frame>(obj);
         auto *origin = registry.try_get<Origin2D>(obj);
-        auto *rotData = registry.try_get<RotationalData>(obj);
+        auto *rotData = registry.try_get<Rotation2D>(obj);
 
         rl::Vector2 pos{0, 0}, size{(float)texture->width, (float)texture->height};
         float rotation = 0.f;
@@ -209,7 +209,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         y = text->frame.origin.position.scale.y * scene->logicalResolution.y + text->frame.origin.position.offset.y + text->textPadding.top;
 
         // Handle horizontal alignment
-        float textWidth = rl::MeasureText(text->text.c_str(), text->textSize);
+        float textWidth = rl::MeasureText(text->text.c_str(), text->fontSize);
         switch (text->textAlignment.horizontal)
         {
         case HorizontalAlignment::LEFT:
@@ -228,14 +228,14 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         case VerticalAlignment::TOP:
             break;
         case VerticalAlignment::MIDDLE:
-            y += (text->textBounds.offset.y - text->textSize - text->textPadding.bottom) * 0.5f;
+            y += (text->textBounds.offset.y - text->fontSize - text->textPadding.bottom) * 0.5f;
             break;
         case VerticalAlignment::BOTTOM:
-            y += text->textBounds.offset.y - text->textSize - text->textPadding.bottom;
+            y += text->textBounds.offset.y - text->fontSize - text->textPadding.bottom;
             break;
         }
 
-        rl::DrawText(text->text.c_str(), x, y, text->textSize, text->frame.renderable.tint);
+        rl::DrawText(text->text.c_str(), x, y, text->fontSize, text->frame.renderable.tint);
     };
 
     auto drawEntries = [&](const std::vector<RenderEntry> &entries, bool worldSpace)
@@ -249,16 +249,16 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
                 {
                     switch (entry.type)
                     {
-                    case RenderEntry::Type::Sprite:
+                    case RenderType::Sprite:
                         drawSprite(entry.entity, scene);
                         break;
-                    case RenderEntry::Type::Rect:
+                    case RenderType::Rect:
                         drawRect(entry.entity, scene);
                         break;
-                    case RenderEntry::Type::Text:
+                    case RenderType::Text:
                         drawText(entry.entity, scene);
                         break;
-                    case RenderEntry::Type::Image:
+                    case RenderType::Image:
                         drawImage(entry.entity, scene);
                         break;
                     }
@@ -272,16 +272,16 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             {
                 switch (entry.type)
                 {
-                case RenderEntry::Type::Sprite:
+                case RenderType::Sprite:
                     drawSprite(entry.entity, scene);
                     break;
-                case RenderEntry::Type::Rect:
+                case RenderType::Rect:
                     drawRect(entry.entity, scene);
                     break;
-                case RenderEntry::Type::Text:
+                case RenderType::Text:
                     drawText(entry.entity, scene);
                     break;
-                case RenderEntry::Type::Image:
+                case RenderType::Image:
                     drawImage(entry.entity, scene);
                     break;
                 }

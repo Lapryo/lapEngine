@@ -1,0 +1,26 @@
+{
+    "name": "main",
+    "assets": [
+
+    ],
+    "systems": [
+        {
+            "type": "render",
+            "order": 3
+        },
+        {
+            "type": "script",
+            "order": 1
+        },
+        {
+            "type": "gui",
+            "order": 0
+        }
+    ],
+    "prefabs": [
+        
+    ],
+    "objects": [
+        "background.json"
+    ]
+}

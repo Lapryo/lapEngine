@@ -1,0 +1,68 @@
+#pragma once
+
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <any>
+
+namespace lapCore
+{
+    enum class ProjectDataType
+    {
+        SCENE,
+        OBJECT,
+        SYSTEM,
+        COMPONENT
+    };
+
+    struct ProjectElementData
+    {
+        std::string type;
+        std::any data;
+    };
+
+    struct ProjectObjectData
+    {
+        std::string name;
+        std::string parent;
+        int child_index;
+
+        std::vector<ProjectElementData> elements;
+    };
+
+    struct ProjectSystemData
+    {
+        std::string type;
+        unsigned int order;
+    };
+
+    struct ProjectAssetData
+    {
+        std::string name;
+        std::string path;
+        std::string type;
+    };
+
+    struct ProjectSceneData
+    {
+        std::vector<ProjectSystemData> systems;
+        std::vector<ProjectObjectData> instances;
+    };
+
+    struct Project
+    {
+        std::string name;
+        std::string version;
+        std::string path; // if there is any
+
+        size_t main_scene_index = -1;
+
+        std::vector<ProjectAssetData> assets;
+        std::vector<ProjectSceneData> scenes;
+        std::vector<ProjectObjectData> prefabs;
+
+        std::string Pack() const;
+    };
+    
+    Project UnpackProject(std::string projectJsonString);
+}

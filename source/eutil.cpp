@@ -55,6 +55,11 @@ void lapCore::WriteStringToFile(const std::string &filePath, const std::string &
     file.close();
 }
 
+nlohmann::json_abi_v3_12_0::json lapCore::ReadFileToJsonObject(const std::string &filePath)
+{
+    return nlohmann::json::parse(ReadFileToString(filePath));
+}
+
 rl::Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight)
 {
     rl::Vector2 mouse = rl::GetMousePosition();
@@ -116,4 +121,31 @@ rl::Vector2 lapCore::FrameVectorToVec2(lapCore::FrameVector vector, int logicalW
     vec.y = vector.scale.y * logicalHeight + vector.offset.y;
 
     return vec;
+}
+
+// Default constructors for structs
+lapCore::Renderable::Renderable()
+    : zlayer(0), isScreenSpace(false), visible(true), tint(rl::RayWhite), usesUIListVisiblity(false)
+{
+    space = {0, 0, 0, 0};
+}
+
+lapCore::Alignment::Alignment()
+    : horizontal(HorizontalAlignment::LEFT), vertical(VerticalAlignment::TOP)
+{
+}
+
+lapCore::FrameVector::FrameVector()
+    : scale({0, 0}), offset({0, 0})
+{
+}
+
+lapCore::Padding::Padding()
+    : top(0), bottom(0), left(0), right(0)
+{
+}
+
+lapCore::UIOrigin::UIOrigin()
+    : position(FrameVector()), size(FrameVector())
+{
 }

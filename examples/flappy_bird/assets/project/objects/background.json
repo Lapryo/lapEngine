@@ -2,10 +2,10 @@
     "name": "background",
     "parent": "",
     "child-index": -1,
-    "components": [
+    "elements": [
         {
             "type": "frame",
-            "data":
+            "properties":
             {
                 "position": [0, 0, 0, 0],
                 "size": [1, 1, 0, 0],

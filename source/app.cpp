@@ -1,8 +1,11 @@
 #include "app.hpp"
+#include "scene.hpp"
+
+#include <iostream>
 
 using namespace lapCore;
 
-lapCore::App::App(Project &project) : project(project)
+lapCore::App::App(Project &project) : world(project)
 {}
 
 void App::Run()
@@ -37,12 +40,10 @@ void App::Shutdown()
     if (state == AppState::DEAD) // If the app is already dead, do nothing
         return;
 
-    for (auto &scene : project.scenes)
-    {
+    for (auto &scene : world.scenes)
         scene->Clear();
-    }
 
-    rl::UnloadRenderTexture(project.target);
+    rl::UnloadRenderTexture(world.target);
 
     // shutdown window if it exists
     rl::CloseWindow();

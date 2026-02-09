@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/wellh/Documents/lapEngine/build/cmake_install.cmake",
+		"C:/Users/wellh/Documents/lapEngine/build/examples/flappy_bird/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
