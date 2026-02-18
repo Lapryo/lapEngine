@@ -1,0 +1,15 @@
+{
+    "window":
+    {
+        "title": "Flappy Bird",
+        "fullscreen": false,
+        "borderless": true,
+        "decorated": true,
+        "resizable": true,
+        "resolution": [1280, 720],
+        "logical-resolution": [640, 360],
+        "vsync": false,
+        "infinite-fps": true,
+        "max-fps": 60
+    }
+}

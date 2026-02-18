@@ -17,11 +17,13 @@ void World::SetScene(ProjectSceneData &scene_data)
 
         for (auto &element : instance.elements)
         {
-            if (element.type == "frame")
+            // AI-generated code
+            std::visit([&](auto&& data)
             {
-                auto frameData = std::any_cast<Frame>(element.data);
-                main_scene.AddElement<Frame>(main_scene.objects, object, frameData);
-            }
+                using T = std::decay_t<decltype(data)>;
+                if constexpr (!std::is_same_v<T, std::monostate>)
+                    main_scene.AddElement<T>(main_scene.objects, object, data);
+            }, element.data);
         }
     }
 
@@ -32,70 +34,82 @@ void World::SetScene(ProjectSceneData &scene_data)
     }
 }
 
-std::string defaultSettingsStr = R"(
+WindowProperties LoadWindowProperties(const nlohmann::json_abi_v3_12_0::json &windowJson)
 {
-    "window":
-    {
-        "title": "Default Window",
-        "mode": "windowed",
-        "decorated": true,
-        "resizable": true,
-        "resolution": [1200, 900],
-        "logical-resolution": [800, 600],
-        "vsync": false,
-        "inf-fps": true,
-        "max-fps": 60
-    }
+    WindowProperties window_properties;
+
+    if (windowJson.contains("title"))
+        window_properties.title = windowJson["title"];
+
+    if (windowJson.contains("resolution"))
+        window_properties.resolution = {windowJson["resolution"].at(0), windowJson["resolution"].at(1)};
+    
+    if (windowJson.contains("logical-resolution"))
+        window_properties.logical_resolution = {windowJson["logical-resolution"].at(0), windowJson["logical-resolution"].at(1)};
+
+    if (windowJson.contains("fullscreen"))
+        window_properties.fullscreen = windowJson["fullscreen"];
+    
+    if (windowJson.contains("borderless"))
+        window_properties.borderless = windowJson["borderless"];
+
+    if (windowJson.contains("decorated"))
+        window_properties.decorated = windowJson["decorated"];
+
+    if (windowJson.contains("resizable"))
+        window_properties.resizable= windowJson["resizable"];
+
+    if (windowJson.contains("vsync"))
+        window_properties.vsync = windowJson["vsync"];
+
+    if (windowJson.contains("infinite-fps"))
+        window_properties.infinite_fps = windowJson["infinite-fps"];
+
+    if (windowJson.contains("max-fps"))
+        window_properties.max_fps = windowJson["max-fps"];
+
+    return window_properties;
 }
-)";
 
 void World::LoadSettings(const std::string &settingsFilePath)
 {
     std::string fileStr = ReadFileToString(settingsFilePath);
     if (fileStr == "")
     {
-        std::cout << "Could not get settings file, loading default.\n";
-        fileStr = defaultSettingsStr;
+        std::cout << "Could not get settings file, loading default for window.\n";
+        window = WindowProperties();
+        return;
     }
 
     auto settingsJson = nlohmann::json::parse(fileStr);
-    auto &windowJson = settingsJson["window"];
+    window = LoadWindowProperties(settingsJson["window"]);
+}
 
-    std::string windowMode = windowJson.value("mode", "windowed");
-    bool resizable = windowJson.value("resizable", false);
-    rl::Vector2 windowRes{
-        windowJson["resolution"].at(0),
-        windowJson["resolution"].at(1)};
-    rl::Vector2 logicalRes{
-        windowJson["logical-resolution"].at(0),
-        windowJson["logical-resolution"].at(1)};
-
-    bool vsync = windowJson.value("vsync", false);
-    bool inf_fps = windowJson.value("inf-fps", true);
-    bool decorated = windowJson.value("decorated", true);
-
-    std::string windowTitle = windowJson.value("title", "");
-
-    rl::InitWindow(windowRes.x, windowRes.y, windowTitle.c_str());
-
-    if (resizable)
-        rl::SetWindowState(rl::FLAG_WINDOW_RESIZABLE);
-
-    if (!decorated)
-        rl::SetWindowState(rl::FLAG_WINDOW_UNDECORATED);
-
-    if (windowMode == "fullscreen")
-        rl::SetWindowState(rl::FLAG_FULLSCREEN_MODE);
-
-    if (!vsync)
-        if (inf_fps)
-            rl::SetTargetFPS(-1);
-        else
-            rl::SetTargetFPS(windowJson["max-fps"].get<int>());
-    else
-        rl::SetWindowState(rl::FLAG_VSYNC_HINT);
+void World::LoadWindow()
+{
+    rl::InitWindow(window.resolution.x, window.resolution.y, window.title.c_str());
+    ResetWindowProperties();
+    window.target = rl::LoadRenderTexture(window.logical_resolution.x, window.logical_resolution.y);
 
     SetScene(project.scenes[project.main_scene_index]);
+}
 
-    target = rl::LoadRenderTexture(logicalRes.x, logicalRes.y);
+void World::ResetWindowProperties()
+{
+    if (window.fullscreen)
+        rl::SetWindowState(rl::FLAG_FULLSCREEN_MODE);
+    if (window.borderless)
+        rl::SetWindowState(rl::FLAG_BORDERLESS_WINDOWED_MODE);
+    if (window.resizable)
+        rl::SetWindowState(rl::FLAG_WINDOW_RESIZABLE);
+    if (!window.decorated)
+        rl::SetWindowState(rl::FLAG_WINDOW_UNDECORATED);
+    
+    if (!window.vsync)
+        if (window.infinite_fps)
+            rl::SetTargetFPS(-1);
+        else
+            rl::SetTargetFPS(window.max_fps);
+    else
+        rl::SetWindowState(rl::FLAG_VSYNC_HINT);
 }

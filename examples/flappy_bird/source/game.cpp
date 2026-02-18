@@ -23,6 +23,7 @@ bool FlappyBird::FBApp::Init()
 
     // lapEngine has a specific function for loading settings for the window
     world.LoadSettings("assets/settings.json");
+    world.LoadWindow();
 
     // Anything else you may want to do is recommended to be done between these two sections of initialization
 
@@ -41,7 +42,7 @@ void FlappyBird::FBApp::Update(float deltaTime)
     // However, you wll most likely main do updates through scripts or other elements, so it's recommended to keep this section clean and only put things here that are necessary to be done every frame and aren't easily done through other means
 
     // For us, we simply update the main scene
-    world.main_scene.Update(deltaTime, world.target);
+    world.main_scene.Update(deltaTime, world.window.target);
 }
 
 int main()

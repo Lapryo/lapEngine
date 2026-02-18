@@ -3,7 +3,8 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <any>
+
+#include "elements.hpp"
 
 namespace lapCore
 {
@@ -18,7 +19,22 @@ namespace lapCore
     struct ProjectElementData
     {
         std::string type;
-        std::any data;
+        std::variant<
+            std::monostate,
+            Origin2D,
+            Physics2D,
+            Rotation2D,
+            Frame,
+            UIList,
+            Sprite,
+            Image,
+            TextLabel,
+            EventBus,
+            UIButton,
+            Cam2D,
+            Attribute<std::any>,
+            Script
+        > data;
     };
 
     struct ProjectObjectData

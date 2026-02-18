@@ -5,10 +5,6 @@
 #include "new_project.hpp"
 #include "world.hpp"
 
-// TODO: Known issue
-// Because the project variable is now private, need to come up with a solution so it's accessible in a way to the developer
-// Maybe after the "World" section of the architecture is implemented, this problem will fix itself
-
 namespace lapCore
 {
     enum class AppState

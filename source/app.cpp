@@ -42,7 +42,7 @@ void App::Shutdown()
 
     world.main_scene.Clear();
 
-    rl::UnloadRenderTexture(world.target);
+    rl::UnloadRenderTexture(world.window.target);
 
     // shutdown window if it exists
     rl::CloseWindow();

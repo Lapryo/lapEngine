@@ -17,19 +17,44 @@
 
 namespace lapCore
 {
+    struct WindowProperties
+    {
+        std::string title = "Default Window";
+
+        rl::Vector2 resolution = {1200, 900};
+        rl::Vector2 logical_resolution = {800, 600};
+
+        bool fullscreen = false;
+        bool borderless = false;
+        bool decorated = true;
+        bool resizable = true;
+
+        bool vsync = false;
+        bool infinite_fps = true;
+        unsigned int max_fps = 60;
+
+        rl::RenderTexture target;
+    };
+
     struct World
     {
         World(Project project) : project(project) {}
 
         Scene main_scene;
 
-        rl::Vector2 logicalResolution;
-        rl::RenderTexture target;
-
+        WindowProperties window;
         ResourceManager resources;
 
         void LoadSettings(const std::string &settingsFilePath);
+
+        void LoadWindow();
+        void ResetWindowProperties();
+
         void SetScene(ProjectSceneData &scene_data);
+
+        const Project &GetProject() const {
+            return project;
+        }
 
     private:
         Project project;

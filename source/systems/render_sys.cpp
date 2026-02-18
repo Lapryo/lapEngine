@@ -154,10 +154,10 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         if (frame)
         {
-            pos.x += frame->origin.position.scale.x * scene->world->logicalResolution.x + frame->origin.position.offset.x;
-            pos.y += frame->origin.position.scale.y * scene->world->logicalResolution.y + frame->origin.position.offset.y;
-            size.x += frame->origin.size.scale.x * scene->world->logicalResolution.x + frame->origin.size.offset.x;
-            size.y += frame->origin.size.scale.y * scene->world->logicalResolution.y + frame->origin.size.offset.y;
+            pos.x += frame->origin.position.scale.x * scene->world->window.logical_resolution.x + frame->origin.position.offset.x;
+            pos.y += frame->origin.position.scale.y * scene->world->window.logical_resolution.y + frame->origin.position.offset.y;
+            size.x += frame->origin.size.scale.x * scene->world->window.logical_resolution.x + frame->origin.size.offset.x;
+            size.y += frame->origin.size.scale.y * scene->world->window.logical_resolution.y + frame->origin.size.offset.y;
         }
 
         if (origin)
@@ -184,7 +184,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         if (!frame || !frame->renderable.visible)
             return;
 
-        rl::Rectangle rect = UIOriginToRect(frame->origin, scene->world->logicalResolution.x, scene->world->logicalResolution.y);
+        rl::Rectangle rect = UIOriginToRect(frame->origin, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
 
         if (auto *origin = registry.try_get<Origin2D>(obj))
         {
@@ -205,8 +205,8 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         float x = 0.f, y = 0.f;
 
-        x = text->frame.origin.position.scale.x * scene->world->logicalResolution.x + text->frame.origin.position.offset.x + text->textPadding.left;
-        y = text->frame.origin.position.scale.y * scene->world->logicalResolution.y + text->frame.origin.position.offset.y + text->textPadding.top;
+        x = text->frame.origin.position.scale.x * scene->world->window.logical_resolution.x + text->frame.origin.position.offset.x + text->textPadding.left;
+        y = text->frame.origin.position.scale.y * scene->world->window.logical_resolution.y + text->frame.origin.position.offset.y + text->textPadding.top;
 
         // Handle horizontal alignment
         float textWidth = rl::MeasureText(text->text.c_str(), text->fontSize);

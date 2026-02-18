@@ -398,7 +398,22 @@ Script GetScriptData(const nlohmann::json_abi_v3_12_0::json &dataJson)
     return script;
 }
 
-std::any GetElementData(const nlohmann::json_abi_v3_12_0::json &elementJson)
+std::variant<
+    std::monostate,
+    Origin2D,
+    Physics2D,
+    Rotation2D,
+    Frame,
+    UIList,
+    Sprite,
+    Image,
+    TextLabel,
+    EventBus,
+    UIButton,
+    Cam2D,
+    Attribute<std::any>,
+    Script
+> GetElementData(const nlohmann::json_abi_v3_12_0::json &elementJson)
 {
     std::string elementType = elementJson.value("type", "");
     if (elementJson.contains("data") && elementJson["data"].is_object())
@@ -437,7 +452,7 @@ std::any GetElementData(const nlohmann::json_abi_v3_12_0::json &elementJson)
     else
         std::cout << (elementJson.contains("data") ? "[NOTICE] Element did not contain any data\n" : "[WARNING] Element data was not an object\n");
 
-    return std::any{};
+    return std::monostate{};
 }
 
 // Gathers data from an element JSON object, which should contain a type string and data array, returns a ProjectElementData struct

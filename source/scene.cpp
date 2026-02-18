@@ -33,7 +33,7 @@ void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
             int screenW = rl::GetScreenWidth();
             int screenH = rl::GetScreenHeight();
             float screenAspect = (float)screenW / screenH;
-            float targetAspect = (float)world->logicalResolution.x / world->logicalResolution.y;
+            float targetAspect = (float)world->window.logical_resolution.x / world->window.logical_resolution.y;
 
             int drawWidth, drawHeight;
             int offsetX, offsetY;
