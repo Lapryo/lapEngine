@@ -25,6 +25,9 @@ bool FlappyBird::FBApp::Init()
     world.LoadSettings("assets/settings.json");
     world.LoadWindow();
 
+    Project project = world.GetProject();
+    world.SetScene(project.scenes[project.main_scene_index]);
+
     // Anything else you may want to do is recommended to be done between these two sections of initialization
 
     // This is a good spot to register logic for any objects you may want

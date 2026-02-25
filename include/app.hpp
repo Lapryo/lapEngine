@@ -2,7 +2,6 @@
 #define APP_HPP
 
 #include <unordered_map>
-#include "new_project.hpp"
 #include "world.hpp"
 
 namespace lapCore

@@ -7,7 +7,6 @@ using namespace lapCore;
 
 void World::SetScene(ProjectSceneData &scene_data)
 {
-    // TODO: Implement scene reset to default
     main_scene.Clear();
 
     main_scene = Scene(this, scene_data.name);
@@ -90,8 +89,6 @@ void World::LoadWindow()
     rl::InitWindow(window.resolution.x, window.resolution.y, window.title.c_str());
     ResetWindowProperties();
     window.target = rl::LoadRenderTexture(window.logical_resolution.x, window.logical_resolution.y);
-
-    SetScene(project.scenes[project.main_scene_index]);
 }
 
 void World::ResetWindowProperties()

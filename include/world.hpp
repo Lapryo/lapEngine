@@ -1,7 +1,7 @@
 #ifndef WORLD_HPP
 #define WORLD_HPP
 
-#include "new_project.hpp"
+#include "project.hpp"
 #include "resource_manager.hpp"
 #include "scene.hpp"
 
