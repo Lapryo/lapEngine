@@ -39,6 +39,7 @@ with open("bin/" + project_name + "_CMakeLists.txt", "w") as f:
     f.write("# Include directories\n")
     f.write("target_include_directories(" + project_name + " PRIVATE \n")
     f.write("\t\"${CMAKE_CURRENT_SOURCE_DIR}/include\" # Edit game include path as needed\n")
+    f.write("\t# (NOTE) YOU NEED TO ADD A PATH HERE TO POINT TO THE LAPENGINE INCLUDE DIRECTORY\n")
     f.write(")\n\n")
     f.write("# Library directories and linking\n")
     f.write("target_link_directories(" + project_name + " PRIVATE \n")

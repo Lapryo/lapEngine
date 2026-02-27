@@ -17,3 +17,4 @@ target_include_directories(lapEngine PRIVATE
 )
 
 add_subdirectory(examples/flappy_bird)
+add_subdirectory(examples/blank_window)

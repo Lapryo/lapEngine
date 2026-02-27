@@ -8,16 +8,6 @@
 
 using namespace lapCore;
 
-// EXAMPLE PROJECT DIRECTORY
-// assets/project/
-//      assets/
-//      scenes/
-//          main/
-//              objects/
-//              systems/
-//              main.json
-//      prefabs/
-
 rl::Color GetColorData(const nlohmann::json_abi_v3_12_0::json &dataJson, const std::string &key)
 {
     if (dataJson.contains(key) && dataJson[key].is_array() && dataJson[key].size() == 4)
@@ -840,9 +830,9 @@ size_t GetMainScene(const nlohmann::json_abi_v3_12_0::json &projectJson)
 }
 
 // Unpacks a project file from a JSON file path into a project object, returns the Project struct
-Project lapCore::UnpackProject(const std::string projectFilePath)
+Project lapCore::UnpackProject(const std::string projectJsonString)
 {
-    nlohmann::json projectJson = ReadFileToJsonObject(projectFilePath); // Parse the file into a JSON object
+    nlohmann::json projectJson = nlohmann::json::parse(projectJsonString); // Parse the JSON string into a JSON object
     std::string projectName = projectJson.value("name", "Unnamed Project");
     std::cout << "[PROJECT] Unpacking project: " << projectName << '\n';
 

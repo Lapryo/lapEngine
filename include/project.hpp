@@ -78,7 +78,9 @@ namespace lapCore
         std::vector<ProjectSceneData> scenes;
         std::vector<ProjectObjectData> prefabs;
 
-        std::string Pack() const;
+        // TODO: make these functions
+        std::string PackAsString() const;
+        void PackAsFiles(const std::string &folderPath) const;
     };
     
     Project UnpackProject(std::string projectJsonString);

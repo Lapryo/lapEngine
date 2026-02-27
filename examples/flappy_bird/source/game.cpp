@@ -52,7 +52,7 @@ int main()
 {
     // Our actual main function, where we create the project and run the application
 
-    Project fbProject = UnpackProject("assets/project/project.json"); /* Remember earlier? We are going to read a file into a string and unpack it here
+    Project fbProject = UnpackProject(ReadFileToString("assets/project/project.json")); /* Remember earlier? We are going to read a file into a string and unpack it here
                                                                                            You must also do the same that you did with the settings file to the project file */
     // lapEngine contains many useful functions like this to just make development easier so you can focus on creating rather than boilerplate code
     FlappyBird::FBApp app(fbProject); // Create the application with the project

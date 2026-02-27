@@ -46,8 +46,10 @@ namespace lapCore
         void Update(float deltaTime, rl::RenderTexture2D &target);
 
         template <typename SystemType, typename... SystemArgs>
-        void AddSystem(unsigned int order, SystemArgs &&...args)
+        void AddSystem(int order, SystemArgs &&...args)
         {
+            if (order < 0) order = systems.size() + 1;
+
             auto sys = std::make_unique<SystemType>(this, order, std::forward<SystemArgs>(args)...);
             if constexpr (requires(SystemType &t, entt::registry &r) { t.Connect(r); })
                 sys->Connect(objects);

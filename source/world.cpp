@@ -28,8 +28,21 @@ void World::SetScene(ProjectSceneData &scene_data)
 
     for (auto &system : scene_data.systems)
     {
+        std::cout << system.type << ' ' << system.order << '\n';
+
         if (system.type == "render")
             main_scene.AddSystem<RenderSystem>(system.order);
+    }
+
+    // cool thing to ensure there is a render system in the scene cause if not, the window wouldn't update at all and buffer the whole time
+    if (rl::IsWindowReady())
+    {
+        std::cout << "window is ready\n";
+        if (main_scene.GetSystem<RenderSystem>() == nullptr)
+        {
+            std::cout << "render system does not exist in the scene, adding it now\n";
+            main_scene.AddSystem<RenderSystem>(-1);
+        }
     }
 }
 
