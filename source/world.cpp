@@ -2,6 +2,10 @@
 #include "eutil.hpp"
 
 #include "systems/render_sys.hpp"
+#include "systems/gui_sys.hpp"
+#include "systems/physics_sys.hpp"
+#include "systems/script_sys.hpp"
+#include "systems/input_sys.hpp"
 
 using namespace lapCore;
 
@@ -15,7 +19,6 @@ void World::SetScene(ProjectSceneData &scene_data)
         Object object = main_scene.AddObject(instance.name, instance.parent, instance.child_index);
 
         for (auto &element : instance.elements)
-        {
             // AI-generated code
             std::visit([&](auto&& data)
             {
@@ -23,27 +26,26 @@ void World::SetScene(ProjectSceneData &scene_data)
                 if constexpr (!std::is_same_v<T, std::monostate>)
                     main_scene.AddElement<T>(main_scene.objects, object, data);
             }, element.data);
-        }
     }
 
     for (auto &system : scene_data.systems)
-    {
-        std::cout << system.type << ' ' << system.order << '\n';
-
         if (system.type == "render")
             main_scene.AddSystem<RenderSystem>(system.order);
-    }
+        else if (system.type == "physics")
+            main_scene.AddSystem<PhysicsSystem>(system.order);
+        else if (system.type == "script")
+            main_scene.AddSystem<ScriptSystem>(system.order);
+        else if (system.type == "gui")
+            main_scene.AddSystem<GUISystem>(system.order);
+        else if (system.type == "input")
+            main_scene.AddSystem<InputSystem>(system.order);
+        else
+            std::cout << "[WARNING] Unknown system type: " << system.type << '\n';
 
     // cool thing to ensure there is a render system in the scene cause if not, the window wouldn't update at all and buffer the whole time
     if (rl::IsWindowReady())
-    {
-        std::cout << "window is ready\n";
         if (main_scene.GetSystem<RenderSystem>() == nullptr)
-        {
-            std::cout << "render system does not exist in the scene, adding it now\n";
             main_scene.AddSystem<RenderSystem>(-1);
-        }
-    }
 }
 
 WindowProperties LoadWindowProperties(const nlohmann::json_abi_v3_12_0::json &windowJson)

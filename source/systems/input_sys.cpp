@@ -68,17 +68,20 @@ void InputSystem::Update(float deltaTime, entt::registry &registry)
         {
             case InputType::KEYBOARD:
             {
-                HandleKeyboardInput(inputPair.second, inputPair.first.code);
+                for (int code : inputPair.first.codes)
+                    HandleKeyboardInput(inputPair.second, code);
                 break;
             }
             case InputType::MOUSE:
             {
-                HandleMouseInput(inputPair.second, inputPair.first.code);
+                for (int code : inputPair.first.codes)
+                    HandleMouseInput(inputPair.second, code);
                 break;
             }
             case InputType::GAMEPAD:
             {
-                HandleGamepadInput(inputPair.second, inputPair.first.controlType, inputPair.first.code);
+                for (int code : inputPair.first.codes)
+                    HandleGamepadInput(inputPair.second, inputPair.first.controlType, code);
                 break;
             }
         }

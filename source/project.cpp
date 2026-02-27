@@ -57,13 +57,13 @@ Renderable GetRenderableData(const nlohmann::json_abi_v3_12_0::json &dataJson)
     return renderable;
 }
 
-rl::Vector2 GetVector2Data(const nlohmann::json_abi_v3_12_0::json &dataJson, const std::string &key, unsigned int offset = 0)
+rl::Vector2 GetVector2Data(const nlohmann::json_abi_v3_12_0::json &dataJson, const std::string &key)
 {
     if (dataJson.contains(key) && dataJson[key].is_array() && dataJson[key].size() == 2)
     {
         return (rl::Vector2){
-            dataJson[key].at(0 + offset).get<float>(),
-            dataJson[key].at(1 + offset).get<float>()};
+            dataJson[key].at(0).get<float>(),
+            dataJson[key].at(1).get<float>()};
     }
     else
         return {0, 0};
@@ -73,10 +73,10 @@ FrameVector GetFrameVectorData(const nlohmann::json_abi_v3_12_0::json &dataJson,
 {
     FrameVector frameVector;
 
-    if (dataJson.contains(key) && dataJson[key].is_array() && dataJson[key].size() == 4)
+    if (dataJson.contains(key) && dataJson[key].is_object())
     {
-        frameVector.scale = GetVector2Data(dataJson, key, 0);
-        frameVector.offset = GetVector2Data(dataJson, key, 2);
+        frameVector.scale = GetVector2Data(dataJson[key], "scale");
+        frameVector.offset = GetVector2Data(dataJson[key], "offset");
     }
     else
         frameVector = FrameVector({0,0}, {0,0});
@@ -110,15 +110,8 @@ Origin2D GetOrigin2DData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 {
     Origin2D origin2D;
 
-    if (dataJson.contains("origin-2d") && dataJson["origin-2d"].is_object())
-    {
-        const auto& origin2DProps = dataJson["origin-2d"];
-
-        origin2D.position = GetVector2Data(origin2DProps, "position");
-        origin2D.scale = GetVector2Data(origin2DProps, "scale");
-    }
-    else
-        origin2D = Origin2D{ {0,0}, {1,1} };
+    origin2D.position = GetVector2Data(dataJson, "position");
+    origin2D.scale = GetVector2Data(dataJson, "scale");
 
     return origin2D;
 }
@@ -127,15 +120,8 @@ Physics2D GetPhysics2DData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 {
     Physics2D physics2D;
 
-    if (dataJson.contains("physics-2d") && dataJson["physics-2d"].is_object())
-    {
-        const auto& physics2DProps = dataJson["physics-2d"];
-
-        physics2D.velocity = GetVector2Data(physics2DProps, "velocity");
-        physics2D.gravity = GetVector2Data(physics2DProps, "gravity");
-    }
-    else
-        physics2D = Physics2D{ {0,0}, {0,0} };
+    physics2D.velocity = GetVector2Data(dataJson, "velocity");
+    physics2D.gravity = GetVector2Data(dataJson, "gravity");
 
     return physics2D;
 }
@@ -347,23 +333,16 @@ Cam2D GetCam2DData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 {
     Cam2D cam2D;
 
-    if (dataJson.contains("cam-2d") && dataJson["cam-2d"].is_object())
-    {
-        const auto& cam2DProps = dataJson["cam-2d"];
-
-        cam2D.camera.offset = GetVector2Data(cam2DProps, "offset");
-        cam2D.camera.target = GetVector2Data(cam2DProps, "target");
-        cam2D.camera.rotation = cam2DProps.value("rotation", 0.0f);
-        cam2D.camera.zoom = cam2DProps.value("zoom", 1.0f);
-        
-        if (cam2DProps.contains("exclude") && cam2DProps["exclude"].is_array())
-            for (const auto& entityJson : cam2DProps["exclude"])
-                cam2D.exclude.push_back(entityJson.get<std::string>());
-        else
-            cam2D.exclude = {};
-    }
+    cam2D.camera.offset = GetVector2Data(dataJson, "offset");
+    cam2D.camera.target = GetVector2Data(dataJson, "target");
+    cam2D.camera.rotation = dataJson.value("rotation", 0.0f);
+    cam2D.camera.zoom = dataJson.value("zoom", 1.0f);
+    
+    if (dataJson.contains("exclude") && dataJson["exclude"].is_array())
+        for (const auto& entityJson : dataJson["exclude"])
+            cam2D.exclude.push_back(entityJson.get<std::string>());
     else
-        cam2D = Cam2D{ {{0,0}, {0,0}, 0.0f, 1.0f}, {} };
+        cam2D.exclude = {};
 
     return cam2D;
 }
@@ -372,18 +351,18 @@ Script GetScriptData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 {
     Script script;
 
-    if (dataJson.contains("script") && dataJson["script"].is_object())
+    if (dataJson.contains("functions") && dataJson["functions"].is_object())
     {
-        const auto& scriptProps = dataJson["script"];
+        const auto& scriptProps = dataJson["functions"];
 
-        script.onCreateFunction = scriptProps.value("create-function", "");
-        script.onUpdateFunction = scriptProps.value("update-function", "");
-        script.onDestroyFunction = scriptProps.value("destroy-function", "");
-
-        script.active = scriptProps.value("active", true);
+        script.onCreateFunction = scriptProps.value("create", "");
+        script.onUpdateFunction = scriptProps.value("update", "");
+        script.onDestroyFunction = scriptProps.value("destroy", "");
     }
     else
         script = Script{ "", "", "" };
+
+    script.active = dataJson.value("active", true);
 
     return script;
 }

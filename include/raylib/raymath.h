@@ -238,6 +238,8 @@ RMAPI int FloatEquals(float x, float y)
 // Module Functions Definition - Vector2 math
 //----------------------------------------------------------------------------------
 
+using namespace rl;
+
 // Vector with components value 0.0f
 RMAPI Vector2 Vector2Zero(void)
 {

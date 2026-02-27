@@ -24,7 +24,7 @@ public:
     {
         ControlType controlType;
         InputType inputType;
-        int code;
+        std::vector<int> codes;
     };
 
     struct InputEntry

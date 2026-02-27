@@ -39,6 +39,14 @@ namespace lapCore
         BOTTOM
     };
 
+    enum class Direction2D
+    {
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT
+    };
+
     struct Alignment
     {
         HorizontalAlignment horizontal;

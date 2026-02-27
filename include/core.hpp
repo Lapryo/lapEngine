@@ -8,6 +8,7 @@
 
 #include "raylib/raylib_namespace.h"
 #include "raylib/rlgl_namespace.h"
+#include "raylib/raymath_namespace.h"
 
 #include "systems/render_sys.hpp"
 #include "systems/physics_sys.hpp"
