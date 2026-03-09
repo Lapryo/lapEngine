@@ -29,13 +29,17 @@ public:
 
     struct InputEntry
     {
+        InputKey key;
         float deadzone;
         bool active;
         bool pressed;
         std::string event;
     };
 
-    std::map<InputKey, InputEntry> inputs;
+    std::map<std::string, InputEntry> actions;
+
+    void RegisterAction(const std::string &actionName, const InputEntry &entry);
+    void RegisterAction(const std::string &actionName, const std::string &event, std::vector<int> codes, InputType inputType = InputType::KEYBOARD, ControlType controlType = ControlType::BUTTON, float deadzone = 0.0f, bool active = true);
 
     InputSystem(Scene *scene, unsigned int order) : System(order, scene, false) {}
     void Update(float deltaTime, entt::registry &registry) override;
