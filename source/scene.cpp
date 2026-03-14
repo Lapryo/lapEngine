@@ -83,7 +83,10 @@ Object Scene::AddObject(const std::string &name, const std::string &parent, int 
     // Create parent info
     ObjectInfo parentInfo;
     parentInfo.name = parent;
-    parentInfo.object = objectMap[parent].info.object;
+    if (parent == "")
+        parentInfo.object = entt::null;
+    else
+        parentInfo.object = objectMap[parent].info.object;
 
     // Create the object entry for the map
     ObjectEntry entry;
@@ -94,22 +97,30 @@ Object Scene::AddObject(const std::string &name, const std::string &parent, int 
     objectMap[name] = entry;
 
     if (childIndex == -1)
-        objectMap[parent].children.push_back(objInfo);
+    {
+        if (parent != "")
+        {
+            objectMap[parent].children.push_back(objInfo);
+        }
+    }
     else
     {
-        auto &children = objectMap[parent].children;
-        if (children.size() < (size_t)(childIndex + 1))
+        if (parent != "")
         {
-            size_t old = children.size();
-            children.resize(childIndex + 1);
-            for (size_t k = old; k < children.size(); ++k)
+            auto &children = objectMap[parent].children;
+            if (children.size() < (size_t)(childIndex + 1))
             {
-                children[k].name = "";
-                children[k].object = entt::null;
+                size_t old = children.size();
+                children.resize(childIndex + 1);
+                for (size_t k = old; k < children.size(); ++k)
+                {
+                    children[k].name = "";
+                    children[k].object = entt::null;
+                }
             }
-        }
 
-        children[childIndex] = objInfo;
+            children[childIndex] = objInfo;
+        }
     }
 
     return object;

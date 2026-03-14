@@ -39,7 +39,7 @@ public:
     std::map<std::string, InputEntry> actions;
 
     void RegisterAction(const std::string &actionName, const InputEntry &entry);
-    void RegisterAction(const std::string &actionName, const std::string &event, std::vector<int> codes, InputType inputType = InputType::KEYBOARD, ControlType controlType = ControlType::BUTTON, float deadzone = 0.0f, bool active = true);
+    void RegisterAction(const std::string &actionName, const std::string &event, std::vector<int> codes, InputType inputType, ControlType controlType, float deadzone = 0.0f, bool active = true);
 
     InputSystem(Scene *scene, unsigned int order) : System(order, scene, false) {}
     void Update(float deltaTime, entt::registry &registry) override;

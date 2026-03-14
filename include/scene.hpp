@@ -55,7 +55,7 @@ namespace lapCore
                 sys->Connect(objects);
 
             if (order > systems.size())
-                systems.resize(order + 1);
+                systems.resize(order);
 
             systems[order] = std::move(sys);
         }

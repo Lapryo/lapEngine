@@ -256,19 +256,12 @@ TextLabel GetTextLabelData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 {
     TextLabel textLabel;
 
-    if (dataJson.contains("text-label") && dataJson["text-label"].is_object())
-    {
-        const auto& textLabelProps = dataJson["text-label"];
-
-        textLabel.frame = GetFrameData(textLabelProps);
-        textLabel.fontSize = textLabelProps.value("font-size", 16);
-        textLabel.textAlignment = GetAlignmentData(textLabelProps);
-        textLabel.textBounds = GetFrameVectorData(textLabelProps, "text-bounds");
-        textLabel.textPadding = GetPaddingData(textLabelProps);
-        textLabel.text = textLabelProps.value("text", "");
-    }
-    else
-        textLabel = TextLabel(Frame(Renderable(0, true, true, rl::RayWhite, false), UIOrigin(FrameVector({0, 0}, {0, 0}), FrameVector({0, 0}, {0, 0}))), "", 0.0f, Alignment(HorizontalAlignment::LEFT, VerticalAlignment::TOP), FrameVector({0,0}, {0,0}), Padding(0.0f, 0.0f, 0.0f, 0.0f));
+    textLabel.frame = GetFrameData(dataJson);
+    textLabel.fontSize = dataJson.value("font-size", 16);
+    textLabel.textAlignment = GetAlignmentData(dataJson);
+    textLabel.textBounds = GetFrameVectorData(dataJson, "text-bounds");
+    textLabel.textPadding = GetPaddingData(dataJson);
+    textLabel.text = dataJson.value("text", "");
 
     return textLabel;
 }
