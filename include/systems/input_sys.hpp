@@ -27,22 +27,31 @@ public:
         std::vector<int> codes;
     };
 
+    struct InputDeadzone
+    {
+        float lower;
+        float upper;
+    };
+
     struct InputEntry
     {
         InputKey key;
-        float deadzone;
+        InputDeadzone deadzone;
+        float value;
         bool active;
         bool pressed;
+        bool sustain;
         std::string event;
     };
 
     std::map<std::string, InputEntry> actions;
 
     void RegisterAction(const std::string &actionName, const InputEntry &entry);
-    void RegisterAction(const std::string &actionName, const std::string &event, std::vector<int> codes, InputType inputType, ControlType controlType, float deadzone = 0.0f, bool active = true);
+    void RegisterAction(const std::string &actionName, const std::string &event, std::vector<int> codes, bool sustain, InputType inputType, ControlType controlType, InputDeadzone deadzone = {0.0f, 0.0f}, bool active = true);
 
     InputSystem(Scene *scene, unsigned int order) : System(order, scene, false) {}
     void Update(float deltaTime, entt::registry &registry) override;
+    std::string GetName() const override { return "InputSystem"; }
 };
 
 #endif

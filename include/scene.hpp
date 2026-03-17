@@ -41,21 +41,16 @@ namespace lapCore
         entt::registry prefabs;
         std::unordered_map<std::string, ObjectEntry> prefabMap;
 
-        std::vector<std::unique_ptr<System>> systems;
+        std::map<int, std::unique_ptr<System>> systems;
 
         void Update(float deltaTime, rl::RenderTexture2D &target);
 
         template <typename SystemType, typename... SystemArgs>
         void AddSystem(int order, SystemArgs &&...args)
         {
-            if (order < 0) order = systems.size() + 1;
-
             auto sys = std::make_unique<SystemType>(this, order, std::forward<SystemArgs>(args)...);
             if constexpr (requires(SystemType &t, entt::registry &r) { t.Connect(r); })
                 sys->Connect(objects);
-
-            if (order > systems.size())
-                systems.resize(order);
 
             systems[order] = std::move(sys);
         }
@@ -63,7 +58,7 @@ namespace lapCore
         template <typename T>
         T *GetSystem() const
         {
-            for (const auto &systemPtr : systems)
+            for (const auto &[order, systemPtr] : systems)
             {
                 if (T *foundSystem = dynamic_cast<T *>(systemPtr.get()))
                 {

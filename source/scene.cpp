@@ -3,10 +3,9 @@
 
 using namespace lapCore;
 
-// figure this out later
 void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
 {
-    for (auto &system : systems)
+    for (auto &[order, system] : systems)
     {
         if (!system || !system->active)
             continue;

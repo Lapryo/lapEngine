@@ -116,12 +116,106 @@ Origin2D GetOrigin2DData(const nlohmann::json_abi_v3_12_0::json &dataJson)
     return origin2D;
 }
 
+b2SurfaceMaterial GetMaterialData(const nlohmann::json_abi_v3_12_0::json &dataJson)
+{
+    b2SurfaceMaterial material = b2DefaultSurfaceMaterial();
+
+    if (dataJson.contains("material") && dataJson["material"].is_object())
+    {
+        const auto& materialProps = dataJson["material"];
+
+        material.friction = materialProps.value("friction", 0.f);
+        material.restitution = materialProps.value("restitution", 0.f);
+        material.rollingResistance = materialProps.value("rolling-resistance", 0.f);
+        material.tangentSpeed = materialProps.value("tangent-speed", 0.f);
+    }
+
+    return material;
+}
+
+b2Filter GetFilterData(const nlohmann::json &dataJson)
+{
+    b2Filter filter = b2DefaultFilter();
+
+    if (dataJson.contains("filter") && dataJson["filter"].is_object())
+    {
+        const auto& filterProps = dataJson["filter"];
+
+        filter.groupIndex = filterProps.value("group-index", 0);
+        filter.categoryBits = filterProps["categories"].get<uint64_t>();
+        filter.maskBits = filterProps["mask-bits"].get<uint64_t>();
+    }
+
+    return filter;
+}
+
+b2ShapeDef GetShapeDefinitionData(const nlohmann::json &dataJson)
+{
+    b2ShapeDef shapeDef = b2DefaultShapeDef();
+
+    if (dataJson.contains("shape") && dataJson["shape"].is_object())
+    {
+        const auto& shapeProps = dataJson["shape"];
+
+        shapeDef.density = shapeProps.value("density", 1.f);
+        shapeDef.material = GetMaterialData(shapeProps);
+        shapeDef.filter = GetFilterData(shapeProps);
+        shapeDef.isSensor = shapeProps.value("is-sensor", false);
+        shapeDef.enableContactEvents = shapeProps.value("enable-contact-events", false);
+        shapeDef.enableHitEvents = shapeProps.value("enable-hit-events", false);
+        shapeDef.enablePreSolveEvents = shapeProps.value("enable-presolve-events", false);
+        shapeDef.enableSensorEvents = shapeProps.value("enable-sensor-events", false);
+        shapeDef.invokeContactCreation = shapeProps.value("invoke-contact-creation", false);
+        shapeDef.updateBodyMass = shapeProps.value("update-body-mass", true);
+    }
+
+    return shapeDef;
+}
+
+b2BodyType GetBodyTypeData(const std::string &value)
+{
+    if (value == "dynamic")
+        return b2_dynamicBody;
+    else if (value == "static")
+        return b2_staticBody;
+    else if (value == "kinematic")
+        return b2_kinematicBody;
+    else
+    {
+        std::cout << "ERR: invalid Physics2D b2BodyType, setting to static default\n";
+        return b2_staticBody;
+    }
+}
+
+b2BodyDef GetBodyDefinitionData(const nlohmann::json &dataJson)
+{
+    b2BodyDef bodyDef = b2DefaultBodyDef();
+
+    if (dataJson.contains("body") && dataJson["body"].is_object())
+    {
+        const auto& bodyProps = dataJson["body"];
+
+        bodyDef.type = GetBodyTypeData(bodyProps.value("type", ""));
+    }
+
+    return bodyDef;
+}
+
 Physics2D GetPhysics2DData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 {
     Physics2D physics2D;
 
-    physics2D.velocity = GetVector2Data(dataJson, "velocity");
     physics2D.gravity = GetVector2Data(dataJson, "gravity");
+    physics2D.collidable = dataJson.value("collidable", false);
+    physics2D.static_friction = dataJson.value("static-friction", 1.f);
+
+    // bool static
+    // float friction [0, 1]
+    // bool collidable
+    // vec2 gravity
+    // material
+
+    // should i make a seperate element for shapeDef and one for bodyDef?
 
     return physics2D;
 }

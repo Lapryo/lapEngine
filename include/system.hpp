@@ -14,6 +14,7 @@ namespace lapCore
         System(unsigned int order, Scene *scene, bool isDrawing) : order(order), scene(scene), drawing(isDrawing) {}
         virtual ~System() = default;
         virtual void Update(float deltaTime, entt::registry &reg) = 0;
+        virtual std::string GetName() const = 0;
 
         unsigned int order;
         bool active = true;

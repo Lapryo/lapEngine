@@ -38,12 +38,21 @@ namespace lapCore
 
     struct World
     {
-        World(Project project) : project(project) {}
+        World(Project project) : project(project) { RegisterElements(); }
 
         Scene main_scene;
 
         WindowProperties window;
         ResourceManager resources;
+
+        // for debugging
+        std::unordered_map<entt::id_type, std::string> elementLookup;
+        void RegisterElements();
+        template <typename T>
+        void RegisterElement(const std::string &name)
+        {
+            elementLookup[entt::type_id<T>().hash()] = name;
+        }
 
         void LoadSettings(const std::string &settingsFilePath);
 

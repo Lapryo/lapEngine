@@ -36,6 +36,8 @@ public:
     void RebuildRenderList(entt::registry &registry);
 
     bool needsResort = true;
+
+    std::string GetName() const override { return "RenderSystem"; }
 };
 
 #endif

@@ -3,6 +3,7 @@
 
 #include "eutil.hpp"
 #include "event.hpp"
+#include "box2d/box2d.h"
 
 #include <functional>
 #include <any>
@@ -23,6 +24,16 @@ namespace lapCore
     {
         rl::Vector2 velocity;
         rl::Vector2 gravity;
+        rl::Vector2 hitbox;
+
+        float static_friction = 1.f; // 1 = none, 0 = full force
+        bool bounce = false;
+        bool collidable = true;
+
+        b2BodyDef bodyDef;
+        b2ShapeDef shapeDef;
+        b2Polygon polygon;
+        b2BodyId bodyID;
     };
 
     struct Rotation2D

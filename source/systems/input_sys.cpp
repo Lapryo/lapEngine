@@ -11,6 +11,7 @@ bool HandleKeyboardInput(InputSystem::InputEntry &entry, int key)
     {
         if (entry.active)
         {
+            if (!entry.sustain && entry.pressed) return true;
             entry.pressed = true;
             EventRegistry::Fire<>(entry.event);
         }
@@ -27,6 +28,7 @@ bool HandleMouseInput(InputSystem::InputEntry &entry, int button)
     {
         if (entry.active)
         {
+            if (!entry.sustain && entry.pressed) return true;
             entry.pressed = true;
             EventRegistry::Fire<>(entry.event);
         }
@@ -37,27 +39,33 @@ bool HandleMouseInput(InputSystem::InputEntry &entry, int button)
     return entry.pressed;
 }
 
-bool HandleGamepadInput(InputSystem::InputEntry &entry, InputSystem::ControlType controlType, int button)
+bool HandleGamepadInput(InputSystem::InputEntry &entry, InputSystem::ControlType controlType, int button, int gamepad)
 {
     if (controlType == InputSystem::ControlType::AXIS)
     {
-        if (rl::GetGamepadAxisMovement(1, button) > entry.deadzone)
+        if (rl::GetGamepadAxisMovement(gamepad, button) > entry.deadzone.upper || rl::GetGamepadAxisMovement(gamepad, button) < entry.deadzone.lower)
         {
             if (entry.active)
             {
+                if (!entry.sustain && entry.pressed) return true;
                 entry.pressed = true;
+                entry.value = rl::GetGamepadAxisMovement(gamepad, button);
                 EventRegistry::Fire<>(entry.event);
             }
         }
         else
+        {
             entry.pressed = false;
+            entry.value = 0.0f;
+        }
     }
     else
     {
-        if (rl::IsGamepadButtonDown(1, button))
+        if (rl::IsGamepadButtonDown(gamepad, button))
         {
             if (entry.active)
             {
+                if (!entry.sustain && entry.pressed) return true;
                 entry.pressed = true;
                 EventRegistry::Fire<>(entry.event);
             }
@@ -90,7 +98,7 @@ void InputSystem::Update(float deltaTime, entt::registry &registry)
             case InputType::GAMEPAD:
             {
                 for (int key : inputPair.second.key.codes)
-                     if (HandleGamepadInput(inputPair.second, inputPair.second.key.controlType, key)) break;
+                     if (HandleGamepadInput(inputPair.second, inputPair.second.key.controlType, key, 0)) break;
                 break;
             }
         }
@@ -102,12 +110,13 @@ void InputSystem::RegisterAction(const std::string &actionName, const InputEntry
     actions[actionName] = entry;
 }
 
-void InputSystem::RegisterAction(const std::string &actionName, const std::string &event, std::vector<int> codes, InputType inputType, ControlType controlType, float deadzone, bool active)
+void InputSystem::RegisterAction(const std::string &actionName, const std::string &event, std::vector<int> codes, bool sustain, InputType inputType, ControlType controlType, InputDeadzone deadzone, bool active)
 {
     InputEntry entry;
     entry.key.inputType = inputType;
     entry.key.controlType = controlType;
     entry.key.codes = codes;
+    entry.sustain = sustain;
     entry.active = active;
     entry.event = event;
     entry.deadzone = deadzone;
