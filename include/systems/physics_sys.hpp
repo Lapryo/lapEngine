@@ -16,7 +16,7 @@ public:
     }
     void Update(float deltaTime, entt::registry &reg) override;
 
-    b2BodyId Create2DBody(b2BodyDef *bodyDef, b2ShapeDef *shapeDef, b2Polygon *polygon);
+    b2BodyId Create2DBody(b2BodyDef bodyDef, b2ShapeDef shapeDef, b2Polygon polygon);
 
     //float noncontact_precision = 100.f; // higher = more precise
     //float contact_hitbox_precision = 0.1f; // higher = less precise hitboxes than intended (smaller)

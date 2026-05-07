@@ -43,7 +43,7 @@ namespace lapCore
 
         std::map<int, std::unique_ptr<System>> systems;
 
-        void Update(float deltaTime, rl::RenderTexture2D &target);
+        void Update(float deltaTime, RenderTexture2D &target);
 
         template <typename SystemType, typename... SystemArgs>
         void AddSystem(int order, SystemArgs &&...args)

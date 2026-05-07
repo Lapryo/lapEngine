@@ -1,7 +1,8 @@
 #ifndef EUTIL_HPP
 #define EUTIL_HPP
 
-#include "raylib/raylib_namespace.h"
+#include <raylib.h>
+
 #include "json.hpp"
 
 #include <vector>
@@ -11,17 +12,17 @@ namespace lapCore
 {
     struct Renderable
     {
-        rl::Rectangle space;
+        Rectangle space;
 
         unsigned int zlayer;
         bool isScreenSpace;
         bool visible = true;
-        rl::Color tint;
+        Color tint;
 
         bool usesUIListVisiblity;
 
         Renderable();
-        Renderable(unsigned int zlayer, bool isScreenSpace, bool visible, rl::Color tint, bool usesUIListVisiblity)
+        Renderable(unsigned int zlayer, bool isScreenSpace, bool visible, Color tint, bool usesUIListVisiblity)
             : zlayer(zlayer), isScreenSpace(isScreenSpace), visible(visible), tint(tint), usesUIListVisiblity(usesUIListVisiblity) {}
     };
 
@@ -65,11 +66,11 @@ namespace lapCore
 
     struct FrameVector
     {
-        rl::Vector2 scale;
-        rl::Vector2 offset;
+        Vector2 scale;
+        Vector2 offset;
 
         FrameVector();
-        FrameVector(rl::Vector2 scale, rl::Vector2 offset)
+        FrameVector(Vector2 scale, Vector2 offset)
             : scale(scale), offset(offset) {}
     };
 
@@ -104,10 +105,10 @@ namespace lapCore
 
     nlohmann::json_abi_v3_12_0::json ReadFileToJsonObject(const std::string &filePath);
 
-    rl::Vector2 GetMouseInViewportSpace(int logicalWidth, int logicalHeight);
+    Vector2 GetMouseInViewportSpace(int logicalWidth, int logicalHeight);
 
-    rl::Rectangle UIOriginToRect(UIOrigin origin, int logicalWidth, int logicalHeight);
-    rl::Vector2 FrameVectorToVec2(lapCore::FrameVector vector, int logicalWidth, int logicalHeight);
+    Rectangle UIOriginToRect(UIOrigin origin, int logicalWidth, int logicalHeight);
+    Vector2 FrameVectorToVec2(lapCore::FrameVector vector, int logicalWidth, int logicalHeight);
 }
 
 #endif

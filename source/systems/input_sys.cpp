@@ -7,7 +7,7 @@ using namespace lapCore;
 
 bool HandleKeyboardInput(InputSystem::InputEntry &entry, int key)
 {
-    if (rl::IsKeyDown(key))
+    if (IsKeyDown(key))
     {
         if (entry.active)
         {
@@ -24,7 +24,7 @@ bool HandleKeyboardInput(InputSystem::InputEntry &entry, int key)
 
 bool HandleMouseInput(InputSystem::InputEntry &entry, int button)
 {
-    if (rl::IsMouseButtonDown(button))
+    if (IsMouseButtonDown(button))
     {
         if (entry.active)
         {
@@ -43,13 +43,13 @@ bool HandleGamepadInput(InputSystem::InputEntry &entry, InputSystem::ControlType
 {
     if (controlType == InputSystem::ControlType::AXIS)
     {
-        if (rl::GetGamepadAxisMovement(gamepad, button) > entry.deadzone.upper || rl::GetGamepadAxisMovement(gamepad, button) < entry.deadzone.lower)
+        if (GetGamepadAxisMovement(gamepad, button) > entry.deadzone.upper || GetGamepadAxisMovement(gamepad, button) < entry.deadzone.lower)
         {
             if (entry.active)
             {
                 if (!entry.sustain && entry.pressed) return true;
                 entry.pressed = true;
-                entry.value = rl::GetGamepadAxisMovement(gamepad, button);
+                entry.value = GetGamepadAxisMovement(gamepad, button);
                 EventRegistry::Fire<>(entry.event);
             }
         }
@@ -61,7 +61,7 @@ bool HandleGamepadInput(InputSystem::InputEntry &entry, InputSystem::ControlType
     }
     else
     {
-        if (rl::IsGamepadButtonDown(gamepad, button))
+        if (IsGamepadButtonDown(gamepad, button))
         {
             if (entry.active)
             {

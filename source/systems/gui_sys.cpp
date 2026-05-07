@@ -17,9 +17,9 @@ void ArrangeUIListElements(Scene *scene, entt::registry &registry)
     {
         auto children = scene->GetChildren(entity);
 
-        rl::Vector2 frameSize = FrameVectorToVec2(frame.origin.size, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
-        rl::Vector2 scrollSize = FrameVectorToVec2(list.scrollSize, frameSize.x, frameSize.y);
-        rl::Vector2 displaySize = FrameVectorToVec2(list.displaySize, frameSize.x, frameSize.y);
+        Vector2 frameSize = FrameVectorToVec2(frame.origin.size, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
+        Vector2 scrollSize = FrameVectorToVec2(list.scrollSize, frameSize.x, frameSize.y);
+        Vector2 displaySize = FrameVectorToVec2(list.displaySize, frameSize.x, frameSize.y);
         float step = (list.direction == Axis2D::VERTICAL) ? displaySize.y : displaySize.x;
 
         for (size_t i = 0; i < children.size(); i++)
@@ -67,26 +67,26 @@ void HandleButtonInputs(Scene *scene, entt::registry &registry)
         if (!button || !button->active)
             continue;
 
-        rl::Rectangle rect = UIOriginToRect(button->bounds, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
-        bool hovered = rl::CheckCollisionPointRec(GetMouseInViewportSpace(scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y), rect);
+        Rectangle rect = UIOriginToRect(button->bounds, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
+        bool hovered = CheckCollisionPointRec(GetMouseInViewportSpace(scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y), rect);
 
         if (hovered)
         {
-            if (rl::IsMouseButtonPressed(rl::MOUSE_LEFT_BUTTON))
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             {
                 auto it = button->events.events.find("left-click");
                 if (it != button->events.events.end())
                     EventRegistry::Fire<>(it->second);
             }
 
-            if (rl::IsMouseButtonPressed(rl::MOUSE_RIGHT_BUTTON))
+            if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
             {
                 auto it = button->events.events.find("right-click");
                 if (it != button->events.events.end())
                     EventRegistry::Fire<>(it->second);
             }
 
-            if (rl::IsMouseButtonPressed(rl::MOUSE_MIDDLE_BUTTON))
+            if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON))
             {
                 auto it = button->events.events.find("middle-click");
                 if (it != button->events.events.end())
@@ -122,18 +122,18 @@ void HandleButtonInputs(Scene *scene, entt::registry &registry)
 
 void HandleUIListScroll(float deltaTime, Scene *scene, entt::registry &registry)
 {
-    float wheel = rl::GetMouseWheelMove();
+    float wheel = GetMouseWheelMove();
     auto uilistView = registry.view<UIList, Frame>();
     for (auto [entity, list, frame] : uilistView.each())
     {
-        if (wheel != 0 && rl::CheckCollisionPointRec(GetMouseInViewportSpace(scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y), UIOriginToRect(frame.origin, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y)))
+        if (wheel != 0 && CheckCollisionPointRec(GetMouseInViewportSpace(scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y), UIOriginToRect(frame.origin, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y)))
         {
             list.scrollOffset -= wheel * list.scrollSpeed * deltaTime * 1000.0f;
             std::cout << list.scrollOffset << std::endl;
 
-            rl::Vector2 frameSize = FrameVectorToVec2(frame.origin.size, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
-            rl::Vector2 scrollSize = FrameVectorToVec2(list.scrollSize, frameSize.x, frameSize.y);
-            rl::Vector2 displaySize = FrameVectorToVec2(list.displaySize, frameSize.x, frameSize.y);
+            Vector2 frameSize = FrameVectorToVec2(frame.origin.size, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
+            Vector2 scrollSize = FrameVectorToVec2(list.scrollSize, frameSize.x, frameSize.y);
+            Vector2 displaySize = FrameVectorToVec2(list.displaySize, frameSize.x, frameSize.y);
 
             list.scrollOffset = std::clamp(list.scrollOffset, 0.0f, (list.direction == Axis2D::VERTICAL) ? scrollSize.y - displaySize.y : scrollSize.x - displaySize.x);
         }

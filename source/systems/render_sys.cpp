@@ -7,13 +7,13 @@ void RenderSystem::Connect(entt::registry &registry)
     // Rebuild when a property changes
     registry.on_update<Sprite>().connect<&RenderSystem::OnRenderableUpdated>(*this);
     registry.on_update<TextLabel>().connect<&RenderSystem::OnRenderableUpdated>(*this);
-    registry.on_update<Image>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_update<lapCore::lapImage>().connect<&RenderSystem::OnRenderableUpdated>(*this);
     registry.on_update<Frame>().connect<&RenderSystem::OnRenderableUpdated>(*this);
 
     // Rebuild when one is added
     registry.on_construct<Sprite>().connect<&RenderSystem::OnRenderableUpdated>(*this);
     registry.on_construct<TextLabel>().connect<&RenderSystem::OnRenderableUpdated>(*this);
-    registry.on_construct<Image>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_construct<lapCore::lapImage>().connect<&RenderSystem::OnRenderableUpdated>(*this);
     registry.on_construct<Frame>().connect<&RenderSystem::OnRenderableUpdated>(*this);
 }
 
@@ -34,10 +34,10 @@ void RenderSystem::RebuildRenderList(entt::registry &registry)
         renderList.push_back({e, s.renderable.zlayer, s.renderable.isScreenSpace, RenderType::Sprite});
     }
 
-    auto imageView = registry.view<Image>();
+    auto imageView = registry.view<lapCore::lapImage>();
     for (auto e : imageView)
     {
-        const auto &s = imageView.get<Image>(e);
+        const auto &s = imageView.get<lapCore::lapImage>(e);
         renderList.push_back({e, s.sprite.renderable.zlayer, s.sprite.renderable.isScreenSpace, RenderType::Image});
     }
 
@@ -82,7 +82,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
     {
         auto *sprite = registry.try_get<Sprite>(obj);
 
-        const rl::Texture2D *texture;
+        const Texture2D *texture;
 
         auto it = scene->world->resources.textures.find(sprite->textureName);
         if (it != scene->world->resources.textures.end())
@@ -97,8 +97,8 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         auto *origin = registry.try_get<Origin2D>(obj);
 
-        rl::Vector2 pos{0.f, 0.f};
-        rl::Vector2 size{(float)texture->width, (float)texture->height};
+        Vector2 pos{0.f, 0.f};
+        Vector2 size{(float)texture->width, (float)texture->height};
         float rotation = 0.f;
 
         auto *rotData = registry.try_get<Rotation2D>(obj);
@@ -114,20 +114,20 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             size.y *= origin->scale.y;
         }
 
-        rl::DrawTexturePro(
+        DrawTexturePro(
             *texture,
             {0.f, 0.f, (float)texture->width, (float)texture->height},
             {pos.x, pos.y, size.x, size.y},
-            (rotData ? rotData->anchor : (rl::Vector2){0.0f, 0.0f}),
+            (rotData ? rotData->anchor : (Vector2){0.0f, 0.0f}),
             rotation,
             sprite->renderable.tint);
     };
 
     auto drawImage = [&](Object obj, const Scene *scene)
     {
-        auto *image = registry.try_get<Image>(obj);
+        auto *image = registry.try_get<lapCore::lapImage>(obj);
 
-        const rl::Texture2D *texture;
+        const Texture2D *texture;
 
         auto it = scene->world->resources.textures.find(image->sprite.textureName);
         if (it != scene->world->resources.textures.end())
@@ -144,7 +144,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         auto *origin = registry.try_get<Origin2D>(obj);
         auto *rotData = registry.try_get<Rotation2D>(obj);
 
-        rl::Vector2 pos{0, 0}, size{(float)texture->width, (float)texture->height};
+        Vector2 pos{0, 0}, size{(float)texture->width, (float)texture->height};
         float rotation = 0.f;
 
         if (rotData)
@@ -169,11 +169,11 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             size.y *= origin->scale.y;
         }
 
-        rl::DrawTexturePro(
+        DrawTexturePro(
             *texture,
             {0.f, 0.f, (float)texture->width, (float)texture->height},
             {pos.x, pos.y, size.x, size.y},
-            (rotData ? rotData->anchor : (rl::Vector2){0.0f, 0.0f}),
+            (rotData ? rotData->anchor : (Vector2){0.0f, 0.0f}),
             rotation,
             image->sprite.renderable.tint);
     };
@@ -184,7 +184,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         if (!frame || !frame->renderable.visible)
             return;
 
-        rl::Rectangle rect = UIOriginToRect(frame->origin, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
+        Rectangle rect = UIOriginToRect(frame->origin, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
 
         if (auto *origin = registry.try_get<Origin2D>(obj))
         {
@@ -194,7 +194,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             rect.height *= origin->scale.y;
         }
 
-        rl::DrawRectangle(rect.x, rect.y, rect.width, rect.height, frame->renderable.tint);
+        DrawRectangle(rect.x, rect.y, rect.width, rect.height, frame->renderable.tint);
     };
 
     auto drawText = [&](Object obj, const Scene *scene)
@@ -209,7 +209,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         y = text->frame.origin.position.scale.y * scene->world->window.logical_resolution.y + text->frame.origin.position.offset.y + text->textPadding.top;
 
         // Handle horizontal alignment
-        float textWidth = rl::MeasureText(text->text.c_str(), text->fontSize);
+        float textWidth = MeasureText(text->text.c_str(), text->fontSize);
         switch (text->textAlignment.horizontal)
         {
         case HorizontalAlignment::LEFT:
@@ -235,7 +235,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             break;
         }
 
-        rl::DrawText(text->text.c_str(), x, y, text->fontSize, text->frame.renderable.tint);
+        DrawText(text->text.c_str(), x, y, text->fontSize, text->frame.renderable.tint);
     };
 
     auto drawEntries = [&](const std::vector<RenderEntry> &entries, bool worldSpace)
@@ -244,7 +244,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         {
             for (auto [camEntity, cam] : registry.view<Cam2D>().each())
             {
-                rl::BeginMode2D(cam.camera);
+                BeginMode2D(cam.camera);
                 for (const auto &entry : entries)
                 {
                     switch (entry.type)
@@ -263,7 +263,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
                         break;
                     }
                 }
-                rl::EndMode2D();
+                EndMode2D();
             }
         }
         else

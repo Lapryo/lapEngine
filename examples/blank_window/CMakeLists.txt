@@ -42,12 +42,14 @@ target_link_directories(blank_window PRIVATE
 if(WIN32)
 	target_link_libraries(blank_window PRIVATE 
 		lapEngine
+		box2d
 		raylib
 		winmm
 	)
 else()
 	target_link_libraries(blank_window PRIVATE 
 		lapEngine
+		box2d
 		raylib
 	)
 endif()

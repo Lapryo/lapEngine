@@ -3,7 +3,7 @@
 
 using namespace lapCore;
 
-void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
+void Scene::Update(float deltaTime, RenderTexture2D &target)
 {
     for (auto &[order, system] : systems)
     {
@@ -16,21 +16,21 @@ void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
 
         if (drawing)
         {
-            rl::BeginDrawing();
-            rl::BeginTextureMode(target);
-            rl::ClearBackground(rl::RayWhite);
+            BeginDrawing();
+            BeginTextureMode(target);
+            ClearBackground(RAYWHITE);
         }
 
         system->Update(deltaTime, objects);
 
         if (drawing)
         {
-            rl::EndTextureMode();
-            rl::ClearBackground(rl::Black);
+            EndTextureMode();
+            ClearBackground(BLACK);
 
             // Now draw render texture to the screen, scaled and letterboxed
-            int screenW = rl::GetScreenWidth();
-            int screenH = rl::GetScreenHeight();
+            int screenW = GetScreenWidth();
+            int screenH = GetScreenHeight();
             float screenAspect = (float)screenW / screenH;
             float targetAspect = (float)world->window.logical_resolution.x / world->window.logical_resolution.y;
 
@@ -57,15 +57,15 @@ void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
             // logicalWindowPos = {(float)offsetX, (float)offsetY};
 
             // Draw the render texture to the screen, scaling it
-            rl::DrawTexturePro(
+            DrawTexturePro(
                 target.texture,
                 {0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height}, // source rect (flip y)
                 {(float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight},    // dest rect
                 {0.0f, 0.0f},                                                             // origin
                 0.0f,                                                                     // rotation
-                rl::White);
+                WHITE);
 
-            rl::EndDrawing();
+            EndDrawing();
         }
     }
 }

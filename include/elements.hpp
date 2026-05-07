@@ -17,19 +17,11 @@ namespace lapCore
 {
     struct Origin2D
     {
-        rl::Vector2 position, scale;
+        Vector2 position, scale;
     };
 
     struct Physics2D
     {
-        rl::Vector2 velocity;
-        rl::Vector2 gravity;
-        rl::Vector2 hitbox;
-
-        float static_friction = 1.f; // 1 = none, 0 = full force
-        bool bounce = false;
-        bool collidable = true;
-
         b2BodyDef bodyDef;
         b2ShapeDef shapeDef;
         b2Polygon polygon;
@@ -38,7 +30,7 @@ namespace lapCore
 
     struct Rotation2D
     {
-        rl::Vector2 anchor;
+        Vector2 anchor;
         float rotation;
     };
 
@@ -84,13 +76,13 @@ namespace lapCore
             : renderable(renderable), textureName(textureName) {}
     };
 
-    struct Image
+    struct lapImage
     {
         Sprite sprite;
         UIOrigin origin;
 
-        Image() {}
-        Image(Sprite sprite, UIOrigin origin)
+        lapImage() {}
+        lapImage(Sprite sprite, UIOrigin origin)
             : sprite(sprite), origin(origin) {}
     };
 
@@ -131,7 +123,7 @@ namespace lapCore
 
     struct Cam2D
     {
-        rl::Camera2D camera;
+        Camera2D camera;
         std::vector<std::string> exclude;
     };
 

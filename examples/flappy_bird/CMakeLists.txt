@@ -18,7 +18,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     )
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     if(WIN32)
-        add_executable(flappy_bird WIN32 # Hide console window
+        add_executable(flappy_bird # WIN32 # Hide console window
             ${GAME_SOURCES}
         )
     else()
@@ -42,12 +42,10 @@ target_link_directories(flappy_bird PRIVATE
 if(WIN32)
     target_link_libraries(flappy_bird PRIVATE 
         lapEngine
-        raylib
         winmm
     )
 else()
     target_link_libraries(flappy_bird PRIVATE 
         lapEngine
-        raylib
     )
 endif()

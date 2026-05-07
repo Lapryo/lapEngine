@@ -69,7 +69,7 @@ void World::SetScene(ProjectSceneData &scene_data)
     std::cout << "got to here. 7\n";
 
     // cool thing to ensure there is a render system in the scene cause if not, the window wouldn't update at all and buffer the whole time
-    if (rl::IsWindowReady())
+    if (IsWindowReady())
         if (main_scene.GetSystem<RenderSystem>() == nullptr)
             main_scene.AddSystem<RenderSystem>(-1);
 
@@ -129,27 +129,27 @@ void World::LoadSettings(const std::string &settingsFilePath)
 
 void World::LoadWindow()
 {
-    rl::InitWindow(window.resolution.x, window.resolution.y, window.title.c_str());
+    InitWindow(window.resolution.x, window.resolution.y, window.title.c_str());
     ResetWindowProperties();
-    window.target = rl::LoadRenderTexture(window.logical_resolution.x, window.logical_resolution.y);
+    window.target = LoadRenderTexture(window.logical_resolution.x, window.logical_resolution.y);
 }
 
 void World::ResetWindowProperties()
 {
     if (window.fullscreen)
-        rl::SetWindowState(rl::FLAG_FULLSCREEN_MODE);
+        SetWindowState(FLAG_FULLSCREEN_MODE);
     if (window.borderless)
-        rl::SetWindowState(rl::FLAG_BORDERLESS_WINDOWED_MODE);
+        SetWindowState(FLAG_BORDERLESS_WINDOWED_MODE);
     if (window.resizable)
-        rl::SetWindowState(rl::FLAG_WINDOW_RESIZABLE);
+        SetWindowState(FLAG_WINDOW_RESIZABLE);
     if (!window.decorated)
-        rl::SetWindowState(rl::FLAG_WINDOW_UNDECORATED);
+        SetWindowState(FLAG_WINDOW_UNDECORATED);
     
     if (!window.vsync)
         if (window.infinite_fps)
-            rl::SetTargetFPS(-1);
+            SetTargetFPS(-1);
         else
-            rl::SetTargetFPS(window.max_fps);
+            SetTargetFPS(window.max_fps);
     else
-        rl::SetWindowState(rl::FLAG_VSYNC_HINT);
+        SetWindowState(FLAG_VSYNC_HINT);
 }

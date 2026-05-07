@@ -27,7 +27,7 @@ namespace lapCore
             Frame,
             UIList,
             Sprite,
-            Image,
+            lapImage,
             TextLabel,
             EventBus,
             UIButton,

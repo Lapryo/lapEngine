@@ -25,13 +25,13 @@ void App::Run()
 
     while (state == AppState::RUNNING)
     {
-        if (rl::WindowShouldClose())
+        if (WindowShouldClose())
         {
             Shutdown();
             return;
         }
 
-        Update(rl::GetFrameTime());
+        Update(GetFrameTime());
     }
 }
 
@@ -42,10 +42,10 @@ void App::Shutdown()
 
     world.main_scene.Clear();
 
-    rl::UnloadRenderTexture(world.window.target);
+    UnloadRenderTexture(world.window.target);
 
     // shutdown window if it exists
-    rl::CloseWindow();
+    CloseWindow();
 
     state = AppState::DEAD;
 }

@@ -8,25 +8,25 @@
 
 using namespace lapCore;
 
-rl::Color GetColorData(const nlohmann::json_abi_v3_12_0::json &dataJson, const std::string &key)
+Color GetColorData(const nlohmann::json_abi_v3_12_0::json &dataJson, const std::string &key)
 {
     if (dataJson.contains(key) && dataJson[key].is_array() && dataJson[key].size() == 4)
     {
-        return (rl::Color){
+        return (Color){
             dataJson[key].at(0).get<unsigned char>(),
             dataJson[key].at(1).get<unsigned char>(),
             dataJson[key].at(2).get<unsigned char>(),
             dataJson[key].at(3).get<unsigned char>()};
     }
     else
-        return rl::RayWhite;
+        return RAYWHITE;
 }
 
-rl::Vector4 GetVector4Data(const nlohmann::json_abi_v3_12_0::json &dataJson, const std::string &key)
+Vector4 GetVector4Data(const nlohmann::json_abi_v3_12_0::json &dataJson, const std::string &key)
 {
     if (dataJson.contains(key) && dataJson[key].is_array() && dataJson[key].size() == 4)
     {
-        return (rl::Vector4){
+        return (Vector4){
             dataJson[key].at(0).get<float>(),
             dataJson[key].at(1).get<float>(),
             dataJson[key].at(2).get<float>(),
@@ -52,16 +52,16 @@ Renderable GetRenderableData(const nlohmann::json_abi_v3_12_0::json &dataJson)
         renderable.tint = GetColorData(renderableProps, "tint");
     }
     else
-        renderable = Renderable(0, false, true, rl::RayWhite, false);
+        renderable = Renderable(0, false, true, RAYWHITE, false);
 
     return renderable;
 }
 
-rl::Vector2 GetVector2Data(const nlohmann::json_abi_v3_12_0::json &dataJson, const std::string &key)
+Vector2 GetVector2Data(const nlohmann::json_abi_v3_12_0::json &dataJson, const std::string &key)
 {
     if (dataJson.contains(key) && dataJson[key].is_array() && dataJson[key].size() == 2)
     {
-        return (rl::Vector2){
+        return (Vector2){
             dataJson[key].at(0).get<float>(),
             dataJson[key].at(1).get<float>()};
     }
@@ -112,6 +112,9 @@ Origin2D GetOrigin2DData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 
     origin2D.position = GetVector2Data(dataJson, "position");
     origin2D.scale = GetVector2Data(dataJson, "scale");
+
+    // TODO:
+    // if the object has a physics2d component, get the body def and apply the position to it
 
     return origin2D;
 }
@@ -205,10 +208,6 @@ Physics2D GetPhysics2DData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 {
     Physics2D physics2D;
 
-    physics2D.gravity = GetVector2Data(dataJson, "gravity");
-    physics2D.collidable = dataJson.value("collidable", false);
-    physics2D.static_friction = dataJson.value("static-friction", 1.f);
-
     // bool static
     // float friction [0, 1]
     // bool collidable
@@ -216,6 +215,12 @@ Physics2D GetPhysics2DData(const nlohmann::json_abi_v3_12_0::json &dataJson)
     // material
 
     // should i make a seperate element for shapeDef and one for bodyDef?
+
+    physics2D.shapeDef = GetShapeDefinitionData(dataJson);
+    physics2D.bodyDef = GetBodyDefinitionData(dataJson);
+
+    // TODO:
+    // if the object has a origin2d component, apply the position to the body def
 
     return physics2D;
 }
@@ -249,7 +254,7 @@ Sprite GetSpriteData(const nlohmann::json_abi_v3_12_0::json &dataJson)
         sprite.textureName = spriteProps.value("texture-name", "");
     }
     else
-        sprite = Sprite(Renderable(0, false, true, rl::RayWhite, false), "");
+        sprite = Sprite(Renderable(0, false, true, RAYWHITE, false), "");
 
     return sprite;
 }
@@ -282,9 +287,9 @@ UIList GetUIListData(const nlohmann::json_abi_v3_12_0::json &dataJson)
     return uiList;
 }
 
-Image GetImageData(const nlohmann::json_abi_v3_12_0::json &dataJson)
+lapCore::lapImage GetImageData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 {
-    Image image;
+    lapCore::lapImage image;
 
     if (dataJson.contains("image") && dataJson["image"].is_object())
     {
@@ -294,7 +299,7 @@ Image GetImageData(const nlohmann::json_abi_v3_12_0::json &dataJson)
         image.origin = GetUIOriginData(imageProps);
     }
     else
-        image = Image(Sprite(Renderable(0, false, true, rl::RayWhite, false), ""), UIOrigin(FrameVector({0,0}, {0,0}), FrameVector({0,0}, {0,0})));
+        image = lapCore::lapImage(Sprite(Renderable(0, false, true, RAYWHITE, false), ""), UIOrigin(FrameVector({0,0}, {0,0}), FrameVector({0,0}, {0,0})));
 
     return image;
 }
@@ -462,7 +467,7 @@ std::variant<
     Frame,
     UIList,
     Sprite,
-    Image,
+    lapCore::lapImage,
     TextLabel,
     EventBus,
     UIButton,

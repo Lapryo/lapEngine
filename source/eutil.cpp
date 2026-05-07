@@ -1,7 +1,6 @@
 #include "eutil.hpp"
 
-#include "portable-file-dialogs.h"
-
+#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -11,7 +10,7 @@
 // Another workaround is the rename Raylib's functions that conflict with windows.h, then recompile the static library.
 // Fixed! Put raylib in its own namespace 'rl' and 'rlgl' for the opengl part.
 
-std::string lapCore::FileDialogs::OpenFile(std::vector<std::string> filters)
+/*std::string lapCore::FileDialogs::OpenFile(std::vector<std::string> filters)
 {
     pfd::open_file ofd("Open File", "", filters, pfd::opt::none);
     auto results = ofd.result();
@@ -24,7 +23,7 @@ std::string lapCore::FileDialogs::SaveFile(std::vector<std::string> filters)
 {
     pfd::save_file sfd("Save File", "", filters, pfd::opt::none);
     return sfd.result();
-}
+}*/
 
 std::string lapCore::ReadFileToString(const std::string &filePath)
 {
@@ -60,12 +59,12 @@ nlohmann::json_abi_v3_12_0::json lapCore::ReadFileToJsonObject(const std::string
     return nlohmann::json::parse(ReadFileToString(filePath));
 }
 
-rl::Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight)
+Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight)
 {
-    rl::Vector2 mouse = rl::GetMousePosition();
+    Vector2 mouse = GetMousePosition();
 
-    float screenWidth = (float)rl::GetScreenWidth();
-    float screenHeight = (float)rl::GetScreenHeight();
+    float screenWidth = (float)GetScreenWidth();
+    float screenHeight = (float)GetScreenHeight();
 
     float screenAspect = screenWidth / screenHeight;
     float targetAspect = (float)logicalWidth / logicalHeight;
@@ -100,9 +99,9 @@ rl::Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight
     return mouse;
 }
 
-rl::Rectangle lapCore::UIOriginToRect(UIOrigin origin, int logicalWidth, int logicalHeight)
+Rectangle lapCore::UIOriginToRect(UIOrigin origin, int logicalWidth, int logicalHeight)
 {
-    rl::Rectangle rect;
+    Rectangle rect;
 
     rect.x = origin.position.scale.x * logicalWidth + origin.position.offset.x;
     rect.y = origin.position.scale.y * logicalHeight + origin.position.offset.y;
@@ -113,9 +112,9 @@ rl::Rectangle lapCore::UIOriginToRect(UIOrigin origin, int logicalWidth, int log
     return rect;
 }
 
-rl::Vector2 lapCore::FrameVectorToVec2(lapCore::FrameVector vector, int logicalWidth, int logicalHeight)
+Vector2 lapCore::FrameVectorToVec2(lapCore::FrameVector vector, int logicalWidth, int logicalHeight)
 {
-    rl::Vector2 vec;
+    Vector2 vec;
 
     vec.x = vector.scale.x * logicalWidth + vector.offset.x;
     vec.y = vector.scale.y * logicalHeight + vector.offset.y;
@@ -125,7 +124,7 @@ rl::Vector2 lapCore::FrameVectorToVec2(lapCore::FrameVector vector, int logicalW
 
 // Default constructors for structs
 lapCore::Renderable::Renderable()
-    : zlayer(0), isScreenSpace(false), visible(true), tint(rl::RayWhite), usesUIListVisiblity(false)
+    : zlayer(0), isScreenSpace(false), visible(true), tint(RAYWHITE), usesUIListVisiblity(false)
 {
     space = {0, 0, 0, 0};
 }

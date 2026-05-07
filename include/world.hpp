@@ -21,8 +21,8 @@ namespace lapCore
     {
         std::string title = "Default Window";
 
-        rl::Vector2 resolution = {1200, 900};
-        rl::Vector2 logical_resolution = {800, 600};
+        Vector2 resolution = {1200, 900};
+        Vector2 logical_resolution = {800, 600};
 
         bool fullscreen = false;
         bool borderless = false;
@@ -33,7 +33,7 @@ namespace lapCore
         bool infinite_fps = true;
         unsigned int max_fps = 60;
 
-        rl::RenderTexture target;
+        RenderTexture target;
     };
 
     struct World

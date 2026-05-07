@@ -35,6 +35,37 @@ bool FlappyBird::FBApp::Init()
 
     // ...
 
+    ScriptRegistry::onCreateFunctions["player_create"] = [](lapCore::Scene *scene, lapCore::Object &object)
+    {
+        std::cout << "Player created!\n";
+        auto physicsSys = scene->GetSystem<PhysicsSystem>();
+        if (physicsSys)
+        {
+            auto physics = scene->FindElement<lapCore::Physics2D>(scene->objects, object);
+            if (physics)
+            {
+                physics->bodyID = physicsSys->Create2DBody(physics->bodyDef, physics->shapeDef, b2MakeBox(25, 25));
+                std::cout << "made physics body for player!\n";
+            }
+        }
+
+        b2World_SetGravity(physicsSys->worldID, b2Vec2{0, 0});
+    };
+
+    ScriptRegistry::onUpdateFunctions["player_update"] = [](lapCore::Scene *scene, lapCore::Object object, float deltaTime)
+    {
+        auto physics = scene->FindElement<lapCore::Physics2D>(scene->objects, object);
+        if (physics)
+        {
+            if (IsKeyPressed(KEY_SPACE))
+            {
+                std::cout << "space pressed.\n";
+                b2Body_SetLinearVelocity(physics->bodyID, b2Vec2{0, 100});
+                std::cout << "velocity set.\n";
+            }
+        }
+    };
+
     return true; // Return true if initialization was successful, false otherwise
 }
 
