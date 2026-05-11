@@ -17,6 +17,51 @@ TODO:
 FlappyBird::FBApp::FBApp(lapCore::Project &project) : App(project)
 {}
 
+struct PlayerAttributes
+{
+    float speed;
+    float damage;
+    float defense;
+    float health;
+    float maximum_health;
+    float stamina;
+
+    float look_distance;
+    Vector2 input_velocity;
+    Vector2 look_direction;
+
+    PlayerAttributes(float spd = 100.f, Vector2 iv = {0.f, 0.f})
+        : speed(spd), damage(10.f), defense(5.f), health(100.f), maximum_health(100.f), input_velocity(iv), stamina(10.f), look_direction({0.f, 0.f}), look_distance(25.f) {}
+};
+
+void RegisterCombatActions(InputSystem* inputSys)
+{
+    // Movement
+    inputSys->RegisterAction("move-up", "player-move-up", {KEY_W}, true, InputSystem::InputType::KEYBOARD, InputSystem::ControlType::BUTTON);
+    inputSys->RegisterAction("move-down", "player-move-down", {KEY_S}, true, InputSystem::InputType::KEYBOARD, InputSystem::ControlType::BUTTON);
+    inputSys->RegisterAction("move-left", "player-move-left", {KEY_A}, true, InputSystem::InputType::KEYBOARD, InputSystem::ControlType::BUTTON);
+    inputSys->RegisterAction("move-right", "player-move-right", {KEY_D}, true, InputSystem::InputType::KEYBOARD, InputSystem::ControlType::BUTTON);
+}
+
+void Move(Scene *scene, Object object, std::string eventName)
+{
+    auto playerAttributes = scene->FindElement<PlayerAttributes>(scene->objects, object);
+    if (!playerAttributes) return;
+
+    if (eventName == "player-move-up")
+        playerAttributes->input_velocity.y -= 1;
+    else if (eventName == "player-move-down")
+        playerAttributes->input_velocity.y += 1;
+    else if (eventName == "player-move-left")
+        playerAttributes->input_velocity.x -= 1;
+    else if (eventName == "player-move-right")
+        playerAttributes->input_velocity.x += 1;
+    else if (eventName == "player-axis-move-vertical")
+        playerAttributes->input_velocity.y = scene->GetSystem<InputSystem>()->actions["controller-move-vertical"].value;
+    else if (eventName == "player-axis-move-horizontal")
+        playerAttributes->input_velocity.x = scene->GetSystem<InputSystem>()->actions["controller-move-horizontal"].value;
+}
+
 bool FlappyBird::FBApp::Init()
 {
     // Anything specific to Flappy Bird initialization can go here (registering logic, loading settings, etc.)
@@ -28,6 +73,9 @@ bool FlappyBird::FBApp::Init()
     Project project = world.GetProject();
     world.SetScene(project.scenes[project.main_scene_index]);
 
+    RegisterCombatActions(world.main_scene.GetSystem<InputSystem>());
+
+
     // Anything else you may want to do is recommended to be done between these two sections of initialization
 
     // This is a good spot to register logic for any objects you may want
@@ -37,18 +85,14 @@ bool FlappyBird::FBApp::Init()
 
     ScriptRegistry::onCreateFunctions["player_create"] = [](lapCore::Scene *scene, lapCore::Object &object)
     {
-        std::cout << "Player created!\n";
-        auto physicsSys = scene->GetSystem<PhysicsSystem>();
-        if (physicsSys)
-        {
-            auto physics = scene->FindElement<lapCore::Physics2D>(scene->objects, object);
-            if (physics)
-            {
-                physics->bodyID = physicsSys->Create2DBody(physics->bodyDef, physics->shapeDef, b2MakeBox(25, 25));
-                std::cout << "made physics body for player!\n";
-            }
-        }
+        scene->AddElement<PlayerAttributes>(scene->objects, object, 100.f, Vector2{0.f, 0.f});
 
+        ConnectECSEvent(scene, object, "player-move-up", Move);
+        ConnectECSEvent(scene, object, "player-move-down", Move);   
+        ConnectECSEvent(scene, object, "player-move-left", Move);
+        ConnectECSEvent(scene, object, "player-move-right", Move);
+
+        auto physicsSys = scene->GetSystem<PhysicsSystem>();
         b2World_SetGravity(physicsSys->worldID, b2Vec2{0, 0});
     };
 
@@ -57,14 +101,36 @@ bool FlappyBird::FBApp::Init()
         auto physics = scene->FindElement<lapCore::Physics2D>(scene->objects, object);
         if (physics)
         {
-            if (IsKeyPressed(KEY_SPACE))
+            auto attributes = scene->FindElement<PlayerAttributes>(scene->objects, object);
+            Vector2 normalized_vel = Vector2Normalize(attributes->input_velocity);
+
+            if (b2Body_IsValid(physics->bodyID))
             {
-                std::cout << "space pressed.\n";
-                b2Body_SetLinearVelocity(physics->bodyID, b2Vec2{0, 100});
-                std::cout << "velocity set.\n";
+                b2Body_SetLinearVelocity(physics->bodyID, {normalized_vel.x * attributes->speed, normalized_vel.y * attributes->speed});
             }
+            
+            attributes->input_velocity = {0.f, 0.f};
         }
     };
+
+    ScriptRegistry::onUpdateFunctions["camera-follow-player"] = [](lapCore::Scene *scene, lapCore::Object object, float deltaTime)
+    {
+        auto camElement = scene->FindElement<Cam2D>(scene->objects, object);
+        if (!camElement) return;
+
+        auto playerObject = scene->FindObject("player").info.object;
+        if (playerObject == entt::null) return;
+
+        auto origin = scene->FindElement<Origin2D>(scene->objects, playerObject);
+        if (!origin) return;
+
+        const float smoothness = 10.f; // higher = faster follow
+        camElement->camera.target = Vector2Lerp(camElement->camera.target,
+                                        origin->position,
+                                        deltaTime * smoothness);
+    };
+
+    std::cout << "Completed initialization.\n";
 
     return true; // Return true if initialization was successful, false otherwise
 }

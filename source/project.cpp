@@ -190,6 +190,34 @@ b2BodyType GetBodyTypeData(const std::string &value)
     }
 }
 
+b2Vec2 GetB2Vec2Data(const nlohmann::json &dataJson, const std::string &key)
+{
+    if (dataJson.contains(key) && dataJson[key].is_array() && dataJson[key].size() == 2)
+    {
+        return (b2Vec2){
+            dataJson[key].at(0).get<float>(),
+            dataJson[key].at(1).get<float>()};
+    }
+    else
+        return {0, 0};
+}
+
+b2MotionLocks GetMotionLocksData(const nlohmann::json &dataJson)
+{
+    b2MotionLocks motionLocks = {0};
+
+    if (dataJson.contains("motion-locks") && dataJson["motion-locks"].is_object())
+    {
+        const auto& mlProps = dataJson["motion-locks"];
+
+        motionLocks.angularZ = mlProps.value("disable-rotation", false);
+        motionLocks.linearX = mlProps.value("disable-linear-x", false);
+        motionLocks.linearY = mlProps.value("disable-linear-y", false);
+    }
+
+    return motionLocks;
+}
+
 b2BodyDef GetBodyDefinitionData(const nlohmann::json &dataJson)
 {
     b2BodyDef bodyDef = b2DefaultBodyDef();
@@ -199,28 +227,131 @@ b2BodyDef GetBodyDefinitionData(const nlohmann::json &dataJson)
         const auto& bodyProps = dataJson["body"];
 
         bodyDef.type = GetBodyTypeData(bodyProps.value("type", ""));
+        bodyDef.allowFastRotation = bodyProps.value("fast-wheels", false);
+        bodyDef.angularDamping = bodyProps.value("angular-damping", 0.f);
+        bodyDef.angularVelocity = bodyProps.value("initial-angular-velocity", 0.f);
+        bodyDef.enableSleep = bodyProps.value("can-sleep", false);
+        bodyDef.gravityScale = bodyProps.value("gravity-scale", 1.f);
+        bodyDef.isAwake = !bodyProps.value("initial-sleep", false);
+        bodyDef.isBullet = bodyProps.value("is-bullet", false);
+        bodyDef.isEnabled = bodyProps.value("active", true);
+        bodyDef.linearDamping = bodyProps.value("linear-damping", 0.f);
+        bodyDef.linearVelocity = GetB2Vec2Data(bodyProps, "initial-linear-velocity");
+        bodyDef.motionLocks = GetMotionLocksData(bodyProps);
+        bodyDef.name = bodyProps.value("debug-name", "").c_str();
+        bodyDef.position = GetB2Vec2Data(bodyProps, "initial-position");
+        bodyDef.rotation = {bodyProps.value("initial-rotation", 0.f), 1.f};
+        bodyDef.sleepThreshold = bodyProps.value("sleep-threshold", 0.05f);
     }
 
     return bodyDef;
 }
 
-Physics2D GetPhysics2DData(const nlohmann::json_abi_v3_12_0::json &dataJson)
+b2Polygon GetPolygonData(const nlohmann::json &dataJson)
+{
+    b2Polygon polygon;
+
+    if (dataJson.contains("polygon") && dataJson["polygon"].is_object())
+    {
+        const auto& polyProps = dataJson["polygon"];
+
+        std::string hitboxType = polyProps.value("hitbox-type", "");
+        if (hitboxType == "simple-box")
+        {
+            std::cout << "made a simple box.\n";
+            polygon = b2MakeBox(polyProps.value("half-width", 1.f), polyProps.value("half-height", 1.f));
+        }
+        else if (hitboxType == "bounding-box")
+        {
+            Model model = LoadModel(polyProps.value("model-file-path", "").c_str());
+            auto meshes = model.meshes;
+
+            BoundingBox boundingBox = GetModelBoundingBox(model);
+
+            float halfWidth = (boundingBox.max.x + boundingBox.min.x) / 2.f;
+            float halfHeight = (boundingBox.max.y + boundingBox.min.y) / 2.f;
+
+            polygon = b2MakeBox(halfWidth, halfHeight);
+        }
+        else if (hitboxType == "mesh") // get meshes from a model
+        {
+            // get all the meshes of a model into one
+            Model model = LoadModel(polyProps.value("model-file-path", "").c_str());
+
+            // 1. Calculate total vertices to allocate the correct amount of memory
+            int totalVertices = 0;
+            for (int i = 0; i < model.meshCount; i++) {
+                totalVertices += model.meshes[i].vertexCount;
+            }
+
+            // 2. Allocate the b2Vec2 array
+            b2Vec2* points = new b2Vec2[totalVertices];
+            int current_point_index = 0;
+
+            // 3. Loop through meshes and vertices
+            for (int mi = 0; mi < model.meshCount; mi++) {
+                Mesh mesh = model.meshes[mi];
+                
+                for (int vi = 0; vi < mesh.vertexCount; vi++) {
+                    // raylib vertices are float* (x, y, z)
+                    // We multiply index by 3 to get the start of each vertex triplet
+                    float x = mesh.vertices[vi * 3];
+                    float y = mesh.vertices[vi * 3 + 1];
+
+                    // 4. Assign to your Box2D vector (ignoring Z for 2D physics)
+                    points[current_point_index] = b2Vec2(x, y);
+                    current_point_index++;
+                }
+            }
+
+            b2Hull hull = b2ComputeHull(points, totalVertices);
+
+            delete[] points;
+            UnloadModel(model);
+
+            polygon = b2MakePolygon(&hull, polyProps.value("radius", 1.f));
+        }
+        else if (hitboxType == "advanced") // defined points
+        {
+            if (polyProps.contains("points") && polyProps["points"].is_array())
+            {
+                auto pointCount = polyProps["points"].size();
+                int totalVertices = pointCount / 3;
+                b2Vec2* points = new b2Vec2[pointCount];
+
+                for (int i = 0; i < totalVertices; i++) {
+                    // Use .get<float>() to safely extract numbers
+                    float x = polyProps["points"][i * 3].get<float>();
+                    float y = polyProps["points"][i * 3 + 1].get<float>();
+                    
+                    points[i] = b2Vec2(x, y);
+                }
+
+                b2Hull hull = b2ComputeHull(points, totalVertices);
+                delete[] points;
+                
+                polygon = b2MakePolygon(&hull, polyProps.value("radius", 1.f));
+            }
+        }
+        else
+        {
+            std::cout << "[WARNING] Invalid hitbox type! Using simple hitbox of 1x1.\n";
+
+            polygon = b2MakeBox(0.5f, 0.5f);
+        }
+    }
+
+    return polygon;
+}
+
+Physics2D GetPhysics2DData(const nlohmann::json &dataJson)
 {
     Physics2D physics2D;
-
-    // bool static
-    // float friction [0, 1]
-    // bool collidable
-    // vec2 gravity
-    // material
-
-    // should i make a seperate element for shapeDef and one for bodyDef?
 
     physics2D.shapeDef = GetShapeDefinitionData(dataJson);
     physics2D.bodyDef = GetBodyDefinitionData(dataJson);
 
-    // TODO:
-    // if the object has a origin2d component, apply the position to the body def
+    physics2D.polygon = GetPolygonData(dataJson);
 
     return physics2D;
 }
@@ -543,7 +674,7 @@ std::vector<ProjectElementData> GetElements(const nlohmann::json_abi_v3_12_0::js
                 std::string elementFilePath = elementJson.get<std::string>();
                 std::cout << "Loading element from file: " << elementFilePath << '\n';
 
-                std::string prefixFilePath = "assets/project/scenes/" + sceneName + "/instances/" + objectJson.value("name", "Unnamed Object") + "/elements/";
+                std::string prefixFilePath = "assets/project/scenes/" + sceneName + "/objects/" + objectJson.value("name", "Unnamed Object") + "/elements/";
                 nlohmann::json elementJsonFromFile = ReadFileToJsonObject(prefixFilePath + elementFilePath);
                 elements.push_back(GetElement(elementJsonFromFile));
             }
@@ -599,7 +730,16 @@ std::vector<ProjectObjectData> GetInstances(const nlohmann::json_abi_v3_12_0::js
                     std::string objectFilePath = objectJson.get<std::string>();
                     std::cout << "Loading instance from file: " << objectFilePath << '\n';
 
-                    nlohmann::json objectJsonFromFile = ReadFileToJsonObject("assets/project/scenes/" + sceneJson.value("name", "") + "/objects/" + objectFilePath);
+                    // To get the file name, we remove the .json / .(anything) extension from the path
+                    std::string objectFileName = objectFilePath;
+                    size_t lastSlash = objectFileName.find_last_of("/\\");
+                    if (lastSlash != std::string::npos)
+                        objectFileName = objectFileName.substr(lastSlash + 1);
+                    size_t lastDot = objectFileName.find_last_of('.');
+                    if (lastDot != std::string::npos)
+                        objectFileName = objectFileName.substr(0, lastDot);
+
+                    nlohmann::json objectJsonFromFile = ReadFileToJsonObject("assets/project/scenes/" + sceneJson.value("name", "") + "/objects/" + objectFileName + "/" + objectFilePath);
                     instances.push_back(GetObject(objectJsonFromFile, sceneJson.value("name", "")));
                 }
                 else if (objectJson.is_object())

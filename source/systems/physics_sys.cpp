@@ -1,10 +1,21 @@
 #include "core.hpp"
+#include "systems/physics_sys.hpp"
 
 using namespace lapCore;
 
 PhysicsSystem::~PhysicsSystem()
 {
     b2DestroyWorld(worldID);
+}
+
+void PhysicsSystem::RegisterBodies()
+{
+    auto view = scene->objects.view<Physics2D>();
+    for (auto [e, physics] : view.each())
+    {
+        if (!b2Body_IsValid(physics.bodyID))
+            physics.bodyID = Create2DBody(physics.bodyDef, physics.shapeDef, physics.polygon);
+    }
 }
 
 b2BodyId PhysicsSystem::Create2DBody(b2BodyDef bodyDef, b2ShapeDef shapeDef, b2Polygon polygon)
@@ -18,7 +29,6 @@ void PhysicsSystem::Update(float deltaTime, entt::registry &registry)
 {
     b2World_Step(worldID, deltaTime, 4);
 
-
     auto view = registry.view<Origin2D, Physics2D>();
     for (auto [entity, origin, physics] : view.each())
     {
@@ -26,6 +36,10 @@ void PhysicsSystem::Update(float deltaTime, entt::registry &registry)
         {
             auto bodyPos = b2Body_GetPosition(physics.bodyID);
             origin.position = {bodyPos.x, bodyPos.y};
+            b2Rot rotation = b2Body_GetRotation(physics.bodyID);
+            float radians = atan2f(rotation.s, rotation.c);
+            float degrees = radians * (180.0f / PI);
+            if (degrees < 0) degrees += 360.0f;
         }
         /*
         // implement collisions

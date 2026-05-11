@@ -185,6 +185,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             return;
 
         Rectangle rect = UIOriginToRect(frame->origin, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
+        float rot = 0.f;
 
         if (auto *origin = registry.try_get<Origin2D>(obj))
         {
@@ -192,9 +193,10 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             rect.y += origin->position.y;
             rect.width *= origin->scale.x;
             rect.height *= origin->scale.y;
+            rot = origin->rotation;
         }
 
-        DrawRectangle(rect.x, rect.y, rect.width, rect.height, frame->renderable.tint);
+        DrawRectanglePro(rect, {0, 0}, rot, frame->renderable.tint);
     };
 
     auto drawText = [&](Object obj, const Scene *scene)

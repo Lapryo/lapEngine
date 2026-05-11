@@ -1,0 +1,214 @@
+{
+	"name": "Flappy Bird",
+	"version": "0.0.1-1",
+	"assets": [],
+	"scenes": [
+		{
+			"name": "main",
+			"systems": [
+				{
+					"type": "render",
+					"order": 3
+				},
+				{
+					"type": "physics",
+					"order": 2
+				},
+				{
+					"type": "script",
+					"order": 1
+				},
+				{
+                    "type": "input",
+                    "order": 0
+                }
+			],
+			"instances": {
+				"prefabs": [],
+				"objects": [
+					{
+						"name": "camera",
+						"parent": "",
+						"child-index": -1,
+						"elements": [
+							{
+                                "type": "cam-2d",
+                                "data": {
+                                    "offset": [400, 300],
+                                    "target": [0, 0],
+                                    "rotation": 0.0,
+                                    "zoom": 1.0,
+                                    "exclude": []
+                                }
+                            },
+                            {
+                                "type": "script",
+                                "data": {
+                                    "functions": {
+                                        "update": "camera-follow-player"
+                                    }
+                                }    
+                            }
+						]
+					},
+					{
+						"name": "player",
+						"parent": "",
+						"child-index": -1,
+						"elements": [
+							{
+								"type": "frame",
+								"data": {
+									"renderable": {
+                                        "isScreenSpace": false,
+                                        "visible": true,
+                                        "zlayer": 1,
+                                        "usesUIListVisibility": false,
+                                        "tint": [255, 0, 0, 255]
+                                    },
+                                    "origin": {
+                                        "position": {
+                                            "scale": [0, 0],
+                                            "offset": [0, 0]
+                                        },
+                                        "size": {
+                                            "scale": [0, 0],
+                                            "offset": [25, 25]
+                                        }
+                                    }
+								}
+							},
+							{
+								"type": "script",
+								"data": {
+									"functions": {
+										"create": "player_create",
+										"update": "player_update"
+									}
+								}
+							},
+							{
+								"type": "physics-2d",
+								"data": {
+									"body": {
+										"type": "dynamic"
+									},
+									"polygon": {
+										"hitbox-type": "simple-box",
+										"half-width": 12.5,
+										"half-height": 12.5
+									}
+								}
+							},
+							{
+								"type": "origin-2d",
+								"data": {
+									"scale": [1, 1]
+								}
+							}
+						]
+					},
+					{
+						"name": "solid-block",
+						"parent": "",
+						"child-index": -1,
+						"elements": [
+							{
+								"type": "frame",
+								"data": {
+									"renderable": {
+                                        "isScreenSpace": false,
+                                        "visible": true,
+                                        "zlayer": 2,
+                                        "usesUIListVisibility": false,
+                                        "tint": [0, 255, 0, 255]
+                                    },
+                                    "origin": {
+                                        "position": {
+                                            "scale": [0, 0],
+                                            "offset": [0, 0]
+                                        },
+                                        "size": {
+                                            "scale": [0, 0],
+                                            "offset": [25, 25]
+                                        }
+                                    }
+								}
+							},
+							{
+								"type": "physics-2d",
+								"data": {
+									"body": {
+										"type": "static",
+										"initial-position": [50, 50]
+									},
+									"polygon": {
+										"hitbox-type": "simple-box",
+										"half-width": 12.5,
+										"half-height": 12.5
+									}
+								}
+							},
+							{
+								"type": "origin-2d",
+								"data": {
+									"scale": [1, 1]
+								}
+							}
+						]
+					},
+					{
+						"name": "solid-block-2",
+						"parent": "",
+						"child-index": -1,
+						"elements": [
+							{
+								"type": "frame",
+								"data": {
+									"renderable": {
+                                        "isScreenSpace": false,
+                                        "visible": true,
+                                        "zlayer": 3,
+                                        "usesUIListVisibility": false,
+                                        "tint": [0, 255, 0, 255]
+                                    },
+                                    "origin": {
+                                        "position": {
+                                            "scale": [0, 0],
+                                            "offset": [0, 0]
+                                        },
+                                        "size": {
+                                            "scale": [0, 0],
+                                            "offset": [25, 25]
+                                        }
+                                    }
+								}
+							},
+							{
+								"type": "physics-2d",
+								"data": {
+									"body": {
+										"type": "static",
+										"initial-position": [-50, -50]
+									},
+									"polygon": {
+										"hitbox-type": "simple-box",
+										"half-width": 12.5,
+										"half-height": 12.5
+									}
+								}
+							},
+							{
+								"type": "origin-2d",
+								"data": {
+									"scale": [1, 1]
+								}
+							}
+						]
+					}
+				]
+			}
+		}
+	],
+	"prefabs": []
+}

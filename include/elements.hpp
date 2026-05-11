@@ -15,19 +15,24 @@ namespace lapCore
 
 namespace lapCore
 {
+    // Position is being constantly updated by the physics system, scale can be changed freely
     struct Origin2D
     {
         Vector2 position, scale;
+        float rotation;
     };
 
     struct Physics2D
     {
+        Vector2 initialPosition;
+
         b2BodyDef bodyDef;
         b2ShapeDef shapeDef;
         b2Polygon polygon;
         b2BodyId bodyID;
     };
 
+    // Likely to be removed
     struct Rotation2D
     {
         Vector2 anchor;
