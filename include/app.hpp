@@ -2,7 +2,7 @@
 #define APP_HPP
 
 #include <unordered_map>
-#include "project.hpp"
+#include "world.hpp"
 
 namespace lapCore
 {
@@ -19,16 +19,18 @@ namespace lapCore
         virtual ~App() = default;
         App(Project &project);
 
-        virtual void Init() = 0;
-        virtual void Update(float deltaTime) = 0;
-
         void Run();
         void Shutdown();
 
-        AppState state = AppState::DEAD;
-        Project project;
-    };
+        World world;
 
+    protected:
+        virtual bool Init() = 0;
+        virtual void Update(float deltaTime) = 0;
+
+    private:
+        AppState state = AppState::DEAD;
+    };
 }
 
 #endif

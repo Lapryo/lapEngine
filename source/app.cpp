@@ -1,36 +1,51 @@
 #include "app.hpp"
+#include "scene.hpp"
+
+#include <iostream>
 
 using namespace lapCore;
 
-lapCore::App::App(Project &project)
-{
-    this->project = std::move(project);
-}
+lapCore::App::App(Project &project) : world(project)
+{}
 
 void App::Run()
 {
+    if (state != AppState::DEAD) // If the app is not dead, and/or is running, then do nothing
+        return;
+
+    if (!Init())
+    {
+        state = AppState::ERROR;
+        std::cerr << "Error: App initialization failed!\n";
+        Shutdown();
+        return;
+    }
+
+    state = AppState::RUNNING;
+
     while (state == AppState::RUNNING)
     {
-        if (rl::WindowShouldClose())
+        if (WindowShouldClose())
         {
-            state = AppState::DEAD;
+            Shutdown();
             return;
         }
 
-        const float delta = rl::GetFrameTime();
-        Update(delta);
+        Update(GetFrameTime());
     }
 }
 
 void App::Shutdown()
 {
-    for (auto &scene : project.scenes)
-    {
-        scene->Clear();
-    }
+    if (state == AppState::DEAD) // If the app is already dead, do nothing
+        return;
 
-    rl::UnloadRenderTexture(project.target);
+    world.main_scene.Clear();
+
+    UnloadRenderTexture(world.window.target);
 
     // shutdown window if it exists
-    rl::CloseWindow();
+    CloseWindow();
+
+    state = AppState::DEAD;
 }

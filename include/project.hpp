@@ -1,32 +1,87 @@
-#ifndef PROJECT_HPP
-#define PROJECT_HPP
+#pragma once
 
-#include "scene.hpp"
-#include <vector>
 #include <string>
+#include <vector>
+#include <unordered_map>
+
+#include "elements.hpp"
 
 namespace lapCore
 {
+    enum class ProjectDataType
+    {
+        SCENE,
+        OBJECT,
+        SYSTEM,
+        COMPONENT
+    };
+
+    struct ProjectElementData
+    {
+        std::string type;
+        std::variant<
+            std::monostate,
+            Origin2D,
+            Physics2D,
+            Rotation2D,
+            Frame,
+            UIList,
+            Sprite,
+            lapImage,
+            TextLabel,
+            EventBus,
+            UIButton,
+            Cam2D,
+            Attribute<std::any>,
+            Script
+        > data;
+    };
+
+    struct ProjectObjectData
+    {
+        std::string name;
+        std::string parent;
+        int child_index;
+
+        std::vector<ProjectElementData> elements;
+    };
+
+    struct ProjectSystemData
+    {
+        std::string type;
+        unsigned int order;
+    };
+
+    struct ProjectAssetData
+    {
+        std::string name;
+        std::string path;
+        std::string type;
+    };
+
+    struct ProjectSceneData
+    {
+        std::string name;
+        std::vector<ProjectSystemData> systems;
+        std::vector<ProjectObjectData> instances;
+    };
+
     struct Project
     {
         std::string name;
         std::string version;
-        std::string path;
-        int main_scene_index;
-        Scene *main_scene;
-        std::vector<std::unique_ptr<Scene>> scenes;
+        std::string path; // if there is any
 
-        rl::Vector2 logicalResolution;
-        rl::RenderTexture target;
+        size_t main_scene_index = -1;
 
-        Scene *GetMainScene();
-        void Clear();
+        std::vector<ProjectAssetData> assets;
+        std::vector<ProjectSceneData> scenes;
+        std::vector<ProjectObjectData> prefabs;
 
-        void LoadSettings(const std::string &settingsFilePath);
+        // TODO: make these functions
+        std::string PackAsString() const;
+        void PackAsFiles(const std::string &folderPath) const;
     };
-
-    std::string PackProject(Project project);
-    Project UnpackProject(const std::string &projJson);
+    
+    Project UnpackProject(std::string projectJsonString);
 }
-
-#endif

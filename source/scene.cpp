@@ -1,36 +1,11 @@
 #include "scene.hpp"
+#include "world.hpp"
 
 using namespace lapCore;
 
-void Scene::QueueAsset(const std::string &name, const std::string &type, const std::string &path)
+void Scene::Update(float deltaTime, RenderTexture2D &target)
 {
-    queuedAssets.push_back({name, type, path});
-}
-
-void Scene::QueueAsset(const AssetLoadRequest &asset)
-{
-    queuedAssets.push_back(asset);
-}
-
-void Scene::LoadQueuedAssets()
-{
-    for (auto &asset : queuedAssets)
-    {
-        if (asset.type == "texture")
-            resources.AddTexture(asset.name, asset.path);
-        else if (asset.type == "shader")
-            resources.AddShader(asset.name, asset.path + "/vert.glsl", asset.path + "/frag.glsl");
-    }
-
-    queuedAssets.clear();
-}
-
-// figure this out later
-void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
-{
-    resolutionScale = logicalResolution.x / LOGICAL_RESOLUTION_REFERENCE;
-
-    for (auto &system : systems)
+    for (auto &[order, system] : systems)
     {
         if (!system || !system->active)
             continue;
@@ -41,23 +16,23 @@ void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
 
         if (drawing)
         {
-            rl::BeginDrawing();
-            rl::BeginTextureMode(target);
-            rl::ClearBackground(rl::RayWhite);
+            BeginDrawing();
+            BeginTextureMode(target);
+            ClearBackground(RAYWHITE);
         }
 
         system->Update(deltaTime, objects);
 
         if (drawing)
         {
-            rl::EndTextureMode();
-            rl::ClearBackground(rl::Black);
+            EndTextureMode();
+            ClearBackground(BLACK);
 
             // Now draw render texture to the screen, scaled and letterboxed
-            int screenW = rl::GetScreenWidth();
-            int screenH = rl::GetScreenHeight();
+            int screenW = GetScreenWidth();
+            int screenH = GetScreenHeight();
             float screenAspect = (float)screenW / screenH;
-            float targetAspect = (float)logicalResolution.x / logicalResolution.y;
+            float targetAspect = (float)world->window.logical_resolution.x / world->window.logical_resolution.y;
 
             int drawWidth, drawHeight;
             int offsetX, offsetY;
@@ -79,18 +54,18 @@ void Scene::Update(float deltaTime, rl::RenderTexture2D &target)
                 offsetY = (screenH - drawHeight) / 2;
             }
 
-            logicalWindowPos = {(float)offsetX, (float)offsetY};
+            // logicalWindowPos = {(float)offsetX, (float)offsetY};
 
             // Draw the render texture to the screen, scaling it
-            rl::DrawTexturePro(
+            DrawTexturePro(
                 target.texture,
                 {0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height}, // source rect (flip y)
                 {(float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight},    // dest rect
                 {0.0f, 0.0f},                                                             // origin
                 0.0f,                                                                     // rotation
-                rl::White);
+                WHITE);
 
-            rl::EndDrawing();
+            EndDrawing();
         }
     }
 }
@@ -107,7 +82,10 @@ Object Scene::AddObject(const std::string &name, const std::string &parent, int 
     // Create parent info
     ObjectInfo parentInfo;
     parentInfo.name = parent;
-    parentInfo.object = objectMap[parent].info.object;
+    if (parent == "")
+        parentInfo.object = entt::null;
+    else
+        parentInfo.object = objectMap[parent].info.object;
 
     // Create the object entry for the map
     ObjectEntry entry;
@@ -118,22 +96,30 @@ Object Scene::AddObject(const std::string &name, const std::string &parent, int 
     objectMap[name] = entry;
 
     if (childIndex == -1)
-        objectMap[parent].children.push_back(objInfo);
+    {
+        if (parent != "")
+        {
+            objectMap[parent].children.push_back(objInfo);
+        }
+    }
     else
     {
-        auto &children = objectMap[parent].children;
-        if (children.size() < (size_t)(childIndex + 1))
+        if (parent != "")
         {
-            size_t old = children.size();
-            children.resize(childIndex + 1);
-            for (size_t k = old; k < children.size(); ++k)
+            auto &children = objectMap[parent].children;
+            if (children.size() < (size_t)(childIndex + 1))
             {
-                children[k].name = "";
-                children[k].object = entt::null;
+                size_t old = children.size();
+                children.resize(childIndex + 1);
+                for (size_t k = old; k < children.size(); ++k)
+                {
+                    children[k].name = "";
+                    children[k].object = entt::null;
+                }
             }
-        }
 
-        children[childIndex] = objInfo;
+            children[childIndex] = objInfo;
+        }
     }
 
     return object;
@@ -148,21 +134,20 @@ void Scene::Clear()
 {
     objects.clear();
     systems.clear();
+    prefabs.clear();
 
-    for (auto &texture : resources.textures)
-    {
-        resources.RemoveTexture(texture.first);
-    }
-
-    for (auto &shader : resources.shaders)
-    {
-        resources.RemoveShader(shader.first);
-    }
+    objectMap.clear();
+    prefabMap.clear();
 }
 
 ObjectEntry Scene::FindObject(const std::string &name)
 {
-    return objectMap[name];
+    auto it = objectMap.find(name);
+    if (it != objectMap.end())
+        return it->second;
+
+    std::cout << "Warning: Object '" << name << "' not found in scene '" << this->name << "'\n";
+    return ObjectEntry();
 }
 
 Object lapCore::Scene::AddPrefab(const std::string &name, const std::string &parent, int childIndex)

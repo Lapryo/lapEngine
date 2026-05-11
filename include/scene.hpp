@@ -1,30 +1,23 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
-#include "systems.hpp"
+#include "system.hpp"
 #include "resource_manager.hpp"
 
 #include <iostream>
 
 namespace lapCore
 {
-    const unsigned int LOGICAL_RESOLUTION_REFERENCE = 800;
+    struct World;
 
     using Object = entt::entity;
-
-    struct AssetLoadRequest
-    {
-        std::string name;
-        std::string type;
-        std::string path;
-    };
 
     struct ObjectInfo
     {
         std::string name;
         Object object;
     };
- 
+
     struct ObjectEntry
     {
         ObjectInfo info;
@@ -35,6 +28,11 @@ namespace lapCore
 
     struct Scene
     {
+        Scene() {}
+        Scene(World *world, const std::string &name) : world(world), name(name) {}
+
+        World *world;
+
         std::string name;
 
         entt::registry objects;
@@ -43,30 +41,16 @@ namespace lapCore
         entt::registry prefabs;
         std::unordered_map<std::string, ObjectEntry> prefabMap;
 
-        std::vector<std::unique_ptr<System>> systems;
+        std::map<int, std::unique_ptr<System>> systems;
 
-        std::vector<AssetLoadRequest> queuedAssets;
-        ResourceManager resources;
-
-        rl::Vector2 logicalWindowPos;
-        rl::Vector2 logicalResolution;
-        double resolutionScale = 1;
-
-        void QueueAsset(const std::string &name, const std::string &type, const std::string &path);
-        void QueueAsset(const AssetLoadRequest &asset);
-        void LoadQueuedAssets();
-
-        void Update(float deltaTime, rl::RenderTexture2D &target);
+        void Update(float deltaTime, RenderTexture2D &target);
 
         template <typename SystemType, typename... SystemArgs>
-        void AddSystem(unsigned int order, SystemArgs &&...args)
+        void AddSystem(int order, SystemArgs &&...args)
         {
             auto sys = std::make_unique<SystemType>(this, order, std::forward<SystemArgs>(args)...);
             if constexpr (requires(SystemType &t, entt::registry &r) { t.Connect(r); })
                 sys->Connect(objects);
-
-            if (order > systems.size())
-                systems.resize(order + 1);
 
             systems[order] = std::move(sys);
         }
@@ -74,7 +58,7 @@ namespace lapCore
         template <typename T>
         T *GetSystem() const
         {
-            for (const auto &systemPtr : systems)
+            for (const auto &[order, systemPtr] : systems)
             {
                 if (T *foundSystem = dynamic_cast<T *>(systemPtr.get()))
                 {

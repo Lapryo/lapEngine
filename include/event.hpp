@@ -7,7 +7,7 @@
 #include <vector>
 #include <any>
 #include <iostream>
-#include <entt/entt.hpp>
+#include <entt.hpp>
 
 namespace lapCore
 {
@@ -74,9 +74,10 @@ namespace lapCore
     {
         auto wrapper_callback = [scene,
                                  object,
+                                 eventName,
                                  handler = std::forward<SystemFunc>(systemHandler)]()
         {
-            handler(scene, object);
+            handler(scene, object, eventName);
         };
 
         EventRegistry::Connect(eventName, wrapper_callback);
@@ -87,9 +88,10 @@ namespace lapCore
     {
         auto wrapper_callback = [scene,
                                  object,
+                                 eventName,
                                  handler = std::forward<SystemFunc>(systemHandler)](const EventType &eventData)
         {
-            handler(eventData, scene, object);
+            handler(eventData, scene, object, eventName);
         };
         EventRegistry::Connect<const EventType &>(eventName, wrapper_callback);
     }
