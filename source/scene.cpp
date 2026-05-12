@@ -5,6 +5,10 @@ using namespace lapCore;
 
 void Scene::Update(float deltaTime, RenderTexture2D &target)
 {
+    /// Draw to render texture first
+    BeginTextureMode(target);
+    ClearBackground(WHITE);
+
     for (auto &[order, system] : systems)
     {
         if (!system || !system->active)
@@ -14,60 +18,51 @@ void Scene::Update(float deltaTime, RenderTexture2D &target)
         if (system->drawing)
             drawing = true;
 
-        if (drawing)
-        {
-            BeginDrawing();
-            BeginTextureMode(target);
-            ClearBackground(RAYWHITE);
-        }
-
         system->Update(deltaTime, objects);
-
-        if (drawing)
-        {
-            EndTextureMode();
-            ClearBackground(BLACK);
-
-            // Now draw render texture to the screen, scaled and letterboxed
-            int screenW = GetScreenWidth();
-            int screenH = GetScreenHeight();
-            float screenAspect = (float)screenW / screenH;
-            float targetAspect = (float)world->window.logical_resolution.x / world->window.logical_resolution.y;
-
-            int drawWidth, drawHeight;
-            int offsetX, offsetY;
-
-            if (screenAspect > targetAspect)
-            {
-                // window is wider than logical
-                drawHeight = screenH;
-                drawWidth = (int)(screenH * targetAspect);
-                offsetX = (screenW - drawWidth) / 2;
-                offsetY = 0;
-            }
-            else
-            {
-                // window is taller than logical
-                drawWidth = screenW;
-                drawHeight = (int)(screenW / targetAspect);
-                offsetX = 0;
-                offsetY = (screenH - drawHeight) / 2;
-            }
-
-            // logicalWindowPos = {(float)offsetX, (float)offsetY};
-
-            // Draw the render texture to the screen, scaling it
-            DrawTexturePro(
-                target.texture,
-                {0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height}, // source rect (flip y)
-                {(float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight},    // dest rect
-                {0.0f, 0.0f},                                                             // origin
-                0.0f,                                                                     // rotation
-                WHITE);
-
-            EndDrawing();
-        }
     }
+
+    EndTextureMode();
+
+    // Draw to the screen with the render texture afterwards
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    // Makes the window letterboxed/pillarboxed to maintain the aspect ratio of the logical resolution
+    int screenW = GetScreenWidth();
+    int screenH = GetScreenHeight();
+    float screenAspect = (float)screenW / screenH;
+    float targetAspect = (float)world->window.logical_resolution.x / world->window.logical_resolution.y;
+
+    int drawWidth, drawHeight;
+    int offsetX, offsetY;
+
+    if (screenAspect > targetAspect)
+    {
+        // window is wider than logical
+        drawHeight = screenH;
+        drawWidth = (int)(screenH * targetAspect);
+        offsetX = (screenW - drawWidth) / 2;
+        offsetY = 0;
+    }
+    else
+    {
+        // window is taller than logical
+        drawWidth = screenW;
+        drawHeight = (int)(screenW / targetAspect);
+        offsetX = 0;
+        offsetY = (screenH - drawHeight) / 2;
+    }
+
+    // Draw the render texture to the screen, scaling it
+    DrawTexturePro(
+        target.texture,
+        {0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height}, // source rect (flip y)
+        {(float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight},    // dest rect
+        {0.0f, 0.0f},                                                             // origin
+        0.0f,                                                                     // rotation
+        WHITE);
+
+    EndDrawing();
 }
 
 Object Scene::AddObject(const std::string &name, const std::string &parent, int childIndex)
@@ -146,7 +141,7 @@ ObjectEntry Scene::FindObject(const std::string &name)
     if (it != objectMap.end())
         return it->second;
 
-    std::cout << "Warning: Object '" << name << "' not found in scene '" << this->name << "'\n";
+    dbgln("Warning: Object '" + name + "' not found in scene '" + this->name + "'", LogType::WARNING);
     return ObjectEntry();
 }
 

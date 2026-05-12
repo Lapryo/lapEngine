@@ -21,6 +21,7 @@ void App::Run()
         return;
     }
 
+    dbgln("Completed initialization.", LogType::INFO);
     state = AppState::RUNNING;
 
     while (state == AppState::RUNNING)

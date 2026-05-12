@@ -19,6 +19,27 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(raylib)
 
+FetchContent_Declare(
+    reactphysics3d
+    GIT_REPOSITORY https://github.com/DanielChappuis/reactphysics3d.git
+    GIT_TAG v0.10.2
+)
+FetchContent_MakeAvailable(reactphysics3d)
+
+FetchContent_Declare(
+    entt
+    GIT_REPOSITORY https://github.com/skypjack/entt.git
+    GIT_TAG v3.16.0
+)
+FetchContent_MakeAvailable(entt)
+
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.12.0
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
 # Find all source files in the source directory
 file(GLOB_RECURSE CORE_SOURCES 
     "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp"
@@ -35,6 +56,9 @@ target_include_directories(lapEngine PUBLIC
 target_link_libraries(lapEngine PUBLIC
     raylib
     box2d
+    reactphysics3d
+    nlohmann_json::nlohmann_json
+    EnTT::EnTT
 )
 
 add_subdirectory(examples/flappy_bird)

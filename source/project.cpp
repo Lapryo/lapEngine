@@ -1,5 +1,5 @@
 #include "project.hpp"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include "eutil.hpp"
 
 #include "elements.hpp"
@@ -185,7 +185,7 @@ b2BodyType GetBodyTypeData(const std::string &value)
         return b2_kinematicBody;
     else
     {
-        std::cout << "ERR: invalid Physics2D b2BodyType, setting to static default\n";
+        dbgln("Invalid Physics2D b2BodyType: " + value + ", setting to static default", LogType::WARNING);
         return b2_staticBody;
     }
 }
@@ -258,7 +258,6 @@ b2Polygon GetPolygonData(const nlohmann::json &dataJson)
         std::string hitboxType = polyProps.value("hitbox-type", "");
         if (hitboxType == "simple-box")
         {
-            std::cout << "made a simple box.\n";
             polygon = b2MakeBox(polyProps.value("half-width", 1.f), polyProps.value("half-height", 1.f));
         }
         else if (hitboxType == "bounding-box")
@@ -335,8 +334,7 @@ b2Polygon GetPolygonData(const nlohmann::json &dataJson)
         }
         else
         {
-            std::cout << "[WARNING] Invalid hitbox type! Using simple hitbox of 1x1.\n";
-
+            dbgln("Invalid hitbox type: " + hitboxType + ", using simple hitbox of 1x1", LogType::WARNING);
             polygon = b2MakeBox(0.5f, 0.5f);
         }
     }
@@ -639,10 +637,10 @@ std::variant<
         else if (elementType == "script") // Returns a Script struct
             return GetScriptData(data);
         else
-            std::cout << "[WARNING] Unknown element type: " << elementType << '\n';
+            dbgln("Unknown element type: " + elementType + ", skipping...", LogType::WARNING);
     }
     else
-        std::cout << (elementJson.contains("data") ? "[NOTICE] Element did not contain any data\n" : "[WARNING] Element data was not an object\n");
+        dbgln((elementJson.contains("data") ? "Element did not contain any data" : "Element data was not an object") + std::string(", skipping..."), LogType::WARNING);
 
     return std::monostate{};
 }
@@ -651,7 +649,7 @@ std::variant<
 ProjectElementData GetElement(const nlohmann::json_abi_v3_12_0::json &elementJson)
 {
     std::string elementType = elementJson.value("type", "");
-    std::cout << "Loading element: " << elementType << '\n';
+    dbgln("Loading element: " + elementType, LogType::INFO);
 
     ProjectElementData elementData;
     elementData.type = elementType;
@@ -672,7 +670,7 @@ std::vector<ProjectElementData> GetElements(const nlohmann::json_abi_v3_12_0::js
             if (elementJson.is_string())
             {
                 std::string elementFilePath = elementJson.get<std::string>();
-                std::cout << "Loading element from file: " << elementFilePath << '\n';
+                dbgln("Loading element from file: " + elementFilePath, LogType::INFO);
 
                 std::string prefixFilePath = "assets/project/scenes/" + sceneName + "/objects/" + objectJson.value("name", "Unnamed Object") + "/elements/";
                 nlohmann::json elementJsonFromFile = ReadFileToJsonObject(prefixFilePath + elementFilePath);
@@ -681,19 +679,19 @@ std::vector<ProjectElementData> GetElements(const nlohmann::json_abi_v3_12_0::js
             else if (elementJson.is_object())
                 elements.push_back(GetElement(elementJson));
             else
-                std::cout << "[WARNING] Element entry was neither a string nor an object, skipping...\n";
+                dbgln("Element entry was neither a string (file path) nor an object, skipping...", LogType::WARNING);
         }
     }
     else
         if (!objectJson.contains("elements"))
-            std::cout << "[WARNING] Object did not contain an elements property\n";
+            dbgln("Object did not contain an elements property", LogType::WARNING);
         else if (!objectJson["elements"].is_array())
-            std::cout << "[WARNING] Object elements property was not an array\n";
+            dbgln("Object elements property was not an array", LogType::WARNING);
         else if (objectJson["elements"].empty())
-            std::cout << "[NOTICE] Object had no elements in the elements property array\n";
+            dbgln("Object had no elements in the elements property array", LogType::WARNING);
         else
-            std::cout << "[WARNING] Something else went wrong with loading elements\n";
-    
+            dbgln("Something else went wrong with loading elements", LogType::WARNING);
+
     return elements;
 }
 
@@ -703,7 +701,9 @@ ProjectObjectData GetObject(const nlohmann::json_abi_v3_12_0::json &objectJson, 
     std::string objectName = objectJson.value("name", "");
     std::string objectParent = objectJson.value("parent", "");
     int objectChildIndex = objectJson.value("child-index", -1);
-    std::cout << "Loading object: " << objectName << "\nChild index: " << objectChildIndex << "\nParent: " << objectParent << '\n';
+    dbgln("Loading object: " + objectName, LogType::INFO);
+    dbgln("Child index: " + std::to_string(objectChildIndex), LogType::INFO);
+    dbgln("Parent: " + objectParent, LogType::INFO);
 
     ProjectObjectData objectData;
     objectData.name = objectName;
@@ -728,7 +728,7 @@ std::vector<ProjectObjectData> GetInstances(const nlohmann::json_abi_v3_12_0::js
                 if (objectJson.is_string())
                 {
                     std::string objectFilePath = objectJson.get<std::string>();
-                    std::cout << "Loading instance from file: " << objectFilePath << '\n';
+                    dbgln("Loading instance from file: " + objectFilePath, LogType::INFO);
 
                     // To get the file name, we remove the .json / .(anything) extension from the path
                     std::string objectFileName = objectFilePath;
@@ -745,18 +745,18 @@ std::vector<ProjectObjectData> GetInstances(const nlohmann::json_abi_v3_12_0::js
                 else if (objectJson.is_object())
                     instances.push_back(GetObject(objectJson, sceneJson.value("name", "")));
                 else
-                    std::cout << "[WARNING] Object entry was neither a string (file path) nor an object, skipping...\n";
+                    dbgln("Object entry was neither a string (file path) nor an object, skipping...", LogType::WARNING);
             }
         }
         else
             if (!sceneJson["instances"].contains("objects"))
-                std::cout << "[WARNING] Instances did not contain an objects property\n";
+                dbgln("Instances did not contain an objects property", LogType::WARNING);
             else if (!sceneJson["instances"]["objects"].is_array())
-                std::cout << "[WARNING] Instances objects property was not an array\n";
+                dbgln("Instances objects property was not an array", LogType::WARNING);
             else if (sceneJson["instances"]["objects"].empty())
-                std::cout << "[NOTICE] Instances had no objects in the objects property array\n";
+                dbgln("Instances had no objects in the objects property array", LogType::WARNING);
             else
-                std::cout << "[WARNING] Something went wrong with loading instanced objects\n";
+                dbgln("Something went wrong with loading instanced objects", LogType::WARNING);
 
         if (sceneJson["instances"].contains("prefabs") && sceneJson["instances"]["prefabs"].is_array() && !sceneJson["instances"]["prefabs"].empty())
         {
@@ -765,7 +765,7 @@ std::vector<ProjectObjectData> GetInstances(const nlohmann::json_abi_v3_12_0::js
                 if (prefabJson.is_string())
                 {
                     std::string prefabFilePath = prefabJson.get<std::string>();
-                    std::cout << "Loading instance from prefab file: " << prefabFilePath << '\n';
+                    dbgln("Loading instance from prefab file: " + prefabFilePath, LogType::INFO);
 
                     nlohmann::json prefabJsonFromFile = ReadFileToJsonObject("assets/project/prefabs/" + prefabFilePath);
                     instances.push_back(GetObject(prefabJsonFromFile, sceneJson.value("name", "")));
@@ -773,28 +773,28 @@ std::vector<ProjectObjectData> GetInstances(const nlohmann::json_abi_v3_12_0::js
                 else if (prefabJson.is_object())
                     instances.push_back(GetObject(prefabJson, sceneJson.value("name", "")));
                 else
-                    std::cout << "[WARNING] Prefab entry was neither a string (file path) nor an object, skipping...\n";
+                    dbgln("Prefab entry was neither a string (file path) nor an object, skipping...", LogType::WARNING);
             }
         }
         else
             if (!sceneJson["instances"].contains("prefabs"))
-                std::cout << "[WARNING] Instances did not contain a prefabs property\n";
+                dbgln("Instances did not contain a prefabs property", LogType::WARNING);
             else if (!sceneJson["instances"]["prefabs"].is_array())
-                std::cout << "[WARNING] Instances prefabs property was not an array\n";
+                dbgln("Instances prefabs property was not an array", LogType::WARNING);
             else if (sceneJson["instances"]["prefabs"].empty())
-                std::cout << "[NOTICE] Instances had no prefabs in the prefabs property array\n";
+                dbgln("Instances had no prefabs in the prefabs property array", LogType::WARNING);
             else
-                std::cout << "[WARNING] Something went wrong with loading instanced prefabs\n";
+                dbgln("Something went wrong with loading instanced prefabs", LogType::WARNING);
     }
     else
         if (!sceneJson.contains("instances"))
-            std::cout << "[WARNING] Scene did not contain an instances property\n";
+            dbgln("Scene did not contain an instances property", LogType::WARNING);
         else if (!sceneJson["instances"].is_object())
-            std::cout << "[WARNING] Scene instances property was not an object\n";
+            dbgln("Scene instances property was not an object", LogType::WARNING);
         else if (sceneJson["instances"].empty())
-            std::cout << "[NOTICE] Scene had no properties in the instances object\n";
+            dbgln("Scene had no properties in the instances object", LogType::WARNING);
         else
-            std::cout << "[WARNING] Something went wrong with loading instances\n";
+            dbgln("Something went wrong with loading instances", LogType::WARNING);
 
     return instances;
 }
@@ -810,26 +810,25 @@ std::vector<ProjectObjectData> GetPrefabs(const nlohmann::json_abi_v3_12_0::json
             if (prefabJson.is_string())
             {
                 std::string prefabFilePath = prefabJson.get<std::string>();
-                std::cout << "Loading prefab from file: " << prefabFilePath << '\n';
-
+                dbgln("Loading prefab from file: " + prefabFilePath, LogType::INFO);
                 nlohmann::json prefabJsonFromFile = ReadFileToJsonObject("assets/project/prefabs/" + prefabFilePath);
                 prefabs.push_back(GetObject(prefabJsonFromFile, "prefabs"));
             }
             else if (prefabJson.is_object())
                 prefabs.push_back(GetObject(prefabJson, "prefabs"));
             else
-                std::cout << "[WARNING] Prefab entry was neither a string (file path) nor an object, skipping...\n";
+                dbgln("[WARNING] Prefab entry was neither a string (file path) nor an object, skipping...", LogType::WARNING);
         }
     }
     else
         if (!projectJson.contains("prefabs"))
-            std::cout << "[WARNING] Project did not contain an prefabs property\n";
+            dbgln("Project did not contain an prefabs property", LogType::WARNING);
         else if (!projectJson["prefabs"].is_array())
-            std::cout << "[WARNING] Project prefabs property was not an array\n";
+            dbgln("Project prefabs property was not an array", LogType::WARNING);
         else if (projectJson["prefabs"].empty())
-            std::cout << "[NOTICE] Project had no prefabs in the prefabs property array\n";
+            dbgln("Project had no prefabs in the prefabs property array", LogType::WARNING);
         else
-            std::cout << "[WARNING] Something else went wrong with loading prefabs\n";
+            dbgln("Something else went wrong with loading prefabs", LogType::WARNING);
 
     return prefabs;
 }
@@ -840,7 +839,7 @@ ProjectSystemData GetSystem(const nlohmann::json_abi_v3_12_0::json &systemJson)
     // Gather the system values
     std::string systemType = systemJson.value("type", "");
     int systemOrder = systemJson.value("order", -1);
-    std::cout << "Loading " << systemType << " system\nSystem order: " << systemOrder << '\n';
+    dbgln("Loading " + systemType + " system with order: " + std::to_string(systemOrder), LogType::INFO);
 
     // Assign them to a ProjectSystemData struct and return it
     ProjectSystemData systemData;
@@ -862,7 +861,7 @@ std::vector<ProjectSystemData> GetSystems(const nlohmann::json_abi_v3_12_0::json
             if (systemJson.is_string())
             {
                 std::string systemFilePath = systemJson.get<std::string>();
-                std::cout << "Loading system from file: " << systemFilePath << '\n';
+                dbgln("Loading system from file: " + systemFilePath, LogType::INFO);
 
                 nlohmann::json systemJsonFromFile = ReadFileToJsonObject("assets/project/scenes/" + sceneJson.value("name", "Unnamed Scene") + "/systems/" + systemFilePath);
 
@@ -871,18 +870,18 @@ std::vector<ProjectSystemData> GetSystems(const nlohmann::json_abi_v3_12_0::json
             else if (systemJson.is_object())
                 systems.push_back(GetSystem(systemJson));
             else
-                std::cout << "[WARNING] System entry was neither a string nor an object, skipping...\n";
+                dbgln("System entry was neither a string (file path) nor an object, skipping...", LogType::WARNING);
         }
     }
     else
         if (!sceneJson.contains("systems"))
-            std::cout << "[WARNING] Scene did not contain a systems property\n";
+            dbgln("Scene did not contain a systems property", LogType::WARNING);
         else if (!sceneJson["systems"].is_array())
-            std::cout << "[WARNING] Scene systems property was not an array\n";
+            dbgln("Scene systems property was not an array", LogType::WARNING);
         else if (sceneJson["systems"].empty())
-            std::cout << "[NOTICE] Scene had no systems in the systems property array\n";
+            dbgln("Scene had no systems in the systems property array", LogType::WARNING);
         else
-            std::cout << "[WARNING] Something else went wrong with loading systems\n";
+            dbgln("Something else went wrong with loading systems", LogType::WARNING);
 
     return systems; // Return the gathered systems
 }
@@ -897,7 +896,7 @@ ProjectSceneData GetScene(const nlohmann::json_abi_v3_12_0::json &sceneJson, std
     sceneData.instances = GetInstances(sceneJson);
     sceneData.systems = GetSystems(sceneJson);
 
-    std::cout << "Finished gathering scene data from: " << sceneData.name << "\n";
+    dbgln("Finished gathering scene data from: " + sceneData.name, LogType::INFO);
 
     return sceneData;
 }
@@ -914,7 +913,7 @@ std::vector<ProjectSceneData> GetScenes(const nlohmann::json_abi_v3_12_0::json &
             if (sceneJson.is_string())
             {
                 std::string sceneFilePath = sceneJson.get<std::string>();
-                std::cout << "Loading scene from file: " << sceneFilePath << '\n';
+                dbgln("Loading scene from file: " + sceneFilePath, LogType::INFO);
 
                 // To get the file name, we remove the .json / .(anything) extension from the path
                 std::string sceneFileName = sceneFilePath;
@@ -931,18 +930,18 @@ std::vector<ProjectSceneData> GetScenes(const nlohmann::json_abi_v3_12_0::json &
             else if (sceneJson.is_object())
                 scenes.push_back(GetScene(sceneJson, sceneJson.value("name", "Unnamed Scene"))); // Pass the scene name for logging
             else
-                std::cout << "[WARNING] Scene entry was neither a string nor an object, skipping...\n";
+                dbgln("Scene entry was neither a string (file path) nor an object, skipping...", LogType::WARNING);
         }
     }
     else // If not, log a message defining the error and continue forward
         if (!projectJson.contains("scenes"))
-            std::cout << "[WARNING] Project did not contain an scenes property\n";
+            dbgln("Project did not contain an scenes property", LogType::WARNING);
         else if (!projectJson["scenes"].is_array())
-            std::cout << "[WARNING] Scenes property was not an array\n";
+            dbgln("Scenes property was not an array", LogType::WARNING);
         else if (projectJson["scenes"].empty())
-            std::cout << "[NOTICE] Project had no scenes in the scenes property array\n";
+            dbgln("Project had no scenes in the scenes property array", LogType::WARNING);
         else
-            std::cout << "[WARNING] Something else went wrong with loading scenes\n";
+            dbgln("Something else went wrong with loading scenes", LogType::WARNING);
 
     return scenes; // Return the gathered scenes
 }
@@ -954,7 +953,10 @@ ProjectAssetData GetAsset(const nlohmann::json_abi_v3_12_0::json &assetJson)
     const auto &assetName = assetJson.value("name", "");
     const auto &assetType = assetJson.value("type", "");
     const auto &assetPath = assetJson.value("path", "");
-    std::cout << "Loading " << assetType << " asset: " << assetName << "\nAsset path: " << assetPath << '\n';
+
+    dbgln("Loading asset: " + assetName, LogType::INFO);
+    dbgln("Asset type: " + assetType, LogType::INFO);
+    dbgln("Asset path: " + assetPath, LogType::INFO);
 
     // Assign them to a ProjectAssetData struct and return it
     ProjectAssetData assetData;
@@ -977,7 +979,7 @@ std::vector<ProjectAssetData> GetAssets(const nlohmann::json_abi_v3_12_0::json &
             if (assetJson.is_string()) // If the asset is a string and not a JSON object, that means it's an external file, and we must load it from there
             {
                 std::string assetFilePath = assetJson.get<std::string>(); // Get the file path string, which should be relative to the assets/project/assets/ directory
-                std::cout << "Loading asset from file: " << assetFilePath << '\n';
+                dbgln("Loading asset from file: " + assetFilePath, LogType::INFO);
 
                 nlohmann::json assetJsonFromFile = ReadFileToJsonObject("assets/project/assets/" + assetFilePath); // Read the file into a string, and parse it into a JSON object
                 assets.push_back(GetAsset(assetJsonFromFile)); // Gather the asset data and add it to the assets vector
@@ -985,18 +987,18 @@ std::vector<ProjectAssetData> GetAssets(const nlohmann::json_abi_v3_12_0::json &
             else if (assetJson.is_object()) // If it's a normal JSON object, we can just gather the data directly
                 assets.push_back(GetAsset(assetJson));
             else // If it's neither, log a warning and skip it
-                std::cout << "[WARNING] Asset entry was neither a string nor an object, skipping...\n";
+                dbgln("Asset entry was neither a string (file path) nor an object, skipping...", LogType::WARNING);
         }
     }
     else // If not, log a message and continue forward
         if (!projectJson.contains("assets"))
-            std::cout << "[WARNING] Project did not contain an assets property\n";
+            dbgln("Project did not contain an assets property", LogType::WARNING);
         else if (!projectJson["assets"].is_array())
-            std::cout << "[WARNING] Project assets property was not an array\n";
+            dbgln("Project assets property was not an array", LogType::WARNING);
         else if (projectJson["assets"].empty())
-            std::cout << "[NOTICE] Project had no assets in the assets property array\n";
+            dbgln("Project had no assets in the assets property array", LogType::WARNING);
         else
-            std::cout << "[WARNING] Something else went wrong with loading assets\n";
+            dbgln("Something else went wrong with loading assets", LogType::WARNING);
 
     return assets; // Return the gathered assets
 }
@@ -1024,20 +1026,20 @@ size_t GetMainScene(const nlohmann::json_abi_v3_12_0::json &projectJson)
                 sceneName = sceneEntry.value("name", "Unnamed Scene");
             else
             {
-                std::cout << "[WARNING] Scene entry was neither a string nor an object, skipping...\n";
+                dbgln("Scene entry was neither a string (file path) nor an object, skipping...", LogType::WARNING);
                 continue;
             }
 
             if (sceneName == "main")
             {
-                std::cout << "Main scene found: " << sceneName << " at index " << i << '\n';
+                dbgln("Main scene found: " + sceneName + " at index " + std::to_string(i), LogType::INFO);
                 return i;
             }
         }
     }
     else
-        std::cout << "[WARNING] Project did not contain any scenes to search for the main scene\n";
-    return -1; // Return 0 if no main scene is found
+        dbgln("[WARNING] Project did not contain any scenes to search for the main scene", LogType::WARNING);
+    return -1; // Return -1 if no main scene is found
 }
 
 // Unpacks a project file from a JSON file path into a project object, returns the Project struct
@@ -1045,10 +1047,10 @@ Project lapCore::UnpackProject(const std::string projectJsonString)
 {
     nlohmann::json projectJson = nlohmann::json::parse(projectJsonString); // Parse the JSON string into a JSON object
     std::string projectName = projectJson.value("name", "Unnamed Project");
-    std::cout << "[PROJECT] Unpacking project: " << projectName << '\n';
+    dbgln("Unpacking project: " + projectName, LogType::INFO);
 
     std::string projectVersion = projectJson.value("version", "0.0");
-    std::cout << "[PROJECT] Version: " << projectVersion << '\n';
+    dbgln("Version: " + projectVersion, LogType::INFO);
 
     Project project; // Create the project object, asign its values
     project.name = projectName;

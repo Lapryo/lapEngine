@@ -111,6 +111,9 @@ bool FlappyBird::FBApp::Init()
             
             attributes->input_velocity = {0.f, 0.f};
         }
+
+        std::string fpsText = "FPS: " + std::to_string(GetFPS());
+        DrawText(fpsText.c_str(), 10, 10, 20, RED);
     };
 
     ScriptRegistry::onUpdateFunctions["camera-follow-player"] = [](lapCore::Scene *scene, lapCore::Object object, float deltaTime)
@@ -129,8 +132,6 @@ bool FlappyBird::FBApp::Init()
                                         origin->position,
                                         deltaTime * smoothness);
     };
-
-    std::cout << "Completed initialization.\n";
 
     return true; // Return true if initialization was successful, false otherwise
 }

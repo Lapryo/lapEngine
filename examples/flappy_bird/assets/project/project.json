@@ -91,7 +91,10 @@
 								"type": "physics-2d",
 								"data": {
 									"body": {
-										"type": "dynamic"
+										"type": "dynamic",
+										"motion-locks": {
+											"disable-rotation": true
+										}
 									},
 									"polygon": {
 										"hitbox-type": "simple-box",
@@ -139,7 +142,7 @@
 								"type": "physics-2d",
 								"data": {
 									"body": {
-										"type": "static",
+										"type": "dynamic",
 										"initial-position": [50, 50]
 									},
 									"polygon": {
@@ -188,7 +191,7 @@
 								"type": "physics-2d",
 								"data": {
 									"body": {
-										"type": "static",
+										"type": "dynamic",
 										"initial-position": [-50, -50]
 									},
 									"polygon": {

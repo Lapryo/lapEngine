@@ -1,7 +1,7 @@
 #ifndef SYSTEMS_HPP
 #define SYSTEMS_HPP
 
-#include "entt.hpp"
+#include <entt/entt.hpp>
 #include "elements.hpp"
 
 namespace lapCore

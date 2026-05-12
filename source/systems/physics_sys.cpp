@@ -25,9 +25,17 @@ b2BodyId PhysicsSystem::Create2DBody(b2BodyDef bodyDef, b2ShapeDef shapeDef, b2P
     return bodyId;
 }
 
+const float timeStep = 1.f / 60.f;
+
 void PhysicsSystem::Update(float deltaTime, entt::registry &registry)
 {
-    b2World_Step(worldID, deltaTime, 4);
+    static float accumulator = 0.f;
+    accumulator += deltaTime;
+    while (accumulator >= timeStep)
+    {
+        b2World_Step(worldID, timeStep, 12);
+        accumulator -= timeStep;
+    }
 
     auto view = registry.view<Origin2D, Physics2D>();
     for (auto [entity, origin, physics] : view.each())
@@ -40,6 +48,7 @@ void PhysicsSystem::Update(float deltaTime, entt::registry &registry)
             float radians = atan2f(rotation.s, rotation.c);
             float degrees = radians * (180.0f / PI);
             if (degrees < 0) degrees += 360.0f;
+            origin.rotation = degrees;
         }
         /*
         // implement collisions
