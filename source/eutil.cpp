@@ -122,6 +122,25 @@ Vector2 lapCore::FrameVectorToVec2(lapCore::FrameVector vector, int logicalWidth
     return vec;
 }
 
+void lapCore::dbgln(const std::string &message, LogType type)
+{
+    switch (type)
+    {
+        case LogType::INFO:
+            std::cout << "[INFO] " << message << "\n";
+            break;
+        case LogType::NOTICE:
+            std::cout << "[NOTICE] " << message << "\n";
+            break;
+        case LogType::WARNING:
+            std::cout << "[WARNING] " << message << "\n";
+            break;
+        case LogType::ERROR:
+            std::cerr << "[ERROR] " << message << "\n";
+            break;
+    }
+}
+
 // Default constructors for structs
 lapCore::Renderable::Renderable()
     : zlayer(0), isScreenSpace(false), visible(true), tint(RAYWHITE), usesUIListVisiblity(false)

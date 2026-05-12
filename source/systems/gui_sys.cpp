@@ -129,7 +129,6 @@ void HandleUIListScroll(float deltaTime, Scene *scene, entt::registry &registry)
         if (wheel != 0 && CheckCollisionPointRec(GetMouseInViewportSpace(scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y), UIOriginToRect(frame.origin, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y)))
         {
             list.scrollOffset -= wheel * list.scrollSpeed * deltaTime * 1000.0f;
-            std::cout << list.scrollOffset << std::endl;
 
             Vector2 frameSize = FrameVectorToVec2(frame.origin.size, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
             Vector2 scrollSize = FrameVectorToVec2(list.scrollSize, frameSize.x, frameSize.y);

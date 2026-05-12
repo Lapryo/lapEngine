@@ -1,7 +1,7 @@
 #ifndef SCRIPT_REGISTRY_HPP
 #define SCRIPT_REGISTRY_HPP
 
-#include "entt.hpp"
+#include <entt/entt.hpp>
 #include "scene.hpp"
 
 using namespace lapCore;

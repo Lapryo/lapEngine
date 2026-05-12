@@ -3,7 +3,7 @@
 const char json_file[] = R"json(
 {
     "name": "Blank Window",
-    "version": "0.0.1-1",
+    "version": "1.0.0",
     "assets": [],
     "scenes": [
         {

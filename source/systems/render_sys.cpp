@@ -24,7 +24,7 @@ void RenderSystem::OnRenderableUpdated(entt::registry &registry, Object object)
 
 void RenderSystem::RebuildRenderList(entt::registry &registry)
 {
-    std::cout << "[RENDER] Rebuilding render list.\n";
+    dbgln("[RENDER] Rebuilding render list.", LogType::INFO);
     renderList.clear();
 
     auto spriteView = registry.view<Sprite>();
@@ -196,7 +196,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             rot = origin->rotation;
         }
 
-        DrawRectanglePro(rect, {0, 0}, rot, frame->renderable.tint);
+        DrawRectanglePro(rect, {rect.width / 2.f, rect.height / 2.f}, rot, frame->renderable.tint);
     };
 
     auto drawText = [&](Object obj, const Scene *scene)

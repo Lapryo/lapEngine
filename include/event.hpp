@@ -7,7 +7,7 @@
 #include <vector>
 #include <any>
 #include <iostream>
-#include <entt.hpp>
+#include <entt/entt.hpp>
 
 namespace lapCore
 {

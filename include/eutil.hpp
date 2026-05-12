@@ -3,7 +3,7 @@
 
 #include <raylib.h>
 
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 #include <vector>
 #include <string>
@@ -109,6 +109,15 @@ namespace lapCore
 
     Rectangle UIOriginToRect(UIOrigin origin, int logicalWidth, int logicalHeight);
     Vector2 FrameVectorToVec2(lapCore::FrameVector vector, int logicalWidth, int logicalHeight);
+
+    enum class LogType
+    {
+        INFO,
+        NOTICE,
+        WARNING,
+        ERROR
+    };
+    void dbgln(const std::string &message, LogType type = LogType::INFO);
 }
 
 #endif

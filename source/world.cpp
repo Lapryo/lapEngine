@@ -64,7 +64,7 @@ void World::SetScene(ProjectSceneData &scene_data)
         else if (system.type == "input")
             main_scene.AddSystem<InputSystem>(system.order);
         else
-            std::cout << "[WARNING] Unknown system type: " << system.type << '\n';
+            dbgln("Unknown system type: " + system.type, LogType::WARNING);
     }
 
     // cool thing to ensure there is a render system in the scene cause if not, the window wouldn't update at all and buffer the whole time
@@ -115,7 +115,7 @@ void World::LoadSettings(const std::string &settingsFilePath)
     std::string fileStr = ReadFileToString(settingsFilePath);
     if (fileStr == "")
     {
-        std::cout << "Could not get settings file, loading default for window.\n";
+        dbgln("Could not get settings file, loading default for window.", LogType::NOTICE);
         window = WindowProperties();
         return;
     }
