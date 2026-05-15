@@ -9,6 +9,7 @@ FetchContent_Declare(
     box2d
     GIT_REPOSITORY https://github.com/erincatto/box2d.git
     GIT_TAG main
+    GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(box2d)
 
@@ -16,6 +17,7 @@ FetchContent_Declare(
     raylib
     GIT_REPOSITORY https://github.com/raysan5/raylib.git
     GIT_TAG 6.0
+    GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(raylib)
 
@@ -23,6 +25,7 @@ FetchContent_Declare(
     reactphysics3d
     GIT_REPOSITORY https://github.com/DanielChappuis/reactphysics3d.git
     GIT_TAG v0.10.2
+    GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(reactphysics3d)
 
@@ -30,6 +33,7 @@ FetchContent_Declare(
     entt
     GIT_REPOSITORY https://github.com/skypjack/entt.git
     GIT_TAG v3.16.0
+    GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(entt)
 
@@ -37,6 +41,7 @@ FetchContent_Declare(
     nlohmann_json
     GIT_REPOSITORY https://github.com/nlohmann/json.git
     GIT_TAG v3.12.0
+    GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(nlohmann_json)
 
@@ -61,5 +66,5 @@ target_link_libraries(lapEngine PUBLIC
     EnTT::EnTT
 )
 
-add_subdirectory(examples/flappy_bird)
+add_subdirectory(examples/player_with_physics)
 add_subdirectory(examples/blank_window)

@@ -38,7 +38,9 @@ namespace lapCore
 
     struct World
     {
-        World(Project project) : project(project) { RegisterElements(); }
+        World(Project project) : project(project) { 
+            RegisterElements(); 
+        }
 
         Scene main_scene;
 
@@ -54,6 +56,7 @@ namespace lapCore
             elementLookup[entt::type_id<T>().hash()] = name;
         }
 
+        void LoadAssets();
         void LoadSettings(const std::string &settingsFilePath);
 
         void LoadWindow();

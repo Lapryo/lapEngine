@@ -81,6 +81,8 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
     auto drawSprite = [&](Object obj, const Scene *scene)
     {
         auto *sprite = registry.try_get<Sprite>(obj);
+        if (!sprite || !sprite->renderable.visible)
+            return;
 
         const Texture2D *texture;
 
@@ -92,33 +94,28 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         else
             return;
 
-        if (!sprite || !sprite->renderable.visible)
-            return;
+        Rectangle rect;
+        rect.width = (float)texture->width;
+        rect.height = (float)texture->height;
 
-        auto *origin = registry.try_get<Origin2D>(obj);
-
-        Vector2 pos{0.f, 0.f};
-        Vector2 size{(float)texture->width, (float)texture->height};
         float rotation = 0.f;
 
-        auto *rotData = registry.try_get<Rotation2D>(obj);
-        if (rotData)
-        {
-            rotation = rotData->rotation;
-        }
-
+        auto *origin = registry.try_get<Origin2D>(obj);
         if (origin)
         {
-            pos = origin->position;
-            size.x *= origin->scale.x;
-            size.y *= origin->scale.y;
+            rect.x = origin->position.x;
+            rect.y = origin->position.y;
+            rect.width *= origin->scale.x;
+            rect.height *= origin->scale.y;
+
+            rotation = origin->rotation;
         }
 
         DrawTexturePro(
             *texture,
             {0.f, 0.f, (float)texture->width, (float)texture->height},
-            {pos.x, pos.y, size.x, size.y},
-            (rotData ? rotData->anchor : (Vector2){0.0f, 0.0f}),
+            rect,
+            {rect.width / 2.f, rect.height / 2.f},
             rotation,
             sprite->renderable.tint);
     };
@@ -126,6 +123,8 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
     auto drawImage = [&](Object obj, const Scene *scene)
     {
         auto *image = registry.try_get<lapCore::lapImage>(obj);
+        if (!image || !image->sprite.renderable.visible)
+            return;
 
         const Texture2D *texture;
 
@@ -137,44 +136,14 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         else
             return;
 
-        if (!image || !image->sprite.renderable.visible)
-            return;
-
-        auto *frame = registry.try_get<Frame>(obj);
-        auto *origin = registry.try_get<Origin2D>(obj);
-        auto *rotData = registry.try_get<Rotation2D>(obj);
-
-        Vector2 pos{0, 0}, size{(float)texture->width, (float)texture->height};
-        float rotation = 0.f;
-
-        if (rotData)
-        {
-            rotation = rotData->rotation;
-        }
-
-        if (frame)
-        {
-            pos.x += frame->origin.position.scale.x * scene->world->window.logical_resolution.x + frame->origin.position.offset.x;
-            pos.y += frame->origin.position.scale.y * scene->world->window.logical_resolution.y + frame->origin.position.offset.y;
-            size.x += frame->origin.size.scale.x * scene->world->window.logical_resolution.x + frame->origin.size.offset.x;
-            size.y += frame->origin.size.scale.y * scene->world->window.logical_resolution.y + frame->origin.size.offset.y;
-        }
-
-        if (origin)
-        {
-            pos.x += origin->position.x;
-            pos.y += origin->position.y;
-
-            size.x *= origin->scale.x;
-            size.y *= origin->scale.y;
-        }
+        Rectangle rect = UIOriginToRect(image->origin, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
 
         DrawTexturePro(
             *texture,
             {0.f, 0.f, (float)texture->width, (float)texture->height},
-            {pos.x, pos.y, size.x, size.y},
-            (rotData ? rotData->anchor : (Vector2){0.0f, 0.0f}),
-            rotation,
+            rect,
+            image->origin.anchor,
+            image->origin.rotation,
             image->sprite.renderable.tint);
     };
 
@@ -196,7 +165,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             rot = origin->rotation;
         }
 
-        DrawRectanglePro(rect, {rect.width / 2.f, rect.height / 2.f}, rot, frame->renderable.tint);
+        DrawRectanglePro(rect, frame->origin.anchor, rot, frame->renderable.tint);
     };
 
     auto drawText = [&](Object obj, const Scene *scene)

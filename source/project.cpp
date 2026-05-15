@@ -94,9 +94,11 @@ UIOrigin GetUIOriginData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 
         origin.position = GetFrameVectorData(originProps, "position");
         origin.size = GetFrameVectorData(originProps, "size");
+        origin.anchor = GetVector2Data(originProps, "anchor");
+        origin.rotation = originProps.value("rotation", 0.f);
     }
     else
-        origin = UIOrigin(FrameVector({0,0}, {0,0}), FrameVector({0,0}, {0,0}));
+        origin = UIOrigin(FrameVector({0,0}, {0,0}), FrameVector({0,0}, {0,0}), {0.f, 0.f}, 0.f);
 
     return origin;
 }
@@ -109,12 +111,8 @@ Frame GetFrameData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 Origin2D GetOrigin2DData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 {
     Origin2D origin2D;
-
-    origin2D.position = GetVector2Data(dataJson, "position");
+    
     origin2D.scale = GetVector2Data(dataJson, "scale");
-
-    // TODO:
-    // if the object has a physics2d component, get the body def and apply the position to it
 
     return origin2D;
 }
@@ -262,7 +260,7 @@ b2Polygon GetPolygonData(const nlohmann::json &dataJson)
         }
         else if (hitboxType == "bounding-box")
         {
-            Model model = LoadModel(polyProps.value("model-file-path", "").c_str());
+            Model model = LoadModel(polyProps.value("asset", "").c_str());
             auto meshes = model.meshes;
 
             BoundingBox boundingBox = GetModelBoundingBox(model);
@@ -275,7 +273,7 @@ b2Polygon GetPolygonData(const nlohmann::json &dataJson)
         else if (hitboxType == "mesh") // get meshes from a model
         {
             // get all the meshes of a model into one
-            Model model = LoadModel(polyProps.value("model-file-path", "").c_str());
+            Model model = LoadModel(polyProps.value("asset", "").c_str());
 
             // 1. Calculate total vertices to allocate the correct amount of memory
             int totalVertices = 0;
@@ -354,36 +352,12 @@ Physics2D GetPhysics2DData(const nlohmann::json &dataJson)
     return physics2D;
 }
 
-Rotation2D GetRotation2DData(const nlohmann::json_abi_v3_12_0::json &dataJson)
-{
-    Rotation2D rotation2D;
-
-    if (dataJson.contains("rotation-2d") && dataJson["rotation-2d"].is_object())
-    {
-        const auto& rotation2DProps = dataJson["rotation-2d"];
-
-        rotation2D.anchor = GetVector2Data(rotation2DProps, "anchor");
-        rotation2D.rotation = rotation2DProps.value("rotation", 0.0f);
-    }
-    else
-        rotation2D = Rotation2D{ {0,0}, 0.0f };
-
-    return rotation2D;
-}
-
 Sprite GetSpriteData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 {
     Sprite sprite;
-
-    if (dataJson.contains("sprite") && dataJson["sprite"].is_object())
-    {
-        const auto& spriteProps = dataJson["sprite"];
-
-        sprite.renderable = GetRenderableData(spriteProps);
-        sprite.textureName = spriteProps.value("texture-name", "");
-    }
-    else
-        sprite = Sprite(Renderable(0, false, true, RAYWHITE, false), "");
+    
+    sprite.renderable = GetRenderableData(dataJson);
+    sprite.textureName = dataJson.value("texture-name", "");
 
     return sprite;
 }
@@ -420,15 +394,8 @@ lapCore::lapImage GetImageData(const nlohmann::json_abi_v3_12_0::json &dataJson)
 {
     lapCore::lapImage image;
 
-    if (dataJson.contains("image") && dataJson["image"].is_object())
-    {
-        const auto& imageProps = dataJson["image"];
-
-        image.sprite = GetSpriteData(imageProps);
-        image.origin = GetUIOriginData(imageProps);
-    }
-    else
-        image = lapCore::lapImage(Sprite(Renderable(0, false, true, RAYWHITE, false), ""), UIOrigin(FrameVector({0,0}, {0,0}), FrameVector({0,0}, {0,0})));
+    image.sprite = GetSpriteData(dataJson);
+    image.origin = GetUIOriginData(dataJson);
 
     return image;
 }
@@ -524,30 +491,9 @@ UIButton GetUIButtonData(const nlohmann::json_abi_v3_12_0::json &dataJson)
         uiButton.usesListVisibility = uiButtonProps.value("uses-uilist-visibility", false);
     }
     else
-        uiButton = UIButton(EventBus(), UIOrigin(FrameVector({0,0}, {0,0}), FrameVector({0,0}, {0,0})), true, false);
+        uiButton = UIButton(EventBus(), UIOrigin(FrameVector({0,0}, {0,0}), FrameVector({0,0}, {0,0}), {0.f, 0.f}, 0.f), true, false);
 
     return uiButton;
-}
-
-Attribute<std::any> GetAttributeData(const nlohmann::json_abi_v3_12_0::json &dataJson)
-{
-    Attribute<std::any> attribute;
-
-    if (dataJson.contains("attribute") && dataJson["attribute"].is_object())
-    {
-        const auto& attributeProps = dataJson["attribute"];
-
-        attribute.name = attributeProps.value("name", "");
-
-        if (attributeProps.contains("value"))
-            attribute.value = attributeProps["value"];
-        else
-            attribute.value = std::any{};
-    }
-    else
-        return Attribute<std::any>("", false);
-
-    return attribute;
 }
 
 Cam2D GetCam2DData(const nlohmann::json_abi_v3_12_0::json &dataJson)
@@ -592,7 +538,6 @@ std::variant<
     std::monostate,
     Origin2D,
     Physics2D,
-    Rotation2D,
     Frame,
     UIList,
     Sprite,
@@ -601,7 +546,6 @@ std::variant<
     EventBus,
     UIButton,
     Cam2D,
-    Attribute<std::any>,
     Script
 > GetElementData(const nlohmann::json_abi_v3_12_0::json &elementJson)
 {
@@ -616,8 +560,6 @@ std::variant<
             return GetOrigin2DData(data);
         else if (elementType == "physics-2d") // Returns a Physics2D struct
             return GetPhysics2DData(data);
-        else if (elementType == "rotation-2d") // Returns a Rotation2D struct
-            return GetRotation2DData(data);
         else if (elementType == "sprite") // Returns a Sprite struct
             return GetSpriteData(data);
         else if (elementType == "ui-list") // Returns a UIList struct
@@ -630,8 +572,6 @@ std::variant<
             return GetEventBusData(data);
         else if (elementType == "ui-button") // Returns a UIButton struct
             return GetUIButtonData(data);
-        else if (elementType == "attribute") // Returns an Attribute<T> struct
-            return GetAttributeData(data);
         else if (elementType == "cam-2d") // Returns a Cam2D struct
             return GetCam2DData(data);
         else if (elementType == "script") // Returns a Script struct
@@ -762,18 +702,32 @@ std::vector<ProjectObjectData> GetInstances(const nlohmann::json_abi_v3_12_0::js
         {
             for (const auto &prefabJson : sceneJson["instances"]["prefabs"])
             {
-                if (prefabJson.is_string())
+                // TODO: make a way for the instance to grab from the existing json file if the index is a string, but also allow to edits and changes to that existing json
+                
+                for (int i = 0; i < prefabJson.at(1).get<int>(); i++)
                 {
-                    std::string prefabFilePath = prefabJson.get<std::string>();
-                    dbgln("Loading instance from prefab file: " + prefabFilePath, LogType::INFO);
+                    if (prefabJson.at(0).is_string())
+                    {
+                        std::string prefabFilePath = prefabJson.at(0).get<std::string>();
+                        dbgln("Loading prefab instance from file: " + prefabFilePath, LogType::INFO);
 
-                    nlohmann::json prefabJsonFromFile = ReadFileToJsonObject("assets/project/prefabs/" + prefabFilePath);
-                    instances.push_back(GetObject(prefabJsonFromFile, sceneJson.value("name", "")));
+                        // To get the file name, we remove the .json / .(anything) extension from the path
+                        std::string prefabFileName = prefabFilePath;
+                        size_t lastSlash = prefabFileName.find_last_of("/\\");
+                        if (lastSlash != std::string::npos)
+                            prefabFileName = prefabFileName.substr(lastSlash + 1);
+                        size_t lastDot = prefabFileName.find_last_of('.');
+                        if (lastDot != std::string::npos)
+                            prefabFileName = prefabFileName.substr(0, lastDot);
+
+                        nlohmann::json prefabJsonFromFile = ReadFileToJsonObject("assets/project/prefabs/" + prefabFileName + "/" + prefabFilePath);
+                        instances.push_back(GetObject(prefabJsonFromFile, sceneJson.value("name", "")));
+                    }
+                    else if (prefabJson.at(0).is_object())
+                        instances.push_back(GetObject(prefabJson, sceneJson.value("name", "")));
+                    else
+                        dbgln("Prefab entry was neither a string (file path) nor an object, skipping...", LogType::WARNING);
                 }
-                else if (prefabJson.is_object())
-                    instances.push_back(GetObject(prefabJson, sceneJson.value("name", "")));
-                else
-                    dbgln("Prefab entry was neither a string (file path) nor an object, skipping...", LogType::WARNING);
             }
         }
         else
@@ -810,8 +764,18 @@ std::vector<ProjectObjectData> GetPrefabs(const nlohmann::json_abi_v3_12_0::json
             if (prefabJson.is_string())
             {
                 std::string prefabFilePath = prefabJson.get<std::string>();
-                dbgln("Loading prefab from file: " + prefabFilePath, LogType::INFO);
-                nlohmann::json prefabJsonFromFile = ReadFileToJsonObject("assets/project/prefabs/" + prefabFilePath);
+                dbgln("Loading prefab instance from file: " + prefabFilePath, LogType::INFO);
+
+                // To get the file name, we remove the .json / .(anything) extension from the path
+                std::string prefabFileName = prefabFilePath;
+                size_t lastSlash = prefabFileName.find_last_of("/\\");
+                if (lastSlash != std::string::npos)
+                    prefabFileName = prefabFileName.substr(lastSlash + 1);
+                size_t lastDot = prefabFileName.find_last_of('.');
+                if (lastDot != std::string::npos)
+                    prefabFileName = prefabFileName.substr(0, lastDot);
+
+                nlohmann::json prefabJsonFromFile = ReadFileToJsonObject("assets/project/prefabs/" + prefabFileName + "/" + prefabFilePath);
                 prefabs.push_back(GetObject(prefabJsonFromFile, "prefabs"));
             }
             else if (prefabJson.is_object())
@@ -946,6 +910,26 @@ std::vector<ProjectSceneData> GetScenes(const nlohmann::json_abi_v3_12_0::json &
     return scenes; // Return the gathered scenes
 }
 
+std::vector<std::string> GetAssetData(const nlohmann::json &assetJson)
+{
+    std::vector<std::string> assetData; // Vector to hold the asset data
+
+    if (assetJson.contains("data") && assetJson["data"].is_array())
+    {
+        for (const auto &dataEntry : assetJson["data"])
+        {
+            if (dataEntry.is_string())
+                assetData.push_back(dataEntry.get<std::string>());
+            else
+                dbgln("Asset data entry was not a string, skipping...", LogType::WARNING);
+        }
+    }
+    else
+        dbgln((assetJson.contains("data") ? "Asset did not contain any data" : "Asset data was not an array") + std::string(", skipping..."), LogType::WARNING);
+
+    return assetData;
+}
+
 // Gathers data from an asset JSON object, which should contain name, type, and path strings, returns a ProjectAssetData struct
 ProjectAssetData GetAsset(const nlohmann::json_abi_v3_12_0::json &assetJson)
 {
@@ -963,6 +947,7 @@ ProjectAssetData GetAsset(const nlohmann::json_abi_v3_12_0::json &assetJson)
     assetData.name = assetName;
     assetData.type = assetType;
     assetData.path = assetPath;
+    assetData.data = GetAssetData(assetJson);
 
     return assetData;
 }
