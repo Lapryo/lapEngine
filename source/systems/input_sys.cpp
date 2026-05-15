@@ -3,8 +3,6 @@
 
 using namespace lapCore;
 
-// TODO: FIX THIS TO MAKE MULTIPLE KEYS FOR ONE ACTION WORK
-
 bool HandleKeyboardInput(InputSystem::InputEntry &entry, int key)
 {
     if (IsKeyDown(key))

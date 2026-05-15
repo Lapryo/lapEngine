@@ -2,7 +2,7 @@
 
 # Setup CMake project
 cmake_minimum_required(VERSION 4.1.2)
-project(flappy_bird)
+project(player_physics)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -13,39 +13,38 @@ file(GLOB_RECURSE GAME_SOURCES
 
 # Executable
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_executable(flappy_bird 
+    add_executable(player_physics 
         ${GAME_SOURCES}
     )
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     if(WIN32)
-        add_executable(flappy_bird # WIN32 # Hide console window
+        add_executable(player_physics # WIN32 # Hide console window
             ${GAME_SOURCES}
         )
     else()
-        add_executable(flappy_bird 
+        add_executable(player_physics 
             ${GAME_SOURCES}
         )
     endif()
 endif()
 
 # Include directories
-target_include_directories(flappy_bird PRIVATE 
+target_include_directories(player_physics PRIVATE 
     "${CMAKE_CURRENT_SOURCE_DIR}/include" # Edit game include path as needed
     "${CMAKE_CURRENT_SOURCE_DIR}/../../include" # Edit lapEngine include path as needed
 )
 
 # Library directories and linking
-target_link_directories(flappy_bird PRIVATE 
+target_link_directories(player_physics PRIVATE 
     "${CMAKE_CURRENT_SOURCE_DIR}/lib" # Edit library path as needed
 )
 
 if(WIN32)
-    target_link_libraries(flappy_bird PRIVATE 
+    target_link_libraries(player_physics PRIVATE 
         lapEngine
-        winmm
     )
 else()
-    target_link_libraries(flappy_bird PRIVATE 
+    target_link_libraries(player_physics PRIVATE 
         lapEngine
     )
 endif()

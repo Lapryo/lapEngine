@@ -8,7 +8,6 @@
 // Only known workaround is to go into windows.h and change the names of the functions, which is not ideal.
 
 // Another workaround is the rename Raylib's functions that conflict with windows.h, then recompile the static library.
-// Fixed! Put raylib in its own namespace 'rl' and 'rlgl' for the opengl part.
 
 /*std::string lapCore::FileDialogs::OpenFile(std::vector<std::string> filters)
 {
@@ -24,6 +23,69 @@ std::string lapCore::FileDialogs::SaveFile(std::vector<std::string> filters)
     pfd::save_file sfd("Save File", "", filters, pfd::opt::none);
     return sfd.result();
 }*/
+
+Vector2 lapCore::json_rlvec2(const nlohmann::json &json, const std::string &key)
+{
+    Vector2 vec;
+
+    if (json.contains(key) && json[key].is_array() && json[key].size() == 2)
+    {
+        vec.x = json[key].at(0).get<float>();
+        vec.y = json[key].at(1).get<float>();
+    }
+    else
+        vec = {0, 0};
+
+    return vec;
+}
+
+Vector3 lapCore::json_rlvec3(const nlohmann::json &json, const std::string &key)
+{
+    Vector3 vec;
+
+    if (json.contains(key) && json[key].is_array() && json[key].size() == 3)
+    {
+        vec.x = json[key].at(0).get<float>();
+        vec.y = json[key].at(1).get<float>();
+        vec.z = json[key].at(2).get<float>();
+    }
+    else
+        vec = {0, 0, 0};
+
+    return vec;
+}
+
+Vector4 lapCore::json_rlvec4(const nlohmann::json &json, const std::string &key)
+{
+    Vector4 vec;
+
+    if (json.contains(key) && json[key].is_array() && json[key].size() == 4)
+    {
+        vec.x = json[key].at(0).get<float>();
+        vec.y = json[key].at(1).get<float>();
+        vec.z = json[key].at(2).get<float>();
+        vec.w = json[key].at(3).get<float>();
+    }
+    else
+        vec = {0, 0, 0, 0};
+
+    return vec;
+}
+
+b2BodyDef lapCore::json_b2bodydef(const nlohmann::json &json)
+{
+    return b2BodyDef();
+}
+
+b2ShapeDef lapCore::json_b2shapedef(const nlohmann::json &json)
+{
+    return b2ShapeDef();
+}
+
+b2Polygon lapCore::json_b2polygon(const nlohmann::json &json)
+{
+    return b2Polygon();
+}
 
 std::string lapCore::ReadFileToString(const std::string &filePath)
 {

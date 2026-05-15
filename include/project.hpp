@@ -23,7 +23,6 @@ namespace lapCore
             std::monostate,
             Origin2D,
             Physics2D,
-            Rotation2D,
             Frame,
             UIList,
             Sprite,
@@ -32,7 +31,6 @@ namespace lapCore
             EventBus,
             UIButton,
             Cam2D,
-            Attribute<std::any>,
             Script
         > data;
     };
@@ -57,6 +55,8 @@ namespace lapCore
         std::string name;
         std::string path;
         std::string type;
+
+        std::vector<std::string> data; // for any additional data, such as texture settings or shader uniform defaults
     };
 
     struct ProjectSceneData

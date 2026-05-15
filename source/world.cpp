@@ -12,7 +12,6 @@ using namespace lapCore;
 void World::RegisterElements()
 {
     RegisterElement<Origin2D>("Origin2D");
-    RegisterElement<Rotation2D>("Rotation2D");
     RegisterElement<Physics2D>("Physics2D");
     RegisterElement<Frame>("Frame");
     RegisterElement<UIList>("UIList");
@@ -22,7 +21,6 @@ void World::RegisterElements()
     RegisterElement<EventBus>("EventBus");
     RegisterElement<UIButton>("UIButton");
     RegisterElement<Cam2D>("Cam2D");
-    RegisterElement<Attribute<std::any>>("Attribute");
     RegisterElement<Script>("Script");
 }
 
@@ -110,6 +108,52 @@ WindowProperties LoadWindowProperties(const nlohmann::json_abi_v3_12_0::json &wi
     return window_properties;
 }
 
+void lapCore::World::LoadAssets()
+{
+    for (const auto& asset : project.assets)
+    {
+        if (asset.type == "texture")
+        {
+            Texture2D* texture = resources.AddTexture(asset.name, asset.path, asset.data);
+            if (texture == nullptr)
+                dbgln("Failed to load texture: " + asset.name + " from path: " + asset.path, LogType::ERROR);
+        }
+        else if (asset.type == "shader")
+        {
+            Shader* shader = resources.AddShader(asset.name, asset.path + ".vs", asset.path + ".fs", asset.data);
+            if (shader == nullptr)
+                dbgln("Failed to load shader: " + asset.name + " from path: " + asset.path, LogType::ERROR);
+        }
+        else if (asset.type == "music")
+        {
+            Music music = LoadMusicStream(asset.path.c_str());
+            resources.music[asset.name] = music;
+        }
+        else if (asset.type == "sound")
+        {
+            Sound sound = LoadSound(asset.path.c_str());
+            resources.sounds[asset.name] = sound;
+        }
+        else if (asset.type == "model")
+        {
+            Model model = LoadModel(asset.path.c_str());
+            resources.models[asset.name] = model;
+        }
+        else if (asset.type == "font")
+        {
+            Font font = LoadFont(asset.path.c_str());
+            resources.fonts[asset.name] = font;
+        }
+        else if (asset.type == "image")
+        {
+            Image image = LoadImage(asset.path.c_str());
+            resources.images[asset.name] = image;
+        }
+        else
+            dbgln("Unknown asset type: " + asset.type + " for asset: " + asset.name, LogType::WARNING);
+    }
+}
+
 void World::LoadSettings(const std::string &settingsFilePath)
 {
     std::string fileStr = ReadFileToString(settingsFilePath);
@@ -127,8 +171,11 @@ void World::LoadSettings(const std::string &settingsFilePath)
 void World::LoadWindow()
 {
     InitWindow(window.resolution.x, window.resolution.y, window.title.c_str());
+    InitAudioDevice();
+
     ResetWindowProperties();
     window.target = LoadRenderTexture(window.logical_resolution.x, window.logical_resolution.y);
+    LoadAssets();
 }
 
 void World::ResetWindowProperties()

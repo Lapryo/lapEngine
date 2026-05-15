@@ -136,6 +136,8 @@ bool FlappyBird::FBApp::Init()
     return true; // Return true if initialization was successful, false otherwise
 }
 
+float introMusicPlayed = false;
+
 void FlappyBird::FBApp::Update(float deltaTime)
 {
     // Anything you want to do every frame can go here
@@ -144,6 +146,17 @@ void FlappyBird::FBApp::Update(float deltaTime)
 
     // For us, we simply update the main scene
     world.main_scene.Update(deltaTime, world.window.target);
+
+    if (!IsSoundPlaying(world.resources.sounds["intro-main-menu-music"]))
+        introMusicPlayed = true;
+    
+    if (introMusicPlayed)
+    {
+        if (!IsMusicStreamPlaying(world.resources.music["main-menu-music"]))
+            PlayMusicStream(world.resources.music["main-menu-music"]);
+        else
+            UpdateMusicStream(world.resources.music["main-menu-music"]);
+    }
 }
 
 int main()

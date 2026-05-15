@@ -20,23 +20,24 @@ namespace lapCore
     {
         Vector2 position, scale;
         float rotation;
+
+        Origin2D() {}
+        Origin2D(Vector2 position, Vector2 scale, float rotation = 0.f)
+            : position(position), scale(scale), rotation(rotation) {}
+        Origin2D(nlohmann::json &json) : scale(json_rlvec2(json, "scale")) {}
     };
 
     struct Physics2D
     {
-        Vector2 initialPosition;
-
         b2BodyDef bodyDef;
         b2ShapeDef shapeDef;
         b2Polygon polygon;
         b2BodyId bodyID;
-    };
 
-    // Likely to be removed
-    struct Rotation2D
-    {
-        Vector2 anchor;
-        float rotation;
+        Physics2D() {}
+        Physics2D(b2BodyDef bodyDef, b2ShapeDef shapeDef, b2Polygon polygon)
+            : bodyDef(bodyDef), shapeDef(shapeDef), polygon(polygon) {}
+        Physics2D(nlohmann::json &json) : bodyDef(json_b2bodydef(json)), shapeDef(json_b2shapedef(json)), polygon(json_b2polygon(json)) {}
     };
 
     // New version of RectVisualizer, the basis of all GUI components (needed for all of them)
@@ -48,6 +49,7 @@ namespace lapCore
         Frame() {}
         Frame(Renderable renderable, UIOrigin origin)
             : renderable(renderable), origin(origin) {}
+        Frame(nlohmann::json &json) : renderable(Renderable(json)), origin(UIOrigin(json)) {}
     };
 
     struct UIList
@@ -69,6 +71,7 @@ namespace lapCore
         UIList(FrameVector scrollSize, FrameVector displaySize, bool hScrollRight, bool vScrollBottom, bool maskOutsideContent, float scrollOffset, float scrollSpeed, Axis2D direction)
             : scrollSize(scrollSize), displaySize(displaySize), hScrollRight(hScrollRight), vScrollBottom(vScrollBottom), maskOutsideContent(maskOutsideContent),
               scrollOffset(scrollOffset), scrollSpeed(scrollSpeed), direction(direction) {}
+        UIList(nlohmann::json &json);
     };
 
     struct Sprite // Uses Origin2D instead
@@ -79,6 +82,7 @@ namespace lapCore
         Sprite() {}
         Sprite(Renderable renderable, std::string textureName)
             : renderable(renderable), textureName(textureName) {}
+        Sprite(nlohmann::json &json);
     };
 
     struct lapImage
@@ -89,6 +93,7 @@ namespace lapCore
         lapImage() {}
         lapImage(Sprite sprite, UIOrigin origin)
             : sprite(sprite), origin(origin) {}
+        lapImage(nlohmann::json &json);
     };
 
     struct TextLabel
@@ -104,11 +109,17 @@ namespace lapCore
         TextLabel() {}
         TextLabel(Frame frame, std::string text, float textSize, Alignment textAlignment, FrameVector textBounds, Padding textPadding)
             : frame(frame), text(text), fontSize(textSize), textAlignment(textAlignment), textBounds(textBounds), textPadding(textPadding) {}
+        TextLabel(nlohmann::json &json);
     };
 
     struct EventBus
     {
         std::unordered_map<std::string, std::string> events;
+
+        EventBus() {}
+        EventBus(std::unordered_map<std::string, std::string> events)
+            : events(events) {}
+        EventBus(nlohmann::json &json);
     };
 
     struct UIButton
@@ -124,23 +135,18 @@ namespace lapCore
         UIButton() {}
         UIButton(EventBus buttonEvents, UIOrigin bounds, bool active = true, bool usesListVisibility = false)
             : events(buttonEvents), bounds(bounds), active(active), usesListVisibility(usesListVisibility) {}
+        UIButton(nlohmann::json &json);
     };
 
     struct Cam2D
     {
         Camera2D camera;
         std::vector<std::string> exclude;
-    };
 
-    template <typename T>
-    struct Attribute
-    {
-        std::string name;
-        T value;
-
-        Attribute() {}
-        Attribute(std::string name, T value)
-            : name(name), value(value) {}
+        Cam2D() {}
+        Cam2D(Camera2D camera, std::vector<std::string> exclude)
+            : camera(camera), exclude(exclude) {}
+        Cam2D(nlohmann::json &json);
     };
 
     struct Script
@@ -153,6 +159,7 @@ namespace lapCore
         Script() {}
         Script(std::string onCreateFunction, std::string onUpdateFunction, std::string onDestroyFunction)
             : onCreateFunction(onCreateFunction), onUpdateFunction(onUpdateFunction), onDestroyFunction(onDestroyFunction) {}
+        Script(nlohmann::json &json);
     };
 
 }

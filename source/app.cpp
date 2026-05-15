@@ -42,8 +42,10 @@ void App::Shutdown()
         return;
 
     world.main_scene.Clear();
+    world.resources.ClearAll();
 
     UnloadRenderTexture(world.window.target);
+    CloseAudioDevice();
 
     // shutdown window if it exists
     CloseWindow();
