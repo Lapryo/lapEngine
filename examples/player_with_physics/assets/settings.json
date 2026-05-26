@@ -1,0 +1,7 @@
+{
+    "window": {
+        "infinite-fps": true,
+        "title": "Player w/ Physics Example",
+        "fullscreen": true
+    }
+}

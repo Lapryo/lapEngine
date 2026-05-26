@@ -41,13 +41,13 @@ public:
         bool active;
         bool pressed;
         bool sustain;
-        std::string event;
+        entt::id_type eventID;
     };
 
     std::map<std::string, InputEntry> actions;
 
     void RegisterAction(const std::string &actionName, const InputEntry &entry);
-    void RegisterAction(const std::string &actionName, const std::string &event, std::vector<int> codes, bool sustain, InputType inputType, ControlType controlType, InputDeadzone deadzone = {0.0f, 0.0f}, bool active = true);
+    void RegisterAction(const std::string &actionName, entt::id_type eventID, std::vector<int> codes, bool sustain, InputType inputType, ControlType controlType, InputDeadzone deadzone = {0.0f, 0.0f}, bool active = true);
 
     InputSystem(Scene *scene, unsigned int order) : System(order, scene, false) {}
     void Update(float deltaTime, entt::registry &registry) override;

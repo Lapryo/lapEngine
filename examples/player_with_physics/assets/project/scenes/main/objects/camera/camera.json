@@ -1,0 +1,25 @@
+{
+    "name": "camera",
+    "parent": "",
+    "child-index": -1,
+    "elements": [
+        {
+            "type": "camera-2d",
+            "data": {
+                "offset": [400, 300],
+                "target": [0, 0],
+                "rotation": 0.0,
+                "zoom": 1.0,
+                "exclude": []
+            }
+        },
+        {
+            "type": "script",
+            "data": {
+                "functions": {
+                    "update": ["camera_update"]
+                }
+            }    
+        }
+    ]
+}

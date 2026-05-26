@@ -4,7 +4,6 @@
 
 #include "system.hpp"
 #include "app.hpp"
-#include "scriptregistry.hpp"
 #include "event.hpp"
 
 #include <raylib.h>

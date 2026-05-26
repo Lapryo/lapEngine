@@ -17,51 +17,77 @@ namespace lapCore
 
     using Object = entt::entity;
 
+    struct IEventContainer
+    {
+        virtual ~IEventContainer() = default;
+        entt::id_type type;
+    };
+    template <typename... Args>
+    struct EventContainer : IEventContainer
+    {
+        EventContainer()
+        {
+            type = entt::type_hash<EventContainer<Args...>>::value();
+        }
+
+        std::vector<std::function<void(Args...)>> listeners;
+    };
+
     class EventRegistry
     {
         // ... (rest of the EventRegistry class implementation is correct) ...
     public:
-        inline static std::unordered_map<std::string, std::any> eventCallbacks;
+        inline static std::unordered_map<entt::id_type, std::unique_ptr<IEventContainer>> eventCallbacks;
+        inline static std::unordered_map<entt::id_type, std::string> reverseLookup;
 
         // --- 1. Declaration and Definition for Connect (Handles all argument counts, including zero) ---
         template <typename... Args, typename Func>
-        static void Connect(const std::string &name, Func &&func)
+        static void Connect(entt::hashed_string name, Func &&func)
         {
-            using Fn = std::function<void(Args...)>;
-            auto &anyRef = eventCallbacks[name];
-            if (!anyRef.has_value())
+            using container = EventContainer<std::decay_t<Args>...>;
+
+            reverseLookup.try_emplace(name.value(), name.data());
+            auto &ptr = eventCallbacks[name.value()];
+
+            if (!ptr)
+                ptr = std::make_unique<container>();
+            if (ptr->type != entt::type_hash<container>::value())
             {
-                anyRef = std::vector<Fn>{};
-            }
-            auto *listeners_vec = std::any_cast<std::vector<Fn>>(&anyRef);
-            if (!listeners_vec)
-            {
-                std::cerr << "[EventRegistry] Mismatched event signature for '" << name << "'\n";
+                std::cerr << "[EventRegistery] Pointer types don't match\n";
                 return;
             }
-            listeners_vec->emplace_back(std::forward<Func>(func));
+
+            auto* c = static_cast<container*>(ptr.get());
+            if (!c)
+            {
+                std::cerr << "[EventRegistry] Mismatched event signature for '" << name.data() << "'.\n";
+                return;
+            }
+
+            c->listeners.emplace_back(std::forward<Func>(func));
         }
 
         // --- 2. Declaration and Definition of Fire (Handles all argument counts, including zero) ---
         template <typename... Args>
-        static void Fire(const std::string &name, Args... args)
+        static void Fire(entt::id_type id, Args&&... args)
         {
-            auto it = eventCallbacks.find(name);
+            auto it = eventCallbacks.find(id);
             if (it == eventCallbacks.end())
                 return;
 
-            auto *listeners_vec = std::any_cast<std::vector<std::function<void(Args...)>>>(&it->second);
-            if (!listeners_vec)
+            using container = EventContainer<std::decay_t<Args>...>;
+            auto *ptr = it->second.get();
+
+            if (ptr->type != entt::type_hash<container>::value())
             {
-                std::cerr << "[EventRegistry] Tried to fire event '" << name << "' with wrong argument types.\n";
+                std::cerr << "[EventRegistery] Pointer types don't match\n";
                 return;
             }
 
-            for (auto &listener : *listeners_vec)
-            {
+            auto *c = static_cast<container*>(ptr);
+            for (auto &listener : c->listeners)
                 if (listener)
                     listener(std::forward<Args>(args)...);
-            }
         }
     };
 
@@ -69,31 +95,31 @@ namespace lapCore
     // ECS Helper Functions
     // =======================================================================
 
-    template <typename SystemFunc>
-    void ConnectECSEvent(Scene *scene, Object object, const std::string &eventName, SystemFunc &&systemHandler)
+    template <typename... EventArgs, typename SystemFunc>
+    void ConnectECSEvent(
+        Scene* scene,
+        Object object,
+        entt::hashed_string name,
+        SystemFunc&& systemHandler)
     {
-        auto wrapper_callback = [scene,
-                                 object,
-                                 eventName,
-                                 handler = std::forward<SystemFunc>(systemHandler)]()
+        auto id = name.value();
+
+        auto wrapper_callback =
+            [scene,
+            object,
+            id,
+            handler = std::forward<SystemFunc>(systemHandler)]
+            (EventArgs... args)
         {
-            handler(scene, object, eventName);
+            handler(
+                scene,
+                object,
+                id,
+                std::forward<decltype(args)>(args)...
+            );
         };
 
-        EventRegistry::Connect(eventName, wrapper_callback);
-    }
-
-    template <typename EventType, typename SystemFunc>
-    void ConnectECSEvent(Scene *scene, Object object, const std::string &eventName, SystemFunc &&systemHandler)
-    {
-        auto wrapper_callback = [scene,
-                                 object,
-                                 eventName,
-                                 handler = std::forward<SystemFunc>(systemHandler)](const EventType &eventData)
-        {
-            handler(eventData, scene, object, eventName);
-        };
-        EventRegistry::Connect<const EventType &>(eventName, wrapper_callback);
+        EventRegistry::Connect<EventArgs...>(name, wrapper_callback);
     }
 }
 

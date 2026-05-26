@@ -2,7 +2,7 @@
 #define SCENE_HPP
 
 #include "system.hpp"
-#include "resource_manager.hpp"
+#include "project.hpp"
 
 #include <iostream>
 
@@ -14,7 +14,7 @@ namespace lapCore
 
     struct ObjectInfo
     {
-        std::string name;
+        entt::id_type id;
         Object object;
     };
 
@@ -24,93 +24,94 @@ namespace lapCore
         ObjectInfo parent;
         std::vector<ObjectInfo> children;
         int childIndex = -1;
+        bool fromPrefab = false;
     };
 
-    struct Scene
+    struct ObjectContainer
     {
-        Scene() {}
-        Scene(World *world, const std::string &name) : world(world), name(name) {}
-
-        World *world;
-
-        std::string name;
+        ~ObjectContainer() { ClearObjects(); }
 
         entt::registry objects;
-        std::unordered_map<std::string, ObjectEntry> objectMap;
 
-        entt::registry prefabs;
-        std::unordered_map<std::string, ObjectEntry> prefabMap;
+        std::unordered_map<entt::id_type, ObjectEntry> objectMap;
+
+        Object AddObject(entt::hashed_string name, entt::hashed_string parent, int childIndex, bool fromPrefab = false);
+        void RemoveObject(entt::id_type id);
+        void RemoveObject(Object object);
+        void RemoveObject(ObjectEntry entry);
+
+        Object* FindObject(entt::id_type id);
+
+        ObjectEntry* FindEntry(entt::id_type id);
+        ObjectEntry* FindEntry(Object object);
+
+        void AddObjectsFromProjectData(std::vector<ProjectObjectData> objects);
+
+        void AddElement(entt::hashed_string objectName, entt::id_type elementType, void* elementData);
+        void AddElement(Object object, entt::id_type elementType, void* elementData);
+        void RemoveElement(entt::id_type id, entt::id_type elementType);
+        void RemoveElement(Object object, entt::id_type elementType);
+        void* FindElement(entt::id_type id, entt::id_type elementType);
+        void* FindElement(Object object, entt::id_type elementType);
+
+        template <typename Element, typename... ElementArgs>
+        Element AddElement(Object object, ElementArgs &&...args)
+        {
+            return objects.emplace<Element>(object, std::forward<ElementArgs>(args)...);
+        }
+
+        template <typename Element>
+        void RemoveElement(Object object)
+        {
+            objects.remove<Element>(object);
+        }
+
+        template <typename Element>
+        Element *FindElement(Object object)
+        {
+            return objects.try_get<Element>(object);
+        }
+
+        void ClearObjects();
+    };
+
+    struct Scene : ObjectContainer
+    {
+        Scene(World* world, const std::string& name) : world(world), name(name) {}
+        ~Scene() { Clear(); }
 
         std::map<int, std::unique_ptr<System>> systems;
 
-        void Update(float deltaTime, RenderTexture2D &target);
+        std::string name;
+        World *world;
 
-        template <typename SystemType, typename... SystemArgs>
-        void AddSystem(int order, SystemArgs &&...args)
+        template <typename T, typename... Args>
+        void AddSystem(int order, Args&&... args)
         {
-            auto sys = std::make_unique<SystemType>(this, order, std::forward<SystemArgs>(args)...);
-            if constexpr (requires(SystemType &t, entt::registry &r) { t.Connect(r); })
+            if (order == -1) order = systems.rbegin()->first + 1;
+            auto sys = std::make_unique<T>(this, order, std::forward<Args>(args)...);
+            if constexpr (requires(T& t, entt::registry& r) { t.Connect(r); })
                 sys->Connect(objects);
 
             systems[order] = std::move(sys);
         }
 
         template <typename T>
-        T *GetSystem() const
+        T* GetSystem() const
         {
-            for (const auto &[order, systemPtr] : systems)
+            for (const auto& [order, systemPtr] : systems)
             {
-                if (T *foundSystem = dynamic_cast<T *>(systemPtr.get()))
+                if (T* foundSystem = dynamic_cast<T*>(systemPtr.get()))
                 {
                     return foundSystem;
                 }
             }
 
-            std::cerr << "Error: System of type " << typeid(T).name() << " not found!" << std::endl;
+            dbgln("Error: System of type " + std::string(typeid(T).name()) + " not found!", LogType::ERROR);
             return nullptr;
         }
 
-        Object AddObject(const std::string &name, const std::string &parent, int childIndex);
-        void RemoveObject(Object object);
-        ObjectEntry FindObject(const std::string &name);
-
-        Object AddPrefab(const std::string &name, const std::string &parent, int childIndex);
-        ObjectEntry FindPrefab(const std::string &name);
-
-        Object AddObjectFromPrefab(const std::string &prefabName, const std::string &newName);
-
-        std::string GetObjectName(Object object);
-
-        std::vector<ObjectInfo> GetChildren(Object object);
-        Object FindChild(Object object, const std::string &name);
-
-        void SetParent(const std::string &name, Object parent);
-        ObjectInfo GetParent(const std::string &name);
-
-        template <typename Element, typename... ElementArgs>
-        Element AddElement(entt::registry &registry, Object object, ElementArgs &&...args)
-        {
-            return registry.emplace<Element>(object, std::forward<ElementArgs>(args)...);
-        }
-
-        template <typename Element>
-        void RemoveElement(entt::registry &registry, Object object)
-        {
-            registry.remove<Element>(object);
-        }
-
-        template <typename Element>
-        Element *FindElement(entt::registry &registry, Object object)
-        {
-            return registry.try_get<Element>(object);
-        }
-
-        template <typename Element>
-        entt::view<Element> GetElements(entt::registry &registry)
-        {
-            return registry.view<Element>();
-        }
-
+        void Update(float delta, RenderTexture2D &target);
         void Clear();
     };
 }

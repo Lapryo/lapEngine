@@ -11,7 +11,7 @@ bool HandleKeyboardInput(InputSystem::InputEntry &entry, int key)
         {
             if (!entry.sustain && entry.pressed) return true;
             entry.pressed = true;
-            EventRegistry::Fire<>(entry.event);
+            EventRegistry::Fire(entry.eventID);
         }
     }
     else
@@ -28,7 +28,7 @@ bool HandleMouseInput(InputSystem::InputEntry &entry, int button)
         {
             if (!entry.sustain && entry.pressed) return true;
             entry.pressed = true;
-            EventRegistry::Fire<>(entry.event);
+            EventRegistry::Fire(entry.eventID);
         }
     }
     else
@@ -48,7 +48,7 @@ bool HandleGamepadInput(InputSystem::InputEntry &entry, InputSystem::ControlType
                 if (!entry.sustain && entry.pressed) return true;
                 entry.pressed = true;
                 entry.value = GetGamepadAxisMovement(gamepad, button);
-                EventRegistry::Fire<>(entry.event);
+                EventRegistry::Fire(entry.eventID);
             }
         }
         else
@@ -65,7 +65,7 @@ bool HandleGamepadInput(InputSystem::InputEntry &entry, InputSystem::ControlType
             {
                 if (!entry.sustain && entry.pressed) return true;
                 entry.pressed = true;
-                EventRegistry::Fire<>(entry.event);
+                EventRegistry::Fire(entry.eventID);
             }
         }
         else
@@ -108,7 +108,7 @@ void InputSystem::RegisterAction(const std::string &actionName, const InputEntry
     actions[actionName] = entry;
 }
 
-void InputSystem::RegisterAction(const std::string &actionName, const std::string &event, std::vector<int> codes, bool sustain, InputType inputType, ControlType controlType, InputDeadzone deadzone, bool active)
+void InputSystem::RegisterAction(const std::string &actionName, entt::id_type eventID, std::vector<int> codes, bool sustain, InputType inputType, ControlType controlType, InputDeadzone deadzone, bool active)
 {
     InputEntry entry;
     entry.key.inputType = inputType;
@@ -116,7 +116,7 @@ void InputSystem::RegisterAction(const std::string &actionName, const std::strin
     entry.key.codes = codes;
     entry.sustain = sustain;
     entry.active = active;
-    entry.event = event;
+    entry.eventID = eventID;
     entry.deadzone = deadzone;
 
     RegisterAction(actionName, entry);

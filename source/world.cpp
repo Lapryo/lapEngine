@@ -7,68 +7,77 @@
 #include "systems/script_sys.hpp"
 #include "systems/input_sys.hpp"
 
-using namespace lapCore;
+#include "reflection.hpp"
 
-void World::RegisterElements()
-{
-    RegisterElement<Origin2D>("Origin2D");
-    RegisterElement<Physics2D>("Physics2D");
-    RegisterElement<Frame>("Frame");
-    RegisterElement<UIList>("UIList");
-    RegisterElement<Sprite>("Sprite");
-    RegisterElement<Image>("Image");
-    RegisterElement<TextLabel>("TextLabel");
-    RegisterElement<EventBus>("EventBus");
-    RegisterElement<UIButton>("UIButton");
-    RegisterElement<Cam2D>("Cam2D");
-    RegisterElement<Script>("Script");
-}
+using namespace lapCore;
 
 void World::SetScene(ProjectSceneData &scene_data)
 {
-    main_scene.Clear();
-
-    main_scene = Scene(this, scene_data.name);
-    for (auto &instance : scene_data.instances)
+    if (mainScene)
     {
-        Object object = main_scene.AddObject(instance.name, instance.parent, instance.child_index);
+        for (auto &scnData : project.scenes)
+        {
+            if (scnData.name != mainScene->name)
+                continue;
 
-        for (auto &element : instance.elements)
-            // AI-generated code
-            std::visit([&](auto&& data)
+            for (auto &instData : scnData.instances.objects)
             {
-                using T = std::decay_t<decltype(data)>;
-                if constexpr (!std::is_same_v<T, std::monostate>)
+                for (auto &elmntData : instData.elements)
                 {
-                    main_scene.AddElement<T>(main_scene.objects, object, data);
+                    if (elmntData->synced != SyncProjectRuntimeMode::UPDATE_ON_SCENE)
+                        continue;
+
+                    void* existingElement = mainScene->FindElement(HASH_ID(instData.name.c_str()), elmntData->GetTypeID());
+                    if (!existingElement)
+                        continue;
+
+                    auto* serializer = Reflection::TryGet(elmntData->GetTypeName());
+                    if (!serializer)
+                        continue;
+
+                    auto ctx = SerializeContext{&resources};
+                    auto existingElementJson = serializer->to_json(existingElement, &ctx);
+                    serializer->from_json(elmntData->GetDataPtr(), existingElementJson);
                 }
-                    
-            }, element.data);
+            }
+        }
     }
+
+    // Clear out and set back up with new scene data
+    if (mainScene) mainScene->Clear();
+    mainScene = new Scene(this, scene_data.name);
+
+    mainScene->AddObjectsFromProjectData(scene_data.instances.objects);
+    mainScene->AddObjectsFromProjectData(scene_data.instances.prefabs);
 
     for (auto &system : scene_data.systems)
     {
         if (system.type == "render")
-            main_scene.AddSystem<RenderSystem>(system.order);
+            mainScene->AddSystem<RenderSystem>(system.order);
         else if (system.type == "physics")
         {
-            main_scene.AddSystem<PhysicsSystem>(system.order);
-            main_scene.GetSystem<PhysicsSystem>()->RegisterBodies();
+            mainScene->AddSystem<PhysicsSystem>(system.order);
+            mainScene->GetSystem<PhysicsSystem>()->RegisterBodies();
         }
         else if (system.type == "script")
-            main_scene.AddSystem<ScriptSystem>(system.order);
+            mainScene->AddSystem<ScriptSystem>(system.order);
         else if (system.type == "gui")
-            main_scene.AddSystem<GUISystem>(system.order);
+            mainScene->AddSystem<GUISystem>(system.order);
         else if (system.type == "input")
-            main_scene.AddSystem<InputSystem>(system.order);
+            mainScene->AddSystem<InputSystem>(system.order);
         else
             dbgln("Unknown system type: " + system.type, LogType::WARNING);
     }
 
-    // cool thing to ensure there is a render system in the scene cause if not, the window wouldn't update at all and buffer the whole time
+    // Cool thing to ensure there is a render system in the scene. cause if not, the window won't update at all and buffer the whole time
     if (IsWindowReady())
-        if (main_scene.GetSystem<RenderSystem>() == nullptr)
-            main_scene.AddSystem<RenderSystem>(-1);
+        if (mainScene->GetSystem<RenderSystem>() == nullptr)
+            mainScene->AddSystem<RenderSystem>(-1);
+}
+
+ProjectSceneData &lapCore::World::GetMainSceneData()
+{
+    return project.scenes[project.main_scene_index];
 }
 
 WindowProperties LoadWindowProperties(const nlohmann::json_abi_v3_12_0::json &windowJson)
@@ -113,42 +122,19 @@ void lapCore::World::LoadAssets()
     for (const auto& asset : project.assets)
     {
         if (asset.type == "texture")
-        {
-            Texture2D* texture = resources.AddTexture(asset.name, asset.path, asset.data);
-            if (texture == nullptr)
-                dbgln("Failed to load texture: " + asset.name + " from path: " + asset.path, LogType::ERROR);
-        }
+            resources.textures.Load(HASH(asset.name.c_str()), LoadTexture(asset.path.c_str()));
         else if (asset.type == "shader")
-        {
-            Shader* shader = resources.AddShader(asset.name, asset.path + ".vs", asset.path + ".fs", asset.data);
-            if (shader == nullptr)
-                dbgln("Failed to load shader: " + asset.name + " from path: " + asset.path, LogType::ERROR);
-        }
+            resources.shaders.Load(HASH(asset.name.c_str()), LoadShader(asset.path.c_str(), asset.path.c_str()));
         else if (asset.type == "music")
-        {
-            Music music = LoadMusicStream(asset.path.c_str());
-            resources.music[asset.name] = music;
-        }
+            resources.music.Load(HASH(asset.name.c_str()), LoadMusicStream(asset.path.c_str()));
         else if (asset.type == "sound")
-        {
-            Sound sound = LoadSound(asset.path.c_str());
-            resources.sounds[asset.name] = sound;
-        }
+            resources.sounds.Load(HASH(asset.name.c_str()), LoadSound(asset.path.c_str()));
         else if (asset.type == "model")
-        {
-            Model model = LoadModel(asset.path.c_str());
-            resources.models[asset.name] = model;
-        }
+            resources.models.Load(HASH(asset.name.c_str()), LoadModel(asset.path.c_str()));
         else if (asset.type == "font")
-        {
-            Font font = LoadFont(asset.path.c_str());
-            resources.fonts[asset.name] = font;
-        }
+            resources.fonts.Load(HASH(asset.name.c_str()), LoadFont(asset.path.c_str()));
         else if (asset.type == "image")
-        {
-            Image image = LoadImage(asset.path.c_str());
-            resources.images[asset.name] = image;
-        }
+            resources.images.Load(HASH(asset.name.c_str()), LoadImage(asset.path.c_str()));
         else
             dbgln("Unknown asset type: " + asset.type + " for asset: " + asset.name, LogType::WARNING);
     }

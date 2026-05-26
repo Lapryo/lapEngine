@@ -34,11 +34,6 @@ target_include_directories(player_physics PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/../../include" # Edit lapEngine include path as needed
 )
 
-# Library directories and linking
-target_link_directories(player_physics PRIVATE 
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib" # Edit library path as needed
-)
-
 if(WIN32)
     target_link_libraries(player_physics PRIVATE 
         lapEngine

@@ -27,6 +27,8 @@ public:
 
     b2WorldId worldID;
 
+    std::unordered_map<Object, b2BodyId> bodyMap;
+
     std::string GetName() const override { return "PhysicsSystem"; }
 };
 

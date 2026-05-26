@@ -2,8 +2,9 @@
 #define WORLD_HPP
 
 #include "project.hpp"
-#include "resource_manager.hpp"
+#include "resourcemanager.hpp"
 #include "scene.hpp"
+#include "reflection.hpp"
 
 #include <memory>
 
@@ -38,23 +39,16 @@ namespace lapCore
 
     struct World
     {
-        World(Project project) : project(project) { 
-            RegisterElements(); 
+        World(Project project) : project(project) {
+            prefabs = new ObjectContainer();
+            prefabs->AddObjectsFromProjectData(project.prefabs);
         }
 
-        Scene main_scene;
+        Scene* mainScene = nullptr;
+        ObjectContainer* prefabs = nullptr;
 
         WindowProperties window;
         ResourceManager resources;
-
-        // for debugging
-        std::unordered_map<entt::id_type, std::string> elementLookup;
-        void RegisterElements();
-        template <typename T>
-        void RegisterElement(const std::string &name)
-        {
-            elementLookup[entt::type_id<T>().hash()] = name;
-        }
 
         void LoadAssets();
         void LoadSettings(const std::string &settingsFilePath);
@@ -63,6 +57,7 @@ namespace lapCore
         void ResetWindowProperties();
 
         void SetScene(ProjectSceneData &scene_data);
+        ProjectSceneData &GetMainSceneData();
 
         const Project &GetProject() const {
             return project;
