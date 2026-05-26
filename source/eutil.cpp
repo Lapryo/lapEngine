@@ -26,7 +26,7 @@ std::string lapCore::FileDialogs::SaveFile(std::vector<std::string> filters)
 
 std::string lapCore::ReadFileToString(const std::string &filePath)
 {
-    std::ifstream file(GetApplicationDirectory() / filePath);
+    std::ifstream file(GetApplicationDirectory() + filePath);
     if (!file.is_open())
     {
         std::cerr << "Failed.\n";
@@ -42,7 +42,7 @@ std::string lapCore::ReadFileToString(const std::string &filePath)
 
 void lapCore::WriteStringToFile(const std::string &filePath, const std::string &data)
 {
-    std::ofstream file(GetApplicationDirectory() / filePath);
+    std::ofstream file(GetApplicationDirectory() + filePath);
     if (!file.is_open())
     {
         std::cerr << "Failed to open file for writing: " << filePath << "\n";
