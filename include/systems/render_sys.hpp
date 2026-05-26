@@ -12,8 +12,6 @@ public:
         Sprite,
         Text,
         Rect,
-        RoundedRect,
-        Circle,
         Image
     };
 

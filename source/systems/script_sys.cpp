@@ -14,16 +14,13 @@ void ScriptSystem::Update(float deltaTime, entt::registry &registry)
 
         if (!script.initiated)
         {
-            auto createFunc = ScriptRegistry::onCreateFunctions[script.onCreateFunction];
-
-            if (createFunc)
-                createFunc(scene, entity);
+            for (const auto &func : script.onCreateFunctions)
+                EventRegistry::Fire(func);
             script.initiated = true;
         }
 
-        auto updateFunc = ScriptRegistry::onUpdateFunctions[script.onUpdateFunction];
-        if (updateFunc)
-            updateFunc(scene, entity, deltaTime);
+        for (const auto &func : script.onUpdateFunctions)
+            EventRegistry::Fire(func, deltaTime);
     }
 }
 
@@ -36,8 +33,7 @@ void ScriptSystem::OnDestroy(entt::registry &registry)
         if (!script.active)
             continue;
 
-        auto destroyFunc = ScriptRegistry::onDestroyFunctions[script.onDestroyFunction];
-        if (destroyFunc)
-            destroyFunc(scene, entity);
+        for (const auto &func : script.onDestroyFunctions)
+            EventRegistry::Fire(func);
     }
 }

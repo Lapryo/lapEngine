@@ -1,0 +1,30 @@
+{
+	"name": "logo",
+	"parent": "",
+	"child-index": -1,
+	"elements": [
+        {
+            "type": "ui-image",
+            "data": {
+                "renderable": {
+                    "isScreenSpace": true,
+                    "visible": true,
+                    "zlayer": 3,
+                    "usesUIListVisibility": false,
+                    "tint": [255, 255, 255, 255]
+                },
+                "origin": {
+                    "position": {
+                        "scale": [0, 0],
+                        "offset": [0, 30]
+                    },
+                    "size": {
+                        "scale": [0, 0],
+                        "offset": [150, 75]
+                    }
+                },
+                "texture-name": "logo"
+            }
+        }
+    ]
+}

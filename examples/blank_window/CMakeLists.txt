@@ -34,11 +34,6 @@ target_include_directories(blank_window PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}/../../include" # Edit lapEngine include path as needed
 )
 
-# Library directories and linking
-target_link_directories(blank_window PRIVATE 
-	"${CMAKE_CURRENT_SOURCE_DIR}/lib" # Edit library path as needed
-)
-
 if(WIN32)
 	target_link_libraries(blank_window PRIVATE 
 		lapEngine

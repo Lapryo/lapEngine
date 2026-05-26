@@ -1,0 +1,58 @@
+{
+	"name": "main",
+	"systems": [
+		{
+			"type": "render",
+			"order": 3
+		},
+		{
+			"type": "physics",
+			"order": 2
+		},
+		{
+			"type": "script",
+			"order": 1
+		},
+		{
+			"type": "input",
+			"order": 0
+		}
+	],
+	"instances": {
+		"prefabs": [
+			["solid-block", [{
+            "type": "physics-2d",
+            "data": {
+                "body": {
+                    "type": "dynamic",
+                    "initial-position": [50, 100]
+                },
+                "polygon": {
+                    "hitbox-type": "box",
+                    "width": 25,
+                    "height": 25
+                }
+            }
+        }], 1],
+		["solid-block", [{
+			"type": "physics-2d",
+			"data": {
+				"body": {
+					"type": "dynamic",
+					"initial-position": [50, 0]
+				},
+				"polygon": {
+					"hitbox-type": "box",
+					"width": 25,
+					"height": 25
+				}
+			}
+		}], 1]
+		],
+		"objects": [
+			"logo.json",
+			"player.json",
+			"camera.json"
+		]
+	}
+}

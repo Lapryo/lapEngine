@@ -6,15 +6,15 @@ void RenderSystem::Connect(entt::registry &registry)
 {
     // Rebuild when a property changes
     registry.on_update<Sprite>().connect<&RenderSystem::OnRenderableUpdated>(*this);
-    registry.on_update<TextLabel>().connect<&RenderSystem::OnRenderableUpdated>(*this);
-    registry.on_update<lapCore::lapImage>().connect<&RenderSystem::OnRenderableUpdated>(*this);
-    registry.on_update<Frame>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_update<UITextLabel>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_update<UIImage>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_update<UIFrame>().connect<&RenderSystem::OnRenderableUpdated>(*this);
 
     // Rebuild when one is added
     registry.on_construct<Sprite>().connect<&RenderSystem::OnRenderableUpdated>(*this);
-    registry.on_construct<TextLabel>().connect<&RenderSystem::OnRenderableUpdated>(*this);
-    registry.on_construct<lapCore::lapImage>().connect<&RenderSystem::OnRenderableUpdated>(*this);
-    registry.on_construct<Frame>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_construct<UITextLabel>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_construct<UIImage>().connect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_construct<UIFrame>().connect<&RenderSystem::OnRenderableUpdated>(*this);
 }
 
 void RenderSystem::OnRenderableUpdated(entt::registry &registry, Object object)
@@ -34,24 +34,24 @@ void RenderSystem::RebuildRenderList(entt::registry &registry)
         renderList.push_back({e, s.renderable.zlayer, s.renderable.isScreenSpace, RenderType::Sprite});
     }
 
-    auto imageView = registry.view<lapCore::lapImage>();
+    auto imageView = registry.view<UIImage>();
     for (auto e : imageView)
     {
-        const auto &s = imageView.get<lapCore::lapImage>(e);
+        const auto &s = imageView.get<UIImage>(e);
         renderList.push_back({e, s.sprite.renderable.zlayer, s.sprite.renderable.isScreenSpace, RenderType::Image});
     }
 
-    auto textView = registry.view<TextLabel>();
+    auto textView = registry.view<UITextLabel>();
     for (auto e : textView)
     {
-        const auto &t = textView.get<TextLabel>(e);
+        const auto &t = textView.get<UITextLabel>(e);
         renderList.push_back({e, t.frame.renderable.zlayer, t.frame.renderable.isScreenSpace, RenderType::Text});
     }
 
-    auto frameView = registry.view<Frame>();
+    auto frameView = registry.view<UIFrame>();
     for (auto e : frameView)
     {
-        const auto &t = frameView.get<Frame>(e);
+        const auto &t = frameView.get<UIFrame>(e);
         renderList.push_back({e, t.renderable.zlayer, t.renderable.isScreenSpace, RenderType::Rect});
     }
 
@@ -84,15 +84,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         if (!sprite || !sprite->renderable.visible)
             return;
 
-        const Texture2D *texture;
-
-        auto it = scene->world->resources.textures.find(sprite->textureName);
-        if (it != scene->world->resources.textures.end())
-        {
-            texture = &it->second;
-        }
-        else
-            return;
+        const Texture2D* texture = scene->world->resources.textures.TryGet(sprite->textureID);
 
         Rectangle rect;
         rect.width = (float)texture->width;
@@ -100,7 +92,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         float rotation = 0.f;
 
-        auto *origin = registry.try_get<Origin2D>(obj);
+        auto *origin = registry.try_get<Transform2D>(obj);
         if (origin)
         {
             rect.x = origin->position.x;
@@ -111,52 +103,46 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             rotation = origin->rotation;
         }
 
-        DrawTexturePro(
-            *texture,
-            {0.f, 0.f, (float)texture->width, (float)texture->height},
-            rect,
-            {rect.width / 2.f, rect.height / 2.f},
-            rotation,
-            sprite->renderable.tint);
+        if (texture)
+            DrawTexturePro(
+                *texture,
+                {0.f, 0.f, rect.width, rect.height},
+                rect,
+                {rect.width / 2.f, rect.height / 2.f},
+                rotation,
+                sprite->renderable.tint);
     };
 
     auto drawImage = [&](Object obj, const Scene *scene)
     {
-        auto *image = registry.try_get<lapCore::lapImage>(obj);
+        auto *image = registry.try_get<lapCore::UIImage>(obj);
         if (!image || !image->sprite.renderable.visible)
             return;
 
-        const Texture2D *texture;
-
-        auto it = scene->world->resources.textures.find(image->sprite.textureName);
-        if (it != scene->world->resources.textures.end())
-        {
-            texture = &it->second;
-        }
-        else
-            return;
+        const Texture2D *texture = scene->world->resources.textures.TryGet(image->sprite.textureID);
 
         Rectangle rect = UIOriginToRect(image->origin, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
 
-        DrawTexturePro(
-            *texture,
-            {0.f, 0.f, (float)texture->width, (float)texture->height},
-            rect,
-            image->origin.anchor,
-            image->origin.rotation,
-            image->sprite.renderable.tint);
+        if (texture)
+            DrawTexturePro(
+                *texture,
+                {0.f, 0.f, (float)texture->width, (float)texture->height},
+                rect,
+                image->origin.anchor,
+                image->origin.rotation,
+                image->sprite.renderable.tint);
     };
 
     auto drawRect = [&](Object obj, const Scene *scene)
     {
-        auto *frame = registry.try_get<Frame>(obj);
+        auto *frame = registry.try_get<UIFrame>(obj);
         if (!frame || !frame->renderable.visible)
             return;
 
         Rectangle rect = UIOriginToRect(frame->origin, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
         float rot = 0.f;
 
-        if (auto *origin = registry.try_get<Origin2D>(obj))
+        if (auto *origin = registry.try_get<Transform2D>(obj))
         {
             rect.x += origin->position.x;
             rect.y += origin->position.y;
@@ -170,39 +156,39 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
     auto drawText = [&](Object obj, const Scene *scene)
     {
-        auto *text = registry.try_get<TextLabel>(obj);
+        auto *text = registry.try_get<UITextLabel>(obj);
         if (!text || !text->frame.renderable.visible)
             return;
 
         float x = 0.f, y = 0.f;
 
-        x = text->frame.origin.position.scale.x * scene->world->window.logical_resolution.x + text->frame.origin.position.offset.x + text->textPadding.left;
-        y = text->frame.origin.position.scale.y * scene->world->window.logical_resolution.y + text->frame.origin.position.offset.y + text->textPadding.top;
+        x = text->frame.origin.position.scale.x * scene->world->window.logical_resolution.x + text->frame.origin.position.offset.x + text->padding.left;
+        y = text->frame.origin.position.scale.y * scene->world->window.logical_resolution.y + text->frame.origin.position.offset.y + text->padding.top;
 
         // Handle horizontal alignment
         float textWidth = MeasureText(text->text.c_str(), text->fontSize);
-        switch (text->textAlignment.horizontal)
+        switch (text->alignment.horizontal)
         {
         case HorizontalAlignment::LEFT:
             break;
         case HorizontalAlignment::MIDDLE:
-            x += (text->textBounds.offset.x - textWidth - text->textPadding.right) * 0.5f;
+            x += (text->bounds.offset.x - textWidth - text->padding.right) * 0.5f;
             break;
         case HorizontalAlignment::RIGHT:
-            x += text->textBounds.offset.x - textWidth - text->textPadding.right;
+            x += text->bounds.offset.x - textWidth - text->padding.right;
             break;
         }
 
         // Handle vertical alignment
-        switch (text->textAlignment.vertical)
+        switch (text->alignment.vertical)
         {
         case VerticalAlignment::TOP:
             break;
         case VerticalAlignment::MIDDLE:
-            y += (text->textBounds.offset.y - text->fontSize - text->textPadding.bottom) * 0.5f;
+            y += (text->bounds.offset.y - text->fontSize - text->padding.bottom) * 0.5f;
             break;
         case VerticalAlignment::BOTTOM:
-            y += text->textBounds.offset.y - text->fontSize - text->textPadding.bottom;
+            y += text->bounds.offset.y - text->fontSize - text->padding.bottom;
             break;
         }
 
@@ -213,9 +199,9 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
     {
         if (worldSpace)
         {
-            for (auto [camEntity, cam] : registry.view<Cam2D>().each())
+            for (auto [camEntity, cam] : registry.view<Camera2D>().each())
             {
-                BeginMode2D(cam.camera);
+                BeginMode2D(cam);
                 for (const auto &entry : entries)
                 {
                     switch (entry.type)

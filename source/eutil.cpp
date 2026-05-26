@@ -24,69 +24,6 @@ std::string lapCore::FileDialogs::SaveFile(std::vector<std::string> filters)
     return sfd.result();
 }*/
 
-Vector2 lapCore::json_rlvec2(const nlohmann::json &json, const std::string &key)
-{
-    Vector2 vec;
-
-    if (json.contains(key) && json[key].is_array() && json[key].size() == 2)
-    {
-        vec.x = json[key].at(0).get<float>();
-        vec.y = json[key].at(1).get<float>();
-    }
-    else
-        vec = {0, 0};
-
-    return vec;
-}
-
-Vector3 lapCore::json_rlvec3(const nlohmann::json &json, const std::string &key)
-{
-    Vector3 vec;
-
-    if (json.contains(key) && json[key].is_array() && json[key].size() == 3)
-    {
-        vec.x = json[key].at(0).get<float>();
-        vec.y = json[key].at(1).get<float>();
-        vec.z = json[key].at(2).get<float>();
-    }
-    else
-        vec = {0, 0, 0};
-
-    return vec;
-}
-
-Vector4 lapCore::json_rlvec4(const nlohmann::json &json, const std::string &key)
-{
-    Vector4 vec;
-
-    if (json.contains(key) && json[key].is_array() && json[key].size() == 4)
-    {
-        vec.x = json[key].at(0).get<float>();
-        vec.y = json[key].at(1).get<float>();
-        vec.z = json[key].at(2).get<float>();
-        vec.w = json[key].at(3).get<float>();
-    }
-    else
-        vec = {0, 0, 0, 0};
-
-    return vec;
-}
-
-b2BodyDef lapCore::json_b2bodydef(const nlohmann::json &json)
-{
-    return b2BodyDef();
-}
-
-b2ShapeDef lapCore::json_b2shapedef(const nlohmann::json &json)
-{
-    return b2ShapeDef();
-}
-
-b2Polygon lapCore::json_b2polygon(const nlohmann::json &json)
-{
-    return b2Polygon();
-}
-
 std::string lapCore::ReadFileToString(const std::string &filePath)
 {
     std::ifstream file(filePath);
@@ -201,31 +138,4 @@ void lapCore::dbgln(const std::string &message, LogType type)
             std::cerr << "[ERROR] " << message << "\n";
             break;
     }
-}
-
-// Default constructors for structs
-lapCore::Renderable::Renderable()
-    : zlayer(0), isScreenSpace(false), visible(true), tint(RAYWHITE), usesUIListVisiblity(false)
-{
-    space = {0, 0, 0, 0};
-}
-
-lapCore::Alignment::Alignment()
-    : horizontal(HorizontalAlignment::LEFT), vertical(VerticalAlignment::TOP)
-{
-}
-
-lapCore::FrameVector::FrameVector()
-    : scale({0, 0}), offset({0, 0})
-{
-}
-
-lapCore::Padding::Padding()
-    : top(0), bottom(0), left(0), right(0)
-{
-}
-
-lapCore::UIOrigin::UIOrigin()
-    : position(FrameVector()), size(FrameVector())
-{
 }

@@ -3,7 +3,130 @@
 
 using namespace lapCore;
 
-void Scene::Update(float deltaTime, RenderTexture2D &target)
+Object lapCore::ObjectContainer::AddObject(entt::hashed_string name, entt::hashed_string parent, int childIndex, bool fromPrefab)
+{
+    ObjectEntry entry;
+    entry.info.id = name.value();
+    entry.info.object = this->objects.create();
+    entry.parent.id = parent.value();
+    entry.childIndex = childIndex;
+    entry.fromPrefab = fromPrefab;
+
+    objectMap[name.value()] = entry;
+    return entry.info.object;
+}
+
+void lapCore::ObjectContainer::RemoveObject(entt::id_type id)
+{
+    auto object = *FindObject(id);
+
+    objects.destroy(object);
+    objectMap.erase(id);
+}
+
+void lapCore::ObjectContainer::RemoveObject(Object object)
+{
+    for (const auto &obj : objectMap)
+    {
+        if (obj.second.info.object == object)
+        {
+            objects.destroy(obj.second.info.object);
+            objectMap.erase(obj.second.info.id);
+        }
+    }
+}
+
+Object *lapCore::ObjectContainer::FindObject(entt::id_type id)
+{
+    auto it = objectMap.find(id);
+    if (it != objectMap.end())
+        return &it->second.info.object;
+    return nullptr;
+}
+
+ObjectEntry *lapCore::ObjectContainer::FindEntry(Object object)
+{
+    for (auto& objEntry : objectMap)
+    {
+        if (objEntry.second.info.object == object)
+            return &objEntry.second;
+    }
+    return nullptr;
+}
+
+void lapCore::ObjectContainer::AddObjectsFromProjectData(std::vector<ProjectObjectData> objects)
+{
+    for (const auto& object_data : objects)
+    {
+        auto prefabObject = AddObject(HASH(object_data.name.c_str()), HASH(object_data.parent.c_str()), object_data.child_index, true);
+        for (const auto& element : object_data.elements)
+        {
+            if (!element.get())
+                continue;
+
+            AddElement(HASH(object_data.name.c_str()), element->GetTypeID(), element->GetDataPtr());
+        }
+    }
+}
+
+void lapCore::ObjectContainer::AddElement(entt::hashed_string objectName, entt::id_type elementType, void *elementData)
+{
+    auto it = objectMap.find(objectName.value());
+    if (it == objectMap.end())
+        return;
+
+    AddElement(it->second.info.object, elementType, elementData);
+}
+
+void lapCore::ObjectContainer::AddElement(Object object, entt::id_type elementType, void *elementData)
+{
+    auto entry = Reflection::TryGet(elementType);
+    entry->emplace(objects, object, elementData);
+}
+
+void lapCore::ObjectContainer::RemoveElement(entt::id_type id, entt::id_type elementType)
+{
+    auto it = objectMap.find(id);
+    if (it == objectMap.end())
+        return;
+
+    RemoveElement(it->second.info.object, elementType);
+}
+
+void lapCore::ObjectContainer::RemoveElement(Object object, entt::id_type elementType)
+{
+    auto entry = Reflection::TryGet(elementType);
+    entry->erase(objects, object);
+}
+
+void *lapCore::ObjectContainer::FindElement(entt::id_type id, entt::id_type elementType)
+{
+    auto it = objectMap.find(id);
+    if (it == objectMap.end())
+        return nullptr;
+
+    return FindElement(it->second.info.object, elementType);
+}
+
+void *lapCore::ObjectContainer::FindElement(Object object, entt::id_type elementType)
+{
+    auto* storage = objects.storage(elementType);
+    if (!storage)
+        return nullptr;
+
+    if (!storage->contains(object))
+        return nullptr;
+
+    return storage->value(object);
+}
+
+void lapCore::ObjectContainer::ClearObjects()
+{
+    objects.clear();
+    objectMap.clear();
+}
+
+void lapCore::Scene::Update(float deltaTime, RenderTexture2D &target)
 {
     /// Draw to render texture first
     BeginTextureMode(target);
@@ -65,190 +188,9 @@ void Scene::Update(float deltaTime, RenderTexture2D &target)
     EndDrawing();
 }
 
-Object Scene::AddObject(const std::string &name, const std::string &parent, int childIndex)
+void lapCore::Scene::Clear()
 {
-    auto object = objects.create();
-
-    // Create object info
-    ObjectInfo objInfo;
-    objInfo.name = name;
-    objInfo.object = object;
-
-    // Create parent info
-    ObjectInfo parentInfo;
-    parentInfo.name = parent;
-    if (parent == "")
-        parentInfo.object = entt::null;
-    else
-        parentInfo.object = objectMap[parent].info.object;
-
-    // Create the object entry for the map
-    ObjectEntry entry;
-    entry.info = objInfo;
-    entry.parent = parentInfo;
-    entry.childIndex = childIndex;
-
-    objectMap[name] = entry;
-
-    if (childIndex == -1)
-    {
-        if (parent != "")
-        {
-            objectMap[parent].children.push_back(objInfo);
-        }
-    }
-    else
-    {
-        if (parent != "")
-        {
-            auto &children = objectMap[parent].children;
-            if (children.size() < (size_t)(childIndex + 1))
-            {
-                size_t old = children.size();
-                children.resize(childIndex + 1);
-                for (size_t k = old; k < children.size(); ++k)
-                {
-                    children[k].name = "";
-                    children[k].object = entt::null;
-                }
-            }
-
-            children[childIndex] = objInfo;
-        }
-    }
-
-    return object;
-}
-
-void Scene::RemoveObject(Object object)
-{
-    objects.destroy(object);
-}
-
-void Scene::Clear()
-{
-    objects.clear();
+    ClearObjects();
     systems.clear();
-    prefabs.clear();
-
-    objectMap.clear();
-    prefabMap.clear();
-}
-
-ObjectEntry Scene::FindObject(const std::string &name)
-{
-    auto it = objectMap.find(name);
-    if (it != objectMap.end())
-        return it->second;
-
-    dbgln("Warning: Object '" + name + "' not found in scene '" + this->name + "'", LogType::WARNING);
-    return ObjectEntry();
-}
-
-Object lapCore::Scene::AddPrefab(const std::string &name, const std::string &parent, int childIndex)
-{
-    auto object = prefabs.create();
-
-    // Create object info
-    ObjectInfo objInfo;
-    objInfo.name = name;
-    objInfo.object = object;
-
-    // Create parent info
-    ObjectInfo parentInfo;
-    parentInfo.name = parent;
-    parentInfo.object = prefabMap[parent].info.object;
-
-    // Create the object entry for the map
-    ObjectEntry entry;
-    entry.info = objInfo;
-    entry.parent = parentInfo;
-    entry.childIndex = childIndex;
-
-    prefabMap[name] = entry;
-
-    if (childIndex == -1)
-        prefabMap[parent].children.push_back(objInfo);
-    else
-    {
-        auto &children = prefabMap[parent].children;
-        if (children.size() < (size_t)(childIndex + 1))
-        {
-            size_t old = children.size();
-            children.resize(childIndex + 1);
-            for (size_t k = old; k < children.size(); ++k)
-            {
-                children[k].name = "";
-                children[k].object = entt::null;
-            }
-        }
-
-        children[childIndex] = objInfo;
-    }
-
-    return object;
-}
-
-ObjectEntry lapCore::Scene::FindPrefab(const std::string &name)
-{
-    if (prefabMap.find(name) != prefabMap.end())
-        return prefabMap[name];
-
-    return ObjectEntry();
-}
-
-Object lapCore::Scene::AddObjectFromPrefab(const std::string &prefabName, const std::string &newName)
-{
-    auto object = objects.create();
-
-    ObjectEntry entry;
-    entry = FindPrefab(prefabName);
-
-    entry.info.object = object;
-    entry.info.name = newName;
-    objectMap[newName] = entry;
-
-    return object;
-}
-
-std::string lapCore::Scene::GetObjectName(Object object)
-{
-    for (auto entry : objectMap)
-    {
-        if (entry.second.info.object == object)
-            return entry.second.info.name;
-    }
-
-    return "";
-}
-
-std::vector<ObjectInfo> lapCore::Scene::GetChildren(Object object)
-{
-    if (GetObjectName(object) == "")
-        return {};
-
-    return objectMap[GetObjectName(object)].children;
-}
-
-Object lapCore::Scene::FindChild(Object object, const std::string &name)
-{
-    std::string objName = GetObjectName(object);
-    if (objName == "")
-        return Object{entt::null};
-    for (auto &child : objectMap[objName].children)
-    {
-        if (child.name == name)
-            return child.object;
-    }
-    return Object{entt::null};
-}
-
-void lapCore::Scene::SetParent(const std::string &name, Object parent)
-{
-    FindObject(name).parent = FindObject(GetObjectName(parent)).info;
-}
-
-ObjectInfo lapCore::Scene::GetParent(const std::string &name)
-{
-    return FindObject(name).parent;
+    name = "";
 }

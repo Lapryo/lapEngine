@@ -1,0 +1,11 @@
+{
+	"name": "Flappy Bird",
+	"version": "0.0.1-1",
+	"assets": [],
+	"scenes": [
+		"main.json"
+	],
+	"prefabs": [
+		"solid-block.json"
+	]
+}

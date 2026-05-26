@@ -13,8 +13,8 @@ void PhysicsSystem::RegisterBodies()
     auto view = scene->objects.view<Physics2D>();
     for (auto [e, physics] : view.each())
     {
-        if (!b2Body_IsValid(physics.bodyID))
-            physics.bodyID = Create2DBody(physics.bodyDef, physics.shapeDef, physics.polygon);
+        if (!b2Body_IsValid(bodyMap[e]))
+            bodyMap[e] = Create2DBody(physics.bodyDef, physics.shapeDef, physics.polygon);
     }
 }
 
@@ -37,75 +37,18 @@ void PhysicsSystem::Update(float deltaTime, entt::registry &registry)
         accumulator -= timeStep;
     }
 
-    auto view = registry.view<Origin2D, Physics2D>();
+    auto view = registry.view<Transform2D, Physics2D>();
     for (auto [entity, origin, physics] : view.each())
     {
-        if (b2Body_IsValid(physics.bodyID))
+        if (b2Body_IsValid(bodyMap[entity]))
         {
-            auto bodyPos = b2Body_GetPosition(physics.bodyID);
+            auto bodyPos = b2Body_GetPosition(bodyMap[entity]);
             origin.position = {bodyPos.x, bodyPos.y};
-            b2Rot rotation = b2Body_GetRotation(physics.bodyID);
+            b2Rot rotation = b2Body_GetRotation(bodyMap[entity]);
             float radians = atan2f(rotation.s, rotation.c);
-            float degrees = radians * (180.0f / PI);
+            float degrees = radians * RAD2DEG;
             if (degrees < 0) degrees += 360.0f;
             origin.rotation = degrees;
         }
-        /*
-        // implement collisions
-        Vector2 oldPos = origin.position;
-        Vector2 newPos = {origin.position.x + physics.velocity.x * deltaTime - physics.gravity.x * deltaTime,
-                              origin.position.y + physics.velocity.y * deltaTime - physics.gravity.y * deltaTime};
-
-        if (physics.collidable)
-        {
-            // detect if the object will be collided with something at the new position point
-            Rectangle thisRect;
-            thisRect.x = newPos.x + (contact_hitbox_precision / 2.f);
-            thisRect.y = newPos.y - (contact_hitbox_precision / 2.f);
-            thisRect.width = physics.hitbox.x - contact_hitbox_precision;
-            thisRect.height = physics.hitbox.y - contact_hitbox_precision;
-            
-            // loop through all objects with an origin and physics besides this one
-            for (auto [e2, o2, p2] : view.each())
-            {
-                if (e2 != entity && p2.collidable)
-                {
-                    Rectangle otherRect;
-                    otherRect.x = o2.position.x + (contact_hitbox_precision / 2.f);
-                    otherRect.y = o2.position.y - (contact_hitbox_precision / 2.f);
-                    otherRect.width = p2.hitbox.x - contact_hitbox_precision;
-                    otherRect.height = p2.hitbox.y - contact_hitbox_precision;
-
-                    if (CheckCollisionRecs(thisRect, otherRect))
-                    {
-                        // get the direction between the old position and the new position
-                        Vector2 difference = {newPos.x - oldPos.x, newPos.y - oldPos.y};
-                        auto dir = rm::Vector2Normalize(difference);
-                        if (dir.x == 0 && dir.y == 0) dir = {1.f, 1.f};
-
-                        // repeat decreasing the distance until CheckCollisionRecs is false
-                        while (CheckCollisionRecs(thisRect, otherRect))
-                        {
-                            thisRect.x -= dir.x / noncontact_precision;
-                            thisRect.y -= dir.y / noncontact_precision;
-                        }
-
-                        if (physics.bounce)
-                        {
-                            auto dot = rm::Vector2DotProduct()
-                        }
-
-                        // check if bounce is true
-                        // if so, calculate dot product and change velocity to that direction with the same magnitude
-
-                        newPos.x = thisRect.x - (contact_hitbox_precision / 2.f);
-                        newPos.y = thisRect.y + (contact_hitbox_precision / 2.f);
-                    }
-                }
-            }
-        }
-
-        origin.position.x = newPos.x;
-        origin.position.y = newPos.y;*/
     }
 }
