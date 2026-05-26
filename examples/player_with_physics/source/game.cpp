@@ -231,7 +231,6 @@ int main()
     If it is already contained within the project you are loading, you must register it beforehand.
     */
     Reflection::Register<PlayerAttributes>("player-attributes");
-
     Project project = UnpackProject(ReadFileToString("assets/project/project.json"));
 
     PlayerWithPhysics::Game game(project);

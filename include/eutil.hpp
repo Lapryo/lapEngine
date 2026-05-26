@@ -760,6 +760,8 @@ namespace lapCore
     Rectangle UIOriginToRect(UIOrigin origin, int logicalWidth, int logicalHeight);
     Vector2 FrameVectorToVec2(lapCore::FrameVector vector, int logicalWidth, int logicalHeight);
 
+    std::filesystem::path GetExecutableDir();
+
     enum class LogType
     {
         INFO,
