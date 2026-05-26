@@ -4,6 +4,14 @@
 #include <fstream>
 #include <sstream>
 
+#if defined(_WIN32)
+    #include <windows.h>
+#elif defined(__APPLE__)
+    #include <mach-o/dyld.h>
+#elif defined(__linux__)
+    #include <unistd.h>
+#endif
+
 // Known issue: On Windows, windows.h's CloseWindow and ShowCursor conflicts with Raylib's CloseWindow and ShowCursor
 // Only known workaround is to go into windows.h and change the names of the functions, which is not ideal.
 
@@ -24,9 +32,43 @@ std::string lapCore::FileDialogs::SaveFile(std::vector<std::string> filters)
     return sfd.result();
 }*/
 
+std::filesystem::path lapCore::GetExecutableDir()
+{
+    #if defined(_WIN32)
+
+        char path[MAX_PATH];
+        GetModuleFileNameA(nullptr, path, MAX_PATH);
+        return std::filesystem::path(path).parent_path();
+
+    #elif defined(__APPLE__)
+
+        uint32_t size = 0;
+        _NSGetExecutablePath(nullptr, &size);
+
+        std::string buffer(size, '\0');
+        _NSGetExecutablePath(buffer.data(), &size);
+
+        return std::filesystem::path(buffer).parent_path();
+
+    #elif defined(__linux__)
+
+        char path[4096];
+        ssize_t len = readlink("/proc/self/exe", path, sizeof(path) - 1);
+
+        if (len != -1)
+        {
+            path[len] = '\0';
+            return std::filesystem::path(path).parent_path();
+        }
+
+        return {};
+
+    #endif
+}
+
 std::string lapCore::ReadFileToString(const std::string &filePath)
 {
-    std::ifstream file(filePath);
+    std::ifstream file(GetExecutableDir() / filePath);
     if (!file.is_open())
     {
         std::cerr << "Failed.\n";
@@ -42,7 +84,7 @@ std::string lapCore::ReadFileToString(const std::string &filePath)
 
 void lapCore::WriteStringToFile(const std::string &filePath, const std::string &data)
 {
-    std::ofstream file(filePath);
+    std::ofstream file(GetExecutableDir() / filePath);
     if (!file.is_open())
     {
         std::cerr << "Failed to open file for writing: " << filePath << "\n";
