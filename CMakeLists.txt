@@ -21,13 +21,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(raylib)
 
-FetchContent_Declare(
-    reactphysics3d
-    GIT_REPOSITORY https://github.com/DanielChappuis/reactphysics3d.git
-    GIT_TAG v0.10.2
-    GIT_SHALLOW TRUE
-)
-FetchContent_MakeAvailable(reactphysics3d)
+#FetchContent_Declare(
+#    reactphysics3d
+#    GIT_REPOSITORY https://github.com/DanielChappuis/reactphysics3d.git
+#    GIT_TAG v0.10.2
+#    GIT_SHALLOW TRUE
+#)
+#FetchContent_MakeAvailable(reactphysics3d)
 
 FetchContent_Declare(
     entt
@@ -61,7 +61,7 @@ target_include_directories(lapEngine PUBLIC
 target_link_libraries(lapEngine PUBLIC
     raylib
     box2d
-    reactphysics3d
+#    reactphysics3d
     nlohmann_json::nlohmann_json
     EnTT::EnTT
 )
