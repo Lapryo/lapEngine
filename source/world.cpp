@@ -121,20 +121,22 @@ void lapCore::World::LoadAssets()
 {
     for (const auto& asset : project.assets)
     {
+        std::string assetPath = std::string(GetApplicationDirectory()) + asset.path;
+
         if (asset.type == "texture")
-            resources.textures.Load(HASH(asset.name.c_str()), LoadTexture(asset.path.c_str()));
+            resources.textures.Load(HASH(asset.name.c_str()), LoadTexture(assetPath.c_str()));
         else if (asset.type == "shader")
-            resources.shaders.Load(HASH(asset.name.c_str()), LoadShader(asset.path.c_str(), asset.path.c_str()));
+            resources.shaders.Load(HASH(asset.name.c_str()), LoadShader(std::string(assetPath + ".vs").c_str(), std::string(assetPath + ".fs").c_str()));
         else if (asset.type == "music")
-            resources.music.Load(HASH(asset.name.c_str()), LoadMusicStream(asset.path.c_str()));
+            resources.music.Load(HASH(asset.name.c_str()), LoadMusicStream(assetPath.c_str()));
         else if (asset.type == "sound")
-            resources.sounds.Load(HASH(asset.name.c_str()), LoadSound(asset.path.c_str()));
+            resources.sounds.Load(HASH(asset.name.c_str()), LoadSound(assetPath.c_str()));
         else if (asset.type == "model")
-            resources.models.Load(HASH(asset.name.c_str()), LoadModel(asset.path.c_str()));
+            resources.models.Load(HASH(asset.name.c_str()), LoadModel(assetPath.c_str()));
         else if (asset.type == "font")
-            resources.fonts.Load(HASH(asset.name.c_str()), LoadFont(asset.path.c_str()));
+            resources.fonts.Load(HASH(asset.name.c_str()), LoadFont(assetPath.c_str()));
         else if (asset.type == "image")
-            resources.images.Load(HASH(asset.name.c_str()), LoadImage(asset.path.c_str()));
+            resources.images.Load(HASH(asset.name.c_str()), LoadImage(assetPath.c_str()));
         else
             dbgln("Unknown asset type: " + asset.type + " for asset: " + asset.name, LogType::WARNING);
     }
