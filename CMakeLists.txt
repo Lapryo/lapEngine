@@ -65,6 +65,3 @@ target_link_libraries(lapEngine PUBLIC
     nlohmann_json::nlohmann_json
     EnTT::EnTT
 )
-
-add_subdirectory(examples/player_with_physics)
-add_subdirectory(examples/blank_window)
