@@ -414,18 +414,33 @@ std::vector<ProjectSceneData> GetScenes(const nlohmann::json_abi_v3_12_0::json &
     return scenes; // Return the gathered scenes
 }
 
-std::vector<std::string> GetAssetData(const nlohmann::json &assetJson)
+std::unordered_map<std::string, std::string> GetAssetData(const nlohmann::json &assetJson)
 {
-    std::vector<std::string> assetData; // Vector to hold the asset data
+    std::unordered_map<std::string, std::string> assetData; // Vector to hold the asset data
 
-    if (assetJson.contains("data") && assetJson["data"].is_array())
+    if (assetJson.contains("data") && assetJson["data"].is_object())
     {
-        for (const auto &dataEntry : assetJson["data"])
+        for (auto it = assetJson["data"].begin(); it != assetJson["data"].end(); ++it)
         {
-            if (dataEntry.is_string())
-                assetData.push_back(dataEntry.get<std::string>());
+            auto key = it.key();
+            if (it.value().is_string())
+            {
+                assetData[key] = it.value().get<std::string>();
+            }
+            else if (it.value().is_boolean())
+            {
+                assetData[key] =
+                    it.value().get<bool>() ? "true" : "false";
+            }
+            else if (it.value().is_number())
+            {
+                assetData[key] = it.value().dump();
+            }
             else
-                dbgln("Asset data entry was not a string, skipping...", LogType::WARNING);
+            {
+                dbgln("Unsupported asset data type for key: " + key,
+                    LogType::WARNING);
+            }
         }
     }
     else

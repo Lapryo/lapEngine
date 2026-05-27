@@ -9,6 +9,10 @@
 
 #include "reflection.hpp"
 
+#include <sstream>
+
+// TODO: Add string serialization
+
 using namespace lapCore;
 
 void World::SetScene(ProjectSceneData &scene_data)
@@ -122,21 +126,273 @@ void lapCore::World::LoadAssets()
     for (const auto& asset : project.assets)
     {
         std::string assetPath = std::string(GetApplicationDirectory()) + asset.path;
+        auto name = HASH(asset.name.c_str());
 
         if (asset.type == "texture")
-            resources.textures.Load(HASH(asset.name.c_str()), LoadTexture(assetPath.c_str()));
+        {
+            auto texture = LoadTexture(assetPath.c_str());
+
+            for (const auto& data : asset.data)
+            {
+                if (data.first == "gen-mipmaps")
+                {
+                    if (data.second == "true") GenTextureMipmaps(&texture);
+                }
+                else if (data.first == "filter")
+                {
+                    if (data.second == "point")
+                        SetTextureFilter(texture, TEXTURE_FILTER_POINT);
+                    else if (data.second == "bilinear")
+                        SetTextureFilter(texture, TEXTURE_FILTER_BILINEAR);
+                    else if (data.second == "trilinear")
+                        SetTextureFilter(texture, TEXTURE_FILTER_TRILINEAR);
+                    else if (data.second == "anisotropic-4x")
+                        SetTextureFilter(texture, TEXTURE_FILTER_ANISOTROPIC_4X);
+                    else if (data.second == "anisotropic-8x")
+                        SetTextureFilter(texture, TEXTURE_FILTER_ANISOTROPIC_8X);
+                    else if (data.second == "anisotropic-16x")
+                        SetTextureFilter(texture, TEXTURE_FILTER_ANISOTROPIC_16X);
+                }
+                else if (data.first == "wrap")
+                {
+                    if (data.second == "repeat")
+                        SetTextureWrap(texture, TEXTURE_WRAP_REPEAT);
+                    else if (data.second == "clamp")
+                        SetTextureWrap(texture, TEXTURE_WRAP_CLAMP);
+                    else if (data.second == "mirror-repeat")
+                        SetTextureWrap(texture, TEXTURE_WRAP_MIRROR_REPEAT);
+                    else if (data.second == "mirror-clamp")
+                        SetTextureWrap(texture, TEXTURE_WRAP_MIRROR_CLAMP);
+                }
+            }
+
+            resources.textures.Load(name, texture);
+        }
         else if (asset.type == "shader")
             resources.shaders.Load(HASH(asset.name.c_str()), LoadShader(std::string(assetPath + ".vs").c_str(), std::string(assetPath + ".fs").c_str()));
         else if (asset.type == "music")
-            resources.music.Load(HASH(asset.name.c_str()), LoadMusicStream(assetPath.c_str()));
+        {
+            auto music = LoadMusicStream(assetPath.c_str());
+
+            for (const auto& data : asset.data)
+            {
+                if (data.first == "looped")
+                    data.second == "true" ? music.looping = true : music.looping = false;
+                else if (data.first == "volume")
+                    SetMusicVolume(music, std::stof(data.second));
+                else if (data.first == "pan")
+                    SetMusicPan(music, std::stof(data.second));
+                else if (data.first == "pitch")
+                    SetMusicPitch(music, std::stof(data.second));
+            }
+
+            resources.music.Load(name, music);
+        }
         else if (asset.type == "sound")
-            resources.sounds.Load(HASH(asset.name.c_str()), LoadSound(assetPath.c_str()));
+        {
+            auto sound = LoadSound(assetPath.c_str());
+
+            for (const auto& data : asset.data)
+            {
+                if (data.first == "volume")
+                    SetSoundVolume(sound, std::stof(data.second));
+                else if (data.first == "pan")
+                    SetSoundPan(sound, std::stof(data.second));
+                else if (data.first == "pitch")
+                    SetSoundPitch(sound, std::stof(data.second));
+            }
+
+            resources.sounds.Load(name, sound);
+        }
         else if (asset.type == "model")
-            resources.models.Load(HASH(asset.name.c_str()), LoadModel(assetPath.c_str()));
+        {
+            auto model = LoadModel(assetPath.c_str());
+            resources.models.Load(name, model);
+        }
         else if (asset.type == "font")
-            resources.fonts.Load(HASH(asset.name.c_str()), LoadFont(assetPath.c_str()));
+        {
+            auto font = LoadFont(assetPath.c_str());
+            resources.fonts.Load(name, font);
+        }
         else if (asset.type == "image")
-            resources.images.Load(HASH(asset.name.c_str()), LoadImage(assetPath.c_str()));
+        {
+            auto image = LoadImage(assetPath.c_str());
+            
+            for (const auto& data : asset.data)
+            {
+                if (data.first == "premultiply")
+                {
+                    if (data.second == "true") ImageAlphaPremultiply(&image); 
+                }
+                else if (data.first == "blur")
+                    ImageBlurGaussian(&image, std::stof(data.second));
+                else if (data.first == "background-color")
+                {
+                    Color c;
+                    std::stringstream ss(data.second);
+                    std::string value;
+                    std::getline(ss, value, ',');
+                    c.r = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c.g = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c.b = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c.a = static_cast<unsigned char>(std::stoi(value));
+                    ImageClearBackground(&image, c);
+                }
+                else if (data.first == "brightness")
+                    ImageColorBrightness(&image, std::stoi(data.second));
+                else if (data.first == "contrast")
+                    ImageColorContrast(&image, std::stof(data.second));
+                else if (data.first == "grayscale")
+                {
+                    if (data.second == "true") ImageColorGrayscale(&image);
+                }
+                else if (data.first == "invert")
+                {
+                    if (data.second == "true") ImageColorInvert(&image);
+                }
+                else if (data.first == "tint")
+                {
+                    Color c;
+                    std::stringstream ss(data.second);
+                    std::string value;
+                    std::getline(ss, value, ',');
+                    c.r = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c.g = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c.b = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c.a = static_cast<unsigned char>(std::stoi(value));
+                    ImageColorTint(&image, c);
+                }
+                else if (data.first == "replace")
+                {
+                    Color c, c2;
+                    std::stringstream ss(data.second);
+                    std::string value;
+                    std::getline(ss, value, ',');
+                    c.r = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c.g = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c.b = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c.a = static_cast<unsigned char>(std::stoi(value));
+
+                    std::getline(ss, value, ',');
+                    c2.r = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c2.g = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c2.b = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c2.a = static_cast<unsigned char>(std::stoi(value));
+                    ImageColorReplace(&image, c, c2);
+                }
+                else if (data.first == "crop")
+                {
+                    Rectangle r;
+                    std::stringstream ss(data.second);
+                    std::string value;
+                    std::getline(ss, value, ',');
+                    r.x = std::stof(value);
+                    std::getline(ss, value, ',');
+                    r.y = std::stof(value);
+                    std::getline(ss, value, ',');
+                    r.width = std::stof(value);
+                    std::getline(ss, value, ',');
+                    r.height = std::stof(value);
+
+                    ImageCrop(&image, r);
+                }
+                else if (data.first == "dither")
+                {
+                    int r, g, b, a;
+                    std::stringstream ss(data.second);
+                    std::string value;
+                    std::getline(ss, value, ',');
+                    r = std::stoi(value);
+                    std::getline(ss, value, ',');
+                    g = std::stoi(value);
+                    std::getline(ss, value, ',');
+                    b = std::stoi(value);
+                    std::getline(ss, value, ',');
+                    a = std::stoi(value);
+
+                    ImageDither(&image, r, g, b, a);
+                }
+                else if (data.first == "alpha-clear")
+                {
+                    Color c;
+                    float t;
+                    std::stringstream ss(data.second);
+                    std::string value;
+                    std::getline(ss, value, ',');
+                    c.r = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c.g = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c.b = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    c.a = static_cast<unsigned char>(std::stoi(value));
+                    std::getline(ss, value, ',');
+                    t = std::stof(value);
+
+                    ImageAlphaClear(&image, c, t);
+                }
+                else if (data.first == "alpha-crop")
+                    ImageAlphaCrop(&image, std::stof(data.second));
+                else if (data.first == "flip-horizontal")
+                {
+                    if (data.second == "true") ImageFlipHorizontal(&image);
+                }
+                else if (data.first == "flip-vertical")
+                {
+                    if (data.second == "true") ImageFlipVertical(&image);
+                }
+                else if (data.first == "compute-mipmaps")
+                {
+                    if (data.second == "true") ImageMipmaps(&image);
+                }
+                else if (data.first == "resize")
+                {
+                    int w, h;
+                    std::stringstream ss(data.second);
+                    std::string value;
+                    std::getline(ss, value, ',');
+                    w = std::stoi(value);
+                    std::getline(ss, value, ',');
+                    h = std::stoi(value);
+                    ImageResize(&image, w, h);
+                }
+                else if (data.first == "resize-nearest-neighbor")
+                {
+                    int w, h;
+                    std::stringstream ss(data.second);
+                    std::string value;
+                    std::getline(ss, value, ',');
+                    w = std::stoi(value);
+                    std::getline(ss, value, ',');
+                    h = std::stoi(value);
+                    ImageResizeNN(&image, w, h);
+                }
+                else if (data.first == "rotation")
+                    ImageRotate(&image, std::stoi(data.second));
+                else if (data.first == "rotate-cw")
+                {
+                    if (data.second == "true") ImageRotateCW(&image);
+                }
+                else if (data.first == "rotate-ccw")
+                {
+                    if (data.second == "true") ImageRotateCCW(&image);
+                }
+            }
+
+            resources.images.Load(name, image);
+        }
         else
             dbgln("Unknown asset type: " + asset.type + " for asset: " + asset.name, LogType::WARNING);
     }
