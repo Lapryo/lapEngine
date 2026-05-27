@@ -110,7 +110,7 @@ namespace lapCore
         std::string path;
         std::string type;
 
-        std::vector<std::string> data; // for any additional data, such as texture settings or shader uniform defaults
+        std::unordered_map<std::string, std::string> data; // for any additional data, such as texture settings or shader uniform defaults
     };
 
     /*
