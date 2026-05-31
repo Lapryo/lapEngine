@@ -32,6 +32,8 @@ std::unique_ptr<IProjectElementData> GetElement(const nlohmann::json_abi_v3_12_0
         element->synced = SyncProjectRuntimeMode::CONSTANT;
     else
         element->synced = SyncProjectRuntimeMode::NONE;
+
+    element->sourceJson = elementJson;
     
     return element;
 }
@@ -171,49 +173,60 @@ std::vector<ProjectObjectData> GetPrefabInstances(const nlohmann::json_abi_v3_12
                         {
                             ProjectObjectData instanceData = prefab;
 
-                            // Apply modifications from prefabJson.at(1) to instanceData here, if there are any
-                            for (const auto &modificationJson : prefabJson.at(1))
+                            auto modifications = prefabJson.at(1);
+                            instanceData.name = modifications.value("name", prefab.name + "_" + std::to_string(i));
+                            instanceData.parent = modifications.value("parent", prefab.parent);
+                            instanceData.child_index = modifications.value("child-index", prefab.child_index);
+
+                            if (modifications.contains("elements"))
                             {
-                                std::string elementType = modificationJson.value("type", "");
-                                dbgln("Applying modification to prefab instance: " + elementType, LogType::INFO);
-
-                                bool elementFoundInPrefab = false;
-
-                                for (auto &element : instanceData.elements)
+                                for (const auto &modificationJson : modifications.at("elements"))
                                 {
-                                    if (element.get()->GetTypeID() == Reflection::reverseLookup[elementType])
-                                    {
-                                        elementFoundInPrefab = true;
+                                    std::string elementType = modificationJson.value("type", "");
+                                    dbgln("Applying modification to prefab instance: " + elementType, LogType::INFO);
 
+                                    bool elementFoundInPrefab = false;
+
+                                    for (auto &element : instanceData.elements)
+                                    {
+                                        auto it = Reflection::reverseLookup.find(elementType);
+                                        if (element.get()->GetTypeID() == it->second)
+                                        {
+                                            elementFoundInPrefab = true;
+
+                                            auto entry = Reflection::TryGet(elementType);
+                                            if (!entry)
+                                            {
+                                                dbgln("Unknown element type in prefab modification: " + elementType, LogType::WARNING);
+                                                break;
+                                            }
+
+                                            // make a new modifications json that is a combination of the two (prefab and instance)
+                                            json merged = element->sourceJson;
+
+                                            JSON::Merge(merged.at("data"), modificationJson.at("data"));
+                                            auto newElement = entry->create_project_data(merged.at("data"), elementType);
+
+                                            // replace element in instanceData with this new modified element
+                                            element = std::move(newElement);
+                                            break;
+                                        }
+                                    }
+
+                                    if (!elementFoundInPrefab)
+                                    {
+                                        // add the modification
                                         auto entry = Reflection::TryGet(elementType);
                                         if (!entry)
                                         {
                                             dbgln("Unknown element type in prefab modification: " + elementType, LogType::WARNING);
-                                            break;
+                                            continue;
                                         }
 
-
-                                        auto newElement = entry->create_project_data(modificationJson.at("data"), elementType);
-
-                                        // replace element in instanceData with this new modified element
-                                        element = std::move(newElement);
-                                        break;
-                                    }
-                                }
-
-                                if (!elementFoundInPrefab)
-                                {
-                                    // add the modification
-                                    auto entry = Reflection::TryGet(elementType);
-                                    if (!entry)
-                                    {
-                                        dbgln("Unknown element type in prefab modification: " + elementType, LogType::WARNING);
+                                        auto element = entry->create_project_data(modificationJson.at("data"), elementType);
+                                        instanceData.elements.push_back(std::move(element));
                                         continue;
                                     }
-
-                                    auto element = entry->create_project_data(modificationJson.at("data"), elementType);
-                                    instanceData.elements.push_back(std::move(element));
-                                    continue;
                                 }
                             }
 

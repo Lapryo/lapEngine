@@ -152,7 +152,8 @@ namespace lapCore
             if (j.contains("animated"))
                 JSON::Serializer<Animated>::from_json(s.animated, j.at("animated"));
             
-            s.textureID = entt::hashed_string{j.at("texture").get<std::string>().c_str()}.value();
+            if (j.contains("texture"))
+                s.textureID = entt::hashed_string{j.at("texture").get<std::string>().c_str()}.value();
         }
     };
 
@@ -187,10 +188,13 @@ namespace lapCore
         std::string text;
         entt::id_type fontID;
         float fontSize;
+        float spacing;
 
-        FrameVector bounds;
         Alignment alignment;
         Padding padding;
+
+        // Not serializable, for runtime only, readonly
+        Rectangle textDrawRect;
     };
     template <>
     struct JSON::Serializer<UITextLabel>
@@ -202,9 +206,9 @@ namespace lapCore
                 { "text"      , l.text                                                 },
                 { "font"      , ctx->resources->fonts.GetName(l.fontID)                },
                 { "font-size" , l.fontSize                                             },
-                { "bounds"    , JSON::Serializer<FrameVector>::to_json(l.bounds, ctx)  },
                 { "alignment" , JSON::Serializer<Alignment>::to_json(l.alignment, ctx) },
-                { "padding"   , JSON::Serializer<Padding>::to_json(l.padding, ctx)     }
+                { "padding"   , JSON::Serializer<Padding>::to_json(l.padding, ctx)     },
+                { "spacing"   , l.spacing                                              }
             };
         }
         static void from_json(UITextLabel& l, const json& j)
@@ -212,11 +216,11 @@ namespace lapCore
             if (j.contains("frame"))
                 JSON::Serializer<UIFrame>::from_json(l.frame, j.at("frame"));
             l.text = j.value("text", l.text);
-            l.fontID = entt::hashed_string{j.at("font").get<std::string>().c_str()}.value();
+            if (j.contains("font"))
+                l.fontID = entt::hashed_string{j.at("font").get<std::string>().c_str()}.value();
             l.fontSize = j.value("font-size", l.fontSize);
-
-            if (j.contains("bounds"))
-                JSON::Serializer<FrameVector>::from_json(l.bounds, j.at("bounds"));
+            l.spacing = j.value("spacing", l.spacing);
+            
             if (j.contains("alignment"))
                 JSON::Serializer<Alignment>::from_json(l.alignment, j.at("alignment"));
             if (j.contains("padding"))
@@ -244,12 +248,18 @@ namespace lapCore
         }
         static void from_json(UIButtonEventCallbacks& c, const json& j)
         {
-            c.mouseHover  = entt::hashed_string{j.at("mouse-hover").get<std::string>().c_str()}.value();
-            c.mouseEnter  = entt::hashed_string{j.at("mouse-enter").get<std::string>().c_str()}.value();
-            c.mouseExit   = entt::hashed_string{j.at("mouse-exit").get<std::string>().c_str()}.value();
-            c.leftClick   = entt::hashed_string{j.at("left-click").get<std::string>().c_str()}.value();
-            c.middleClick = entt::hashed_string{j.at("middle-click").get<std::string>().c_str()}.value();
-            c.rightClick  = entt::hashed_string{j.at("right-click").get<std::string>().c_str()}.value();
+            if (j.contains("mouse-hover"))
+                c.mouseHover  = entt::hashed_string{j.at("mouse-hover").get<std::string>().c_str()}.value();
+            if (j.contains("mouse-enter"))
+                c.mouseEnter  = entt::hashed_string{j.at("mouse-enter").get<std::string>().c_str()}.value();
+            if (j.contains("mouse-exit"))
+                c.mouseExit   = entt::hashed_string{j.at("mouse-exit").get<std::string>().c_str()}.value();
+            if (j.contains("left-click"))
+                c.leftClick   = entt::hashed_string{j.at("left-click").get<std::string>().c_str()}.value();
+            if (j.contains("middle-click"))
+                c.middleClick = entt::hashed_string{j.at("middle-click").get<std::string>().c_str()}.value();
+            if (j.contains("right-click"))
+                c.rightClick  = entt::hashed_string{j.at("right-click").get<std::string>().c_str()}.value();
         }
     };
 
@@ -261,7 +271,7 @@ namespace lapCore
 
         bool inheritsListVisibility = false;
 
-        bool mouseHovering = false; // not serialized, used for runtime data
+        bool mouseHovering, inUIList = false; // not serialized, used for runtime data
     };
     template <>
     struct JSON::Serializer<UIButton>

@@ -22,9 +22,15 @@ namespace lapCore
     {
         ObjectInfo info;
         ObjectInfo parent;
-        std::vector<ObjectInfo> children;
+        std::map<unsigned int, ObjectInfo> children;
         int childIndex = -1;
         bool fromPrefab = false;
+    };
+
+    struct HierarchyEntry {
+        entt::id_type id;
+        entt::id_type parentID;
+        std::map<unsigned int, entt::id_type> childrenIDs;
     };
 
     struct ObjectContainer
@@ -34,6 +40,9 @@ namespace lapCore
         entt::registry objects;
 
         std::unordered_map<entt::id_type, ObjectEntry> objectMap;
+
+        std::unordered_map<entt::id_type, std::string> lookup;
+        std::vector<HierarchyEntry> hierarchy;
 
         Object AddObject(entt::hashed_string name, entt::hashed_string parent, int childIndex, bool fromPrefab = false);
         void RemoveObject(entt::id_type id);

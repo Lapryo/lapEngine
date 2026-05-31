@@ -103,6 +103,8 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             rotation = origin->rotation;
         }
 
+        sprite->renderable.drawRect = rect;
+
         if (texture)
             DrawTexturePro(
                 *texture,
@@ -121,15 +123,27 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         const Texture2D *texture = scene->world->resources.textures.TryGet(image->sprite.textureID);
 
-        Rectangle rect = UIOriginToRect(image->origin, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
+        auto logicalRes = scene->world->window.logical_resolution;
+        Rectangle rect = UIOriginToRect(image->origin, logicalRes);
+        image->sprite.renderable.drawRect = rect;
+
+        if (image->sprite.renderable.inUIList)
+        {
+            rect.x = image->origin.gui.position.x;
+            rect.y = image->origin.gui.position.y;
+            rect.height = image->origin.gui.size.y;
+            rect.width = image->origin.gui.size.x;
+        }
+
+        auto anchorVec = FrameVectorToVec2(image->origin.transform.anchor, {rect.width, rect.height});
 
         if (texture)
             DrawTexturePro(
                 *texture,
                 {0.f, 0.f, (float)texture->width, (float)texture->height},
                 rect,
-                image->origin.anchor,
-                image->origin.rotation,
+                anchorVec,
+                image->origin.transform.rotation,
                 image->sprite.renderable.tint);
     };
 
@@ -139,7 +153,19 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         if (!frame || !frame->renderable.visible)
             return;
 
-        Rectangle rect = UIOriginToRect(frame->origin, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y);
+        auto logicalRes = scene->world->window.logical_resolution;
+
+        Rectangle rect = UIOriginToRect(frame->origin, logicalRes);
+        frame->renderable.drawRect = rect;
+
+        if (frame->renderable.inUIList)
+        {
+            rect.x = frame->origin.gui.position.x;
+            rect.y = frame->origin.gui.position.y;
+            rect.height = frame->origin.gui.size.y;
+            rect.width = frame->origin.gui.size.x;
+        }
+
         float rot = 0.f;
 
         if (auto *origin = registry.try_get<Transform2D>(obj))
@@ -151,7 +177,9 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
             rot = origin->rotation;
         }
 
-        DrawRectanglePro(rect, frame->origin.anchor, rot, frame->renderable.tint);
+        auto anchorVec = FrameVectorToVec2(frame->origin.transform.anchor, {rect.width, rect.height});
+
+        DrawRectanglePro(rect, anchorVec, rot, frame->renderable.tint);
     };
 
     auto drawText = [&](Object obj, const Scene *scene)
@@ -160,39 +188,70 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         if (!text || !text->frame.renderable.visible)
             return;
 
-        float x = 0.f, y = 0.f;
+        Vector2 logicalRes = scene->world->window.logical_resolution;
 
-        x = text->frame.origin.position.scale.x * scene->world->window.logical_resolution.x + text->frame.origin.position.offset.x + text->padding.left;
-        y = text->frame.origin.position.scale.y * scene->world->window.logical_resolution.y + text->frame.origin.position.offset.y + text->padding.top;
+        Rectangle rect = UIOriginToRect(text->frame.origin, logicalRes);
+        Vector2 textSizing = MeasureTextEx(GetFontDefault(), text->text.c_str(), text->fontSize, text->spacing);
+        
+        text->frame.renderable.drawRect = rect;
+        text->textDrawRect = {rect.x, rect.y, textSizing.x, textSizing.y};
 
-        // Handle horizontal alignment
-        float textWidth = MeasureText(text->text.c_str(), text->fontSize);
+        if (text->frame.renderable.inUIList)
+        {
+            rect.x = text->frame.origin.gui.position.x;
+            rect.y = text->frame.origin.gui.position.y;
+            rect.height = text->frame.origin.gui.size.y;
+            rect.width = text->frame.origin.gui.size.x;
+        }
+
+        Vector2 anchorVec = FrameVectorToVec2(text->frame.origin.transform.anchor, {rect.width, rect.height});
+
+        rect.x += text->padding.left;
+        rect.y += text->padding.top;
+
         switch (text->alignment.horizontal)
         {
-        case HorizontalAlignment::LEFT:
-            break;
-        case HorizontalAlignment::MIDDLE:
-            x += (text->bounds.offset.x - textWidth - text->padding.right) * 0.5f;
-            break;
-        case HorizontalAlignment::RIGHT:
-            x += text->bounds.offset.x - textWidth - text->padding.right;
-            break;
+            case HorizontalAlignment::MIDDLE:
+            {
+                rect.x += (rect.width - textSizing.x - text->padding.right) * 0.5f;
+                break;
+            }
+            case HorizontalAlignment::RIGHT:
+            {
+                rect.x += rect.height - textSizing.x - text->padding.right;
+                break;
+            }
+            default:
+                break;
         }
 
         // Handle vertical alignment
         switch (text->alignment.vertical)
         {
-        case VerticalAlignment::TOP:
-            break;
-        case VerticalAlignment::MIDDLE:
-            y += (text->bounds.offset.y - text->fontSize - text->padding.bottom) * 0.5f;
-            break;
-        case VerticalAlignment::BOTTOM:
-            y += text->bounds.offset.y - text->fontSize - text->padding.bottom;
-            break;
+            case VerticalAlignment::MIDDLE:
+            {
+                rect.y += (rect.height - textSizing.y - text->padding.bottom) * 0.5f;
+                break;
+            }
+            case VerticalAlignment::BOTTOM:
+            {
+                rect.y += rect.height - textSizing.y - text->padding.bottom;
+                break;
+            }
+            default:
+                break;
         }
 
-        DrawText(text->text.c_str(), x, y, text->fontSize, text->frame.renderable.tint);
+        DrawTextPro(
+            GetFontDefault(), 
+            text->text.c_str(), 
+            {rect.x, rect.y}, 
+            anchorVec, 
+            text->frame.origin.transform.rotation, 
+            text->fontSize, 
+            text->spacing, 
+            text->frame.renderable.tint
+        );
     };
 
     auto drawEntries = [&](const std::vector<RenderEntry> &entries, bool worldSpace)
@@ -248,4 +307,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
     drawEntries(worldSpace, true);
     drawEntries(screenSpace, false);
+
+    auto guiSys = scene->GetSystem<GUISystem>();
+    if (guiSys) guiSys->ResetInUIList();
 }

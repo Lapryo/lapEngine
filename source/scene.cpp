@@ -12,6 +12,31 @@ Object lapCore::ObjectContainer::AddObject(entt::hashed_string name, entt::hashe
     entry.childIndex = childIndex;
     entry.fromPrefab = fromPrefab;
 
+    // Get new name
+    std::string newName = "";
+    if (objectMap.find(name.value()) != objectMap.end())
+    {
+        int i = 1;
+        while (objectMap.find(HASH_ID(newName.c_str())) != objectMap.end())
+        {
+            newName = std::string(name.data()) + "_" + std::to_string(i);
+            i++;
+        }
+    }
+
+    // Set the child index to the last if its == -1
+    // TODO: But what if the parent doesn't exist yet?
+    // Maybe create a new map thats just for object hierarchy?
+    auto it = objectMap.find(parent.value());
+    if (it != objectMap.end())
+    {
+        if (childIndex == -1)
+            it->second.children[it->second.children.size() + 1] = entry.info;
+        else
+            it->second.children[childIndex] = entry.info;
+    }
+
+
     objectMap[name.value()] = entry;
     return entry.info.object;
 }

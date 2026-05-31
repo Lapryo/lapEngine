@@ -3,7 +3,7 @@
 
 using namespace lapCore;
 
-bool HandleKeyboardInput(InputSystem::InputEntry &entry, int key)
+bool HandleKeyboardInput(Scene* scene, InputSystem::InputEntry &entry, int key)
 {
     if (IsKeyDown(key))
     {
@@ -11,7 +11,7 @@ bool HandleKeyboardInput(InputSystem::InputEntry &entry, int key)
         {
             if (!entry.sustain && entry.pressed) return true;
             entry.pressed = true;
-            EventRegistry::Fire(entry.eventID);
+            EventRegistry::Fire(scene, entry.eventID);
         }
     }
     else
@@ -20,7 +20,7 @@ bool HandleKeyboardInput(InputSystem::InputEntry &entry, int key)
     return entry.pressed;
 }
 
-bool HandleMouseInput(InputSystem::InputEntry &entry, int button)
+bool HandleMouseInput(Scene* scene, InputSystem::InputEntry &entry, int button)
 {
     if (IsMouseButtonDown(button))
     {
@@ -28,7 +28,7 @@ bool HandleMouseInput(InputSystem::InputEntry &entry, int button)
         {
             if (!entry.sustain && entry.pressed) return true;
             entry.pressed = true;
-            EventRegistry::Fire(entry.eventID);
+            EventRegistry::Fire(scene, entry.eventID);
         }
     }
     else
@@ -37,7 +37,7 @@ bool HandleMouseInput(InputSystem::InputEntry &entry, int button)
     return entry.pressed;
 }
 
-bool HandleGamepadInput(InputSystem::InputEntry &entry, InputSystem::ControlType controlType, int button, int gamepad)
+bool HandleGamepadInput(Scene* scene, InputSystem::InputEntry &entry, InputSystem::ControlType controlType, int button, int gamepad)
 {
     if (controlType == InputSystem::ControlType::AXIS)
     {
@@ -48,7 +48,7 @@ bool HandleGamepadInput(InputSystem::InputEntry &entry, InputSystem::ControlType
                 if (!entry.sustain && entry.pressed) return true;
                 entry.pressed = true;
                 entry.value = GetGamepadAxisMovement(gamepad, button);
-                EventRegistry::Fire(entry.eventID);
+                EventRegistry::Fire(scene, entry.eventID);
             }
         }
         else
@@ -65,7 +65,7 @@ bool HandleGamepadInput(InputSystem::InputEntry &entry, InputSystem::ControlType
             {
                 if (!entry.sustain && entry.pressed) return true;
                 entry.pressed = true;
-                EventRegistry::Fire(entry.eventID);
+                EventRegistry::Fire(scene, entry.eventID);
             }
         }
         else
@@ -84,19 +84,19 @@ void InputSystem::Update(float deltaTime, entt::registry &registry)
             case InputType::KEYBOARD:
             {
                 for (int key : inputPair.second.key.codes)
-                    if (HandleKeyboardInput(inputPair.second, key)) break;
+                    if (HandleKeyboardInput(scene, inputPair.second, key)) break;
                 break;
             }
             case InputType::MOUSE:
             {
                 for (int key : inputPair.second.key.codes)
-                     if (HandleMouseInput(inputPair.second, key)) break;
+                     if (HandleMouseInput(scene, inputPair.second, key)) break;
                 break;
             }
             case InputType::GAMEPAD:
             {
                 for (int key : inputPair.second.key.codes)
-                     if (HandleGamepadInput(inputPair.second, inputPair.second.key.controlType, key, 0)) break;
+                     if (HandleGamepadInput(scene, inputPair.second, inputPair.second.key.controlType, key, 0)) break;
                 break;
             }
         }

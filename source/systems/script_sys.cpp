@@ -15,12 +15,12 @@ void ScriptSystem::Update(float deltaTime, entt::registry &registry)
         if (!script.initiated)
         {
             for (const auto &func : script.onCreateFunctions)
-                EventRegistry::Fire(func);
+                EventRegistry::Fire(scene, func);
             script.initiated = true;
         }
 
         for (const auto &func : script.onUpdateFunctions)
-            EventRegistry::Fire(func, deltaTime);
+            EventRegistry::Fire(scene, func, deltaTime);
     }
 }
 
@@ -34,6 +34,6 @@ void ScriptSystem::OnDestroy(entt::registry &registry)
             continue;
 
         for (const auto &func : script.onDestroyFunctions)
-            EventRegistry::Fire(func);
+            EventRegistry::Fire(scene, func);
     }
 }
