@@ -5,7 +5,7 @@
 
 using namespace lapCore;
 
-lapCore::App::App(Project &project) : world(project)
+lapCore::App::App(Project &project) : world(this, project)
 {}
 
 void App::Run()
@@ -26,12 +26,6 @@ void App::Run()
 
     while (state == AppState::RUNNING)
     {
-        if (WindowShouldClose())
-        {
-            Shutdown();
-            return;
-        }
-
         Update(GetFrameTime());
     }
 }

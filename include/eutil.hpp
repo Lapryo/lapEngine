@@ -419,6 +419,9 @@ namespace lapCore
         Color tint;
 
         bool usesUIListVisiblity;
+
+        // Not serializable, only for runtime
+        bool inUIList = false;
     };
     template <>
     struct JSON::Serializer<Renderable>
@@ -718,12 +721,48 @@ namespace lapCore
         }
     };
 
-    struct UIOrigin
+    struct UITransform
     {
         FrameVector position;
         FrameVector size;
-        Vector2 anchor;
+        FrameVector anchor;
         float rotation;
+    };
+    template <>
+    struct JSON::Serializer<UITransform>
+    {
+        static json to_json(const UITransform& t, SerializeContext* ctx = nullptr)
+        {
+            return json{
+                {"position", JSON::Serializer<FrameVector>::to_json(t.position, ctx)},
+                {"size", JSON::Serializer<FrameVector>::to_json(t.size, ctx)},
+                {"anchor", JSON::Serializer<FrameVector>::to_json(t.anchor, ctx)},
+                {"rotation", t.rotation}
+            };
+        }
+
+        static void from_json(UITransform& t, const json& j)
+        {
+            if (j.contains("position"))
+                JSON::Serializer<FrameVector>::from_json(t.position, j.at("position"));
+            if (j.contains("size"))
+                JSON::Serializer<FrameVector>::from_json(t.size, j.at("size"));
+            if (j.contains("anchor"))
+                JSON::Serializer<FrameVector>::from_json(t.anchor, j.at("anchor"));
+            t.rotation = j.value("rotation", 0.f);
+        }
+    };
+
+    // Not serializable, for runtime only
+    struct GUITransform
+    {
+        Vector2 position, size;
+    };
+
+    struct UIOrigin
+    {
+        UITransform transform;
+        GUITransform gui;
     };
     template <>
     struct JSON::Serializer<UIOrigin>
@@ -731,22 +770,13 @@ namespace lapCore
         static json to_json(const UIOrigin& o, SerializeContext* ctx = nullptr)
         {
             return json{
-                {"position", JSON::Serializer<FrameVector>::to_json(o.position, ctx)},
-                {"size", JSON::Serializer<FrameVector>::to_json(o.size, ctx)},
-                {"anchor", JSON::Serializer<Vector2>::to_json(o.anchor, ctx)},
-                {"rotation", o.rotation}
+                JSON::Serializer<UITransform>::to_json(o.transform, ctx)
             };
         }
 
         static void from_json(UIOrigin& o, const json& j)
         {
-            if (j.contains("position"))
-                JSON::Serializer<FrameVector>::from_json(o.position, j.at("position"));
-            if (j.contains("size"))
-                JSON::Serializer<FrameVector>::from_json(o.size, j.at("size"));
-            if (j.contains("anchor"))
-                JSON::Serializer<Vector2>::from_json(o.anchor, j.at("anchor"));
-            o.rotation = j.value("rotation", 0.f);
+            JSON::Serializer<UITransform>::from_json(o.transform, j);
         }
     };
 
@@ -755,10 +785,10 @@ namespace lapCore
 
     nlohmann::json ReadFileToJsonObject(const std::string &filePath);
 
-    Vector2 GetMouseInViewportSpace(int logicalWidth, int logicalHeight);
+    Vector2 GetMouseInViewportSpace(Vector2 logicalResolution);
 
-    Rectangle UIOriginToRect(UIOrigin origin, int logicalWidth, int logicalHeight);
-    Vector2 FrameVectorToVec2(lapCore::FrameVector vector, int logicalWidth, int logicalHeight);
+    Rectangle UIOriginToRect(UIOrigin origin, Vector2 logicalResolution);
+    Vector2 FrameVectorToVec2(lapCore::FrameVector vector, Vector2 logicalResolution);
 
     std::filesystem::path GetExecutableDir();
 

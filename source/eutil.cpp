@@ -58,7 +58,7 @@ nlohmann::json_abi_v3_12_0::json lapCore::ReadFileToJsonObject(const std::string
     return nlohmann::json::parse(ReadFileToString(filePath));
 }
 
-Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight)
+Vector2 lapCore::GetMouseInViewportSpace(Vector2 logicalResolution)
 {
     Vector2 mouse = GetMousePosition();
 
@@ -66,7 +66,7 @@ Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight)
     float screenHeight = (float)GetScreenHeight();
 
     float screenAspect = screenWidth / screenHeight;
-    float targetAspect = (float)logicalWidth / logicalHeight;
+    float targetAspect = (float)logicalResolution.x / logicalResolution.y;
 
     float scale;
     float offsetX = 0;
@@ -77,17 +77,17 @@ Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight)
     if (screenAspect > targetAspect)
     {
         // Screen is wider than target — add pillarboxes
-        scale = screenHeight / logicalHeight;
-        drawWidth = logicalWidth * scale;
+        scale = screenHeight / logicalResolution.y;
+        drawWidth = logicalResolution.x * scale;
         drawHeight = screenHeight;
         offsetX = (screenWidth - drawWidth) * 0.5f;
     }
     else
     {
         // Screen is taller — add letterboxes
-        scale = screenWidth / logicalWidth;
+        scale = screenWidth / logicalResolution.x;
         drawWidth = screenWidth;
-        drawHeight = logicalHeight * scale;
+        drawHeight = logicalResolution.y * scale;
         offsetY = (screenHeight - drawHeight) * 0.5f;
     }
 
@@ -98,25 +98,27 @@ Vector2 lapCore::GetMouseInViewportSpace(int logicalWidth, int logicalHeight)
     return mouse;
 }
 
-Rectangle lapCore::UIOriginToRect(UIOrigin origin, int logicalWidth, int logicalHeight)
+Rectangle lapCore::UIOriginToRect(UIOrigin origin, Vector2 logicalResolution)
 {
     Rectangle rect;
 
-    rect.x = origin.position.scale.x * logicalWidth + origin.position.offset.x;
-    rect.y = origin.position.scale.y * logicalHeight + origin.position.offset.y;
+    auto posVec = FrameVectorToVec2(origin.transform.position, logicalResolution);
+    auto sizeVec = FrameVectorToVec2(origin.transform.size, logicalResolution);
 
-    rect.width = origin.size.scale.x * logicalWidth + origin.size.offset.x;
-    rect.height = origin.size.scale.y * logicalHeight + origin.size.offset.y;
+    rect.x = posVec.x;
+    rect.y = posVec.y;
+    rect.width = sizeVec.x;
+    rect.height = sizeVec.y;
 
     return rect;
 }
 
-Vector2 lapCore::FrameVectorToVec2(lapCore::FrameVector vector, int logicalWidth, int logicalHeight)
+Vector2 lapCore::FrameVectorToVec2(lapCore::FrameVector vector, Vector2 logicalResolution)
 {
     Vector2 vec;
 
-    vec.x = vector.scale.x * logicalWidth + vector.offset.x;
-    vec.y = vector.scale.y * logicalHeight + vector.offset.y;
+    vec.x = vector.scale.x * logicalResolution.x + vector.offset.x;
+    vec.y = vector.scale.y * logicalResolution.y + vector.offset.y;
 
     return vec;
 }

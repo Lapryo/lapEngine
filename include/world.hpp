@@ -18,6 +18,8 @@
 
 namespace lapCore
 {
+    class App;
+
     struct WindowProperties
     {
         std::string title = "Default Window";
@@ -39,7 +41,9 @@ namespace lapCore
 
     struct World
     {
-        World(Project project) : project(project) {
+        App* app;
+
+        World(App* app, Project project) : project(project), app(app) {
             prefabs = new ObjectContainer();
             prefabs->AddObjectsFromProjectData(project.prefabs);
         }

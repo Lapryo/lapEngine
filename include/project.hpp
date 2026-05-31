@@ -24,6 +24,8 @@ namespace lapCore
         virtual const void* GetDataPtr() const = 0;
         virtual std::unique_ptr<IProjectElementData> Clone() const = 0;
         SyncProjectRuntimeMode synced = SyncProjectRuntimeMode::NONE;
+
+        json sourceJson;
     };
 
     template <typename T>

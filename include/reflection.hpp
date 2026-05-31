@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <iostream>
 
 #include "resourcemanager.hpp"
 
@@ -26,6 +27,7 @@ namespace lapCore
     struct SerializeContext
     {
         ResourceManager* resources = nullptr;
+        std::string objectName = "";
     };
 
     // =========================================================
@@ -50,6 +52,18 @@ namespace lapCore
             static json to_json(const T&, SerializeContext* = nullptr);
             static void from_json(T&, const json&);
         };
+
+        inline void Merge(json& base, const json& other)
+        {
+            for (auto it = other.begin(); it != other.end(); ++it)
+            {
+                const auto& key = it.key();
+                if (base.contains(key) && base[key].is_object() && it.value().is_object())
+                    Merge(base[key], it.value());
+                else
+                    base[key] = it.value();
+            }
+        }
     }
 
     // =========================================================
@@ -94,6 +108,9 @@ namespace lapCore
                 const std::string&
             )
         > create_project_data;
+        std::function<
+            json(const IProjectElementData*, SerializeContext*)
+        > serialize_project_data;
     };
 
     // =========================================================
@@ -212,6 +229,17 @@ namespace lapCore
                     );
 
                     return ptr;
+                },
+
+                [](const IProjectElementData* element, SerializeContext* ctx) -> json
+                {
+                    auto typed =
+                        static_cast<const ProjectElementData<T>*>(element);
+
+                    return JSON::Serializer<T>::to_json(
+                        typed->data,
+                        ctx
+                    );
                 }
             };
         }

@@ -11,11 +11,7 @@
 
 namespace lapCore
 {
-    // --- FORWARD DECLARATION ---
-    // This tells the compiler that 'Scene' is a class defined elsewhere.
-    class Scene;
-
-    using Object = entt::entity;
+    struct Scene;
 
     struct IEventContainer
     {
@@ -30,7 +26,7 @@ namespace lapCore
             type = entt::type_hash<EventContainer<Args...>>::value();
         }
 
-        std::vector<std::function<void(Args...)>> listeners;
+        std::vector<std::function<void(Scene*, Args...)>> listeners;
     };
 
     class EventRegistry
@@ -69,7 +65,7 @@ namespace lapCore
 
         // --- 2. Declaration and Definition of Fire (Handles all argument counts, including zero) ---
         template <typename... Args>
-        static void Fire(entt::id_type id, Args&&... args)
+        static void Fire(Scene* scene, entt::id_type id, Args&&... args)
         {
             auto it = eventCallbacks.find(id);
             if (it == eventCallbacks.end())
@@ -87,7 +83,13 @@ namespace lapCore
             auto *c = static_cast<container*>(ptr);
             for (auto &listener : c->listeners)
                 if (listener)
-                    listener(std::forward<Args>(args)...);
+                    listener(scene, std::forward<Args>(args)...);
+        }
+
+        static void Disconnect(entt::id_type eventID)
+        {
+            eventCallbacks.erase(eventID);
+            reverseLookup.erase(eventID);
         }
     };
 
@@ -97,23 +99,21 @@ namespace lapCore
 
     template <typename... EventArgs, typename SystemFunc>
     void ConnectECSEvent(
-        Scene* scene,
-        Object object,
+        entt::id_type objectID,
         entt::hashed_string name,
         SystemFunc&& systemHandler)
     {
         auto id = name.value();
 
         auto wrapper_callback =
-            [scene,
-            object,
+            [objectID,
             id,
             handler = std::forward<SystemFunc>(systemHandler)]
-            (EventArgs... args)
+            (Scene* scene, EventArgs... args)
         {
             handler(
                 scene,
-                object,
+                objectID,
                 id,
                 std::forward<decltype(args)>(args)...
             );

@@ -6,6 +6,8 @@
 
 namespace lapCore
 {
+    struct Scene;
+    
     using Object = entt::entity;
 
     class System
