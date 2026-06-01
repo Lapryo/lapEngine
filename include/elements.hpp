@@ -16,9 +16,9 @@ namespace lapCore
 
     struct Transform2D
     {
-        Vector2 scale = {1.f, 1.f};
-        Vector2 position = {0.f, 0.f};
-        float rotation = 0.f;
+        Vector2 scale{1.f, 1.f};
+        Vector2 position{0.f, 0.f};
+        float rotation{0.f};
     };
     template <>
     struct JSON::Serializer<Transform2D>
@@ -46,7 +46,7 @@ namespace lapCore
     {
         b2BodyDef bodyDef = b2DefaultBodyDef();
         b2ShapeDef shapeDef = b2DefaultShapeDef();
-        b2Polygon polygon;
+        b2Polygon polygon{};
     };
     template <>
     struct JSON::Serializer<Physics2D>
@@ -72,8 +72,8 @@ namespace lapCore
 
     struct UIFrame
     {
-        Renderable renderable;
-        UIOrigin origin;
+        Renderable renderable{};
+        UIOrigin origin{};
     };
     template <>
     struct JSON::Serializer<UIFrame>
@@ -96,11 +96,11 @@ namespace lapCore
 
     struct UIList
     {
-        FrameVector scrollSize;
-        FrameVector displaySize;
-        ScrollSettings settings;
+        FrameVector scrollSize{};
+        FrameVector displaySize{};
+        ScrollSettings settings{};
 
-        float scrollOffset = 0.f;
+        float scrollOffset{0.f};
     };
     template <>
     struct JSON::Serializer<UIList>
@@ -129,10 +129,10 @@ namespace lapCore
 
     struct Sprite
     {
-        Renderable renderable;
-        Animated animated;
+        Renderable renderable{};
+        Animated animated{};
 
-        entt::id_type textureID;
+        entt::id_type textureID{0};
     };
     template <>
     struct JSON::Serializer<Sprite>
@@ -159,8 +159,8 @@ namespace lapCore
 
     struct UIImage
     {
-        Sprite sprite;
-        UIOrigin origin;
+        Sprite sprite{};
+        UIOrigin origin{};
     };
     template <>
     struct JSON::Serializer<UIImage>
@@ -183,18 +183,18 @@ namespace lapCore
 
     struct UITextLabel
     {
-        UIFrame frame;
+        UIFrame frame{};
 
-        std::string text;
-        entt::id_type fontID;
-        float fontSize;
-        float spacing;
+        std::string text{""};
+        entt::id_type fontID{0};
+        float fontSize{10.f};
+        float spacing{1.f};
 
-        Alignment alignment;
-        Padding padding;
+        Alignment alignment{};
+        Padding padding{};
 
         // Not serializable, for runtime only, readonly
-        Rectangle textDrawRect;
+        Rectangle textDrawRect{0, 0, 0, 0};
     };
     template <>
     struct JSON::Serializer<UITextLabel>
@@ -230,7 +230,7 @@ namespace lapCore
 
     struct UIButtonEventCallbacks
     {
-        entt::id_type mouseHover, mouseEnter, mouseExit, leftClick, rightClick, middleClick = 0;
+        entt::id_type mouseHover{0}, mouseEnter{0}, mouseExit{0}, leftClick{0}, rightClick{0}, middleClick{0};
     };
     template <>
     struct JSON::Serializer<UIButtonEventCallbacks>
@@ -265,13 +265,13 @@ namespace lapCore
 
     struct UIButton
     {
-        UIButtonEventCallbacks eventCallbacks;
-        bool active = true;
-        UIOrigin bounds;
+        UIButtonEventCallbacks eventCallbacks{};
+        bool active{true};
+        UIOrigin bounds{};
 
-        bool inheritsListVisibility = false;
+        bool inheritsListVisibility{false};
 
-        bool mouseHovering, inUIList = false; // not serialized, used for runtime data
+        bool mouseHovering{false}, inUIList{false}; // not serialized, used for runtime data
     };
     template <>
     struct JSON::Serializer<UIButton>
@@ -299,10 +299,10 @@ namespace lapCore
 
     struct Script
     {
-        std::vector<entt::id_type> onCreateFunctions, onUpdateFunctions, onDestroyFunctions = {};
+        std::vector<entt::id_type> onCreateFunctions{}, onUpdateFunctions{}, onDestroyFunctions{};
 
-        bool active = true;
-        bool initiated = false;
+        bool active{true};
+        bool initiated{false};
     };
     template <>
     struct JSON::Serializer<Script>
