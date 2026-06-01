@@ -411,17 +411,17 @@ namespace lapCore
     struct Renderable
     {
         // Not to be changed, i mean you can, but it wont do anything, itll just be overwritten by the render system
-        Rectangle drawRect;
+        Rectangle drawRect{0, 0, 0, 0};
 
-        unsigned int zlayer;
-        bool isScreenSpace;
-        bool visible = true;
-        Color tint;
+        unsigned int zlayer{0};
+        bool isScreenSpace{false};
+        bool visible{true};
+        Color tint{255, 255, 255, 255};
 
-        bool usesUIListVisiblity;
+        bool usesUIListVisiblity{false};
 
         // Not serializable, only for runtime
-        bool inUIList = false;
+        bool inUIList{false};
     };
     template <>
     struct JSON::Serializer<Renderable>
@@ -481,10 +481,10 @@ namespace lapCore
     
     struct ScrollSettings
     {
-        Axis2D direction;
-        bool allowHorizontalScrolling;
-        bool allowVerticalScrolling;
-        float scrollSpeed;
+        Axis2D direction{Axis2D::HORIZONTAL};
+        bool allowHorizontalScrolling{true};
+        bool allowVerticalScrolling{true};
+        float scrollSpeed{1.f};
     };
     template <>
     struct JSON::Serializer<ScrollSettings>
@@ -512,9 +512,9 @@ namespace lapCore
 
     struct Animated
     {
-        bool active;
-        unsigned int index;
-        std::vector<float> frameTimes;
+        bool active{true};
+        unsigned int index{0};
+        std::vector<float> frameTimes{0.f};
     };
     template <>
     struct JSON::Serializer<Animated>
@@ -647,8 +647,8 @@ namespace lapCore
 
     struct Alignment
     {
-        HorizontalAlignment horizontal;
-        VerticalAlignment vertical;
+        HorizontalAlignment horizontal{HorizontalAlignment::LEFT};
+        VerticalAlignment vertical{VerticalAlignment::TOP};
     };
     template <>
     struct JSON::Serializer<Alignment>
@@ -672,8 +672,8 @@ namespace lapCore
 
     struct FrameVector
     {
-        Vector2 scale;
-        Vector2 offset;
+        Vector2 scale{0.f, 0.f};
+        Vector2 offset{0.f, 0.f};
     };
     template <>
     struct JSON::Serializer<FrameVector>
@@ -697,7 +697,7 @@ namespace lapCore
 
     struct Padding
     {
-        float top, bottom, left, right;
+        float top{0.f}, bottom{0.f}, left{0.f}, right{0.f};
     };
     template <>
     struct JSON::Serializer<Padding>
@@ -723,10 +723,10 @@ namespace lapCore
 
     struct UITransform
     {
-        FrameVector position;
-        FrameVector size;
-        FrameVector anchor;
-        float rotation;
+        FrameVector position{};
+        FrameVector size{};
+        FrameVector anchor{};
+        float rotation{0.f};
     };
     template <>
     struct JSON::Serializer<UITransform>
@@ -756,13 +756,13 @@ namespace lapCore
     // Not serializable, for runtime only
     struct GUITransform
     {
-        Vector2 position, size;
+        Vector2 position{0.f, 0.f}, size{0.f, 0.f};
     };
 
     struct UIOrigin
     {
-        UITransform transform;
-        GUITransform gui;
+        UITransform transform{};
+        GUITransform gui{};
     };
     template <>
     struct JSON::Serializer<UIOrigin>
