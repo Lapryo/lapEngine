@@ -6,7 +6,6 @@ using namespace lapCore;
 Object lapCore::ObjectContainer::AddObject(entt::hashed_string name, entt::hashed_string parent, int childIndex, bool fromPrefab)
 {
     ObjectEntry entry;
-    entry.info.id = name.value();
     entry.info.object = this->objects.create();
     entry.parent.id = parent.value();
     entry.childIndex = childIndex;
@@ -24,18 +23,25 @@ Object lapCore::ObjectContainer::AddObject(entt::hashed_string name, entt::hashe
         }
     }
 
+    if (newName != "")
+        name = HASH(newName.c_str());
+    entry.info.id = name.value();
+
     // Set the child index to the last if its == -1
     // TODO: But what if the parent doesn't exist yet?
     // Maybe create a new map thats just for object hierarchy?
-    auto it = objectMap.find(parent.value());
-    if (it != objectMap.end())
+    
+    if (parent.data() != nullptr)
     {
-        if (childIndex == -1)
-            it->second.children[it->second.children.size() + 1] = entry.info;
-        else
-            it->second.children[childIndex] = entry.info;
+        auto it = objectMap.find(parent.value());
+        if (it != objectMap.end())
+        {
+            if (childIndex == -1)
+                it->second.children[it->second.children.size() + 1] = entry.info;
+            else
+                it->second.children[childIndex] = entry.info;
+        }
     }
-
 
     objectMap[name.value()] = entry;
     return entry.info.object;
