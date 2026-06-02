@@ -1,5 +1,4 @@
-#ifndef SYSTEMS_HPP
-#define SYSTEMS_HPP
+#pragma once
 
 #include <entt/entt.hpp>
 #include "elements.hpp"
@@ -24,5 +23,3 @@ namespace lapCore
         Scene *scene;
     };
 }
-
-#endif

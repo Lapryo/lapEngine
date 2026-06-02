@@ -1,5 +1,4 @@
-#ifndef RENDER_SYS_HPP
-#define RENDER_SYS_HPP
+#pragma once
 
 #include "system.hpp"
 using namespace lapCore;
@@ -37,5 +36,3 @@ public:
 
     std::string GetName() const override { return "RenderSystem"; }
 };
-
-#endif

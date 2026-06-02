@@ -8,6 +8,8 @@
 #include <functional>
 #include <cassert>
 
+#include "map.hpp"
+
 namespace lapCore
 {
     template <typename T>
@@ -176,6 +178,13 @@ namespace lapCore
             }
         };
 
+        AssetStorage<Map> maps{
+            [](Map& map)
+            {
+                map.Unload();
+            }
+        };
+
         void ClearAll()
         {
             textures.UnloadAll();
@@ -185,6 +194,7 @@ namespace lapCore
             models.UnloadAll();
             fonts.UnloadAll();
             images.UnloadAll();
+            maps.UnloadAll();
         }
     };
 }

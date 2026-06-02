@@ -6,6 +6,8 @@
 
 #include "elements.hpp"
 
+using json = nlohmann::json;
+
 namespace lapCore
 {
     enum class SyncProjectRuntimeMode

@@ -1,6 +1,4 @@
-#ifndef CORE_HPP
-#define CORE_HPP
-
+#pragma once
 
 #include "system.hpp"
 #include "app.hpp"
@@ -15,6 +13,3 @@
 #include "systems/script_sys.hpp"
 #include "systems/gui_sys.hpp"
 #include "systems/input_sys.hpp"
-
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef INPUT_SYS_HPP
-#define INPUT_SYS_HPP
+#pragma once
 
 #include "system.hpp"
 using namespace lapCore;
@@ -53,5 +52,3 @@ public:
     void Update(float deltaTime, entt::registry &registry) override;
     std::string GetName() const override { return "InputSystem"; }
 };
-
-#endif

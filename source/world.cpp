@@ -393,6 +393,25 @@ void lapCore::World::LoadAssets()
 
             resources.images.Load(name, image);
         }
+        else if (asset.type == "map")
+        {
+            // Handle map loading here
+            for (const auto& data : asset.data)
+            {
+                if (data.first == "map-type")
+                {
+                    if (data.second == "tiled")
+                    {
+                        // Load Tiled map here
+                        // resources.maps.Load(name, LoadTiledMap(assetPath.c_str()));
+                    }
+                    else if (data.second == "lapmap")
+                    {
+                        
+                    }
+                }
+            }
+        }
         else
             dbgln("Unknown asset type: " + asset.type + " for asset: " + asset.name, LogType::WARNING);
     }

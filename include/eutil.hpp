@@ -1,5 +1,4 @@
-#ifndef EUTIL_HPP
-#define EUTIL_HPP
+#pragma once
 
 #include <raylib.h>
 #include <nlohmann/json.hpp>
@@ -801,5 +800,3 @@ namespace lapCore
     };
     void dbgln(const std::string &message, LogType type = LogType::INFO);
 }
-
-#endif

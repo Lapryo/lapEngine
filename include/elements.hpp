@@ -1,5 +1,4 @@
-#ifndef ELEMENTS_HPP
-#define ELEMENTS_HPP
+#pragma once
 
 #include "eutil.hpp"
 #include "event.hpp"
@@ -8,7 +7,7 @@
 #include <functional>
 #include <any>
 
-#include "reflection.hpp"
+#include <reflection.hpp>
 
 namespace lapCore
 {
@@ -368,5 +367,3 @@ namespace lapCore
         }
     };
 }
-
-#endif

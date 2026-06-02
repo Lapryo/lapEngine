@@ -1,5 +1,4 @@
-#ifndef APP_HPP
-#define APP_HPP
+#pragma once
 
 #include <unordered_map>
 #include "world.hpp"
@@ -32,5 +31,3 @@ namespace lapCore
         AppState state = AppState::DEAD;
     };
 }
-
-#endif

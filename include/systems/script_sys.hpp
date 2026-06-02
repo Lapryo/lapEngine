@@ -1,5 +1,4 @@
-#ifndef SCRIPT_SYS_HPP
-#define SCRIPT_SYS_HPP
+#pragma once
 
 #include "system.hpp"
 using namespace lapCore;
@@ -13,5 +12,3 @@ public:
 
     std::string GetName() const override { return "ScriptSystem"; }
 };
-
-#endif

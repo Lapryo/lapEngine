@@ -20,29 +20,17 @@ namespace lapCore
     template <typename T>
     struct ProjectElementData;
 
-    // =========================================================
-    // Serialization Context
-    // =========================================================
-
     struct SerializeContext
     {
         ResourceManager* resources = nullptr;
         std::string objectName = "";
     };
 
-    // =========================================================
-    // Compile-Time Type ID
-    // =========================================================
-
     template<typename T>
     constexpr entt::id_type GetTypeID()
     {
         return entt::type_hash<T>::value();
     }
-
-    // =========================================================
-    // Serializer Interface
-    // =========================================================
 
     namespace JSON
     {
@@ -66,41 +54,16 @@ namespace lapCore
         }
     }
 
-    // =========================================================
-    // Reflection Entry
-    // =========================================================
-
     struct ReflectionEntry
     {
-        // -----------------------------
-        // Metadata
-        // -----------------------------
-
         std::string name;
-
-        // -----------------------------
-        // Serialization
-        // -----------------------------
 
         std::function<json(const void*, SerializeContext*)> to_json;
         std::function<void(void*, const json&)> from_json;
 
-        // -----------------------------
-        // ECS Operations
-        // -----------------------------
-
         std::function<void(entt::registry&, Object, void*)> emplace;
         std::function<void(entt::registry&, Object)> erase;
-
-        // -----------------------------
-        // Utilities
-        // -----------------------------
-
         std::function<void(void*, const void*)> copy;
-
-        // -----------------------------
-        // Project Integration
-        // -----------------------------
 
         std::function<
             std::unique_ptr<IProjectElementData>(
@@ -113,19 +76,11 @@ namespace lapCore
         > serialize_project_data;
     };
 
-    // =========================================================
-    // Reflection Registry
-    // =========================================================
-
     class Reflection
     {
     public:
 
         Reflection() = delete;
-
-        // -----------------------------
-        // Runtime Storage
-        // -----------------------------
 
         inline static std::unordered_map<
             entt::id_type,
@@ -137,10 +92,6 @@ namespace lapCore
             entt::id_type
         > reverseLookup;
 
-        // =====================================================
-        // Registration
-        // =====================================================
-
         template<typename T>
         static void Register(const std::string& name)
         {
@@ -150,16 +101,7 @@ namespace lapCore
 
             registry[id] = ReflectionEntry
             {
-                // ---------------------------------
-                // Name
-                // ---------------------------------
-
                 name,
-
-                // ---------------------------------
-                // Serialize
-                // ---------------------------------
-
                 [](const void* ptr, SerializeContext* ctx) -> json
                 {
                     return JSON::Serializer<T>::to_json(
@@ -167,11 +109,6 @@ namespace lapCore
                         ctx
                     );
                 },
-
-                // ---------------------------------
-                // Deserialize
-                // ---------------------------------
-
                 [](void* ptr, const json& j)
                 {
                     JSON::Serializer<T>::from_json(
@@ -179,11 +116,6 @@ namespace lapCore
                         j
                     );
                 },
-
-                // ---------------------------------
-                // Emplace
-                // ---------------------------------
-
                 [](entt::registry& reg, Object obj, void* data)
                 {
                     reg.emplace<T>(
@@ -191,30 +123,15 @@ namespace lapCore
                         *static_cast<T*>(data)
                     );
                 },
-
-                // ---------------------------------
-                // Erase
-                // ---------------------------------
-
                 [](entt::registry& reg, Object obj)
                 {
                     reg.remove<T>(obj);
                 },
-
-                // ---------------------------------
-                // Copy
-                // ---------------------------------
-
                 [](void* dst, const void* src)
                 {
                     *static_cast<T*>(dst) =
                         *static_cast<const T*>(src);
                 },
-
-                // ---------------------------------
-                // Project Data
-                // ---------------------------------
-
                 [](const json& j, const std::string& typeName)
                     -> std::unique_ptr<IProjectElementData>
                 {
@@ -243,11 +160,7 @@ namespace lapCore
                 }
             };
         }
-
-        // =====================================================
-        // Lookup
-        // =====================================================
-
+        
         static ReflectionEntry* TryGet(entt::id_type id)
         {
             auto it = registry.find(id);

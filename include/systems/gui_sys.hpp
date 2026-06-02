@@ -1,5 +1,4 @@
-#ifndef GUI_SYS_HPP
-#define GUI_SYS_HPP
+#pragma once
 
 #include "system.hpp"
 using namespace lapCore;
@@ -13,5 +12,3 @@ public:
 
     void ResetInUIList();
 };
-
-#endif

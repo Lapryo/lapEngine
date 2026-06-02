@@ -3,7 +3,7 @@
 
 using namespace lapCore;
 
-Object lapCore::ObjectContainer::AddObject(entt::hashed_string name, entt::hashed_string parent, int childIndex, bool fromPrefab)
+ObjectInfo lapCore::ObjectContainer::AddObject(entt::hashed_string name, entt::hashed_string parent, int childIndex, bool fromPrefab)
 {
     ObjectEntry entry;
     entry.info.object = this->objects.create();
@@ -44,7 +44,7 @@ Object lapCore::ObjectContainer::AddObject(entt::hashed_string name, entt::hashe
     }
 
     objectMap[name.value()] = entry;
-    return entry.info.object;
+    return entry.info;
 }
 
 void lapCore::ObjectContainer::RemoveObject(entt::id_type id)

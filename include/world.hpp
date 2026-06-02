@@ -1,5 +1,4 @@
-#ifndef WORLD_HPP
-#define WORLD_HPP
+#pragma once
 
 #include "project.hpp"
 #include "resourcemanager.hpp"
@@ -71,5 +70,3 @@ namespace lapCore
         Project project;
     };
 }
-
-#endif

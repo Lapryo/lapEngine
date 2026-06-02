@@ -1,5 +1,4 @@
-#ifndef SCENE_HPP
-#define SCENE_HPP
+#pragma once
 
 #include "system.hpp"
 #include "project.hpp"
@@ -44,7 +43,7 @@ namespace lapCore
         std::unordered_map<entt::id_type, std::string> lookup;
         std::vector<HierarchyEntry> hierarchy;
 
-        Object AddObject(entt::hashed_string name, entt::hashed_string parent, int childIndex, bool fromPrefab = false);
+        ObjectInfo AddObject(entt::hashed_string name, entt::hashed_string parent, int childIndex, bool fromPrefab = false);
         void RemoveObject(entt::id_type id);
         void RemoveObject(Object object);
         void RemoveObject(ObjectEntry entry);
@@ -124,5 +123,3 @@ namespace lapCore
         void Clear();
     };
 }
-
-#endif

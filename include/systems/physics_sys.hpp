@@ -1,5 +1,4 @@
-#ifndef PHYSICS_SYS_HPP
-#define PHYSICS_SYS_HPP
+#pragma once
 
 #include "box2d/box2d.h"
 
@@ -31,5 +30,3 @@ public:
 
     std::string GetName() const override { return "PhysicsSystem"; }
 };
-
-#endif

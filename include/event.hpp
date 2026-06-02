@@ -1,5 +1,4 @@
-#ifndef EVENT_HPP
-#define EVENT_HPP
+#pragma once
 
 #include <unordered_map>
 #include <string>
@@ -122,5 +121,3 @@ namespace lapCore
         EventRegistry::Connect<EventArgs...>(name, wrapper_callback);
     }
 }
-
-#endif
