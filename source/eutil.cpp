@@ -24,9 +24,11 @@ std::string lapCore::FileDialogs::SaveFile(std::vector<std::string> filters)
     return sfd.result();
 }*/
 
-std::string lapCore::ReadFileToString(const std::string &filePath)
+std::string lapCore::ReadFileToString(const std::string &filePath, bool withPrefix)
 {
-    std::ifstream file(GetApplicationDirectory() + filePath);
+    std::string fullPath = withPrefix ? GetApplicationDirectory() + filePath : filePath;
+    std::ifstream file(fullPath);
+
     if (!file.is_open())
     {
         std::cerr << "Failed.\n";
@@ -53,9 +55,9 @@ void lapCore::WriteStringToFile(const std::string &filePath, const std::string &
     file.close();
 }
 
-nlohmann::json_abi_v3_12_0::json lapCore::ReadFileToJsonObject(const std::string &filePath)
+nlohmann::json_abi_v3_12_0::json lapCore::ReadFileToJsonObject(const std::string &filePath, bool withPrefix)
 {
-    return nlohmann::json::parse(ReadFileToString(filePath));
+    return nlohmann::json::parse(ReadFileToString(filePath, withPrefix));
 }
 
 Vector2 lapCore::GetMouseInViewportSpace(Vector2 logicalResolution)

@@ -779,10 +779,10 @@ namespace lapCore
         }
     };
 
-    std::string ReadFileToString(const std::string &filePath);
+    std::string ReadFileToString(const std::string &filePath, bool withPrefix = true);
     void WriteStringToFile(const std::string &filePath, const std::string &data);
 
-    nlohmann::json ReadFileToJsonObject(const std::string &filePath);
+    nlohmann::json ReadFileToJsonObject(const std::string &filePath, bool withPrefix = true);
 
     Vector2 GetMouseInViewportSpace(Vector2 logicalResolution);
 

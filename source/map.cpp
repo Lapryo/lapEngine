@@ -93,7 +93,7 @@ void GetLayers(Map& map, const json& mapJson)
 
 void lapCore::Map::LoadFromTMJ(ResourceManager* resources, const std::string &filePath)
 {
-    json mapJson = ReadFileToJsonObject(filePath);
+    json mapJson = ReadFileToJsonObject(filePath, false);
 
     width = mapJson.value("width", 0);
     height = mapJson.value("height", 0);
@@ -113,7 +113,7 @@ void lapCore::Map::Unload()
 
 void lapCore::Tileset::LoadFromTSJ(const std::string &filePath)
 {
-    json tilesetJson = ReadFileToJsonObject(filePath);
+    json tilesetJson = ReadFileToJsonObject(filePath, false);
 
     textureID = HASH_ID(tilesetJson.value("image", "").c_str());
 
