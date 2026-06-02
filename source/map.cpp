@@ -1,5 +1,7 @@
 #include "map.hpp"
 
+#include "eutil.hpp"
+
 #include <nlohmann/json.hpp>
 
 using namespace lapCore;
@@ -100,29 +102,6 @@ void lapCore::Map::LoadFromTMJ(ResourceManager* resources, const std::string &fi
 
     GetTilesets(*this, mapJson, filePath, resources);
     GetLayers(*this, mapJson);
-}
-
-void lapCore::Map::Generate(Scene *scene)
-{
-    for (const auto& layer : layers)
-    {
-        for (const auto& tileData : layer.second)
-        {
-            std::string tileName = "tile_" + 
-                std::to_string(layer.first) + "_" + 
-                std::to_string(tileData.id) + "_" + 
-                std::to_string(tileData.x) + "_" + 
-                std::to_string(tileData.y);
-
-            auto tile = scene->AddObject(HASH(tileName.c_str()), HASH(""), -1);
-            objects[layer.first] = tile.id;
-
-            // Add tile here properties as elements
-
-            
-
-        }
-    }
 }
 
 void lapCore::Map::Unload()

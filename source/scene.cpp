@@ -100,6 +100,29 @@ void lapCore::ObjectContainer::AddObjectsFromProjectData(std::vector<ProjectObje
     }
 }
 
+void lapCore::ObjectContainer::LoadMapObjects(Map &map)
+{
+    for (const auto& layer : map.layers)
+    {
+        for (const auto& tileData : layer.second)
+        {
+            std::string tileName = "tile_" + 
+                std::to_string(layer.first) + "_" + 
+                std::to_string(tileData.id) + "_" + 
+                std::to_string(tileData.x) + "_" + 
+                std::to_string(tileData.y);
+
+            auto tile = AddObject(HASH(tileName.c_str()), HASH(""), -1);
+            map.objects[layer.first] = tile.id;
+
+            // Add tile properties as elements here
+
+            
+
+        }
+    }
+}
+
 void lapCore::ObjectContainer::AddElement(entt::hashed_string objectName, entt::id_type elementType, void *elementData)
 {
     auto it = objectMap.find(objectName.value());

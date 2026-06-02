@@ -2,10 +2,12 @@
 
 #include <map>
 #include <entt/entt.hpp>
-#include "scene.hpp"
 
 namespace lapCore
 {
+    struct Scene;
+    struct ResourceManager;
+
     struct Tileset {
         entt::id_type textureID;
         unsigned int columns, count;
@@ -38,8 +40,6 @@ namespace lapCore
         std::map<unsigned int, entt::id_type> objects;
 
         void LoadFromTMJ(ResourceManager* resources, const std::string& filePath);
-        void Generate(Scene* scene);
-
         void Unload();
     };
 }

@@ -2,6 +2,7 @@
 
 #include "system.hpp"
 #include "project.hpp"
+#include "map.hpp"
 
 #include <iostream>
 
@@ -54,6 +55,7 @@ namespace lapCore
         ObjectEntry* FindEntry(Object object);
 
         void AddObjectsFromProjectData(std::vector<ProjectObjectData> objects);
+        void LoadMapObjects(Map& map);
 
         void AddElement(entt::hashed_string objectName, entt::id_type elementType, void* elementData);
         void AddElement(Object object, entt::id_type elementType, void* elementData);
