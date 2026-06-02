@@ -185,6 +185,13 @@ namespace lapCore
             }
         };
 
+        AssetStorage<Tileset> tilesets{
+            [](Tileset& tileset)
+            {
+                tileset.Unload();
+            }
+        };
+
         void ClearAll()
         {
             textures.UnloadAll();
@@ -195,6 +202,7 @@ namespace lapCore
             fonts.UnloadAll();
             images.UnloadAll();
             maps.UnloadAll();
+            tilesets.UnloadAll();
         }
     };
 }

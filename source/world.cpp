@@ -395,6 +395,8 @@ void lapCore::World::LoadAssets()
         }
         else if (asset.type == "map")
         {
+            Map map;
+
             // Handle map loading here
             for (const auto& data : asset.data)
             {
@@ -402,15 +404,23 @@ void lapCore::World::LoadAssets()
                 {
                     if (data.second == "tiled")
                     {
-                        // Load Tiled map here
-                        // resources.maps.Load(name, LoadTiledMap(assetPath.c_str()));
+                        map.LoadFromTMJ(&resources, assetPath);
                     }
                     else if (data.second == "lapmap")
                     {
-                        
+                        dbgln("Loading lapmap format is not yet implemented! Map is empty.", LogType::WARNING);
                     }
                 }
             }
+
+            resources.maps.Load(name, map);
+        }
+        else if (asset.type == "tileset")
+        {
+            Tileset tileset;
+
+            tileset.LoadFromTSJ(assetPath);
+            resources.tilesets.Load(name, tileset);
         }
         else
             dbgln("Unknown asset type: " + asset.type + " for asset: " + asset.name, LogType::WARNING);

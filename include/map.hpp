@@ -6,16 +6,24 @@
 
 namespace lapCore
 {
+    struct Tileset {
+        entt::id_type textureID;
+        unsigned int columns, count;
+        std::map<unsigned int, std::string> types;
+
+        void LoadFromTSJ(const std::string& filePath);
+        void Unload();
+    };
+
     struct Map {
         struct Tile {
             unsigned int tileset, id, x, y;
             std::map<std::string, std::string> properties;
         };
 
-        struct Tileset {
-            entt::id_type textureID;
-            unsigned int firstGID, columns, count;
-            std::map<unsigned int, std::string> types;
+        struct TilesetInfo {
+            unsigned int firstGID, count;
+            entt::id_type id;
         };
 
         unsigned int width, height, tileWidth, tileHeight;
@@ -23,13 +31,13 @@ namespace lapCore
         using TileLayer = std::vector<Tile>;
         std::map<unsigned int, TileLayer> layers;
 
-        //         LAYER ID      TEXTURE ID
-        std::map<unsigned int, Tileset> tilesets;
+        //         LAYER ID     TILESET INFO
+        std::map<unsigned int, TilesetInfo> tilesets;
 
         //.        LAYER ID      OBJECT ID
         std::map<unsigned int, entt::id_type> objects;
 
-        void LoadFromTMJ(const std::string& filePath);
+        void LoadFromTMJ(ResourceManager* resources, const std::string& filePath);
         void Generate(Scene* scene);
 
         void Unload();
