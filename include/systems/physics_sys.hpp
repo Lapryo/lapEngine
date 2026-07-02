@@ -9,7 +9,7 @@ class PhysicsSystem : public System
 {
 public:
     ~PhysicsSystem();
-    PhysicsSystem(Scene *scene, unsigned int order) : System(order, scene, false) {
+    PhysicsSystem(Scene *scene, unsigned int order) : System(order, scene) {
         b2WorldDef worldDef = b2DefaultWorldDef();
         worldID = b2CreateWorld(&worldDef);
 

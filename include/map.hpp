@@ -2,33 +2,42 @@
 
 #include <map>
 #include <entt/entt.hpp>
+#include <raylib.h>
 
 namespace lapCore
 {
     struct Scene;
     struct ResourceManager;
 
+    using Object = entt::entity;
+
     struct Tileset {
-        entt::id_type textureID;
-        unsigned int columns, count;
-        std::map<unsigned int, std::string> types;
+        entt::id_type textureID = 0;
+        unsigned int columns = 0, count = 0;
+        std::map<unsigned int, std::string> types = {};
 
         void LoadFromTSJ(const std::string& filePath);
         void Unload();
     };
 
     struct Map {
+        using TileProperties = std::map<std::string, std::string>;
+
         struct Tile {
-            unsigned int tileset, id, x, y;
-            std::map<std::string, std::string> properties;
+            unsigned int tileset = 0, id = 0;
+            Rectangle rect = {0, 0, 0, 0};
+            bool flipX = false, flipY = false, flipD = false, isObject = false;
+            TileProperties properties = {};
+            float opacity = 1.f;
         };
 
         struct TilesetInfo {
-            unsigned int firstGID, count;
-            entt::id_type id;
+            unsigned int firstGID = 0, count = 0;
+            entt::id_type id = 0;
+            std::map<unsigned int, std::string> types;
         };
 
-        unsigned int width, height, tileWidth, tileHeight;
+        Vector2 size = {0, 0}, tileSize = {0, 0};
         
         using TileLayer = std::vector<Tile>;
         std::map<unsigned int, TileLayer> layers;

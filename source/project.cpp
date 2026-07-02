@@ -612,6 +612,7 @@ void lapCore::Project::RegisterDefaultElements()
     Reflection::Register<Camera2D>("camera-2d");
     Reflection::Register<Vector2>("vector2");
     Reflection::Register<Color>("color");
+    Reflection::Register<Rectangle>("rectangle");
 
     // BOX2D
     Reflection::Register<b2BodyDef>("b2-body-def");

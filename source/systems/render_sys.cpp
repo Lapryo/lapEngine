@@ -24,42 +24,44 @@ void RenderSystem::OnRenderableUpdated(entt::registry &registry, Object object)
 
 void RenderSystem::RebuildRenderList(entt::registry &registry)
 {
-    dbgln("[RENDER] Rebuilding render list.", LogType::INFO);
     renderList.clear();
 
     auto spriteView = registry.view<Sprite>();
     for (auto e : spriteView)
     {
         const auto &s = spriteView.get<Sprite>(e);
-        renderList.push_back({e, s.renderable.zlayer, s.renderable.isScreenSpace, RenderType::Sprite});
+        renderList.push_back({e, s.renderable.zlayer, s.renderable.ySort, s.renderable.isScreenSpace, RenderType::Sprite});
     }
 
     auto imageView = registry.view<UIImage>();
     for (auto e : imageView)
     {
         const auto &s = imageView.get<UIImage>(e);
-        renderList.push_back({e, s.sprite.renderable.zlayer, s.sprite.renderable.isScreenSpace, RenderType::Image});
+        renderList.push_back({e, s.sprite.renderable.zlayer, s.sprite.renderable.ySort, s.sprite.renderable.isScreenSpace, RenderType::Image});
     }
 
     auto textView = registry.view<UITextLabel>();
     for (auto e : textView)
     {
         const auto &t = textView.get<UITextLabel>(e);
-        renderList.push_back({e, t.frame.renderable.zlayer, t.frame.renderable.isScreenSpace, RenderType::Text});
+        renderList.push_back({e, t.frame.renderable.zlayer, t.frame.renderable.ySort, t.frame.renderable.isScreenSpace, RenderType::Text});
     }
 
     auto frameView = registry.view<UIFrame>();
     for (auto e : frameView)
     {
         const auto &t = frameView.get<UIFrame>(e);
-        renderList.push_back({e, t.renderable.zlayer, t.renderable.isScreenSpace, RenderType::Rect});
+        renderList.push_back({e, t.renderable.zlayer, t.renderable.ySort, t.renderable.isScreenSpace, RenderType::Rect});
     }
 
     std::sort(renderList.begin(), renderList.end(), [](const auto &a, const auto &b)
-              {
+    {
         if (a.isScreenSpace != b.isScreenSpace)
             return !a.isScreenSpace; // world first
-        return a.zlayer < b.zlayer; });
+        if (a.zlayer != b.zlayer)
+            return a.zlayer < b.zlayer; 
+        return a.ySort < b.ySort;
+    });
 
     needsResort = false;
 }
@@ -86,17 +88,15 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         const Texture2D* texture = scene->world->resources.textures.TryGet(sprite->textureID);
 
-        Rectangle rect;
-        rect.width = (float)texture->width;
-        rect.height = (float)texture->height;
+        Rectangle rect = sprite->destRect;
 
         float rotation = 0.f;
 
         auto *origin = registry.try_get<Transform2D>(obj);
         if (origin)
         {
-            rect.x = origin->position.x;
-            rect.y = origin->position.y;
+            rect.x += origin->position.x;
+            rect.y += origin->position.y;
             rect.width *= origin->scale.x;
             rect.height *= origin->scale.y;
 
@@ -108,11 +108,17 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         if (texture)
             DrawTexturePro(
                 *texture,
-                {0.f, 0.f, rect.width, rect.height},
+                sprite->sourceRect,
                 rect,
                 {rect.width / 2.f, rect.height / 2.f},
                 rotation,
                 sprite->renderable.tint);
+
+        if (auto physics = registry.try_get<Physics2D>(obj)) {
+            DrawRectangleLines(
+                rect.x - (rect.width / 2.f), rect.y - (rect.height / 2.f), rect.width, rect.height, RED
+            );
+        }
     };
 
     auto drawImage = [&](Object obj, const Scene *scene)
@@ -140,7 +146,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         if (texture)
             DrawTexturePro(
                 *texture,
-                {0.f, 0.f, (float)texture->width, (float)texture->height},
+                image->sprite.sourceRect,
                 rect,
                 anchorVec,
                 image->origin.transform.rotation,

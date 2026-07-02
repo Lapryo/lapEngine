@@ -3,6 +3,8 @@
 
 using namespace lapCore;
 
+#include "systems/physics_sys.hpp"
+
 ObjectInfo lapCore::ObjectContainer::AddObject(entt::hashed_string name, entt::hashed_string parent, int childIndex, bool fromPrefab)
 {
     ObjectEntry entry;
@@ -100,7 +102,7 @@ void lapCore::ObjectContainer::AddObjectsFromProjectData(std::vector<ProjectObje
     }
 }
 
-void lapCore::ObjectContainer::LoadMapObjects(Map &map)
+void lapCore::Scene::LoadMapObjects(Map &map)
 {
     for (const auto& layer : map.layers)
     {
@@ -109,16 +111,143 @@ void lapCore::ObjectContainer::LoadMapObjects(Map &map)
             std::string tileName = "tile_" + 
                 std::to_string(layer.first) + "_" + 
                 std::to_string(tileData.id) + "_" + 
-                std::to_string(tileData.x) + "_" + 
-                std::to_string(tileData.y);
+                std::to_string(tileData.rect.x) + "_" + 
+                std::to_string(tileData.rect.y);
 
             auto tile = AddObject(HASH(tileName.c_str()), HASH(""), -1);
             map.objects[layer.first] = tile.id;
 
             // Add tile properties as elements here
 
-            
+            auto tileset = world->resources.tilesets.TryGet(map.tilesets[tileData.tileset].id);
+            if (!tileset) continue;
 
+            Transform2D tileTransform;
+            tileTransform.position = {tileData.rect.x, tileData.rect.y};
+
+            if (tileData.id != 0)
+            {
+                Sprite tileSprite;
+                tileSprite.textureID = tileset->textureID;
+                tileSprite.animated.active = false;
+
+                unsigned int localID =
+                    tileData.id - map.tilesets[tileData.tileset].firstGID;
+
+                int column = localID % tileset->columns;
+                int row    = localID / tileset->columns;
+
+                tileSprite.sourceRect = {
+                    (float)(column * map.tileSize.x),
+                    (float)(row * map.tileSize.y),
+                    (float)map.tileSize.x,
+                    (float)map.tileSize.y
+                };
+
+                tileSprite.destRect = tileSprite.sourceRect;
+                tileSprite.destRect.x = 0.f;
+                tileSprite.destRect.y = 0.f;
+                tileSprite.destRect.width = (float)tileData.rect.width;
+                tileSprite.destRect.height = (float)tileData.rect.height;
+
+                tileSprite.renderable.zlayer = layer.first;
+                if (localID == 24)
+                {
+                    std::cout << "bush, zlayer: " << layer.first << '\n';
+                }
+
+                float rotation = 0.f;
+                bool flipX = tileData.flipX;
+                bool flipY = tileData.flipY;
+
+                if (tileData.flipD)
+                {
+                    std::swap(tileSprite.sourceRect.width,
+                            tileSprite.sourceRect.height);
+
+                    if (flipX && !flipY)
+                    {
+                        rotation = 90.f;
+                        flipX = false;
+                    }
+                    else if (!flipX && flipY)
+                    {
+                        rotation = -90.f;
+                        flipY = false;
+                    }
+                    else if (flipX && flipY)
+                    {
+                        rotation = 180.f;
+                        flipX = false;
+                        flipY = false;
+                    }
+                }
+
+                if (flipX)
+                    tileSprite.sourceRect.width *= -1;
+
+                if (flipY)
+                    tileSprite.sourceRect.height *= -1;
+
+                tileTransform.rotation = rotation;
+
+                tileSprite.renderable.tint = {255, 255, 255, (unsigned char)(255 * tileData.opacity)};
+
+                tileSprite.renderable.ySort = tileTransform.position.y + map.tileSize.y;
+
+                AddElement<Sprite>(tile.object, tileSprite);
+
+                if (tileData.isObject)
+                {
+                    tileTransform.position.x += (tileData.rect.width / 2.f) - (map.tileSize.x / 2.f);
+                    tileTransform.position.y += (tileData.rect.height / 2.f) - (map.tileSize.y / 2.f);
+                }
+
+                if (localID == 24)
+                    std::cout << "ysort: " << tileSprite.renderable.ySort << '\n';
+            }
+            else if (tileData.isObject)
+            {
+                tileTransform.position.y += map.tileSize.y;
+            }
+
+            AddElement<Transform2D>(tile.object, tileTransform);
+
+            auto it = tileData.properties.find("type");
+            if (it != tileData.properties.end())
+            {
+                auto tileType = it->second;
+                if (tileType == "solid")
+                {
+                    Physics2D tilephysics;
+                    tilephysics.bodyDef = b2DefaultBodyDef();
+                    tilephysics.bodyDef.position = Convert::Vec2::box2d(tileTransform.position);
+                    tilephysics.bodyDef.type = b2BodyType::b2_staticBody;
+                    tilephysics.shapeDef = b2DefaultShapeDef();
+                    tilephysics.polygon = b2MakeBox(((float)tileData.rect.width) / 2.f, ((float)tileData.rect.height) / 2.f);
+                    auto physics = AddElement<Physics2D>(tile.object, tilephysics);
+
+                    auto pSys = GetSystem<PhysicsSystem>();
+                    pSys->bodyMap[tile.object] = pSys->Create2DBody(tilephysics.bodyDef, tilephysics.shapeDef, tilephysics.polygon);
+                }
+                else if (tileType == "teleport")
+                {
+                    Physics2D tilephysics;
+                    tilephysics.bodyDef = b2DefaultBodyDef();
+                    tilephysics.bodyDef.position = Convert::Vec2::box2d(tileTransform.position);
+                    tilephysics.bodyDef.type = b2BodyType::b2_staticBody;
+                    tilephysics.shapeDef = b2DefaultShapeDef();
+                    tilephysics.polygon = b2MakeBox(((float)tileData.rect.width) / 2.f, ((float)tileData.rect.height) / 2.f);
+                    tilephysics.shapeDef.isSensor = true;
+
+                    auto physics = AddElement<Physics2D>(tile.object, tilephysics);
+
+                    auto pSys = GetSystem<PhysicsSystem>();
+                    pSys->bodyMap[tile.object] = pSys->Create2DBody(tilephysics.bodyDef, tilephysics.shapeDef, tilephysics.polygon);
+                }
+            }
+
+            AddElement<Map::TileProperties>(tile.object, tileData.properties);
         }
     }
 }
@@ -190,10 +319,6 @@ void lapCore::Scene::Update(float deltaTime, RenderTexture2D &target)
     {
         if (!system || !system->active)
             continue;
-
-        bool drawing = false;
-        if (system->drawing)
-            drawing = true;
 
         system->Update(deltaTime, objects);
     }

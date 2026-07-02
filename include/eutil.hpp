@@ -33,6 +33,31 @@ namespace lapCore
     };
 
     template <>
+    struct JSON::Serializer<Rectangle>
+    {
+        static json to_json(const Rectangle& r, SerializeContext* ctx = nullptr)
+        {
+            return json{
+                {"position", JSON::Serializer<Vector2>::to_json({r.x, r.y})},
+                {"size", JSON::Serializer<Vector2>::to_json({r.width, r.height})}
+            };
+        }
+
+        static void from_json(Rectangle& r, const json& j)
+        {
+            if (j.contains("position")) {
+                r.x = j.at("position").at(0).get<float>();
+                r.y = j.at("position").at(1).get<float>();
+            }
+
+            if (j.contains("size")) {
+                r.width = j.at("size").at(0).get<float>();
+                r.height = j.at("size").at(1).get<float>();
+            }
+        }
+    };
+
+    template <>
     struct JSON::Serializer<Color>
     {
         static json to_json(const Color& c, SerializeContext* ctx = nullptr)
@@ -326,6 +351,10 @@ namespace lapCore
             {
                 p = b2MakeBox(j.value("width", 1.f) / 2.f, j.value("height", 1.f) / 2.f);
             }
+            else if (hitboxType == "circle")
+            {
+                p = b2MakeRoundedBox(j.value("radius", 1.f) / 2.f, j.value("radius", 1.f) / 2.f, j.value("radius", 1.f) / 2.f);
+            }
             else if (hitboxType == "bounding-box")
             {
                 Model model = LoadModel(j.value("model-path", std::string()).c_str());
@@ -412,7 +441,7 @@ namespace lapCore
         // Not to be changed, i mean you can, but it wont do anything, itll just be overwritten by the render system
         Rectangle drawRect{0, 0, 0, 0};
 
-        unsigned int zlayer{0};
+        int zlayer{0}, ySort{0};
         bool isScreenSpace{false};
         bool visible{true};
         Color tint{255, 255, 255, 255};
@@ -429,6 +458,7 @@ namespace lapCore
         {
             return json{
                 {"z-layer", r.zlayer},
+                {"y-sort", r.ySort},
                 {"is-screen-space", r.isScreenSpace},
                 {"visible", r.visible},
                 {"tint", JSON::Serializer<Color>::to_json(r.tint, ctx)},
@@ -439,6 +469,7 @@ namespace lapCore
         static void from_json(Renderable& r, const json& j)
         {
             r.zlayer = j.value("z-layer", r.zlayer);
+            r.ySort = j.value("y-sort", r.ySort);
             r.isScreenSpace = j.value("is-screen-space", r.isScreenSpace);
             r.visible = j.value("visible", r.visible);
             r.usesUIListVisiblity = j.value("inherits-ui", r.usesUIListVisiblity);
@@ -512,7 +543,7 @@ namespace lapCore
     struct Animated
     {
         bool active{true};
-        unsigned int index{0};
+        unsigned int index{0}, columns{0};
         std::vector<float> frameTimes{0.f};
     };
     template <>
@@ -523,14 +554,16 @@ namespace lapCore
             return json{
                 {"active", a.active},
                 {"index", a.index},
+                {"columns", a.columns},
                 {"frame-times", a.frameTimes}
             };
         }
         static void from_json(Animated& a, const json& j)
         {
-            a.active = j.value("active", false);
-            a.index = j.value("index", 0);
-            a.frameTimes = j.value("frame-times", std::vector<float>());
+            a.active = j.value("active", a.active);
+            a.index = j.value("index", a.index);
+            a.columns = j.value("columns", a.columns);
+            a.frameTimes = j.value("frame-times", a.frameTimes);
         }
     };
 
@@ -694,6 +727,18 @@ namespace lapCore
         }
     };
 
+    // TODO: Implement this to other structs, also change any structs that use two Vector2's to some type of Rectangle
+    struct FrameRect
+    {
+        FrameVector position;
+        FrameVector size;
+    };
+    template <>
+    struct JSON::Serializer<FrameRect>
+    {
+
+    };
+
     struct Padding
     {
         float top{0.f}, bottom{0.f}, left{0.f}, right{0.f};
@@ -799,4 +844,19 @@ namespace lapCore
         ERROR
     };
     void dbgln(const std::string &message, LogType type = LogType::INFO);
+
+    namespace Convert
+    {
+        namespace Vec2
+        {
+            inline b2Vec2 box2d(Vector2 vec)
+            {
+                return {vec.x, vec.y};
+            }
+            inline Vector2 raylib(b2Vec2 vec)
+            {
+                return {vec.x, vec.y};
+            }
+        };
+    };
 }

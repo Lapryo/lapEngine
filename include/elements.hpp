@@ -131,6 +131,10 @@ namespace lapCore
         Renderable renderable{};
         Animated animated{};
 
+        // Not serializable, for runtime only
+        Rectangle sourceRect{0, 0, 0, 0}, destRect{0, 0, 0, 0};
+        bool flipX, flipY, flipD = false;
+
         entt::id_type textureID{0};
     };
     template <>
@@ -141,6 +145,11 @@ namespace lapCore
             return json{
                 { "renderable" , JSON::Serializer<Renderable>::to_json(s.renderable) },
                 { "animated"   , JSON::Serializer<Animated>::to_json(s.animated)     },
+                { "source-rect", JSON::Serializer<Rectangle>::to_json(s.sourceRect)  },
+                { "dest-rect"  , JSON::Serializer<Rectangle>::to_json(s.destRect)    },
+                { "flip-horizontal", s.flipX },
+                { "flip-vertical", s.flipY },
+                { "flip-diagonal", s.flipD },
                 { "texture"    , ctx->resources->textures.GetName(s.textureID)       }
             };
         }
@@ -150,6 +159,15 @@ namespace lapCore
                 JSON::Serializer<Renderable>::from_json(s.renderable, j.at("renderable"));
             if (j.contains("animated"))
                 JSON::Serializer<Animated>::from_json(s.animated, j.at("animated"));
+
+            if (j.contains("source-rect"))
+                JSON::Serializer<Rectangle>::from_json(s.sourceRect, j.at("source-rect"));
+            if (j.contains("dest-rect"))
+                JSON::Serializer<Rectangle>::from_json(s.destRect, j.at("dest-rect"));
+
+            s.flipX = j.value("flip-horizontal", s.flipX);
+            s.flipY = j.value("flip-vertical", s.flipY);
+            s.flipD = j.value("flip-diagonal", s.flipD);
             
             if (j.contains("texture"))
                 s.textureID = entt::hashed_string{j.at("texture").get<std::string>().c_str()}.value();

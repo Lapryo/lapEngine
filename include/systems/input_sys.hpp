@@ -48,7 +48,7 @@ public:
     void RegisterAction(const std::string &actionName, const InputEntry &entry);
     void RegisterAction(const std::string &actionName, entt::id_type eventID, std::vector<int> codes, bool sustain, InputType inputType, ControlType controlType, InputDeadzone deadzone = {0.0f, 0.0f}, bool active = true);
 
-    InputSystem(Scene *scene, unsigned int order) : System(order, scene, false) {}
+    InputSystem(Scene *scene, unsigned int order) : System(order, scene) {}
     void Update(float deltaTime, entt::registry &registry) override;
     std::string GetName() const override { return "InputSystem"; }
 };

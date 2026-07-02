@@ -55,7 +55,6 @@ namespace lapCore
         ObjectEntry* FindEntry(Object object);
 
         void AddObjectsFromProjectData(std::vector<ProjectObjectData> objects);
-        void LoadMapObjects(Map& map);
 
         void AddElement(entt::hashed_string objectName, entt::id_type elementType, void* elementData);
         void AddElement(Object object, entt::id_type elementType, void* elementData);
@@ -94,6 +93,8 @@ namespace lapCore
 
         std::string name;
         World *world;
+
+        void LoadMapObjects(Map& map);
 
         template <typename T, typename... Args>
         void AddSystem(int order, Args&&... args)

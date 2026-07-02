@@ -17,14 +17,14 @@ public:
     struct RenderEntry
     {
         Object entity;
-        unsigned int zlayer;
+        int zlayer, ySort;
         bool isScreenSpace;
         RenderType type;
     };
 
     std::vector<RenderEntry> renderList;
 
-    RenderSystem(Scene *scene, unsigned int order) : System(order, scene, true) {}
+    RenderSystem(Scene *scene, unsigned int order) : System(order, scene) {}
     void Update(float deltaTime, entt::registry &reg) override;
 
     void Connect(entt::registry &registry);
