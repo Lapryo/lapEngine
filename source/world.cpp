@@ -84,6 +84,12 @@ ProjectSceneData &lapCore::World::GetMainSceneData()
     return project.scenes[project.main_scene_index];
 }
 
+void lapCore::World::SwitchScene(ProjectSceneData &scene_data)
+{
+    switchingScene = true;
+    nextSceneData = &scene_data;
+}
+
 WindowProperties LoadWindowProperties(const nlohmann::json_abi_v3_12_0::json &windowJson)
 {
     WindowProperties window_properties;

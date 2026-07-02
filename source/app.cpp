@@ -27,6 +27,12 @@ void App::Run()
     while (state == AppState::RUNNING)
     {
         Update(GetFrameTime());
+        if (world.switchingScene && world.nextSceneData != nullptr)
+        {
+            world.SetScene(*world.nextSceneData);
+            world.switchingScene = false;
+            world.nextSceneData = nullptr;
+        }
     }
 }
 

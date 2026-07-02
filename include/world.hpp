@@ -62,9 +62,14 @@ namespace lapCore
         void SetScene(ProjectSceneData &scene_data);
         ProjectSceneData &GetMainSceneData();
 
+        void SwitchScene(ProjectSceneData &scene_data);
+
         const Project &GetProject() const {
             return project;
         }
+
+        bool switchingScene = false;
+        ProjectSceneData *nextSceneData = nullptr;
 
     private:
         Project project;

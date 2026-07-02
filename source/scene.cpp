@@ -151,10 +151,6 @@ void lapCore::Scene::LoadMapObjects(Map &map)
                 tileSprite.destRect.height = (float)tileData.rect.height;
 
                 tileSprite.renderable.zlayer = layer.first;
-                if (localID == 24)
-                {
-                    std::cout << "bush, zlayer: " << layer.first << '\n';
-                }
 
                 float rotation = 0.f;
                 bool flipX = tileData.flipX;
@@ -202,9 +198,6 @@ void lapCore::Scene::LoadMapObjects(Map &map)
                     tileTransform.position.x += (tileData.rect.width / 2.f) - (map.tileSize.x / 2.f);
                     tileTransform.position.y += (tileData.rect.height / 2.f) - (map.tileSize.y / 2.f);
                 }
-
-                if (localID == 24)
-                    std::cout << "ysort: " << tileSprite.renderable.ySort << '\n';
             }
             else if (tileData.isObject)
             {
