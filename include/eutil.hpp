@@ -845,6 +845,12 @@ namespace lapCore
     };
     void dbgln(const std::string &message, LogType type = LogType::INFO);
 
+    template <typename T>
+    struct Range
+    {
+        T upper, lower;
+    };
+
     namespace Convert
     {
         namespace Vec2

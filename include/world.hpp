@@ -4,6 +4,7 @@
 #include "resourcemanager.hpp"
 #include "scene.hpp"
 #include "reflection.hpp"
+#include "actionmap.hpp"
 
 #include <memory>
 
@@ -62,14 +63,19 @@ namespace lapCore
         void SetScene(ProjectSceneData &scene_data);
         ProjectSceneData &GetMainSceneData();
 
-        void SwitchScene(ProjectSceneData &scene_data);
+        void SwitchScene(const ProjectSceneData &scene_data, std::function<void()> preloadCallback);
 
         const Project &GetProject() const {
             return project;
         }
 
         bool switchingScene = false;
-        ProjectSceneData *nextSceneData = nullptr;
+        ProjectSceneData nextSceneData;
+
+        std::function<void()> preloadSceneCallback = nullptr;
+
+        std::unordered_map<std::string, ActionMap> actionMaps;
+        ActionMap* currentActionMap = nullptr;
 
     private:
         Project project;

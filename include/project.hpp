@@ -136,6 +136,8 @@ namespace lapCore
         std::string name;
         std::vector<ProjectSystemData> systems;
         SceneInstancesData instances;
+
+        void Clear();
     };
 
     struct Project

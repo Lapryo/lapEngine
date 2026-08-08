@@ -582,6 +582,13 @@ Project lapCore::UnpackProject(const std::string projectJsonString)
     return project;
 }
 
+void lapCore::ProjectSceneData::Clear() {
+    name.clear();
+    systems.clear();
+    instances.objects.clear();
+    instances.prefabs.clear();
+}
+
 void lapCore::Project::RegisterDefaultElements()
 {
     // ELEMENTS

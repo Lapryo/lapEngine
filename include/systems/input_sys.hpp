@@ -6,49 +6,38 @@ using namespace lapCore;
 class InputSystem : public System
 {
 public:
-    enum class ControlType
-    {
-        BUTTON,
-        AXIS
-    };
+    InputSystem(
+        Scene *scene, 
+        unsigned int order
+    ) : System(order, scene) {}
 
-    enum class InputType
-    {
-        KEYBOARD,
-        MOUSE,
-        GAMEPAD
-    };
+    void Update(float deltaTime, 
+        entt::registry &registry
+    ) override;
 
-    struct InputKey
-    {
-        ControlType controlType;
-        InputType inputType;
-        std::vector<int> codes;
-    };
+    std::vector<int> consumedKeys;
+    std::vector<int> consumedMouseButtons;
+    std::vector<int> consumedGamepadButtons;
+    std::vector<int> consumedGamepadAxes;
 
-    struct InputDeadzone
-    {
-        float lower;
-        float upper;
-    };
-
-    struct InputEntry
-    {
-        InputKey key;
-        InputDeadzone deadzone;
-        float value;
-        bool active;
-        bool pressed;
-        bool sustain;
-        entt::id_type eventID;
-    };
-
-    std::map<std::string, InputEntry> actions;
-
-    void RegisterAction(const std::string &actionName, const InputEntry &entry);
-    void RegisterAction(const std::string &actionName, entt::id_type eventID, std::vector<int> codes, bool sustain, InputType inputType, ControlType controlType, InputDeadzone deadzone = {0.0f, 0.0f}, bool active = true);
-
-    InputSystem(Scene *scene, unsigned int order) : System(order, scene) {}
-    void Update(float deltaTime, entt::registry &registry) override;
-    std::string GetName() const override { return "InputSystem"; }
+    std::string GetName() const override 
+    { return "InputSystem"; }
+private:
+    bool HandleKeyboardInput(
+        Scene* scene, 
+        ActionMap::InputEntry &entry, 
+        int key
+    );
+    bool HandleMouseInput(
+        Scene* scene, 
+        ActionMap::InputEntry &entry, 
+        int button
+    );
+    bool HandleGamepadInput(
+        Scene* scene, 
+        ActionMap::InputEntry &entry, 
+        ActionMap::ControlType controlType, 
+        int button, 
+        int gamepad
+    );
 };

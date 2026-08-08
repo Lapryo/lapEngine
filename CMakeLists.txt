@@ -65,3 +65,9 @@ target_link_libraries(lapEngine PUBLIC
     nlohmann_json::nlohmann_json
     EnTT::EnTT
 )
+
+if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(lapEngine PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wa,-mbig-obj>
+    )
+endif()

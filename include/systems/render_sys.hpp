@@ -6,11 +6,13 @@ using namespace lapCore;
 class RenderSystem : public System
 {
 public:
+    // TODO: Add support for models and custom 2d shapes
     enum class RenderType
     {
         Sprite,
         Text,
         Rect,
+        Ellipse,
         Image
     };
 
@@ -22,17 +24,27 @@ public:
         RenderType type;
     };
 
-    std::vector<RenderEntry> renderList;
+    RenderSystem(
+        Scene *scene, 
+        unsigned int order
+    ) : System(order, scene) {}
 
-    RenderSystem(Scene *scene, unsigned int order) : System(order, scene) {}
-    void Update(float deltaTime, entt::registry &reg) override;
+    void Update(
+        float deltaTime, 
+        entt::registry &reg
+    ) override;
 
     void Connect(entt::registry &registry);
-    void OnRenderableUpdated(entt::registry &registry, Object entity);
+    void OnRenderableUpdated(
+        entt::registry &registry, 
+        Object entity
+    );
 
     void RebuildRenderList(entt::registry &registry);
 
+    std::vector<RenderEntry> renderList;
     bool needsResort = true;
 
-    std::string GetName() const override { return "RenderSystem"; }
+    std::string GetName() const override 
+    { return "RenderSystem"; }
 };

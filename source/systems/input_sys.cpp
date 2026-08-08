@@ -3,121 +3,193 @@
 
 using namespace lapCore;
 
-bool HandleKeyboardInput(Scene* scene, InputSystem::InputEntry &entry, int key)
+bool InputSystem::HandleKeyboardInput(
+    Scene* scene,
+    ActionMap::InputEntry& entry,
+    int key
+)
 {
-    if (IsKeyDown(key))
-    {
-        if (entry.active)
-        {
-            if (!entry.sustain && entry.pressed) return true;
-            entry.pressed = true;
-            EventRegistry::Fire(scene, entry.eventID);
-        }
-    }
-    else
-        entry.pressed = false;
+    const bool down = IsKeyDown(key);
+    entry.pressed = down;
 
-    return entry.pressed;
+    if (!down || !entry.active)
+        return false;
+
+    // Sustained: every frame while held.
+    // Non-sustained: only the physical down transition.
+    const bool shouldFire =
+        entry.sustain || IsKeyPressed(key);
+
+    if (!shouldFire)
+        return true;
+
+    const auto consumedIt =
+        std::find(consumedKeys.begin(), consumedKeys.end(), key);
+
+    const bool consumed =
+        consumedIt != consumedKeys.end();
+
+    if (consumed && !entry.shared)
+        return true;
+
+    // Mark it consumed regardless of whether this entry is shared.
+    // "shared" means this entry may ignore previous consumption,
+    // not that this entry never consumes the key.
+    if (!consumed)
+        consumedKeys.push_back(key);
+
+    EventRegistry::Fire(scene, entry.eventID);
+    return true;
 }
 
-bool HandleMouseInput(Scene* scene, InputSystem::InputEntry &entry, int button)
+bool InputSystem::HandleMouseInput(
+    Scene* scene,
+    ActionMap::InputEntry& entry,
+    int button
+)
 {
-    if (IsMouseButtonDown(button))
-    {
-        if (entry.active)
-        {
-            if (!entry.sustain && entry.pressed) return true;
-            entry.pressed = true;
-            EventRegistry::Fire(scene, entry.eventID);
-        }
-    }
-    else
-        entry.pressed = false;
+    const bool down = IsMouseButtonDown(button);
+    entry.pressed = down;
 
-    return entry.pressed;
+    if (!down || !entry.active)
+        return false;
+
+    // Sustained: every frame while held.
+    // Non-sustained: only the physical down transition.
+    const bool shouldFire =
+        entry.sustain || IsMouseButtonPressed(button);
+
+    if (!shouldFire)
+        return true;
+
+    const bool consumed =
+        std::find(
+            consumedKeys.begin(),
+            consumedKeys.end(),
+            button
+        ) != consumedKeys.end();
+
+    if (consumed && !entry.shared)
+        return true;
+
+    // Shared inputs may ignore previous consumption, but still consume
+    // the input for later non-shared actions.
+    if (!consumed)
+        consumedKeys.push_back(button);
+
+    EventRegistry::Fire(scene, entry.eventID);
+    return true;
 }
 
-bool HandleGamepadInput(Scene* scene, InputSystem::InputEntry &entry, InputSystem::ControlType controlType, int button, int gamepad)
+bool InputSystem::HandleGamepadInput(
+    Scene* scene,
+    ActionMap::InputEntry& entry,
+    ActionMap::ControlType controlType,
+    int button,
+    int gamepad
+)
 {
-    if (controlType == InputSystem::ControlType::AXIS)
+    bool down = false;
+    bool freshlyPressed = false;
+    float value = 0.0f;
+
+    const bool wasPressed = entry.pressed;
+
+    if (controlType == ActionMap::ControlType::AXIS)
     {
-        if (GetGamepadAxisMovement(gamepad, button) > entry.deadzone.upper || GetGamepadAxisMovement(gamepad, button) < entry.deadzone.lower)
-        {
-            if (entry.active)
-            {
-                if (!entry.sustain && entry.pressed) return true;
-                entry.pressed = true;
-                entry.value = GetGamepadAxisMovement(gamepad, button);
-                EventRegistry::Fire(scene, entry.eventID);
-            }
-        }
-        else
-        {
-            entry.pressed = false;
-            entry.value = 0.0f;
-        }
+        value = GetGamepadAxisMovement(gamepad, button);
+
+        down =
+            value > entry.deadzone.upper ||
+            value < entry.deadzone.lower;
+
+        // An axis is freshly pressed when it transitions from
+        // inside the deadzone to outside the deadzone.
+        freshlyPressed = down && !wasPressed;
     }
     else
     {
-        if (IsGamepadButtonDown(gamepad, button))
-        {
-            if (entry.active)
-            {
-                if (!entry.sustain && entry.pressed) return true;
-                entry.pressed = true;
-                EventRegistry::Fire(scene, entry.eventID);
-            }
-        }
-        else
-            entry.pressed = false;
+        down = IsGamepadButtonDown(gamepad, button);
+        freshlyPressed = IsGamepadButtonPressed(gamepad, button);
+        value = down ? 1.0f : 0.0f;
     }
 
-    return entry.pressed;
+    /*
+     * Always track the physical state, even while the entry is inactive.
+     *
+     * This prevents an action enabled while an axis is already held
+     * from interpreting that held axis as a fresh press.
+     */
+    entry.pressed = down;
+
+    if (!down)
+    {
+        entry.value = 0.0f;
+        return false;
+    }
+
+    if (!entry.active)
+    {
+        entry.value = 0.0f;
+        return false;
+    }
+
+    entry.value = value;
+
+    // Sustained: every frame while held.
+    // Non-sustained: only the physical down transition.
+    const bool shouldFire =
+        entry.sustain || freshlyPressed;
+
+    if (!shouldFire)
+        return true;
+
+    const bool consumed =
+        std::find(
+            consumedKeys.begin(),
+            consumedKeys.end(),
+            button
+        ) != consumedKeys.end();
+
+    if (consumed && !entry.shared)
+        return true;
+
+    if (!consumed)
+        consumedKeys.push_back(button);
+
+    EventRegistry::Fire(scene, entry.eventID);
+    return true;
 }
 
 void InputSystem::Update(float deltaTime, entt::registry &registry)
 {
-    for (auto &inputPair : actions)
+    consumedKeys.clear();
+
+    for (auto &inputPair : scene->world->currentActionMap->actions)
     {
         switch (inputPair.second.key.inputType)
         {
-            case InputType::KEYBOARD:
+            case ActionMap::InputType::KEYBOARD:
             {
                 for (int key : inputPair.second.key.codes)
-                    if (HandleKeyboardInput(scene, inputPair.second, key)) break;
+                    if (HandleKeyboardInput(scene, inputPair.second, key))
+                        break;
                 break;
             }
-            case InputType::MOUSE:
+            case ActionMap::InputType::MOUSE:
             {
                 for (int key : inputPair.second.key.codes)
-                     if (HandleMouseInput(scene, inputPair.second, key)) break;
+                    if (HandleMouseInput(scene, inputPair.second, key))
+                        break;
                 break;
             }
-            case InputType::GAMEPAD:
+            case ActionMap::InputType::GAMEPAD:
             {
                 for (int key : inputPair.second.key.codes)
-                     if (HandleGamepadInput(scene, inputPair.second, inputPair.second.key.controlType, key, 0)) break;
+                    if (HandleGamepadInput(scene, inputPair.second, inputPair.second.key.controlType, key, 0))
+                        break;
                 break;
             }
         }
     }
-}
-
-void InputSystem::RegisterAction(const std::string &actionName, const InputEntry &entry)
-{
-    actions[actionName] = entry;
-}
-
-void InputSystem::RegisterAction(const std::string &actionName, entt::id_type eventID, std::vector<int> codes, bool sustain, InputType inputType, ControlType controlType, InputDeadzone deadzone, bool active)
-{
-    InputEntry entry;
-    entry.key.inputType = inputType;
-    entry.key.controlType = controlType;
-    entry.key.codes = codes;
-    entry.sustain = sustain;
-    entry.active = active;
-    entry.eventID = eventID;
-    entry.deadzone = deadzone;
-
-    RegisterAction(actionName, entry);
 }

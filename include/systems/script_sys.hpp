@@ -6,9 +6,18 @@ using namespace lapCore;
 class ScriptSystem : public System
 {
 public:
-    ScriptSystem(Scene *scene, unsigned int order) : System(order, scene) {}
-    void Update(float deltaTime, entt::registry &registry) override;
+    ScriptSystem(
+        Scene *scene, 
+        unsigned int order
+    ) : System(order, scene) {}
+
+    void Update(
+        float deltaTime, 
+        entt::registry &registry
+    ) override;
+
     void OnDestroy(entt::registry &registry);
 
-    std::string GetName() const override { return "ScriptSystem"; }
+    std::string GetName() const override 
+    { return "ScriptSystem"; }
 };

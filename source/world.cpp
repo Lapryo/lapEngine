@@ -77,6 +77,12 @@ void World::SetScene(ProjectSceneData &scene_data)
     if (IsWindowReady())
         if (mainScene->GetSystem<RenderSystem>() == nullptr)
             mainScene->AddSystem<RenderSystem>(-1);
+
+    if (preloadSceneCallback)
+    {
+        preloadSceneCallback();
+    }
+    preloadSceneCallback = nullptr;
 }
 
 ProjectSceneData &lapCore::World::GetMainSceneData()
@@ -84,10 +90,11 @@ ProjectSceneData &lapCore::World::GetMainSceneData()
     return project.scenes[project.main_scene_index];
 }
 
-void lapCore::World::SwitchScene(ProjectSceneData &scene_data)
+void lapCore::World::SwitchScene(const ProjectSceneData &scene_data, std::function<void()> preloadCallback)
 {
     switchingScene = true;
-    nextSceneData = &scene_data;
+    nextSceneData = scene_data;
+    preloadSceneCallback = preloadCallback;
 }
 
 WindowProperties LoadWindowProperties(const nlohmann::json_abi_v3_12_0::json &windowJson)
