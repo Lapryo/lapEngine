@@ -113,12 +113,6 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
                 {rect.width / 2.f, rect.height / 2.f},
                 rotation,
                 sprite->renderable.tint);
-
-        if (auto physics = registry.try_get<Physics2D>(obj)) {
-            DrawRectangleLines(
-                rect.x - (rect.width / 2.f), rect.y - (rect.height / 2.f), rect.width, rect.height, RED
-            );
-        }
     };
 
     auto drawImage = [&](Object obj, const Scene *scene)

@@ -39,7 +39,7 @@ namespace lapCore
 
         Vector2 size = {0, 0}, tileSize = {0, 0};
         
-        using TileLayer = std::vector<Tile>;
+        using TileLayer = std::pair<std::string, std::vector<Tile>>;
         std::map<unsigned int, TileLayer> layers;
 
         //         LAYER ID     TILESET INFO

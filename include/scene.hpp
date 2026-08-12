@@ -54,7 +54,11 @@ namespace lapCore
         ObjectEntry* FindEntry(entt::id_type id);
         ObjectEntry* FindEntry(Object object);
 
+        ObjectInfo CloneObject(Object object, std::string newName = "");
+        ObjectInfo CloneObjectFromContainer(ObjectContainer &container, Object object, entt::hashed_string newName = "", entt::hashed_string newParent = "");
+
         void AddObjectsFromProjectData(std::vector<ProjectObjectData> objects);
+        ObjectInfo AddObjectFromObjectData(ProjectObjectData objectData);
 
         void AddElement(entt::hashed_string objectName, entt::id_type elementType, void* elementData);
         void AddElement(Object object, entt::id_type elementType, void* elementData);
@@ -95,6 +99,9 @@ namespace lapCore
         World *world;
 
         void LoadMapObjects(Map& map);
+
+        void AddPrefab(entt::id_type prefabName, std::string newName = "");
+        void AddPrefab(Object prefab, std::string newName = "");
 
         template <typename T, typename... Args>
         void AddSystem(int order, Args&&... args)

@@ -46,9 +46,11 @@ constexpr uint32_t FLIP_V = 0x40000000;
 constexpr uint32_t FLIP_D = 0x20000000;
 constexpr uint32_t TILE_MASK = 0x1FFFFFFF;
 
-void GetTiles(Map& map, const json& layerDataJson, unsigned int layerID)
+void GetTiles(Map& map, const json& layerDataJson, unsigned int layerID, std::string layerName)
 {
     Map::TileLayer tileLayer;
+    tileLayer.first = layerName;
+
     for (unsigned int i = 0; i < layerDataJson.size(); i++)
     {
         uint32_t rawGID = layerDataJson.at(i).get<uint32_t>();
@@ -89,15 +91,16 @@ void GetTiles(Map& map, const json& layerDataJson, unsigned int layerID)
             }
         }
 
-        tileLayer.push_back(tile);
+        tileLayer.second.push_back(tile);
     }
 
     map.layers[layerID] = tileLayer;
 }
 
-void GetObjects(Map& map, const json& objectsJson, unsigned int layerID)
+void GetObjects(Map& map, const json& objectsJson, unsigned int layerID, std::string layerName)
 {
     Map::TileLayer tileLayer;
+    tileLayer.first = layerName;
 
     for (const auto& objectJson : objectsJson)
     {
@@ -141,7 +144,7 @@ void GetObjects(Map& map, const json& objectsJson, unsigned int layerID)
             }
         }
 
-        tileLayer.push_back(tile);
+        tileLayer.second.push_back(tile);
     }
 
     map.layers[layerID] = tileLayer;
@@ -150,16 +153,17 @@ void GetObjects(Map& map, const json& objectsJson, unsigned int layerID)
 void GetLayer(Map& map, const json& layerJson, unsigned int index)
 {
     std::string layerType = layerJson.value("type", "");
+    std::string layerName = layerJson.value("name", "");
     
     if (layerType == "tilelayer")
     {
         const auto& data = layerJson.at("data");
-        GetTiles(map, data, index);
+        GetTiles(map, data, index, layerName);
     }
     else if (layerType == "objectgroup")
     {
         const auto& data = layerJson.at("objects");
-        GetObjects(map, data, index);
+        GetObjects(map, data, index, layerName);
     }
     else
         return;

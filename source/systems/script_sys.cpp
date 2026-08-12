@@ -1,4 +1,5 @@
 #include "core.hpp"
+#include "systems/script_sys.hpp"
 
 using namespace lapCore;
 

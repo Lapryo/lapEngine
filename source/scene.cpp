@@ -13,25 +13,26 @@ ObjectInfo lapCore::ObjectContainer::AddObject(entt::hashed_string name, entt::h
     entry.childIndex = childIndex;
     entry.fromPrefab = fromPrefab;
 
-    // Get new name
-    std::string newName = "";
-    if (objectMap.find(name.value()) != objectMap.end())
+    std::string finalName = name.data();
+
+    if (objectMap.contains(name.value()))
     {
+        const std::string baseName = finalName;
         int i = 1;
-        while (objectMap.find(HASH_ID(newName.c_str())) != objectMap.end())
+
+        do
         {
-            newName = std::string(name.data()) + "_" + std::to_string(i);
-            i++;
+            finalName =
+                baseName + "_" + std::to_string(i++);
         }
+        while (
+            objectMap.contains(HASH_ID(finalName.c_str()))
+        );
+
+        name = HASH(finalName.c_str());
     }
 
-    if (newName != "")
-        name = HASH(newName.c_str());
     entry.info.id = name.value();
-
-    // Set the child index to the last if its == -1
-    // TODO: But what if the parent doesn't exist yet?
-    // Maybe create a new map thats just for object hierarchy?
     
     if (parent.data() != nullptr)
     {
@@ -39,13 +40,15 @@ ObjectInfo lapCore::ObjectContainer::AddObject(entt::hashed_string name, entt::h
         if (it != objectMap.end())
         {
             if (childIndex == -1)
-                it->second.children[it->second.children.size() + 1] = entry.info;
-            else
-                it->second.children[childIndex] = entry.info;
+                childIndex = it->second.children.size() + 1;
+
+            it->second.children[childIndex] = entry.info;
         }
     }
 
     objectMap[name.value()] = entry;
+    lookup[entry.info.id] = finalName;
+
     return entry.info;
 }
 
@@ -59,14 +62,16 @@ void lapCore::ObjectContainer::RemoveObject(entt::id_type id)
 
 void lapCore::ObjectContainer::RemoveObject(Object object)
 {
-    for (const auto &obj : objectMap)
-    {
-        if (obj.second.info.object == object)
-        {
-            objects.destroy(obj.second.info.object);
-            objectMap.erase(obj.second.info.id);
-        }
-    }
+    auto entry = FindEntry(object);
+    if (!entry) return;
+
+    RemoveObject(*entry);
+}
+
+void lapCore::ObjectContainer::RemoveObject(ObjectEntry entry)
+{
+    objects.destroy(entry.info.object);
+    objectMap.erase(entry.info.id);
 }
 
 Object *lapCore::ObjectContainer::FindObject(entt::id_type id)
@@ -74,6 +79,16 @@ Object *lapCore::ObjectContainer::FindObject(entt::id_type id)
     auto it = objectMap.find(id);
     if (it != objectMap.end())
         return &it->second.info.object;
+    return nullptr;
+}
+
+ObjectEntry *lapCore::ObjectContainer::FindEntry(entt::id_type id)
+{
+    for (auto& objEntry : objectMap)
+    {
+        if (objEntry.second.info.id == id)
+            return &objEntry.second;
+    }
     return nullptr;
 }
 
@@ -85,6 +100,183 @@ ObjectEntry *lapCore::ObjectContainer::FindEntry(Object object)
             return &objEntry.second;
     }
     return nullptr;
+}
+
+ObjectInfo lapCore::ObjectContainer::CloneObject(Object object, std::string newName)
+{
+    auto* srcObject = FindEntry(object);
+    if (!srcObject)
+        return {};
+
+    auto srcObjNameIt = lookup.find(srcObject->info.id);
+    if (srcObjNameIt == lookup.end())
+        return {};
+
+    if (newName.empty())
+        newName = srcObjNameIt->second;
+
+    // Get the original parent name if one exists
+    std::string parentName;
+
+    auto srcObjParentNameIt = lookup.find(srcObject->parent.id);
+    if (srcObjParentNameIt != lookup.end())
+        parentName = srcObjParentNameIt->second;
+
+    std::function<ObjectInfo(Object, const std::string&, const std::string&)> cloneRecursive;
+
+    cloneRecursive =
+        [&](Object srcEntity,
+            const std::string& requestedName,
+            const std::string& dstParentName) -> ObjectInfo
+    {
+        auto* srcEntry = FindEntry(srcEntity);
+        if (!srcEntry)
+            return {};
+
+        auto srcNameIt = lookup.find(srcEntry->info.id);
+        if (srcNameIt == lookup.end())
+            return {};
+
+        std::string dstName = requestedName;
+
+        if (dstName.empty())
+            dstName = srcNameIt->second;
+
+        ObjectInfo dstObject = AddObject(
+            HASH(dstName.c_str()),
+            HASH(dstParentName.c_str()),
+            -1,
+            srcEntry->fromPrefab
+        );
+
+        // Get the actual name AddObject chose.
+        // Important if "enemy" became "enemy_1".
+        auto dstNameIt = lookup.find(dstObject.id);
+        if (dstNameIt == lookup.end())
+            return {};
+
+        const std::string actualDstName = dstNameIt->second;
+
+        // Copy all components
+        for (auto&& curr : objects.storage())
+        {
+            auto& storage = curr.second;
+
+            if (storage.contains(srcEntry->info.object))
+            {
+                storage.push(
+                    dstObject.object,
+                    storage.value(srcEntry->info.object)
+                );
+            }
+        }
+
+        // Clone children under the NEW object
+        for (const auto& [childIndex, child] : srcEntry->children)
+        {
+            cloneRecursive(
+                child.object,
+                "",
+                actualDstName
+            );
+        }
+
+        return dstObject;
+    };
+
+    return cloneRecursive(
+        object,
+        newName,
+        parentName
+    );
+}
+
+ObjectInfo lapCore::ObjectContainer::CloneObjectFromContainer(
+    ObjectContainer& container,
+    Object object,
+    entt::hashed_string newName,
+    entt::hashed_string newParent
+)
+{
+    auto* srcObject = container.FindEntry(object);
+    if (!srcObject)
+        return {};
+
+    auto srcObjNameIt = container.lookup.find(srcObject->info.id);
+    if (srcObjNameIt == container.lookup.end())
+        return {};
+
+    if (newName.value() == HASH_ID(""))
+        newName = HASH(srcObjNameIt->second.c_str());
+
+    std::function<ObjectInfo(
+        Object,
+        entt::hashed_string,
+        entt::hashed_string
+    )> cloneRecursive;
+
+    cloneRecursive =
+        [&](Object srcEntity,
+            entt::hashed_string dstName,
+            entt::hashed_string dstParentName) -> ObjectInfo
+    {
+        auto* srcEntry = container.FindEntry(srcEntity);
+        if (!srcEntry)
+            return {};
+
+        auto srcNameIt = container.lookup.find(srcEntry->info.id);
+        if (srcNameIt == container.lookup.end())
+            return {};
+
+        if (dstName.value() == HASH_ID(""))
+            dstName = HASH(srcNameIt->second.c_str());
+
+        ObjectInfo dstObject = AddObject(
+            dstName,
+            dstParentName,
+            -1,
+            srcEntry->fromPrefab
+        );
+
+        auto dstNameIt = lookup.find(dstObject.id);
+        if (dstNameIt == lookup.end())
+            return {};
+
+        entt::hashed_string actualDstName =
+            HASH(dstNameIt->second.c_str());
+
+        for (auto&& curr : container.objects.storage())
+        {
+            entt::id_type componentType = curr.first;
+            auto& storage = curr.second;
+
+            if (storage.contains(srcEntry->info.object))
+            {
+                AddElement(
+                    dstObject.object,
+                    componentType,
+                    storage.value(srcEntry->info.object)
+                );
+            }
+        }
+
+        for (const auto& [childIndex, childInfo] : srcEntry->children)
+        {
+            cloneRecursive(
+                childInfo.object,
+                HASH(""),
+                actualDstName
+            );
+        }
+
+        return dstObject;
+    };
+
+    return cloneRecursive(
+        object,
+        newName,
+        newParent
+    );
 }
 
 void lapCore::ObjectContainer::AddObjectsFromProjectData(std::vector<ProjectObjectData> objects)
@@ -106,7 +298,7 @@ void lapCore::Scene::LoadMapObjects(Map &map)
 {
     for (const auto& layer : map.layers)
     {
-        for (const auto& tileData : layer.second)
+        for (const auto& tileData : layer.second.second)
         {
             std::string tileName = "tile_" + 
                 std::to_string(layer.first) + "_" + 
@@ -153,37 +345,53 @@ void lapCore::Scene::LoadMapObjects(Map &map)
                 tileSprite.renderable.zlayer = layer.first;
 
                 float rotation = 0.f;
-                bool flipX = tileData.flipX;
-                bool flipY = tileData.flipY;
 
-                if (tileData.flipD)
+                const bool h = tileData.flipX;
+                const bool v = tileData.flipY;
+                const bool d = tileData.flipD;
+
+                bool flipX = false;
+                bool flipY = false;
+
+                if (!d)
                 {
-                    std::swap(tileSprite.sourceRect.width,
-                            tileSprite.sourceRect.height);
+                    // Normal Tiled flips
+                    flipX = h;
+                    flipY = v;
+                }
+                else
+                {
+                    // Tiled diagonal transformations
 
-                    if (flipX && !flipY)
+                    if (!h && !v)
                     {
+                        // Diagonal only
                         rotation = 90.f;
-                        flipX = false;
+                        flipY = true;
                     }
-                    else if (!flipX && flipY)
+                    else if (h && !v)
                     {
+                        // Diagonal + horizontal
+                        rotation = 90.f;
+                    }
+                    else if (!h && v)
+                    {
+                        // Diagonal + vertical
                         rotation = -90.f;
-                        flipY = false;
                     }
-                    else if (flipX && flipY)
+                    else // h && v
                     {
-                        rotation = 180.f;
-                        flipX = false;
-                        flipY = false;
+                        // Diagonal + horizontal + vertical
+                        rotation = 90.f;
+                        flipX = true;
                     }
                 }
 
                 if (flipX)
-                    tileSprite.sourceRect.width *= -1;
+                    tileSprite.sourceRect.width *= -1.f;
 
                 if (flipY)
-                    tileSprite.sourceRect.height *= -1;
+                    tileSprite.sourceRect.height *= -1.f;
 
                 tileTransform.rotation = rotation;
 

@@ -834,8 +834,6 @@ namespace lapCore
     Rectangle UIOriginToRect(UIOrigin origin, Vector2 logicalResolution);
     Vector2 FrameVectorToVec2(lapCore::FrameVector vector, Vector2 logicalResolution);
 
-    std::filesystem::path GetExecutableDir();
-
     enum class LogType
     {
         INFO,

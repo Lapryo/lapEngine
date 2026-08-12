@@ -104,17 +104,50 @@ void HandleButtonInputs(Scene *scene, entt::registry &registry)
     auto buttonView = registry.view<UIButton>();
     for (auto &entity : buttonView)
     {
-        auto *button = &buttonView.get<UIButton>(entity);
+        auto* button = &buttonView.get<UIButton>(entity);
+
         if (!button || !button->active)
             continue;
 
-        Rectangle rect = UIOriginToRect(button->bounds, scene->world->window.logical_resolution);
-        bool hovered = CheckCollisionPointRec(GetMouseInViewportSpace(scene->world->window.logical_resolution), rect);
+        Rectangle rect;
+
+        if (button->inUIList)
+        {
+            rect = {
+                button->bounds.gui.position.x,
+                button->bounds.gui.position.y,
+                button->bounds.gui.size.x,
+                button->bounds.gui.size.y
+            };
+
+            Vector2 anchorVec = FrameVectorToVec2(
+                button->bounds.transform.anchor,
+                { rect.width, rect.height }
+            );
+
+            rect.x -= anchorVec.x;
+            rect.y -= anchorVec.y;
+        }
+        else
+        {
+            rect = UIOriginToRect(
+                button->bounds,
+                scene->world->window.logical_resolution
+            );
+        }
+
+        Vector2 mouse =
+            GetMouseInViewportSpace(
+                scene->world->window.logical_resolution
+            );
+
+        bool hovered = CheckCollisionPointRec(mouse, rect);
 
         if (hovered)
         {
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             {
+                std::cout << "firing event: " << EventRegistry::reverseLookup[button->eventCallbacks.leftClick] << '\n';
                 EventRegistry::Fire(scene, button->eventCallbacks.leftClick);
             }
 
