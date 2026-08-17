@@ -106,13 +106,43 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         sprite->renderable.drawRect = rect;
 
         if (texture)
+        {
+            Rectangle source = sprite->sourceRect;
+
+            constexpr float INSET = 0.01f;
+
+            // Prevent sampling exactly on atlas boundaries.
+            if (source.width > 0.0f)
+            {
+                source.x += INSET;
+                source.width -= INSET * 2.0f;
+            }
+            else
+            {
+                source.x -= INSET;
+                source.width += INSET * 2.0f;
+            }
+
+            if (source.height > 0.0f)
+            {
+                source.y += INSET;
+                source.height -= INSET * 2.0f;
+            }
+            else
+            {
+                source.y -= INSET;
+                source.height += INSET * 2.0f;
+            }
+
             DrawTexturePro(
                 *texture,
-                sprite->sourceRect,
+                source,
                 rect,
-                {rect.width / 2.f, rect.height / 2.f},
+                {rect.width / 2.0f, rect.height / 2.0f},
                 rotation,
-                sprite->renderable.tint);
+                sprite->renderable.tint
+            );
+        }
     };
 
     auto drawImage = [&](Object obj, const Scene *scene)
