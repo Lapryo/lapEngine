@@ -109,6 +109,7 @@ bool InputSystem::HandleGamepadInput(
     }
     else
     {
+        
         down = IsGamepadButtonDown(gamepad, button);
         freshlyPressed = IsGamepadButtonPressed(gamepad, button);
         value = down ? 1.0f : 0.0f;
@@ -138,6 +139,9 @@ bool InputSystem::HandleGamepadInput(
 
     // Sustained: every frame while held.
     // Non-sustained: only the physical down transition.
+
+    std::cout << "recieved input\n";
+
     const bool shouldFire =
         entry.sustain || freshlyPressed;
 
@@ -158,6 +162,7 @@ bool InputSystem::HandleGamepadInput(
         consumedKeys.push_back(button);
 
     EventRegistry::Fire(scene, entry.eventID);
+    std::cout << "fired input\n";
     return true;
 }
 

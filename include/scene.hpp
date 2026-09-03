@@ -130,6 +130,29 @@ namespace lapCore
         }
 
         void Update(float delta, RenderTexture2D &target);
+
+        template <typename... Args>
+        void SpawnScript(entt::id_type objectID, entt::hashed_string eventName, void (*func)(Scene*, entt::id_type, entt::id_type, Args...))
+        {
+            auto object = FindObject(objectID);
+            if (!object) return;
+
+            auto* script = FindElement<Script>(*object);
+            if (script)
+            {
+                script->onUpdateFunctions.push_back(eventName.value());
+            }
+            else
+            {
+                Script newScript;
+                newScript.onUpdateFunctions.push_back(eventName.value());
+
+                AddElement<Script>(*object, newScript);
+            }
+
+            ConnectECSEvent<Args...>(objectID, eventName, func);
+        }
+
         void Clear();
     };
 }

@@ -477,9 +477,22 @@ void lapCore::ObjectContainer::RemoveElement(entt::id_type id, entt::id_type ele
     RemoveElement(it->second.info.object, elementType);
 }
 
-void lapCore::ObjectContainer::RemoveElement(Object object, entt::id_type elementType)
+void lapCore::ObjectContainer::RemoveElement(
+    Object object,
+    entt::id_type elementType
+)
 {
     auto entry = Reflection::TryGet(elementType);
+    if (!entry)
+        return;
+
+    auto* storage = objects.storage(elementType);
+    if (!storage)
+        return;
+
+    if (!storage->contains(object))
+        return;
+
     entry->erase(objects, object);
 }
 
