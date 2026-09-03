@@ -21,6 +21,17 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(raylib)
 
+set(SKIP_PERFORMANCE_COMPARISON ON CACHE BOOL "" FORCE)
+set(BUILD_SANDBOX OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
+    cereal
+    GIT_REPOSITORY https://github.com/USCiLab/cereal.git
+    GIT_TAG v1.3.2
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(cereal)
+
 #FetchContent_Declare(
 #    reactphysics3d
 #    GIT_REPOSITORY https://github.com/DanielChappuis/reactphysics3d.git
@@ -64,6 +75,7 @@ target_link_libraries(lapEngine PUBLIC
 #    reactphysics3d
     nlohmann_json::nlohmann_json
     EnTT::EnTT
+    cereal
 )
 
 if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

@@ -3,12 +3,14 @@
 #include <raylib.h>
 #include <nlohmann/json.hpp>
 #include <box2d/box2d.h>
+#include <cereal/archives/binary.hpp>
 
 #include "reflection.hpp"
 
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
 
 namespace lapCore
 {
@@ -863,4 +865,22 @@ namespace lapCore
             }
         };
     };
+
+    template <typename T>
+    void BinarySerialize(const T& value, const std::string& filePath)
+    {
+        std::ofstream stream(filePath, std::ios::binary);
+        cereal::BinaryOutputArchive archive(stream);
+        archive(value);
+    }
+
+    template <typename T>
+    T& BinaryDeserialize(const std::string& filePath)
+    {
+        T value;
+        std::ifstream stream(filePath, std::ios::binary);
+        cereal::BinaryInputArchive archive(stream);
+        archive(value);
+        return value;
+    }
 }
