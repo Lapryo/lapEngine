@@ -529,12 +529,35 @@ void lapCore::Scene::Update(float deltaTime, RenderTexture2D &target)
     BeginTextureMode(target);
     ClearBackground(WHITE);
 
+    static int frameCounter = 0;
+    frameCounter++;
+
+    std::vector<std::pair<std::string, float>> systemTimes;
+
     for (auto &[order, system] : systems)
     {
         if (!system || !system->active)
             continue;
 
+        float timeStart = GetTime();
         system->Update(deltaTime, objects);
+        float timeEnd = GetTime();
+
+        float timeTaken = timeEnd - timeStart;
+        systemTimes.push_back({system->GetName(), timeTaken});
+    }
+
+    // Sort the system times in descending order
+    std::sort(systemTimes.begin(), systemTimes.end(),
+        [](const auto &a, const auto &b) {
+            return a.second > b.second;
+        });
+
+    // Output the system times here
+    std::cout << "Frame " << frameCounter << " System Times:\n";
+    for (const auto &[name, time] : systemTimes)
+    {
+        std::cout << "  " << name << ": " << time << " seconds\n";
     }
 
     EndTextureMode();
@@ -577,6 +600,9 @@ void lapCore::Scene::Update(float deltaTime, RenderTexture2D &target)
         {0.0f, 0.0f},                                                             // origin
         0.0f,                                                                     // rotation
         WHITE);
+
+    // TODO: Here we can draw a custom debug menu with system times, etc. if needed for developers
+    // This option can be toggleable and is checked via the App class
 
     EndDrawing();
 }
