@@ -201,8 +201,66 @@ void HandleUIListScroll(float deltaTime, Scene *scene, entt::registry &registry)
     }
 }
 
+Rectangle* GetAbsoluteUI(entt::registry &registry, UITransform &transform, Object parent, Vector2 logicalResolution)
+{
+    if (parent == entt::null)
+        return nullptr;
+
+    Rectangle* absRect = new Rectangle();
+    absRect->width = logicalResolution.x;
+    absRect->height = logicalResolution.y;
+
+    auto offsetX = transform.position.scale.x - (transform.size.scale.x * transform.anchor.scale.x);
+    auto offsetY = transform.position.scale.y - (transform.size.scale.y * transform.anchor.scale.y);
+
+    auto transformParent = registry.try_get<UIFrame>(parent);
+    if (!transformParent)
+        return nullptr;
+
+    Rectangle* parentAbsRect = GetAbsoluteUI(registry, *transformParent, parent, logicalResolution);
+    if (!parentAbsRect)
+        return nullptr;
+
+    auto productX = parentAbsRect->width * offsetX;
+    auto productY = parentAbsRect->height * offsetY;
+
+    auto resultX = parentAbsRect->x + productX;
+    auto resultY = parentAbsRect->y + productY;
+
+    auto sizeX = parentAbsRect->width * transform.size.scale.x;
+    auto sizeY = parentAbsRect->height * transform.size.scale.y;
+
+    absRect->x = resultX;
+    absRect->y = resultY;
+    absRect->width = sizeX;
+    absRect->height = sizeY;
+
+    return absRect;
+}
+
 void GUISystem::Update(float deltaTime, entt::registry &registry)
 {
+    auto frame_view = registry.view<UIFrame>();
+    auto image_view = registry.view<UIImage>();
+    auto button_view = registry.view<UIButton>();
+    auto text_view = registry.view<UITextLabel>();
+    
+    for (auto [e, frame] : frame_view.each())
+    {
+        auto entry = scene->FindEntry(e);
+        if (!entry) continue;
+
+        if (entry->parent.object == entt::null)
+            frame.origin.transform.parentRect = {0, 0, scene->world->window.logical_resolution.x, scene->world->window.logical_resolution.y};
+        else
+        {
+            auto rect = GetAbsoluteUI(registry, frame.origin.transform, entry->parent.object, scene->world->window.logical_resolution);
+            if (!rect) continue;
+            frame.origin.transform.parentRect = *rect;
+        }
+    }
+
+
     HandleUIListScroll(deltaTime, scene, registry);
     ArrangeUIListElements(scene, registry);
     HandleButtonInputs(scene, registry);

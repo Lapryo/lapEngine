@@ -24,6 +24,8 @@ public:
         RenderType type;
     };
 
+    std::vector<RenderEntry> worldSpace, screenSpace;
+
     RenderSystem(
         Scene *scene, 
         unsigned int order

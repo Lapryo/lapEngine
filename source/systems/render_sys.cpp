@@ -72,15 +72,13 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         RebuildRenderList(registry);
 
     // Partition render entries
-    std::vector<RenderEntry> worldSpace;
-    std::vector<RenderEntry> screenSpace;
     worldSpace.reserve(renderList.size());
     screenSpace.reserve(renderList.size());
 
     for (const auto &entry : renderList)
         (entry.isScreenSpace ? screenSpace : worldSpace).push_back(entry);
 
-    auto drawSprite = [&](Object obj, const Scene *scene)
+    auto drawSprite = [&](Object obj, const Scene *scene, Camera2D* camera)
     {
         auto *sprite = registry.try_get<Sprite>(obj);
         if (!sprite || !sprite->renderable.visible)
@@ -104,6 +102,9 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         }
 
         sprite->renderable.drawRect = rect;
+
+        if (!IsRectangleInViewportSpace(rect, scene->world->window.logical_resolution, camera) && sprite->renderable.culling)
+            return;
 
         if (texture)
         {
@@ -145,7 +146,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         }
     };
 
-    auto drawImage = [&](Object obj, const Scene *scene)
+    auto drawImage = [&](Object obj, const Scene *scene, Camera2D* camera)
     {
         auto *image = registry.try_get<lapCore::UIImage>(obj);
         if (!image || !image->sprite.renderable.visible)
@@ -156,6 +157,9 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         auto logicalRes = scene->world->window.logical_resolution;
         Rectangle rect = UIOriginToRect(image->origin, logicalRes);
         image->sprite.renderable.drawRect = rect;
+
+        if (!IsRectangleInViewportSpace(rect, scene->world->window.logical_resolution, camera) && image->sprite.renderable.culling)
+            return;
 
         if (image->sprite.renderable.inUIList)
         {
@@ -177,7 +181,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
                 image->sprite.renderable.tint);
     };
 
-    auto drawRect = [&](Object obj, const Scene *scene)
+    auto drawRect = [&](Object obj, const Scene *scene, Camera2D* camera)
     {
         auto *frame = registry.try_get<UIFrame>(obj);
         if (!frame || !frame->renderable.visible)
@@ -187,6 +191,9 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
         Rectangle rect = UIOriginToRect(frame->origin, logicalRes);
         frame->renderable.drawRect = rect;
+
+        if (!IsRectangleInViewportSpace(rect, scene->world->window.logical_resolution, camera) && frame->renderable.culling)
+            return;
 
         if (frame->renderable.inUIList)
         {
@@ -212,7 +219,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         DrawRectanglePro(rect, anchorVec, rot, frame->renderable.tint);
     };
 
-    auto drawText = [&](Object obj, const Scene *scene)
+    auto drawText = [&](Object obj, const Scene *scene, Camera2D* camera)
     {
         auto *text = registry.try_get<UITextLabel>(obj);
         if (!text || !text->frame.renderable.visible)
@@ -221,10 +228,19 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         Vector2 logicalRes = scene->world->window.logical_resolution;
 
         Rectangle rect = UIOriginToRect(text->frame.origin, logicalRes);
-        Vector2 textSizing = MeasureTextEx(GetFontDefault(), text->text.c_str(), text->fontSize, text->spacing);
+
+        auto find_font = scene->world->resources.fonts.TryGet(text->fontID);
+        Font font = GetFontDefault();
+        if (find_font) 
+            font = *find_font;
+
+        Vector2 textSizing = MeasureTextEx(font, text->text.c_str(), text->fontSize, text->spacing);
         
         text->frame.renderable.drawRect = rect;
         text->textDrawRect = {rect.x, rect.y, textSizing.x, textSizing.y};
+
+        if (!IsRectangleInViewportSpace(rect, scene->world->window.logical_resolution, camera) && text->frame.renderable.culling)
+            return;
 
         if (text->frame.renderable.inUIList)
         {
@@ -273,7 +289,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
         }
 
         DrawTextPro(
-            GetFontDefault(), 
+            font, 
             text->text.c_str(), 
             {rect.x, rect.y}, 
             anchorVec, 
@@ -296,16 +312,16 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
                     switch (entry.type)
                     {
                     case RenderType::Sprite:
-                        drawSprite(entry.entity, scene);
+                        drawSprite(entry.entity, scene, &cam);
                         break;
                     case RenderType::Rect:
-                        drawRect(entry.entity, scene);
+                        drawRect(entry.entity, scene, &cam);
                         break;
                     case RenderType::Text:
-                        drawText(entry.entity, scene);
+                        drawText(entry.entity, scene, &cam);
                         break;
                     case RenderType::Image:
-                        drawImage(entry.entity, scene);
+                        drawImage(entry.entity, scene, &cam);
                         break;
                     }
                 }
@@ -319,16 +335,16 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
                 switch (entry.type)
                 {
                 case RenderType::Sprite:
-                    drawSprite(entry.entity, scene);
+                    drawSprite(entry.entity, scene, nullptr);
                     break;
                 case RenderType::Rect:
-                    drawRect(entry.entity, scene);
+                    drawRect(entry.entity, scene, nullptr);
                     break;
                 case RenderType::Text:
-                    drawText(entry.entity, scene);
+                    drawText(entry.entity, scene, nullptr);
                     break;
                 case RenderType::Image:
-                    drawImage(entry.entity, scene);
+                    drawImage(entry.entity, scene, nullptr);
                     break;
                 }
             }
@@ -340,4 +356,7 @@ void RenderSystem::Update(float deltaTime, entt::registry &registry)
 
     auto guiSys = scene->GetSystem<GUISystem>();
     if (guiSys) guiSys->ResetInUIList();
+
+    worldSpace.clear();
+    screenSpace.clear();
 }

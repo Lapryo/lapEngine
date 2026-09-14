@@ -73,6 +73,15 @@ namespace lapCore
             return objects.emplace<Element>(object, std::forward<ElementArgs>(args)...);
         }
 
+        template <typename Element, typename... ElementArgs>
+        Element* AddElement(entt::id_type objectID, ElementArgs &&...args)
+        {
+            auto obj = FindObject(objectID);
+            if (!obj) return nullptr;
+            auto element = AddElement<Element>(*obj, std::forward<ElementArgs>(args)...);
+            return &element;
+        }
+
         template <typename Element>
         void RemoveElement(Object object)
         {
@@ -80,9 +89,26 @@ namespace lapCore
         }
 
         template <typename Element>
+        bool RemoveElement(entt::id_type objectID)
+        {
+            auto obj = FindObject(objectID);
+            if (!obj) return false;
+            RemoveElement<Element>(*obj);
+            return true;
+        }
+
+        template <typename Element>
         Element *FindElement(Object object)
         {
             return objects.try_get<Element>(object);
+        }
+
+        template <typename Element>
+        Element* FindElement(entt::id_type objectID)
+        {
+            auto obj = FindObject(objectID);
+            if (!obj) return nullptr;
+            return FindElement<Element>(*obj);
         }
 
         void ClearObjects();
@@ -98,10 +124,12 @@ namespace lapCore
         std::string name;
         World *world;
 
+        Color backgroundColor = WHITE;
+
         void LoadMapObjects(Map& map);
 
-        void AddPrefab(entt::id_type prefabName, std::string newName = "");
-        void AddPrefab(Object prefab, std::string newName = "");
+        lapCore::ObjectInfo *AddPrefab(entt::id_type prefabName, std::string newName = "");
+        lapCore::ObjectInfo AddPrefab(Object prefab, std::string newName = "");
 
         template <typename T, typename... Args>
         void AddSystem(int order, Args&&... args)

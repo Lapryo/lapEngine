@@ -4,6 +4,8 @@
 #include <nlohmann/json.hpp>
 #include <box2d/box2d.h>
 #include <cereal/archives/binary.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/cereal.hpp>
 
 #include "reflection.hpp"
 
@@ -16,6 +18,16 @@ namespace lapCore
 {
     #define HASH(name) entt::hashed_string{name}
     #define HASH_ID(name) HASH(name).value()
+
+    enum class DebugLevel
+    {
+        NONE, // As the name suggests, nothing will be printed
+        LOW, // Minimal debugging information (only errors)
+        MEDIUM, // Moderate debugging information (errors, warnings & notices)
+        HIGH, // Extensive debugging information, covers nearly everything (errors, warnings, notices, info)
+    };
+
+    #define DEBUG_LEVEL DebugLevel::LOW
 
     template <>
     struct JSON::Serializer<Vector2>
@@ -450,6 +462,8 @@ namespace lapCore
 
         bool usesUIListVisiblity{false};
 
+        bool culling = true;
+
         // Not serializable, only for runtime
         bool inUIList{false};
     };
@@ -464,7 +478,8 @@ namespace lapCore
                 {"is-screen-space", r.isScreenSpace},
                 {"visible", r.visible},
                 {"tint", JSON::Serializer<Color>::to_json(r.tint, ctx)},
-                {"inherits-ui", r.usesUIListVisiblity}
+                {"inherits-ui", r.usesUIListVisiblity},
+                {"culling", r.culling}
             };
         }
 
@@ -475,6 +490,7 @@ namespace lapCore
             r.isScreenSpace = j.value("is-screen-space", r.isScreenSpace);
             r.visible = j.value("visible", r.visible);
             r.usesUIListVisiblity = j.value("inherits-ui", r.usesUIListVisiblity);
+            r.culling = j.value("culling", r.culling);
 
             if (j.contains("tint"))
                 JSON::Serializer<Color>::from_json(r.tint, j.at("tint"));
@@ -769,6 +785,9 @@ namespace lapCore
 
     struct UITransform
     {
+        // Should I store parent absolute position + size here?
+        Rectangle parentRect;
+
         FrameVector position{};
         FrameVector size{};
         FrameVector anchor{};
@@ -831,6 +850,11 @@ namespace lapCore
 
     nlohmann::json ReadFileToJsonObject(const std::string &filePath, bool withPrefix = true);
 
+    bool IsPointInViewportSpace(Vector2 point, Vector2 logicalResolution, Camera2D* camera);
+    bool IsRectangleInViewportSpace(Rectangle rect, Vector2 logicalResolution, Camera2D* camera);
+
+    Rectangle GetCameraViewport(Vector2 logicalResolution, Camera2D* camera);
+
     Vector2 GetMouseInViewportSpace(Vector2 logicalResolution);
 
     Rectangle UIOriginToRect(UIOrigin origin, Vector2 logicalResolution);
@@ -869,18 +893,40 @@ namespace lapCore
     template <typename T>
     void BinarySerialize(const T& value, const std::string& filePath)
     {
-        std::ofstream stream(filePath, std::ios::binary);
+        std::ofstream stream(GetApplicationDirectory() + filePath, std::ios::binary);
+
+        dbgln("Saving to: " + filePath, LogType::INFO);
+        dbgln("Stream open: " + std::to_string(stream.is_open()), LogType::INFO);
+        dbgln("Stream good: " + std::to_string(stream.good()), LogType::INFO);
+
+        if (!stream.is_open())
+        {
+            throw std::runtime_error(
+                "Could not open save file: " + filePath
+            );
+        }
+
         cereal::BinaryOutputArchive archive(stream);
         archive(value);
     }
 
     template <typename T>
-    T& BinaryDeserialize(const std::string& filePath)
+    T BinaryDeserialize(const std::string& filePath)
     {
         T value;
-        std::ifstream stream(filePath, std::ios::binary);
+
+
+
+        std::ifstream stream(GetApplicationDirectory() + filePath, std::ios::binary);
+
+        if (!stream.is_open())
+        {
+            throw std::runtime_error("Failed to open file for binary deserialization");
+        }
+
         cereal::BinaryInputArchive archive(stream);
         archive(value);
+
         return value;
     }
 }

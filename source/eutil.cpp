@@ -4,26 +4,6 @@
 #include <fstream>
 #include <sstream>
 
-// Known issue: On Windows, windows.h's CloseWindow and ShowCursor conflicts with Raylib's CloseWindow and ShowCursor
-// Only known workaround is to go into windows.h and change the names of the functions, which is not ideal.
-
-// Another workaround is the rename Raylib's functions that conflict with windows.h, then recompile the static library.
-
-/*std::string lapCore::FileDialogs::OpenFile(std::vector<std::string> filters)
-{
-    pfd::open_file ofd("Open File", "", filters, pfd::opt::none);
-    auto results = ofd.result();
-    if (!results.empty())
-        return results[0];
-    return "";
-}
-
-std::string lapCore::FileDialogs::SaveFile(std::vector<std::string> filters)
-{
-    pfd::save_file sfd("Save File", "", filters, pfd::opt::none);
-    return sfd.result();
-}*/
-
 std::string lapCore::ReadFileToString(const std::string &filePath, bool withPrefix)
 {
     std::string fullPath = withPrefix ? GetApplicationDirectory() + filePath : filePath;
@@ -58,6 +38,83 @@ void lapCore::WriteStringToFile(const std::string &filePath, const std::string &
 nlohmann::json_abi_v3_12_0::json lapCore::ReadFileToJsonObject(const std::string &filePath, bool withPrefix)
 {
     return nlohmann::json::parse(ReadFileToString(filePath, withPrefix));
+}
+
+bool lapCore::IsPointInViewportSpace(
+    Vector2 point,
+    Vector2 logicalResolution,
+    Camera2D* camera)
+{
+    if (!camera)
+    {
+        return point.x >= 0.0f &&
+               point.x < logicalResolution.x &&
+               point.y >= 0.0f &&
+               point.y < logicalResolution.y;
+    }
+
+    Vector2 topLeft = GetScreenToWorld2D(
+        { 0.0f, 0.0f },
+        *camera
+    );
+
+    Vector2 bottomRight = GetScreenToWorld2D(
+        {
+            logicalResolution.x,
+            logicalResolution.y
+        },
+        *camera
+    );
+
+    return point.x >= topLeft.x &&
+           point.x < bottomRight.x &&
+           point.y >= topLeft.y &&
+           point.y < bottomRight.y;
+}
+
+bool lapCore::IsRectangleInViewportSpace(
+    Rectangle rect,
+    Vector2 logicalResolution,
+    Camera2D* camera)
+{
+    Rectangle viewport =
+        GetCameraViewport(logicalResolution, camera);
+
+    rect.x -= (rect.width * 0.5f);
+    rect.y -= (rect.height * 0.5f);
+
+    return CheckCollisionRecs(rect, viewport);
+}
+
+Rectangle lapCore::GetCameraViewport(
+    Vector2 logicalResolution,
+    Camera2D* camera)
+{
+    if (!camera)
+    {
+        return {
+            0.0f,
+            0.0f,
+            logicalResolution.x,
+            logicalResolution.y
+        };
+    }
+
+    float width = logicalResolution.x / camera->zoom;
+    float height = logicalResolution.y / camera->zoom;
+
+    float x = camera->target.x -
+              camera->offset.x / camera->zoom;
+
+    float y = camera->target.y -
+              camera->offset.y / camera->zoom;
+
+    return {
+        x,
+        y,
+        width,
+        height
+    };
 }
 
 Vector2 lapCore::GetMouseInViewportSpace(Vector2 logicalResolution)
@@ -130,16 +187,20 @@ void lapCore::dbgln(const std::string &message, LogType type)
     switch (type)
     {
         case LogType::INFO:
-            std::cout << "[INFO] " << message << "\n";
+            if (DEBUG_LEVEL == DebugLevel::HIGH)
+                std::cout << "[INFO] " << message << "\n";
             break;
         case LogType::NOTICE:
-            std::cout << "[NOTICE] " << message << "\n";
+            if (DEBUG_LEVEL >= DebugLevel::MEDIUM)
+                std::cout << "[NOTICE] " << message << "\n";
             break;
         case LogType::WARNING:
-            std::cout << "[WARNING] " << message << "\n";
+            if (DEBUG_LEVEL >= DebugLevel::MEDIUM)
+                std::cout << "[WARNING] " << message << "\n";
             break;
         case LogType::ERROR:
-            std::cerr << "[ERROR] " << message << "\n";
+            if (DEBUG_LEVEL >= DebugLevel::LOW)
+                std::cerr << "[ERROR] " << message << "\n";
             break;
     }
 }

@@ -137,6 +137,8 @@ namespace lapCore
         std::vector<ProjectSystemData> systems;
         SceneInstancesData instances;
 
+        Color backgroundColor = WHITE;
+
         void Clear();
     };
 

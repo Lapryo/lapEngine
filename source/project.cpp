@@ -10,10 +10,21 @@
 
 using namespace lapCore;
 
+bool jsonContainsArray(const nlohmann::json &json, const std::string &key)
+{
+    return json.contains(key) && json[key].is_array() && !json[key].empty();
+}
+
+bool jsonContainsObject(const nlohmann::json &json, const std::string &key)
+{
+    return json.contains(key) && json[key].is_object() && !json[key].empty();
+}
+
 // Gathers data from an element JSON object, which should contain a type string and data array, returns a ProjectElementData struct
-std::unique_ptr<IProjectElementData> GetElement(const nlohmann::json_abi_v3_12_0::json &elementJson)
+std::unique_ptr<IProjectElementData> GetElement(const nlohmann::json &elementJson)
 {
     std::string elementType = elementJson.value("type", "");
+    
     dbgln("Loading element: " + elementType, LogType::INFO);
 
     auto entry = Reflection::TryGet(elementType);
@@ -39,11 +50,11 @@ std::unique_ptr<IProjectElementData> GetElement(const nlohmann::json_abi_v3_12_0
 }
 
 // Loads elements from either object JSONs or external files, returns a vector of ProjectElementData structs
-std::vector<std::unique_ptr<IProjectElementData>> GetElements(const nlohmann::json_abi_v3_12_0::json &objectJson, const std::string &sceneName)
+std::vector<std::unique_ptr<IProjectElementData>> GetElements(const nlohmann::json &objectJson, const std::string &sceneName)
 {
     std::vector<std::unique_ptr<IProjectElementData>> elements; // Vector to hold the elements
 
-    if (objectJson.contains("elements") && objectJson["elements"].is_array() && !objectJson["elements"].empty())
+    if (jsonContainsArray(objectJson, "elements"))
     {
         for (const auto &elementJson : objectJson["elements"])
         {
@@ -76,7 +87,7 @@ std::vector<std::unique_ptr<IProjectElementData>> GetElements(const nlohmann::js
 }
 
 // Gathers data from an object JSON object, which should contain name string, parent string, child-index int, and components array, returns a ProjectObjectData struct
-ProjectObjectData GetObject(const nlohmann::json_abi_v3_12_0::json &objectJson, const std::string &sceneName)
+ProjectObjectData GetObject(const nlohmann::json &objectJson, const std::string &sceneName)
 {
     std::string objectName = objectJson.value("name", "");
     std::string objectParent = objectJson.value("parent", "");
@@ -99,9 +110,9 @@ std::vector<ProjectObjectData> GetObjectInstances(const nlohmann::json_abi_v3_12
 {
     std::vector<ProjectObjectData> objectInstances;
 
-    if (sceneJson.contains("instances") && sceneJson["instances"].is_object() && !sceneJson["instances"].empty())
+    if (jsonContainsObject(sceneJson, "instances"))
     {
-        if (sceneJson["instances"].contains("objects") && sceneJson["instances"]["objects"].is_array() && !sceneJson["instances"]["objects"].empty())
+        if (jsonContainsArray(sceneJson["instances"], "objects"))
         {
             for (const auto &objectJson : sceneJson["instances"]["objects"])
             {
@@ -155,9 +166,9 @@ std::vector<ProjectObjectData> GetPrefabInstances(const nlohmann::json_abi_v3_12
 {
     std::vector<ProjectObjectData> prefabInstances;
 
-    if (sceneJson.contains("instances") && sceneJson["instances"].is_object() && !sceneJson["instances"].empty())
+    if (jsonContainsObject(sceneJson, "instances"))
     {
-        if (sceneJson["instances"].contains("prefabs") && sceneJson["instances"]["prefabs"].is_array() && !sceneJson["instances"]["prefabs"].empty())
+        if (jsonContainsArray(sceneJson["instances"], "prefabs"))
         {
             for (const auto &prefabJson : sceneJson["instances"]["prefabs"])
             {
@@ -274,7 +285,7 @@ std::vector<ProjectObjectData> GetPrefabs(const nlohmann::json_abi_v3_12_0::json
 {
     std::vector<ProjectObjectData> prefabs; // Vector to hold the prefabs
 
-    if (projectJson.contains("prefabs") && projectJson["prefabs"].is_array() && !projectJson["prefabs"].empty())
+    if (jsonContainsArray(projectJson, "prefabs"))
     {
         for (const auto &prefabJson : projectJson["prefabs"])
         {
@@ -335,7 +346,7 @@ std::vector<ProjectSystemData> GetSystems(const nlohmann::json_abi_v3_12_0::json
 {
     std::vector<ProjectSystemData> systems; // Vector to hold the systems
 
-    if (sceneJson.contains("systems") && sceneJson["systems"].is_array() && !sceneJson["systems"].empty()) // Similar to GetAssets(), check if there is an array for systems, loop through, gather data
+    if (jsonContainsArray(sceneJson, "systems"))
     {
         for (const auto &systemJson : sceneJson["systems"])
         {
@@ -374,6 +385,8 @@ ProjectSceneData GetScene(const nlohmann::json_abi_v3_12_0::json &sceneJson, std
 
     // Gather objects, prefabs, and systems into a ProjectSceneData struct and return it
     sceneData.name = sceneJson.value("name", "Unnamed Scene");
+    if (sceneJson.contains("background-color"))
+        JSON::Serializer<Color>::from_json(sceneData.backgroundColor, sceneJson.at("background-color"));
     sceneData.instances = GetInstances(sceneJson, prefabs);
     sceneData.systems = GetSystems(sceneJson);
 
@@ -387,7 +400,7 @@ std::vector<ProjectSceneData> GetScenes(const nlohmann::json_abi_v3_12_0::json &
 {
     std::vector<ProjectSceneData> scenes; // Vector to hold the scenes
 
-    if (projectJson.contains("scenes") && projectJson["scenes"].is_array() && !projectJson["scenes"].empty()) // Similar to GetAssets(), check if there is an array for scenes, loop through, gather data
+    if (jsonContainsArray(projectJson, "scenes"))
     {
         for (const auto &sceneJson : projectJson["scenes"])
         {
@@ -431,7 +444,7 @@ std::unordered_map<std::string, std::string> GetAssetData(const nlohmann::json &
 {
     std::unordered_map<std::string, std::string> assetData; // Vector to hold the asset data
 
-    if (assetJson.contains("data") && assetJson["data"].is_object())
+    if (jsonContainsObject(assetJson, "data"))
     {
         for (auto it = assetJson["data"].begin(); it != assetJson["data"].end(); ++it)
         {
@@ -489,7 +502,7 @@ std::vector<ProjectAssetData> GetAssets(const nlohmann::json_abi_v3_12_0::json &
 {
     std::vector<ProjectAssetData> assets; // Vector to hold the assets
 
-    if (projectJson.contains("assets") && projectJson["assets"].is_array() && !projectJson["assets"].empty()) // Check if there is an array for assets
+    if (jsonContainsArray(projectJson, "assets"))
     {
         for (const auto &assetJson : projectJson["assets"]) // Loop through each asset
         {
@@ -522,7 +535,7 @@ std::vector<ProjectAssetData> GetAssets(const nlohmann::json_abi_v3_12_0::json &
 
 size_t GetMainScene(const nlohmann::json_abi_v3_12_0::json &projectJson)
 {
-    if (projectJson.contains("scenes") && projectJson["scenes"].is_array() && !projectJson["scenes"].empty())
+    if (jsonContainsArray(projectJson, "scenes"))
     {
         for (size_t i = 0; i < projectJson["scenes"].size(); ++i)
         {

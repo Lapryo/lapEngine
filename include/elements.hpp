@@ -126,6 +126,12 @@ namespace lapCore
         }
     };
 
+    // TODO: Implement this
+    struct UIGrid
+    {
+        FrameVector displaySize;
+    };
+
     struct Sprite
     {
         Renderable renderable{};

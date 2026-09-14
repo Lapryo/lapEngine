@@ -453,6 +453,20 @@ void lapCore::Scene::LoadMapObjects(Map &map)
     }
 }
 
+lapCore::ObjectInfo* lapCore::Scene::AddPrefab(entt::id_type prefabName, std::string newName)
+{
+    auto prefab = world->prefabs->FindObject(prefabName);
+    if (!prefab) return nullptr;
+
+    auto obj = CloneObjectFromContainer(*world->prefabs, *prefab, HASH(newName.c_str()), "");
+    return &obj;
+}
+
+lapCore::ObjectInfo lapCore::Scene::AddPrefab(Object prefab, std::string newName)
+{
+    return CloneObjectFromContainer(*world->prefabs, prefab, HASH(newName.c_str()), "");
+}
+
 void lapCore::ObjectContainer::AddElement(entt::hashed_string objectName, entt::id_type elementType, void *elementData)
 {
     auto it = objectMap.find(objectName.value());
@@ -529,35 +543,12 @@ void lapCore::Scene::Update(float deltaTime, RenderTexture2D &target)
     BeginTextureMode(target);
     ClearBackground(WHITE);
 
-    static int frameCounter = 0;
-    frameCounter++;
-
-    std::vector<std::pair<std::string, float>> systemTimes;
-
     for (auto &[order, system] : systems)
     {
         if (!system || !system->active)
             continue;
 
-        float timeStart = GetTime();
         system->Update(deltaTime, objects);
-        float timeEnd = GetTime();
-
-        float timeTaken = timeEnd - timeStart;
-        systemTimes.push_back({system->GetName(), timeTaken});
-    }
-
-    // Sort the system times in descending order
-    std::sort(systemTimes.begin(), systemTimes.end(),
-        [](const auto &a, const auto &b) {
-            return a.second > b.second;
-        });
-
-    // Output the system times here
-    std::cout << "Frame " << frameCounter << " System Times:\n";
-    for (const auto &[name, time] : systemTimes)
-    {
-        std::cout << "  " << name << ": " << time << " seconds\n";
     }
 
     EndTextureMode();

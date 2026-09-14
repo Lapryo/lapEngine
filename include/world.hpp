@@ -79,5 +79,7 @@ namespace lapCore
 
     private:
         Project project;
+
+        bool debugMenu = false;
     };
 }

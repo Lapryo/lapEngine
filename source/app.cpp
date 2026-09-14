@@ -8,8 +8,29 @@ using namespace lapCore;
 lapCore::App::App(Project &project) : world(this, project)
 {}
 
+void ResetLogLevel(DebugLevel level)
+{
+    switch (level)
+    {
+        case DebugLevel::NONE:
+            SetTraceLogLevel(7);
+            break;
+        case DebugLevel::LOW:
+            SetTraceLogLevel(5);
+            break;
+        case DebugLevel::MEDIUM:
+            SetTraceLogLevel(4);
+            break;
+        case DebugLevel::HIGH:
+            SetTraceLogLevel(0);
+            break;
+    }
+}
+
 void App::Run()
 {
+    ResetLogLevel(DEBUG_LEVEL);
+
     if (state != AppState::DEAD) // If the app is not dead, and/or is running, then do nothing
         return;
 
@@ -26,6 +47,8 @@ void App::Run()
 
     while (state == AppState::RUNNING)
     {
+        ResetLogLevel(DEBUG_LEVEL);
+
         Update(GetFrameTime());
         if (world.switchingScene && world.nextSceneData.name != "")
         {

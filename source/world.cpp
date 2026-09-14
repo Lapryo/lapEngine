@@ -54,6 +54,8 @@ void World::SetScene(ProjectSceneData &scene_data)
     mainScene->AddObjectsFromProjectData(scene_data.instances.objects);
     mainScene->AddObjectsFromProjectData(scene_data.instances.prefabs);
 
+    mainScene->backgroundColor = scene_data.backgroundColor;
+
     for (auto &system : scene_data.systems)
     {
         if (system.type == "render")
