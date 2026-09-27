@@ -1,10 +1,13 @@
 #include "map.hpp"
 
 #include "eutil.hpp"
+#include "resourcemanager.hpp"
 
 #include <nlohmann/json.hpp>
 
 using namespace lapCore;
+using namespace EUTIL;
+using namespace Functions;
 
 void GetTileset(Map& map, const json& tilesetJson, const std::string &filePath, unsigned int tilesetIndex, ResourceManager* resources)
 {

@@ -1,14 +1,52 @@
-#include "project.hpp"
-#include <nlohmann/json.hpp>
-#include "eutil.hpp"
-
 #include "elements.hpp"
-
 #include "reflection.hpp"
+#include "jsonstructs.hpp"
+#include "project.hpp"
 
+#include <nlohmann/json.hpp>
 #include <iostream>
 
 using namespace lapCore;
+using namespace EUTIL;
+using namespace ELEMENTS;
+
+using namespace ELEMENTS::Render;
+using namespace EUTIL::Render;
+using namespace ELEMENTS::Render::UI;
+using namespace EUTIL::Render::UI;
+using namespace ELEMENTS::Other;
+using namespace EUTIL::Other;
+
+using namespace ELEMENTS::Physics;
+
+using namespace Functions;
+
+/*
+TODO:
+Allow the developer to be able to change/modify the elements/(object data) of an instanced prefab
+
+Could look like this:
+
+["inventory-slot", {
+    "name": "inventory-slot-0x0",
+    "parent": "inventory-menu-row-0"
+    "children": {
+        "inventory-slot-count": {
+            "name": "inventory-slot-count-0x0",
+            "parent": "inventory-slot-0x0",
+            "elements": [
+                {
+                    "type": "ui-text-label",
+                    "data": {
+                        "text": "test"
+                    }
+                }
+            ]
+        }
+    }
+}, 3]
+
+*/
 
 bool jsonContainsArray(const nlohmann::json &json, const std::string &key)
 {
@@ -162,9 +200,9 @@ std::vector<ProjectObjectData> GetObjectInstances(const nlohmann::json_abi_v3_12
     return objectInstances;
 }
 
-std::vector<ProjectObjectData> GetPrefabInstances(const nlohmann::json_abi_v3_12_0::json &sceneJson, std::vector<ProjectObjectData> prefabs)
+std::vector<std::pair<std::string, ProjectObjectData>> GetPrefabInstances(const nlohmann::json_abi_v3_12_0::json &sceneJson, std::vector<ProjectObjectData> prefabs)
 {
-    std::vector<ProjectObjectData> prefabInstances;
+    std::vector<std::pair<std::string, ProjectObjectData>> prefabInstances;
 
     if (jsonContainsObject(sceneJson, "instances"))
     {
@@ -241,7 +279,7 @@ std::vector<ProjectObjectData> GetPrefabInstances(const nlohmann::json_abi_v3_12
                                 }
                             }
 
-                            prefabInstances.push_back(instanceData);
+                            prefabInstances.push_back({prefabName, instanceData});
                             break;
                         }
                     }
@@ -609,6 +647,7 @@ void lapCore::Project::RegisterDefaultElements()
     Reflection::Register<Physics2D>("physics-2d");
     Reflection::Register<UIFrame>("ui-frame");
     Reflection::Register<UIList>("ui-list");
+    //Reflection::Register<UIGrid>("ui-grid");
     Reflection::Register<Sprite>("sprite");
     Reflection::Register<UIImage>("ui-image");
     Reflection::Register<UITextLabel>("ui-text-label");
@@ -626,13 +665,13 @@ void lapCore::Project::RegisterDefaultElements()
     Reflection::Register<Direction2D>("direction-2d");
     Reflection::Register<FrameVector>("frame-vector");
     Reflection::Register<Padding>("padding");
-    Reflection::Register<UIOrigin>("ui-origin");
+    Reflection::Register<UITransform>("ui-transform");
 
     // RAYLIB
-    Reflection::Register<Camera2D>("camera-2d");
-    Reflection::Register<Vector2>("vector2");
-    Reflection::Register<Color>("color");
-    Reflection::Register<Rectangle>("rectangle");
+    Reflection::Register<Camera2D>("rl-camera-2d");
+    Reflection::Register<Vector2>("rl-vector2");
+    Reflection::Register<Color>("rl-color");
+    Reflection::Register<Rectangle>("rl-rectangle");
 
     // BOX2D
     Reflection::Register<b2BodyDef>("b2-body-def");

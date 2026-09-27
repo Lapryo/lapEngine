@@ -7,13 +7,21 @@
 #include <string>
 #include <functional>
 #include <cassert>
+#include <memory>
 
 #include "map.hpp"
 
 namespace lapCore
 {
+    class IAssetStorage
+    {
+    public:
+        virtual ~IAssetStorage() = default;
+        virtual void UnloadAll() = 0;
+    };
+
     template <typename T>
-    class AssetStorage
+    class AssetStorage : public IAssetStorage
     {
     public:
         using Deleter = std::function<void(T&)>;
@@ -31,7 +39,17 @@ namespace lapCore
         entt::id_type Load(entt::hashed_string name, T asset)
         {
             entt::id_type id = name.value();
-            assets.emplace(id, std::move(asset));
+
+            auto [it, inserted] = assets.emplace(id, std::move(asset));
+
+            if (!inserted)
+            {
+                if (deleter)
+                    deleter(asset);
+
+                return id;
+            }
+
             reverseLookup[id] = name.data();
 
             return id;
@@ -61,7 +79,7 @@ namespace lapCore
             assets.erase(assetIt);
         }
 
-        void UnloadAll()
+        void UnloadAll() override
         {
             for (auto& [id, asset] : assets)
             {
@@ -129,6 +147,14 @@ namespace lapCore
 
     struct ResourceManager
     {
+        ResourceManager() = default;
+
+        ResourceManager(const ResourceManager&) = delete;
+        ResourceManager& operator=(const ResourceManager&) = delete;
+
+        ResourceManager(ResourceManager&&) = delete;
+        ResourceManager& operator=(ResourceManager&&) = delete;
+
         AssetStorage<Texture2D> textures{
             [](Texture2D& texture)
             {
@@ -192,6 +218,37 @@ namespace lapCore
             }
         };
 
+        std::unordered_map<entt::id_type, std::unique_ptr<IAssetStorage>> others;
+
+        template <typename T>
+        AssetStorage<T>* AddStorageToOthers(
+            entt::id_type id,
+            std::function<void(T&)> deleter)
+        {
+            if (others.contains(id))
+                return nullptr;
+
+            auto storage = std::make_unique<AssetStorage<T>>(deleter);
+
+            auto* storagePointer = storage.get();
+
+            others.emplace(id, std::move(storage));
+
+            return storagePointer;
+        }
+
+        template <typename T>
+        AssetStorage<T>* GetStorageFromOthers(entt::id_type id)
+        {
+            auto it = others.find(id);
+            if (it == others.end())
+                return nullptr;
+
+            auto* storagePtr = dynamic_cast<AssetStorage<T>*>(it->second.get());
+
+            return storagePtr;
+        }
+
         void ClearAll()
         {
             textures.UnloadAll();
@@ -203,6 +260,13 @@ namespace lapCore
             images.UnloadAll();
             maps.UnloadAll();
             tilesets.UnloadAll();
+
+            for (auto& [id, storage] : others)
+            {
+                storage->UnloadAll();
+            }
+
+            others.clear();
         }
     };
 }

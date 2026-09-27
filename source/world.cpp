@@ -52,7 +52,7 @@ void World::SetScene(ProjectSceneData &scene_data)
     mainScene = new Scene(this, scene_data.name);
 
     mainScene->AddObjectsFromProjectData(scene_data.instances.objects);
-    mainScene->AddObjectsFromProjectData(scene_data.instances.prefabs);
+    mainScene->AddObjectsFromPrefabProjectData(*prefabs, scene_data.instances.prefabs);
 
     mainScene->backgroundColor = scene_data.backgroundColor;
 
@@ -85,6 +85,8 @@ void World::SetScene(ProjectSceneData &scene_data)
         preloadSceneCallback();
     }
     preloadSceneCallback = nullptr;
+
+    dbgln("Finished setting scene.", LogType::INFO);
 }
 
 ProjectSceneData &lapCore::World::GetMainSceneData()

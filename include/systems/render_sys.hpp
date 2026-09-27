@@ -12,8 +12,11 @@ public:
         Sprite,
         Text,
         Rect,
+        Image,
         Ellipse,
-        Image
+        Line,
+        Polygon,
+        Model
     };
 
     struct RenderEntry

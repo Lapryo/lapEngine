@@ -128,7 +128,7 @@ namespace lapCore
     struct SceneInstancesData
     {
         std::vector<ProjectObjectData> objects;
-        std::vector<ProjectObjectData> prefabs;
+        std::vector<std::pair<std::string, ProjectObjectData>> prefabs;
     };
 
     struct ProjectSceneData

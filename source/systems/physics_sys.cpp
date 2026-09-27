@@ -2,6 +2,7 @@
 #include "systems/physics_sys.hpp"
 
 using namespace lapCore;
+using namespace ELEMENTS::Physics;
 
 PhysicsSystem::~PhysicsSystem()
 {

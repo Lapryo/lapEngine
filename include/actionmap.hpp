@@ -7,6 +7,8 @@
 
 namespace lapCore
 {
+    using namespace EUTIL::Math;
+
     struct ActionMap
     {
         enum class ControlType

@@ -4,6 +4,9 @@
 #include <iostream>
 
 using namespace lapCore;
+using namespace EUTIL;
+using namespace Functions;
+using namespace EUTIL::Other;
 
 lapCore::App::App(Project &project) : world(this, project)
 {}

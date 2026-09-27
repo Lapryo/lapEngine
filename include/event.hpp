@@ -8,9 +8,14 @@
 #include <iostream>
 #include <entt/entt.hpp>
 
+// this code is half-AI half-me, i understand how it works, but i was lowk too lazy, thanks mr. GPT
+
+
 namespace lapCore
 {
     struct Scene;
+
+    using Object = entt::entity;
 
     struct IEventContainer
     {
@@ -130,6 +135,45 @@ namespace lapCore
             for (auto &listener : c->listeners)
                 if (listener)
                     listener(scene, std::forward<Args>(args)...);
+        }
+
+        template <typename... Args>
+        static void Fire(
+            Scene* scene,
+            entt::id_type id,
+            Object source,
+            Args&&... args
+        )
+        {
+            auto it = eventCallbacks.find(id);
+
+            if (it == eventCallbacks.end())
+                return;
+
+            using container =
+                EventContainer<Object, std::decay_t<Args>...>;
+
+            auto* ptr = it->second.get();
+
+            if (ptr->type != entt::type_hash<container>::value())
+            {
+                std::cerr
+                    << "[EventRegistry] Pointer types don't match\n";
+                return;
+            }
+
+            auto* c =
+                static_cast<container*>(ptr);
+
+            for (auto& listener : c->listeners)
+            {
+                if (listener)
+                    listener(
+                        scene,
+                        source,
+                        std::forward<Args>(args)...
+                    );
+            }
         }
 
         static void Disconnect(entt::id_type eventID)

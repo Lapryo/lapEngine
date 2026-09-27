@@ -18,6 +18,18 @@ public:
     
     void ResetInUIList();
 
+    void MarkUIDirty(
+        Scene* scene,
+        entt::registry& registry,
+        entt::entity entity
+    );
+
+    void Connect(entt::registry &registry);
+    void OnUIUpdated(
+        entt::registry &registry, 
+        Object entity
+    );
+
     std::string GetName() const override 
     { return "GUISystem"; }
 };

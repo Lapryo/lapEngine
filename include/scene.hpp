@@ -6,8 +6,16 @@
 
 #include <iostream>
 
+using namespace lapCore;
+using namespace ELEMENTS;
+using namespace ELEMENTS::Other;
+
 namespace lapCore
 {
+    using namespace EUTIL;
+    using namespace Functions;
+    using namespace Other;
+
     struct World;
 
     using Object = entt::entity;
@@ -56,8 +64,11 @@ namespace lapCore
 
         ObjectInfo CloneObject(Object object, std::string newName = "");
         ObjectInfo CloneObjectFromContainer(ObjectContainer &container, Object object, entt::hashed_string newName = "", entt::hashed_string newParent = "");
+        ObjectInfo CloneHierarchyFromContainer(ObjectContainer &container, Object object, entt::hashed_string newName = "", entt::hashed_string newParent = "");
 
         void AddObjectsFromProjectData(std::vector<ProjectObjectData> objects);
+        void AddObjectsFromPrefabProjectData(ObjectContainer& prefabContainer, const std::vector<std::pair<std::string, ProjectObjectData>>& prefabs);
+
         ObjectInfo AddObjectFromObjectData(ProjectObjectData objectData);
 
         void AddElement(entt::hashed_string objectName, entt::id_type elementType, void* elementData);
@@ -68,7 +79,7 @@ namespace lapCore
         void* FindElement(Object object, entt::id_type elementType);
 
         template <typename Element, typename... ElementArgs>
-        Element AddElement(Object object, ElementArgs &&...args)
+        Element& AddElement(Object object, ElementArgs &&...args)
         {
             return objects.emplace<Element>(object, std::forward<ElementArgs>(args)...);
         }
@@ -78,7 +89,8 @@ namespace lapCore
         {
             auto obj = FindObject(objectID);
             if (!obj) return nullptr;
-            auto element = AddElement<Element>(*obj, std::forward<ElementArgs>(args)...);
+            auto& element = AddElement<Element>(*obj, std::forward<ElementArgs>(args)...);
+            
             return &element;
         }
 

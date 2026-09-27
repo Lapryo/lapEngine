@@ -2,19 +2,45 @@
 #include "world.hpp"
 
 using namespace lapCore;
+using namespace EUTIL::Functions;
+
+using namespace ELEMENTS::Physics;
+using namespace ELEMENTS::Render;
 
 #include "systems/physics_sys.hpp"
 
-ObjectInfo lapCore::ObjectContainer::AddObject(entt::hashed_string name, entt::hashed_string parent, int childIndex, bool fromPrefab)
+ObjectInfo lapCore::ObjectContainer::AddObject(
+    entt::hashed_string name,
+    entt::hashed_string parent,
+    int childIndex,
+    bool fromPrefab)
 {
     ObjectEntry entry;
+
     entry.info.object = this->objects.create();
     entry.parent.id = parent.value();
     entry.childIndex = childIndex;
     entry.fromPrefab = fromPrefab;
 
+    // Resolve parent
+    entry.parent.object = entt::null;
+
+    const bool hasParent =
+        parent.value() != HASH_ID("");
+
+    if (hasParent)
+    {
+        auto parentEntry = FindEntry(parent.value());
+
+        if (parentEntry)
+        {
+            entry.parent.object = parentEntry->info.object;
+        }
+    }
+
     std::string finalName = name.data();
 
+    // Resolve duplicate names
     if (objectMap.contains(name.value()))
     {
         const std::string baseName = finalName;
@@ -33,15 +59,19 @@ ObjectInfo lapCore::ObjectContainer::AddObject(entt::hashed_string name, entt::h
     }
 
     entry.info.id = name.value();
-    
-    if (parent.data() != nullptr)
+
+    // Add to parent's children
+    if (hasParent &&
+        entry.parent.object != entt::null)
     {
         auto it = objectMap.find(parent.value());
+
         if (it != objectMap.end())
         {
             if (childIndex == -1)
-                childIndex = it->second.children.size() + 1;
+                childIndex = static_cast<int>(it->second.children.size());
 
+            entry.childIndex = childIndex;
             it->second.children[childIndex] = entry.info;
         }
     }
@@ -279,6 +309,79 @@ ObjectInfo lapCore::ObjectContainer::CloneObjectFromContainer(
     );
 }
 
+ObjectInfo lapCore::ObjectContainer::CloneHierarchyFromContainer(
+    ObjectContainer& container,
+    Object object,
+    entt::hashed_string newName,
+    entt::hashed_string newParent
+)
+{
+    auto* srcObject = container.FindEntry(object);
+    if (!srcObject)
+        return {};
+
+    auto srcObjNameIt = container.lookup.find(srcObject->info.id);
+    if (srcObjNameIt == container.lookup.end())
+        return {};
+
+    if (newName.value() == HASH_ID(""))
+        newName = HASH(srcObjNameIt->second.c_str());
+
+    std::function<ObjectInfo(
+        Object,
+        entt::hashed_string,
+        entt::hashed_string
+    )> cloneRecursive;
+
+    cloneRecursive =
+        [&](Object srcEntity,
+            entt::hashed_string dstName,
+            entt::hashed_string dstParentName) -> ObjectInfo
+    {
+        auto* srcEntry = container.FindEntry(srcEntity);
+        if (!srcEntry)
+            return {};
+
+        auto srcNameIt = container.lookup.find(srcEntry->info.id);
+        if (srcNameIt == container.lookup.end())
+            return {};
+
+        if (dstName.value() == HASH_ID(""))
+            dstName = HASH(srcNameIt->second.c_str());
+
+        ObjectInfo dstObject = AddObject(
+            dstName,
+            dstParentName,
+            -1,
+            srcEntry->fromPrefab
+        );
+
+        auto dstNameIt = lookup.find(dstObject.id);
+        if (dstNameIt == lookup.end())
+            return {};
+
+        entt::hashed_string actualDstName =
+            HASH(dstNameIt->second.c_str());
+
+        for (const auto& [childIndex, childInfo] : srcEntry->children)
+        {
+            cloneRecursive(
+                childInfo.object,
+                HASH(""),
+                actualDstName
+            );
+        }
+
+        return dstObject;
+    };
+
+    return cloneRecursive(
+        object,
+        newName,
+        newParent
+    );
+}
+
 void lapCore::ObjectContainer::AddObjectsFromProjectData(std::vector<ProjectObjectData> objects)
 {
     for (const auto& object_data : objects)
@@ -289,7 +392,37 @@ void lapCore::ObjectContainer::AddObjectsFromProjectData(std::vector<ProjectObje
             if (!element.get())
                 continue;
 
-            AddElement(HASH(object_data.name.c_str()), element->GetTypeID(), element->GetDataPtr());
+            AddElement(prefabObject.object, element->GetTypeID(), element->GetDataPtr());
+        }
+    }
+}
+
+void lapCore::ObjectContainer::AddObjectsFromPrefabProjectData(
+    ObjectContainer& prefabContainer,
+    const std::vector<std::pair<std::string, ProjectObjectData>>& prefabs)
+{
+    for (const auto& [prefabName, objectData] : prefabs)
+    {
+        auto prefab = prefabContainer.FindObject(
+            HASH(prefabName.c_str())
+        );
+
+        if (!prefab)
+            continue;
+
+        auto objInfo = CloneHierarchyFromContainer(
+            prefabContainer,
+            *prefab,
+            HASH(objectData.name.c_str()),
+            HASH(objectData.parent.c_str())
+        );
+
+        for (const auto& element : objectData.elements)
+        {
+            if (!element.get())
+                continue;
+
+            AddElement(objInfo.object, element->GetTypeID(), element->GetDataPtr());
         }
     }
 }
@@ -459,7 +592,8 @@ lapCore::ObjectInfo* lapCore::Scene::AddPrefab(entt::id_type prefabName, std::st
     if (!prefab) return nullptr;
 
     auto obj = CloneObjectFromContainer(*world->prefabs, *prefab, HASH(newName.c_str()), "");
-    return &obj;
+    auto* entry = FindEntry(obj.object);
+    return entry ? &entry->info : nullptr;
 }
 
 lapCore::ObjectInfo lapCore::Scene::AddPrefab(Object prefab, std::string newName)

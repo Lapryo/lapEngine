@@ -4,7 +4,10 @@
 #include <fstream>
 #include <sstream>
 
-std::string lapCore::ReadFileToString(const std::string &filePath, bool withPrefix)
+using namespace lapCore::EUTIL;
+using namespace Other;
+
+std::string Functions::ReadFileToString(const std::string &filePath, bool withPrefix)
 {
     std::string fullPath = withPrefix ? GetApplicationDirectory() + filePath : filePath;
     std::ifstream file(fullPath);
@@ -22,7 +25,7 @@ std::string lapCore::ReadFileToString(const std::string &filePath, bool withPref
     return buffer.str();
 }
 
-void lapCore::WriteStringToFile(const std::string &filePath, const std::string &data)
+void Functions::WriteStringToFile(const std::string &filePath, const std::string &data)
 {
     std::ofstream file(GetApplicationDirectory() + filePath);
     if (!file.is_open())
@@ -35,12 +38,12 @@ void lapCore::WriteStringToFile(const std::string &filePath, const std::string &
     file.close();
 }
 
-nlohmann::json_abi_v3_12_0::json lapCore::ReadFileToJsonObject(const std::string &filePath, bool withPrefix)
+nlohmann::json Functions::ReadFileToJsonObject(const std::string &filePath, bool withPrefix)
 {
     return nlohmann::json::parse(ReadFileToString(filePath, withPrefix));
 }
 
-bool lapCore::IsPointInViewportSpace(
+bool Functions::IsPointInViewportSpace(
     Vector2 point,
     Vector2 logicalResolution,
     Camera2D* camera)
@@ -72,7 +75,7 @@ bool lapCore::IsPointInViewportSpace(
            point.y < bottomRight.y;
 }
 
-bool lapCore::IsRectangleInViewportSpace(
+bool Functions::IsRectangleInViewportSpace(
     Rectangle rect,
     Vector2 logicalResolution,
     Camera2D* camera)
@@ -86,7 +89,7 @@ bool lapCore::IsRectangleInViewportSpace(
     return CheckCollisionRecs(rect, viewport);
 }
 
-Rectangle lapCore::GetCameraViewport(
+Rectangle Functions::GetCameraViewport(
     Vector2 logicalResolution,
     Camera2D* camera)
 {
@@ -117,7 +120,7 @@ Rectangle lapCore::GetCameraViewport(
     };
 }
 
-Vector2 lapCore::GetMouseInViewportSpace(Vector2 logicalResolution)
+Vector2 Functions::GetMouseInViewportSpace(Vector2 logicalResolution)
 {
     Vector2 mouse = GetMousePosition();
 
@@ -157,12 +160,12 @@ Vector2 lapCore::GetMouseInViewportSpace(Vector2 logicalResolution)
     return mouse;
 }
 
-Rectangle lapCore::UIOriginToRect(UIOrigin origin, Vector2 logicalResolution)
+Rectangle Functions::UITransformToRect(UITransform transform, Vector2 logicalResolution)
 {
     Rectangle rect;
 
-    auto posVec = FrameVectorToVec2(origin.transform.position, logicalResolution);
-    auto sizeVec = FrameVectorToVec2(origin.transform.size, logicalResolution);
+    auto posVec = FrameVectorToVec2(transform.position, logicalResolution);
+    auto sizeVec = FrameVectorToVec2(transform.size, logicalResolution);
 
     rect.x = posVec.x;
     rect.y = posVec.y;
@@ -172,7 +175,7 @@ Rectangle lapCore::UIOriginToRect(UIOrigin origin, Vector2 logicalResolution)
     return rect;
 }
 
-Vector2 lapCore::FrameVectorToVec2(lapCore::FrameVector vector, Vector2 logicalResolution)
+Vector2 Functions::FrameVectorToVec2(Functions::FrameVector vector, Vector2 logicalResolution)
 {
     Vector2 vec;
 
@@ -182,25 +185,48 @@ Vector2 lapCore::FrameVectorToVec2(lapCore::FrameVector vector, Vector2 logicalR
     return vec;
 }
 
-void lapCore::dbgln(const std::string &message, LogType type)
+void Functions::dbgln(const std::string &message, Other::LogType type)
 {
     switch (type)
     {
-        case LogType::INFO:
+        case Other::LogType::INFO:
             if (DEBUG_LEVEL == DebugLevel::HIGH)
-                std::cout << "[INFO] " << message << "\n";
+                std::cout << Console::_BLUE << "[INFO] " << Console::_RESET << message << '\n';
             break;
-        case LogType::NOTICE:
+        case Other::LogType::NOTICE:
             if (DEBUG_LEVEL >= DebugLevel::MEDIUM)
-                std::cout << "[NOTICE] " << message << "\n";
+                std::cout << Console::_GREEN << "[NOTICE] " << Console::_RESET << message << '\n';
             break;
-        case LogType::WARNING:
+        case Other::LogType::WARNING:
             if (DEBUG_LEVEL >= DebugLevel::MEDIUM)
-                std::cout << "[WARNING] " << message << "\n";
+                std::cout << Console::_YELLOW << "[WARNING] " << Console::_RESET << message << '\n';
             break;
-        case LogType::ERROR:
+        case Other::LogType::ERROR:
             if (DEBUG_LEVEL >= DebugLevel::LOW)
-                std::cerr << "[ERROR] " << message << "\n";
+                std::cout << Console::_RED << "[ERROR] " << Console::_RESET << message << '\n';
+            break;
+    }
+}
+
+void lapCore::EUTIL::Functions::dbgln(const std::string &message, const char *colorCode, Other::LogType type)
+{
+    switch (type)
+    {
+        case Other::LogType::INFO:
+            if (DEBUG_LEVEL == DebugLevel::HIGH)
+                std::cout << Console::_BLUE << "[INFO] " << Console::_RESET << colorCode << message << Console::_RESET << '\n';
+            break;
+        case Other::LogType::NOTICE:
+            if (DEBUG_LEVEL >= DebugLevel::MEDIUM)
+                std::cout << Console::_GREEN << "[NOTICE] " << Console::_RESET << colorCode << message << Console::_RESET << '\n';
+            break;
+        case Other::LogType::WARNING:
+            if (DEBUG_LEVEL >= DebugLevel::MEDIUM)
+                std::cout << Console::_YELLOW << "[WARNING] " << Console::_RESET << colorCode << message << Console::_RESET << '\n';
+            break;
+        case Other::LogType::ERROR:
+            if (DEBUG_LEVEL >= DebugLevel::LOW)
+                std::cerr << Console::_RED << "[ERROR] " << Console::_RESET << colorCode << message << Console::_RESET << '\n';
             break;
     }
 }
