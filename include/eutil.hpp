@@ -125,6 +125,15 @@ namespace lapCore
                     float top{0.f}, bottom{0.f}, left{0.f}, right{0.f};
                 };
 
+                enum class UIListSpreading
+                {
+                    BUNCH_START, // 1 - 2 - 3 --
+                    BUNCH_MIDDLE, // - 1 - 2 - 3 -
+                    BUNCH_END, // -- 1 - 2 - 3
+                    EVENLY, // - 1 - 2 - 3 - .. NOT THE SAME AS BUNCH_MIDDLE, ELEMENTS ARE DISTRIBUTED EQUALLY WITH SPACE ON BOTH ENDS
+                    DISTANCING // 1 -- 2 -- 3
+                };
+
                 struct UITransform
                 {
                     // Should I store parent absolute position + size here?

@@ -179,18 +179,10 @@ void GUISystem::OnUIUpdated(
 Rectangle ResolveUI(
     Scene *scene,
     entt::registry &registry,
-    entt::entity entity)
+    entt::entity entity,
+    UITransform &transform)
 {
-    UITransform *transform =
-        GetUITransform(
-            registry,
-            entity);
-
-    if (!transform)
-        return {};
-
-    auto entry =
-        scene->FindEntry(entity);
+    auto entry = scene->FindEntry(entity);
 
     if (!entry)
         return {};
@@ -198,16 +190,8 @@ Rectangle ResolveUI(
     const bool isRoot =
         entry->parent.object == entt::null;
 
-    // --------------------------------------------------------
-    // Cached result.
-    // --------------------------------------------------------
-
-    if (!isRoot && !transform->dirty)
-        return transform->absoluteRect;
-
-    // --------------------------------------------------------
-    // Resolve parent rectangle.
-    // --------------------------------------------------------
+    if (!isRoot && !transform.dirty)
+        return transform.absoluteRect;
 
     Rectangle parentRect{};
 
@@ -217,70 +201,99 @@ Rectangle ResolveUI(
             0.0f,
             0.0f,
             scene->world->window.logical_resolution.x,
-            scene->world->window.logical_resolution.y};
+            scene->world->window.logical_resolution.y
+        };
     }
     else
     {
-        parentRect =
-            ResolveUI(
-                scene,
-                registry,
-                entry->parent.object);
+        auto parent = entry->parent.object;
+
+        // The hierarchy parent should use its UIFrame
+        // when one exists.
+        if (auto *parentFrame =
+                registry.try_get<UIFrame>(parent))
+        {
+            parentRect =
+                ResolveUI(
+                    scene,
+                    registry,
+                    parent,
+                    parentFrame->transform);
+        }
+        else if (auto *parentButton =
+                     registry.try_get<UIButton>(parent))
+        {
+            parentRect =
+                ResolveUI(
+                    scene,
+                    registry,
+                    parent,
+                    parentButton->bounds);
+        }
+        else if (auto *parentImage =
+                     registry.try_get<UIImage>(parent))
+        {
+            parentRect =
+                ResolveUI(
+                    scene,
+                    registry,
+                    parent,
+                    parentImage->transform);
+        }
+        else if (auto *parentText =
+                     registry.try_get<UITextLabel>(parent))
+        {
+            parentRect =
+                ResolveUI(
+                    scene,
+                    registry,
+                    parent,
+                    parentText->frame.transform);
+        }
+        else
+        {
+            return {};
+        }
     }
 
-    transform->parentAbsRect =
-        parentRect;
-
-    // --------------------------------------------------------
-    // Calculate size.
-    // --------------------------------------------------------
+    transform.parentAbsRect = parentRect;
 
     const float width =
         parentRect.width *
-            transform->size.scale.x +
-        transform->size.offset.x;
+            transform.size.scale.x +
+        transform.size.offset.x;
 
     const float height =
         parentRect.height *
-            transform->size.scale.y +
-        transform->size.offset.y;
-
-    // --------------------------------------------------------
-    // Calculate position.
-    //
-    // absoluteRect is already the final top-left rectangle.
-    // The renderer must NOT apply the anchor again.
-    // --------------------------------------------------------
+            transform.size.scale.y +
+        transform.size.offset.y;
 
     const float x =
         parentRect.x +
         parentRect.width *
-            transform->position.scale.x +
-        transform->position.offset.x -
+            transform.position.scale.x +
+        transform.position.offset.x -
         width *
-            transform->anchor.scale.x;
+            transform.anchor.scale.x;
 
     const float y =
         parentRect.y +
         parentRect.height *
-            transform->position.scale.y +
-        transform->position.offset.y -
+            transform.position.scale.y +
+        transform.position.offset.y -
         height *
-            transform->anchor.scale.y;
+            transform.anchor.scale.y;
 
-    // --------------------------------------------------------
-    // Cache result.
-    // --------------------------------------------------------
-
-    transform->absoluteRect = {
+    transform.absoluteRect = {
         x,
         y,
         width,
-        height};
+        height
+    };
 
-    transform->dirty = false;
+    transform.dirty = false;
 
-    return transform->absoluteRect;
+    return transform.absoluteRect;
 }
 
 // ============================================================
@@ -529,6 +542,86 @@ void GUISystem::ResetInUIList()
     }
 }
 
+float GetUIListSpacing(
+    const UIList &list,
+    size_t elementCount,
+    float elementLength,
+    float contentLength)
+{
+    if (elementCount == 0)
+        return 0.0f;
+
+    const float totalElementLength =
+        static_cast<float>(elementCount) *
+        elementLength;
+
+    const float freeSpace =
+        std::max(
+            0.0f,
+            contentLength - totalElementLength);
+
+    switch (list.spreading)
+    {
+        case UIListSpreading::BUNCH_START:
+        case UIListSpreading::BUNCH_MIDDLE:
+        case UIListSpreading::BUNCH_END:
+            return 0.0f;
+
+        case UIListSpreading::EVENLY:
+            return freeSpace /
+                   static_cast<float>(elementCount + 1);
+
+        case UIListSpreading::DISTANCING:
+            if (elementCount <= 1)
+                return 0.0f;
+
+            return freeSpace /
+                   static_cast<float>(elementCount - 1);
+    }
+
+    return 0.0f;
+}
+
+float GetUIListStartOffset(
+    const UIList &list,
+    size_t elementCount,
+    float elementLength,
+    float contentLength,
+    float spacing)
+{
+    if (elementCount == 0)
+        return 0.0f;
+
+    const float totalElementLength =
+        static_cast<float>(elementCount) *
+        elementLength;
+
+    const float freeSpace =
+        std::max(
+            0.0f,
+            contentLength - totalElementLength);
+
+    switch (list.spreading)
+    {
+        case UIListSpreading::BUNCH_START:
+            return 0.0f;
+
+        case UIListSpreading::BUNCH_MIDDLE:
+            return freeSpace * 0.5f;
+
+        case UIListSpreading::BUNCH_END:
+            return freeSpace;
+
+        case UIListSpreading::EVENLY:
+            return spacing;
+
+        case UIListSpreading::DISTANCING:
+            return 0.0f;
+    }
+
+    return 0.0f;
+}
+
 // ============================================================
 // ARRANGE ONE UI LIST
 // ============================================================
@@ -585,6 +678,34 @@ void ArrangeUIList(
         list->settings.direction ==
         Axis2D::VERTICAL;
 
+    const size_t elementCount =
+        entry->children.size();
+
+    const float elementLength =
+        vertical
+            ? elementSize.y
+            : elementSize.x;
+
+    const float contentLength =
+        vertical
+            ? scrollSize.y
+            : scrollSize.x;
+
+    const float spacing =
+        GetUIListSpacing(
+            *list,
+            elementCount,
+            elementLength,
+            contentLength);
+
+    const float startOffset =
+        GetUIListStartOffset(
+            *list,
+            elementCount,
+            elementLength,
+            contentLength,
+            spacing);
+
     // --------------------------------------------------------
     // Arrange each direct child.
     // --------------------------------------------------------
@@ -597,10 +718,9 @@ void ArrangeUIList(
             entry->children[index].object;
 
         const float contentOffset =
+            startOffset +
             static_cast<float>(index) *
-            (vertical
-                 ? elementSize.y
-                 : elementSize.x);
+                (elementLength + spacing);
 
         Rectangle elementRect = {
             listRect.x,
@@ -1028,40 +1148,48 @@ void GUISystem::Update(
     // 2. Resolve normal UI hierarchy.
     // ========================================================
 
-    for (auto entity :
-         registry.view<UIFrame>())
+    for (auto entity : registry.view<UIFrame>())
     {
+        auto &frame = registry.get<UIFrame>(entity);
+
         ResolveUI(
             scene,
             registry,
-            entity);
+            entity,
+            frame.transform);
     }
 
-    for (auto entity :
-         registry.view<UIButton>())
+    for (auto entity : registry.view<UIButton>())
     {
+        auto &button = registry.get<UIButton>(entity);
+
         ResolveUI(
             scene,
             registry,
-            entity);
+            entity,
+            button.bounds);
     }
 
-    for (auto entity :
-         registry.view<UITextLabel>())
+    for (auto entity : registry.view<UITextLabel>())
     {
+        auto &text = registry.get<UITextLabel>(entity);
+
         ResolveUI(
             scene,
             registry,
-            entity);
+            entity,
+            text.frame.transform);
     }
 
-    for (auto entity :
-         registry.view<UIImage>())
+    for (auto entity : registry.view<UIImage>())
     {
+        auto &image = registry.get<UIImage>(entity);
+
         ResolveUI(
             scene,
             registry,
-            entity);
+            entity,
+            image.transform);
     }
 
     // ========================================================

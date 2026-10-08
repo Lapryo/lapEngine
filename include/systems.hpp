@@ -5,3 +5,4 @@
 #include "systems/script_sys.hpp"
 #include "systems/gui_sys.hpp"
 #include "systems/input_sys.hpp"
+#include "systems/sound_sys.hpp"

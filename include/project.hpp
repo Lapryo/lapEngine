@@ -142,6 +142,13 @@ namespace lapCore
         void Clear();
     };
 
+    enum class ProjectPackingLevel
+    {
+        SINGLE_FILE,
+        ONLY_ARRAYS,
+        FULL
+    };
+
     struct Project
     {
         Project() { RegisterDefaultElements(); }
@@ -158,10 +165,11 @@ namespace lapCore
 
         // TODO: make these functions
         std::string PackAsString() const;
-        void PackAsFiles(const std::string &folderPath) const;
+        void PackAsFiles(const std::string &folderPath, ProjectPackingLevel level) const;
 
         void RegisterDefaultElements();
     };
     
     Project UnpackProject(std::string projectJsonString);
+    json UnpackMultidirectoryProject(std::filesystem::path projectFilePath);
 }

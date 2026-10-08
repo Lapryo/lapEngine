@@ -200,111 +200,296 @@ std::vector<ProjectObjectData> GetObjectInstances(const nlohmann::json_abi_v3_12
     return objectInstances;
 }
 
-std::vector<std::pair<std::string, ProjectObjectData>> GetPrefabInstances(const nlohmann::json_abi_v3_12_0::json &sceneJson, std::vector<ProjectObjectData> prefabs)
+/*
+
+This code essentially handles this case, allows for modifications of children of prefabs without having to manually add them in
+
 {
-    std::vector<std::pair<std::string, ProjectObjectData>> prefabInstances;
-
-    if (jsonContainsObject(sceneJson, "instances"))
-    {
-        if (jsonContainsArray(sceneJson["instances"], "prefabs"))
-        {
-            for (const auto &prefabJson : sceneJson["instances"]["prefabs"])
-            {
-                // This will be a bit tricky, index 1 will be the prefab name, index 2 will be any modifications made to that prefab, index 3 will be the count of those instances
-                for (int i = 0; i < prefabJson.at(2).get<unsigned int>(); i++)
-                {
-                    std::string prefabName = prefabJson.at(0).get<std::string>();
-                    dbgln("Loading prefab instance: " + prefabName, LogType::INFO);
-
-                    for (const auto &prefab : prefabs)
-                    {
-                        if (prefab.name == prefabName)
-                        {
-                            ProjectObjectData instanceData = prefab;
-
-                            auto modifications = prefabJson.at(1);
-                            instanceData.name = modifications.value("name", prefab.name + "_" + std::to_string(i));
-                            instanceData.parent = modifications.value("parent", prefab.parent);
-                            instanceData.child_index = modifications.value("child-index", prefab.child_index);
-
-                            if (modifications.contains("elements"))
-                            {
-                                for (const auto &modificationJson : modifications.at("elements"))
-                                {
-                                    std::string elementType = modificationJson.value("type", "");
-                                    dbgln("Applying modification to prefab instance: " + elementType, LogType::INFO);
-
-                                    bool elementFoundInPrefab = false;
-
-                                    for (auto &element : instanceData.elements)
-                                    {
-                                        auto it = Reflection::reverseLookup.find(elementType);
-                                        if (element.get()->GetTypeID() == it->second)
-                                        {
-                                            elementFoundInPrefab = true;
-
-                                            auto entry = Reflection::TryGet(elementType);
-                                            if (!entry)
-                                            {
-                                                dbgln("Unknown element type in prefab modification: " + elementType, LogType::WARNING);
-                                                break;
-                                            }
-
-                                            // make a new modifications json that is a combination of the two (prefab and instance)
-                                            json merged = element->sourceJson;
-
-                                            JSON::Merge(merged.at("data"), modificationJson.at("data"));
-                                            auto newElement = entry->create_project_data(merged.at("data"), elementType);
-
-                                            // replace element in instanceData with this new modified element
-                                            element = std::move(newElement);
-                                            break;
-                                        }
-                                    }
-
-                                    if (!elementFoundInPrefab)
-                                    {
-                                        // add the modification
-                                        auto entry = Reflection::TryGet(elementType);
-                                        if (!entry)
-                                        {
-                                            dbgln("Unknown element type in prefab modification: " + elementType, LogType::WARNING);
-                                            continue;
-                                        }
-
-                                        auto element = entry->create_project_data(modificationJson.at("data"), elementType);
-                                        instanceData.elements.push_back(std::move(element));
-                                        continue;
-                                    }
-                                }
-                            }
-
-                            prefabInstances.push_back({prefabName, instanceData});
-                            break;
+    "name": "prefab1",
+    "count": 3
+    "modifications": {
+        "name": "new_prefab_instance"
+        "children": {
+            "child1": {
+                "children": {
+                    "child1_1": {
+                        "children": {
+                            "...": { ... }
                         }
                     }
                 }
             }
         }
-        else
-            if (!sceneJson["instances"].contains("prefabs"))
-                dbgln("Instances did not contain a prefabs property", LogType::WARNING);
-            else if (!sceneJson["instances"]["prefabs"].is_array())
-                dbgln("Instances prefabs property was not an array", LogType::WARNING);
-            else if (sceneJson["instances"]["prefabs"].empty())
-                dbgln("Instances had no prefabs in the prefabs property array", LogType::WARNING);
-            else
-                dbgln("Something went wrong with loading instanced prefabs", LogType::WARNING);
     }
+}
+
+*/
+
+bool CreateModifiedElement(const json& elementModificationJson, ProjectObjectData &instanceData)
+{
+    auto elementType = elementModificationJson.value("type", "");
+
+    bool elementWithinPrefab = false;
+    for (auto &element : instanceData.elements)
+    {
+        auto it = Reflection::reverseLookup.find(elementType);
+        if (element->GetTypeID() == it->second)
+        {
+            elementWithinPrefab = true;
+
+            auto entry = Reflection::TryGet(elementType);
+            if (!entry) break;
+
+            json merged = element->sourceJson;
+
+            JSON::Merge(merged.at("data"), elementModificationJson.at("data"));
+            auto newElement = entry->create_project_data(merged.at("data"), elementType);
+            element = std::move(newElement);
+            break;
+        }
+    }
+
+    if (!elementWithinPrefab)
+    {
+        auto entry = Reflection::TryGet(elementType);
+        if (!entry)
+        {
+            dbgln("Unknown element type in prefab modification: " + elementType, LogType::WARNING);
+            return false;
+        }
+
+        auto element = entry->create_project_data(elementModificationJson.at("data"), elementType);
+        instanceData.elements.push_back(std::move(element));
+    }
+
+    return true;
+}
+
+std::vector<std::pair<std::string, ProjectObjectData>> GetModifiedPrefabInstance(const json &modificationsJson, ProjectObjectData instanceData, const std::vector<ProjectObjectData> &projectPrefabs)
+{
+    std::vector<std::pair<std::string, ProjectObjectData>> prefabFamily;
+
+    // Base modifications
+    auto prefabIdentifier = instanceData.name;
+
+    instanceData.name = modificationsJson.value("name", instanceData.name);
+    instanceData.parent = modificationsJson.value("parent", instanceData.parent);
+    instanceData.child_index = modificationsJson.value("child-index", instanceData.child_index);
+
+    // Element modifications
+    if (jsonContainsArray(modificationsJson, "elements"))
+    {
+        for (const auto& elementModificationJson : modificationsJson["elements"])
+        {
+            if (!CreateModifiedElement(elementModificationJson, instanceData))
+                continue;
+        }
+    }
+
+    // Children modifications
+    if (jsonContainsObject(modificationsJson, "children"))
+    {
+        auto childrenModificationObj = modificationsJson["children"];
+
+        // Get the children of the current prefab
+        std::vector<ProjectObjectData> prefabChildren;
+
+        for (auto prefab : projectPrefabs)
+        {
+            if (prefab.parent == prefabIdentifier)
+                prefabChildren.push_back(prefab);
+        }
+
+        for (auto child : prefabChildren)
+        {
+            ProjectObjectData childData = child;
+
+            if (childrenModificationObj.contains(child.name))
+            {
+                if (childrenModificationObj[child.name].is_object())
+                {
+                    auto newFamily = GetModifiedPrefabInstance(childrenModificationObj[child.name], childData, projectPrefabs);
+                    for (auto newInstance : newFamily)
+                        prefabFamily.push_back(newInstance);
+                }
+                else if (childrenModificationObj[child.name].is_string()
+                    && childrenModificationObj[child.name].get<std::string>() != "exclude")
+                {
+                    // Unmodified child
+                    childData.parent = instanceData.name;
+
+                    prefabFamily.push_back({
+                        child.name,
+                        std::move(childData)
+                    });
+                }
+            }
+            else
+            {
+                // Unmodified child
+
+                dbgln("Loading child of prefab: " + instanceData.name + ", child is: " + child.name, LogType::INFO);
+
+                childData.parent = instanceData.name;
+
+                prefabFamily.push_back({
+                    child.name,
+                    std::move(childData)
+                });
+            }
+        }
+    }
+
+    prefabFamily.push_back({prefabIdentifier, instanceData});
+    return prefabFamily;
+}
+
+std::vector<std::pair<std::string, ProjectObjectData>> GetPrefabInstance(const json &prefabInstanceJson, const std::vector<ProjectObjectData> &projectPrefabs)
+{
+    std::vector<std::pair<std::string, ProjectObjectData>> prefabInstanceCount;
+
+    // Get the actual name of the prefab
+    auto prefabName = prefabInstanceJson.value("prefab", "");
+    if (prefabName.empty()) return {};
+
+    auto prefabCount = prefabInstanceJson.value("count", 1);
+
+    // Copy the prefab data from the corresponding project prefab based off the name
+    ProjectObjectData instanceData;
+    for (auto prefabData : projectPrefabs)
+        if (prefabData.name == prefabName) 
+        {
+            instanceData = prefabData;
+            break;
+        }
+
+    // If there are no modifications to be made, or the modifications value is not an object, just return the instance data (duplicated based off the count)
+    std::vector<std::pair<std::string, ProjectObjectData>> prefabFamily;
+    
+    if (prefabInstanceJson.contains("modifications") && prefabInstanceJson["modifications"].is_object())
+        prefabFamily = GetModifiedPrefabInstance(prefabInstanceJson.at("modifications"), instanceData, projectPrefabs);
     else
-        if (!sceneJson.contains("instances"))
-            dbgln("Scene did not contain an instances property", LogType::WARNING);
-        else if (!sceneJson["instances"].is_object())
-            dbgln("Scene instances property was not an object", LogType::WARNING);
-        else if (sceneJson["instances"].empty())
-            dbgln("Scene had no instances in the instances property object", LogType::WARNING);
-        else
-            dbgln("Something went wrong with loading instances", LogType::WARNING);
+        prefabFamily.push_back({prefabName, instanceData});
+    
+    for (int i = 0; i < prefabCount; i++)
+        for (auto prefabInstanceData : prefabFamily)
+            prefabInstanceCount.push_back(prefabInstanceData);
+
+    return prefabInstanceCount;
+}
+
+std::vector<std::pair<std::string, ProjectObjectData>> GetPrefabInstances(const nlohmann::json &prefabInstancesJson, const std::vector<ProjectObjectData> &projectPrefabs)
+{
+    std::vector<std::pair<std::string, ProjectObjectData>> prefabInstances;
+
+    for (const auto &prefabJson : prefabInstancesJson)
+    {
+        auto prefabFamily = GetPrefabInstance(prefabJson, projectPrefabs);
+
+        for (const auto& prefab : prefabFamily)
+        {
+            prefabInstances.push_back(prefab);
+        }
+
+        /* This will be a bit tricky, index 1 will be the prefab name, index 2 will be any modifications made to that prefab, index 3 will be the count of those instances
+        for (int i = 0; i < prefabJson.at(2).get<unsigned int>(); i++)
+        {
+            std::string prefabName = prefabJson.at(0).get<std::string>();
+            dbgln("Loading prefab instance: " + prefabName, LogType::INFO);
+
+            for (const auto &prefab : prefabs)
+            {
+                if (prefab.name == prefabName)
+                {
+                    ProjectObjectData instanceData = prefab;
+
+                    auto modifications = prefabJson.at(1);
+                    instanceData.name = modifications.value("name", prefab.name + "_" + std::to_string(i));
+                    instanceData.parent = modifications.value("parent", prefab.parent);
+                    instanceData.child_index = modifications.value("child-index", prefab.child_index);
+
+                    // This must be recursive, meaning that it can be looped forever and ever, because a modified child can also have a "children" object
+                    if (modifications.contains("children") && modifications["children"].is_object())
+                    {
+                        // Here we must find any other prefabs that are parented to this prefab type, aka the children
+                        std::vector<ProjectObjectData> prefabChildren;
+                        auto childrenModificationJson = modifications["children"];
+
+                        for (const auto& prefabData : prefabs)
+                        {
+                            if (prefabData.parent == prefabName)
+                                prefabChildren.push_back(prefabData);
+                        }
+
+                        for (const auto& child : prefabChildren)
+                        {
+                            if (childrenModificationJson.contains(child.name)) // This child is being modified within the prefab instance
+                            {
+                                if (childrenModificationJson[child.name] == "exclude") continue;
+
+
+                            }
+                        }
+                    }
+
+                    if (modifications.contains("elements"))
+                    {
+                        for (const auto &modificationJson : modifications.at("elements"))
+                        {
+                            std::string elementType = modificationJson.value("type", "");
+                            dbgln("Applying modification to prefab instance: " + elementType, LogType::INFO);
+
+                            bool elementFoundInPrefab = false;
+
+                            for (auto &element : instanceData.elements)
+                            {
+                                auto it = Reflection::reverseLookup.find(elementType);
+                                if (element.get()->GetTypeID() == it->second)
+                                {
+                                    elementFoundInPrefab = true;
+
+                                    auto entry = Reflection::TryGet(elementType);
+                                    if (!entry)
+                                    {
+                                        dbgln("Unknown element type in prefab modification: " + elementType, LogType::WARNING);
+                                        break;
+                                    }
+
+                                    // make a new modifications json that is a combination of the two (prefab and instance)
+                                    json merged = element->sourceJson;
+
+                                    JSON::Merge(merged.at("data"), modificationJson.at("data"));
+                                    auto newElement = entry->create_project_data(merged.at("data"), elementType);
+
+                                    // replace element in instanceData with this new modified element
+                                    element = std::move(newElement);
+                                    break;
+                                }
+                            }
+
+                            if (!elementFoundInPrefab)
+                            {
+                                // add the modification
+                                auto entry = Reflection::TryGet(elementType);
+                                if (!entry)
+                                {
+                                    dbgln("Unknown element type in prefab modification: " + elementType, LogType::WARNING);
+                                    continue;
+                                }
+
+                                auto element = entry->create_project_data(modificationJson.at("data"), elementType);
+                                instanceData.elements.push_back(std::move(element));
+                                continue;
+                            }
+                        }
+                    }
+
+                    prefabInstances.push_back({prefabName, instanceData});
+                    break;
+                }
+            }
+        }*/
+    }
 
     return prefabInstances;
 }
@@ -314,7 +499,8 @@ SceneInstancesData GetInstances(const json &sceneJson, std::vector<ProjectObject
     SceneInstancesData instances;
 
     instances.objects = GetObjectInstances(sceneJson);
-    instances.prefabs = GetPrefabInstances(sceneJson, prefabs);
+    if (jsonContainsObject(sceneJson, "instances") && jsonContainsArray(sceneJson["instances"], "prefabs"))
+        instances.prefabs = GetPrefabInstances(sceneJson["instances"]["prefabs"], prefabs);
 
     return instances;
 }
@@ -633,6 +819,42 @@ Project lapCore::UnpackProject(const std::string projectJsonString)
     return project;
 }
 
+
+
+json UnpackFile(std::filesystem::path jsonFilePath)
+{
+    auto jsonStr = ReadFileToString(jsonFilePath.string());
+    return json::parse(jsonStr);
+}
+
+json lapCore::UnpackMultidirectoryProject(std::filesystem::path projectFilePath)
+{
+    auto projectJson = UnpackFile(projectFilePath);
+
+    // Loop through the project JSON and unpack directories
+    if (jsonContainsArray(projectJson, "assets"))
+    {
+        projectFilePath = projectFilePath.parent_path().append("assets");
+        for (auto &asset : projectJson["assets"])
+        {
+            if (asset.is_string())
+            {
+                // Go back by one to the project.json's parent directory
+                projectFilePath.append(asset.get<std::string>()).append(".json");
+                json assetJson = UnpackFile(projectFilePath);
+
+                // Then we replace this string with the unpacked JSON
+                asset = assetJson;
+            }
+            else
+            {
+                // Handle the case where the asset is not a string
+            }
+        }
+    }
+
+}
+
 void lapCore::ProjectSceneData::Clear() {
     name.clear();
     systems.clear();
@@ -645,8 +867,10 @@ void lapCore::Project::RegisterDefaultElements()
     // ELEMENTS
     Reflection::Register<Transform2D>("transform-2d");
     Reflection::Register<Physics2D>("physics-2d");
+    Reflection::Register<SoundPoint>("sound-point");
     Reflection::Register<UIFrame>("ui-frame");
     Reflection::Register<UIList>("ui-list");
+    Reflection::Register<UIGradient>("ui-gradient");
     //Reflection::Register<UIGrid>("ui-grid");
     Reflection::Register<Sprite>("sprite");
     Reflection::Register<UIImage>("ui-image");

@@ -35,11 +35,79 @@ namespace lapCore
         bool fromPrefab = false;
     };
 
-    struct HierarchyEntry {
-        entt::id_type id;
-        entt::id_type parentID;
-        std::map<unsigned int, entt::id_type> childrenIDs;
+    /*struct ObjectInfo
+    {
+        Object object;
+        Object parent;
     };
+
+    struct NewContainer
+    {
+        std::unordered_map<entt::id_type, tree<std::forward_list<ObjectInfo>>::iterator> objectLookup;
+        tree<std::forward_list<ObjectInfo>> objectTree;
+
+        
+            Implement a queue system that works in layers, layer 1 is the children of the root node (the window),
+            layer 2 is the children of the layer 1 nodes, and so on.
+
+            In the ResolvePendingObjects function, we will determine what objects are in what layers based of their distance
+            from the head node.
+        
+
+        Object AddObject(const std::string& name, Object parent = entt::null)
+        {
+            Object object = objects.create();
+
+            entt::id_type id = HASH_ID(name.c_str());
+            if (parent == entt::null)
+            {
+                std::forward_list<ObjectInfo> objectList;
+                objectList.push_front({ object, entt::null });
+                objectLookup[id] = objectTree.insert_after(objectTree.head->last_child, std::move(objectList));
+
+                return object;
+            }
+
+            if (objectLookup.contains(id))
+            {
+                // That means the iterator exists and we can just add the object to the linked list
+                auto node = objectLookup[id].node;
+
+                bool matchingParent = false;
+                for (const auto& obj : node->parent->data)
+                {
+                    if (obj.object == parent)
+                    {
+                        matchingParent = true;
+                        break;
+                    }
+                }
+
+                if (matchingParent)
+                {
+                    return object;
+                }
+
+                // The object parent may soon exist, so we need to add it to a queue to get resolved later
+
+                node->data.push_front({ object, parent });
+            }
+            else
+            {
+                // The object doesn't exist, so we create it
+                // The problem is, the parent may soon exist, so we need to add it to a queue to be resolved later
+
+            }
+
+            return object;
+        }
+
+        void ResolvePendingObjects();
+
+    private:
+        entt::registry objects;
+        std::vector<ObjectInfo> objectQueue;
+    };*/
 
     struct ObjectContainer
     {
@@ -50,7 +118,6 @@ namespace lapCore
         std::unordered_map<entt::id_type, ObjectEntry> objectMap;
 
         std::unordered_map<entt::id_type, std::string> lookup;
-        std::vector<HierarchyEntry> hierarchy;
 
         ObjectInfo AddObject(entt::hashed_string name, entt::hashed_string parent, int childIndex, bool fromPrefab = false);
         void RemoveObject(entt::id_type id);

@@ -352,6 +352,40 @@ namespace lapCore
     };
 
     template <>
+    struct JSON::Serializer<SoundPoint>
+    {
+        static json to_json(const SoundPoint& s, SerializeContext* ctx = nullptr)
+        {
+            return json{
+                {"is-music"       , s.isMusic},
+                {"active"         , s.active},
+                {"cutoff-distance", s.cutoffDistance},
+                {"uses-own"       , s.usesOwn},
+                {"auto-play"      , s.autoPlay},
+                {"audio-id"       , s.audioID},
+                {"positional"     , s.positional},
+                {"target"         , JSON::Serializer<Vector2>::to_json(s.target, ctx)}
+            };
+        }
+
+        static void from_json(SoundPoint& s, const json& j)
+        {
+            s.isMusic = j.value("is-music", s.isMusic);
+            if (j.contains("audio-id"))
+                s.audioID = entt::hashed_string{j.at("audio-id").get<std::string>().c_str()}.value();
+            
+            s.cutoffDistance = j.value("cutoff-distance", s.cutoffDistance);
+            s.active = j.value("active", s.active);
+            s.usesOwn = j.value("uses-own", s.usesOwn);
+            s.autoPlay = j.value("auto-play", s.autoPlay);
+
+            s.positional = j.value("positional", s.positional);
+            if (j.contains("target"))
+                JSON::Serializer<Vector2>::from_json(s.target, j.at("target"));
+        }
+    };
+
+    template <>
     struct JSON::Serializer<UIFrame>
     {
         static json to_json(const UIFrame& f, SerializeContext* ctx = nullptr)
@@ -371,15 +405,56 @@ namespace lapCore
     };
 
     template <>
+    struct JSON::Serializer<UIListSpreading>
+    {
+        static json to_json(const UIListSpreading& s, SerializeContext* ctx = nullptr)
+        {
+            switch (s)
+            {
+                case UIListSpreading::BUNCH_START:
+                    return "bunch-start";
+                case UIListSpreading::BUNCH_MIDDLE:
+                    return "bunch-middle";
+                case UIListSpreading::BUNCH_END:
+                    return "bunch-end";
+                case UIListSpreading::EVENLY:
+                    return "evenly";
+                case UIListSpreading::DISTANCING:
+                    return "distancing";
+                default:
+                    return "bunch-start";
+            }
+        }
+
+        static void from_json(UIListSpreading& s, const json& j)
+        {
+            const auto& value = j.get<std::string>();
+            if (value == "bunch-start")
+                s = UIListSpreading::BUNCH_START;
+            else if (value == "bunch-middle")
+                s = UIListSpreading::BUNCH_MIDDLE;
+            else if (value == "bunch-end")
+                s = UIListSpreading::BUNCH_END;
+            else if (value == "evenly")
+                s = UIListSpreading::EVENLY;
+            else if (value == "distancing")
+                s = UIListSpreading::DISTANCING;
+            else
+                s = UIListSpreading::BUNCH_START;
+        }
+    };
+
+    template <>
     struct JSON::Serializer<UIList>
     {
         static json to_json(const UIList& l, SerializeContext* ctx = nullptr)
         {
             return json{
-                { "scroll-size"   , JSON::Serializer<FrameVector>::to_json(l.scrollSize, ctx)  },
-                { "display-size"  , JSON::Serializer<FrameVector>::to_json(l.displaySize, ctx) },
-                { "settings"      , JSON::Serializer<ScrollSettings>::to_json(l.settings, ctx) },
-                { "scroll-offset" , l.scrollOffset                                             }
+                { "scroll-size"   , JSON::Serializer<FrameVector>::to_json(l.scrollSize, ctx)    },
+                { "display-size"  , JSON::Serializer<FrameVector>::to_json(l.displaySize, ctx)   },
+                { "settings"      , JSON::Serializer<ScrollSettings>::to_json(l.settings, ctx)   },
+                { "spreading"     , JSON::Serializer<UIListSpreading>::to_json(l.spreading, ctx) },
+                { "scroll-offset" , l.scrollOffset                                               }
             };
         }
         static void from_json(UIList& l, const json& j)
@@ -388,10 +463,46 @@ namespace lapCore
                 JSON::Serializer<FrameVector>::from_json(l.scrollSize, j.at("scroll-size"));
             if (j.contains("display-size"))
                 JSON::Serializer<FrameVector>::from_json(l.displaySize, j.at("display-size"));
-
             if (j.contains("settings"))
                 JSON::Serializer<ScrollSettings>::from_json(l.settings, j.at("settings"));
+            if (j.contains("spreading"))
+                JSON::Serializer<UIListSpreading>::from_json(l.spreading, j.at("spreading"));
+
             l.scrollOffset = j.value("scroll-offset", l.scrollOffset);
+        }
+    };
+
+    template <>
+    struct JSON::Serializer<UIGradient>
+    {
+        static json to_json(const UIGradient& g, SerializeContext* ctx = nullptr)
+        {
+            std::vector<std::vector<unsigned char>> colorPts;
+            for (const auto& color : g.colorPoints)
+                colorPts.push_back({color.r, color.g, color.b, color.a});
+
+            return json{
+                { "colors-points"    , colorPts },
+                { "angle"       , g.angle }
+            };
+        }
+        static void from_json(UIGradient& g, const json& j)
+        {
+            g.colorPoints.clear();
+
+            if (j.contains("colors-points"))
+            {
+                for (const auto& colorPt : j.at("colors-points"))
+                {
+                    g.colorPoints.push_back({
+                        colorPt[0],
+                        colorPt[1],
+                        colorPt[2],
+                        colorPt[3]
+                    });
+                }
+            }
+            g.angle = j.value("angle", g.angle);
         }
     };
 

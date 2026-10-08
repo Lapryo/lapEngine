@@ -227,10 +227,8 @@ void RenderSystem::Update(
             return;
         }
 
-        const Texture2D *texture =
-            scene->world->resources.textures.TryGet(
-                sprite->textureID
-            );
+        auto textureAsset = scene->world->resources.textures.GetAsset(sprite->textureID);
+        if (!textureAsset) return;
 
         Rectangle rect =
             sprite->destRect;
@@ -278,7 +276,7 @@ void RenderSystem::Update(
         // Draw
         // ----------------------------------------------------
 
-        if (texture)
+        if (textureAsset)
         {
             Rectangle source =
                 sprite->sourceRect;
@@ -309,7 +307,7 @@ void RenderSystem::Update(
             }
 
             DrawTexturePro(
-                *texture,
+                *textureAsset,
                 source,
                 rect,
                 {
@@ -340,9 +338,12 @@ void RenderSystem::Update(
         }
 
         const Texture2D *texture =
-            scene->world->resources.textures.TryGet(
+            &scene->world->resources.textures.TryGet(
                 image->sprite.textureID
-            );
+            )->asset;
+
+        if (image->sprite.textureID == HASH_ID("apostrophe-s-ti"))
+            std::cout << "apostrophe is being rendered.\n";
 
         // ----------------------------------------------------
         // Use the FINAL resolved absolute rectangle.
@@ -461,12 +462,101 @@ void RenderSystem::Update(
         // Draw
         // ----------------------------------------------------
 
-        DrawRectanglePro(
-            rect,
-            {0.0f, 0.0f},
-            rotation,
-            frame->renderable.tint
-        );
+        auto ui_gradient = registry.try_get<UIGradient>(obj);
+        if (!ui_gradient)
+        {
+            DrawRectanglePro(
+                rect,
+                {0.0f, 0.0f},
+                rotation,
+                frame->renderable.tint
+            );
+        }
+        else
+        {
+            int colorCount = std::min(
+                static_cast<int>(ui_gradient->colorPoints.size()),
+                16
+            );
+
+            if (colorCount == 0)
+                return;
+
+            float colorData[16 * 4]{};
+
+            for (int i = 0; i < colorCount; i++)
+            {
+                colorData[i * 4 + 0] =
+                    ui_gradient->colorPoints[i].r / 255.0f;
+
+                colorData[i * 4 + 1] =
+                    ui_gradient->colorPoints[i].g / 255.0f;
+
+                colorData[i * 4 + 2] =
+                    ui_gradient->colorPoints[i].b / 255.0f;
+
+                colorData[i * 4 + 3] =
+                    ui_gradient->colorPoints[i].a / 255.0f;
+            }
+
+            float angle =
+                ui_gradient->angle * DEG2RAD;
+
+            SetShaderValueV(
+                UIGradient_fragShader,
+                gradientColorLocation,
+                colorData,
+                SHADER_UNIFORM_VEC4,
+                colorCount
+            );
+
+            SetShaderValue(
+                UIGradient_fragShader,
+                gradientColorCountLocation,
+                &colorCount,
+                SHADER_UNIFORM_INT
+            );
+
+            SetShaderValue(
+                UIGradient_fragShader,
+                gradientAngleLocation,
+                &angle,
+                SHADER_UNIFORM_FLOAT
+            );
+
+            Vector2 rectPosition = {
+                rect.x,
+                rect.y
+            };
+
+            Vector2 rectSize = {
+                rect.width,
+                rect.height
+            };
+
+            SetShaderValue(
+                UIGradient_fragShader,
+                gradientRectPositionLocation,
+                &rectPosition,
+                SHADER_UNIFORM_VEC2
+            );
+
+            SetShaderValue(
+                UIGradient_fragShader,
+                gradientRectSizeLocation,
+                &rectSize,
+                SHADER_UNIFORM_VEC2
+            );
+
+            BeginShaderMode(UIGradient_fragShader);
+
+            DrawRectangleRec(
+                rect,
+                WHITE
+            );
+
+            EndShaderMode();
+        }
     };
 
 
@@ -507,7 +597,9 @@ void RenderSystem::Update(
             GetFontDefault();
 
         if (find_font)
-            font = *find_font;
+        {
+            font = find_font->asset;
+        }
 
 
         // ----------------------------------------------------

@@ -453,14 +453,14 @@ void lapCore::Scene::LoadMapObjects(Map &map)
             if (tileData.id != 0)
             {
                 Sprite tileSprite;
-                tileSprite.textureID = tileset->textureID;
+                tileSprite.textureID = tileset->asset.textureID;
                 tileSprite.animated.active = false;
 
                 unsigned int localID =
                     tileData.id - map.tilesets[tileData.tileset].firstGID;
 
-                int column = localID % tileset->columns;
-                int row    = localID / tileset->columns;
+                int column = localID % tileset->asset.columns;
+                int row    = localID / tileset->asset.columns;
 
                 tileSprite.sourceRect = {
                     (float)(column * map.tileSize.x),
@@ -578,6 +578,11 @@ void lapCore::Scene::LoadMapObjects(Map &map)
 
                     auto pSys = GetSystem<PhysicsSystem>();
                     pSys->bodyMap[tile.object] = pSys->Create2DBody(tilephysics.bodyDef, tilephysics.shapeDef, tilephysics.polygon);
+
+                    b2Body_SetUserData(
+                        pSys->bodyMap[tile.object],
+                        const_cast<Map::TileProperties*>(&tileData.properties)
+                    );
                 }
             }
 
@@ -675,7 +680,7 @@ void lapCore::Scene::Update(float deltaTime, RenderTexture2D &target)
 {
     /// Draw to render texture first
     BeginTextureMode(target);
-    ClearBackground(WHITE);
+    ClearBackground(backgroundColor);
 
     for (auto &[order, system] : systems)
     {

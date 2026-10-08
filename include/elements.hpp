@@ -46,6 +46,8 @@ namespace lapCore
                     FrameVector displaySize{};
                     ScrollSettings settings{};
 
+                    UIListSpreading spreading{UIListSpreading::BUNCH_START};
+
                     float scrollOffset{0.f};
                 };
 
@@ -86,6 +88,12 @@ namespace lapCore
                     Vector2 scrollOffset{0.f, 0.f};
                 };
                 */
+
+                struct UIGradient
+                {
+                    std::vector<Color> colorPoints{};
+                    float angle{0.f};
+                };
 
                 struct UIImage
                 {
@@ -141,6 +149,24 @@ namespace lapCore
                 b2BodyDef bodyDef = b2DefaultBodyDef();
                 b2ShapeDef shapeDef = b2DefaultShapeDef();
                 b2Polygon polygon{};
+            };
+
+            struct SoundPoint
+            {
+                entt::id_type audioID{0};
+                bool isMusic{false}, positional{true}, active{true}, usesOwn{true};
+                float cutoffDistance{100.f};
+                Vector2 target{0.f, 0.f}; // Target should be set to objects positions such as the player
+
+                // For runtime use only
+                Music musicPlayback{};
+                Sound soundPlayback{};
+                bool playing{false};
+                bool initialized{false};
+                bool autoPlay{true};
+
+                // Not serializeable
+                std::function<void()> onStart, onPlay, onEnd;
             };
         }
 

@@ -198,6 +198,7 @@ void Functions::dbgln(const std::string &message, Other::LogType type)
                 std::cout << Console::_GREEN << "[NOTICE] " << Console::_RESET << message << '\n';
             break;
         case Other::LogType::WARNING:
+        
             if (DEBUG_LEVEL >= DebugLevel::MEDIUM)
                 std::cout << Console::_YELLOW << "[WARNING] " << Console::_RESET << message << '\n';
             break;

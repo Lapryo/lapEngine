@@ -1,11 +1,7 @@
 #include "world.hpp"
 #include "eutil.hpp"
 
-#include "systems/render_sys.hpp"
-#include "systems/gui_sys.hpp"
-#include "systems/physics_sys.hpp"
-#include "systems/script_sys.hpp"
-#include "systems/input_sys.hpp"
+#include "systems.hpp"
 
 #include "reflection.hpp"
 
@@ -19,6 +15,10 @@ void World::SetScene(ProjectSceneData &scene_data)
 {
     if (mainScene)
     {
+        auto sound_sys = mainScene->GetSystem<SoundSystem>();
+        if (sound_sys)
+            sound_sys->StopAll();
+
         for (auto &scnData : project.scenes)
         {
             if (scnData.name != mainScene->name)
@@ -71,6 +71,8 @@ void World::SetScene(ProjectSceneData &scene_data)
             mainScene->AddSystem<GUISystem>(system.order);
         else if (system.type == "input")
             mainScene->AddSystem<InputSystem>(system.order);
+        else if (system.type == "sound")
+            mainScene->AddSystem<SoundSystem>(system.order);
         else
             dbgln("Unknown system type: " + system.type, LogType::WARNING);
     }
@@ -183,10 +185,10 @@ void lapCore::World::LoadAssets()
                 }
             }
 
-            resources.textures.Load(name, texture);
+            resources.textures.Load(name, {texture, assetPath});
         }
         else if (asset.type == "shader")
-            resources.shaders.Load(HASH(asset.name.c_str()), LoadShader(std::string(assetPath + ".vs").c_str(), std::string(assetPath + ".fs").c_str()));
+            resources.shaders.Load(HASH(asset.name.c_str()), {LoadShader(std::string(assetPath + ".vs").c_str(), std::string(assetPath + ".fs").c_str()), assetPath});
         else if (asset.type == "music")
         {
             auto music = LoadMusicStream(assetPath.c_str());
@@ -203,7 +205,7 @@ void lapCore::World::LoadAssets()
                     SetMusicPitch(music, std::stof(data.second));
             }
 
-            resources.music.Load(name, music);
+            resources.music.Load(name, {music, assetPath});
         }
         else if (asset.type == "sound")
         {
@@ -219,17 +221,27 @@ void lapCore::World::LoadAssets()
                     SetSoundPitch(sound, std::stof(data.second));
             }
 
-            resources.sounds.Load(name, sound);
+            resources.sounds.Load(name, {sound, assetPath});
         }
         else if (asset.type == "model")
         {
             auto model = LoadModel(assetPath.c_str());
-            resources.models.Load(name, model);
+            resources.models.Load(name, {model, assetPath});
         }
         else if (asset.type == "font")
         {
             auto font = LoadFont(assetPath.c_str());
-            resources.fonts.Load(name, font);
+            if (!IsFontValid(font))
+            {
+                dbgln(
+                    "Failed to load font: " + assetPath,
+                    LogType::ERROR
+                );
+
+                continue;
+            }
+
+            resources.fonts.Load(name, {font, assetPath});
         }
         else if (asset.type == "image")
         {
@@ -408,7 +420,7 @@ void lapCore::World::LoadAssets()
                 }
             }
 
-            resources.images.Load(name, image);
+            resources.images.Load(name, {image, assetPath});
         }
         else if (asset.type == "map")
         {
@@ -430,14 +442,14 @@ void lapCore::World::LoadAssets()
                 }
             }
 
-            resources.maps.Load(name, map);
+            resources.maps.Load(name, {map, assetPath});
         }
         else if (asset.type == "tileset")
         {
             Tileset tileset;
 
             tileset.LoadFromTSJ(assetPath);
-            resources.tilesets.Load(name, tileset);
+            resources.tilesets.Load(name, {tileset, assetPath});
         }
         else
             dbgln("Unknown asset type: " + asset.type + " for asset: " + asset.name, LogType::WARNING);

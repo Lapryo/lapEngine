@@ -23,8 +23,8 @@ void GetTileset(Map& map, const json& tilesetJson, const std::string &filePath, 
         auto tilesetPtr = resources->tilesets.TryGet(tileset.id);
         if (tilesetPtr)
         {
-            tileset.count = tilesetPtr->count;
-            tileset.types = tilesetPtr->types;
+            tileset.count = tilesetPtr->asset.count;
+            tileset.types = tilesetPtr->asset.types;
         }
     }
 
