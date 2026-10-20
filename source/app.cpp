@@ -57,7 +57,7 @@ void App::Run()
         {
             world.SetScene(world.nextSceneData);
             world.switchingScene = false;
-            world.nextSceneData.Clear();
+            world.nextSceneData = ProjectSceneData();
         }
     }
 }

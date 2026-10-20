@@ -386,13 +386,13 @@ void lapCore::ObjectContainer::AddObjectsFromProjectData(std::vector<ProjectObje
 {
     for (const auto& object_data : objects)
     {
-        auto prefabObject = AddObject(HASH(object_data.name.c_str()), HASH(object_data.parent.c_str()), object_data.child_index, true);
+        auto prefabObject = AddObject(HASH(object_data.name.c_str()), HASH(object_data.parent.c_str()), object_data.index, true);
         for (const auto& element : object_data.elements)
         {
             if (!element.get())
                 continue;
 
-            AddElement(prefabObject.object, element->GetTypeID(), element->GetDataPtr());
+            AddElement(prefabObject.object, element->GetTypeID(), element->GetRawData());
         }
     }
 }
@@ -422,7 +422,7 @@ void lapCore::ObjectContainer::AddObjectsFromPrefabProjectData(
             if (!element.get())
                 continue;
 
-            AddElement(objInfo.object, element->GetTypeID(), element->GetDataPtr());
+            AddElement(objInfo.object, element->GetTypeID(), element->GetRawData());
         }
     }
 }

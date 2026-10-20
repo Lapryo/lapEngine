@@ -24,10 +24,21 @@ void World::SetScene(ProjectSceneData &scene_data)
             if (scnData.name != mainScene->name)
                 continue;
 
-            for (auto &instData : scnData.instances.objects)
+            for (auto &instData : scnData.objects)
             {
                 for (auto &elmntData : instData.elements)
                 {
+                    /*
+
+                    This will soon be used for project synchronization, so you can save an
+                    exact replica of the current state of the app.
+
+                    However, this may not be implemented, as I could just make a function called
+                    Snapshot() or something for instance. That way, it gives the developer full control
+                    over what to save/synchronize.
+                    
+                    continue;
+
                     if (elmntData->synced != SyncProjectRuntimeMode::UPDATE_ON_SCENE)
                         continue;
 
@@ -41,7 +52,7 @@ void World::SetScene(ProjectSceneData &scene_data)
 
                     auto ctx = SerializeContext{&resources};
                     auto existingElementJson = serializer->to_json(existingElement, &ctx);
-                    serializer->from_json(elmntData->GetDataPtr(), existingElementJson);
+                    serializer->from_json(elmntData->GetDataPtr(), existingElementJson);*/
                 }
             }
         }
@@ -51,8 +62,8 @@ void World::SetScene(ProjectSceneData &scene_data)
     if (mainScene) mainScene->Clear();
     mainScene = new Scene(this, scene_data.name);
 
-    mainScene->AddObjectsFromProjectData(scene_data.instances.objects);
-    mainScene->AddObjectsFromPrefabProjectData(*prefabs, scene_data.instances.prefabs);
+    mainScene->AddObjectsFromProjectData(scene_data.objects);
+    mainScene->AddObjectsFromPrefabProjectData(*prefabs, scene_data.prefabs);
 
     mainScene->backgroundColor = scene_data.backgroundColor;
 
@@ -144,7 +155,7 @@ void lapCore::World::LoadAssets()
 {
     for (const auto& asset : project.assets)
     {
-        std::string assetPath = std::string(GetApplicationDirectory()) + asset.path;
+        std::string assetPath = std::string(GetApplicationDirectory()) + asset.path.string();
         auto name = HASH(asset.name.c_str());
 
         if (asset.type == "texture")

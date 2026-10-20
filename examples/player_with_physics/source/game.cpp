@@ -49,50 +49,30 @@ The Input System has a useful function that registers our actions for us, it ess
 Just looking at the function be used in this case is pretty self explanatory, if you'd like more information... DOCUMENATION!!!
 */
 
-constexpr auto plrUpEvent = HASH("player-move-up");
-constexpr auto plrDownEvent = HASH("player-move-down");
-constexpr auto plrLeftEvent = HASH("player-move-left");
-constexpr auto plrRightEvent = HASH("player-move-right");
-constexpr auto plrCreate = HASH("player_create");
-constexpr auto plrUpdate = HASH("player_update");
-constexpr auto plrName = HASH("player");
-constexpr auto camUpdate = HASH("camera_update");
+auto plrUpEvent = HASH("player-move-up");
+auto plrDownEvent = HASH("player-move-down");
+auto plrLeftEvent = HASH("player-move-left");
+auto plrRightEvent = HASH("player-move-right");
+auto plrCreate = HASH("player_create");
+auto plrUpdate = HASH("player_update");
+auto plrName = HASH("player");
+auto camUpdate = HASH("camera_update");
 
-void RegisterMovementActions(InputSystem* inputSys)
+ActionMap RegisterMovementActions()
 {
-    inputSys->RegisterAction(
-        "move-up",
-        plrUpEvent,
-        {KEY_W}, 
-        true, 
-        InputSystem::InputType::KEYBOARD, 
-        InputSystem::ControlType::BUTTON);
-    inputSys->RegisterAction(
-        "move-down", 
-        plrDownEvent, 
-        {KEY_S}, 
-        true, 
-        InputSystem::InputType::KEYBOARD, 
-        InputSystem::ControlType::BUTTON);
-    inputSys->RegisterAction(
-        "move-left", 
-        plrLeftEvent, 
-        {KEY_A}, 
-        true, 
-        InputSystem::InputType::KEYBOARD, 
-        InputSystem::ControlType::BUTTON);
-    inputSys->RegisterAction(
-        "move-right", 
-        plrRightEvent, 
-        {KEY_D}, 
-        true, 
-        InputSystem::InputType::KEYBOARD, 
-        InputSystem::ControlType::BUTTON);
+    ActionMap movementActions;
+
+    movementActions.RegisterAction("move-up", HASH_ID("player-move-up"), {KEY_W}, true, ActionMap::InputType::KEYBOARD, ActionMap::ControlType::BUTTON);
+    movementActions.RegisterAction("move-down", HASH_ID("player-move-down"), {KEY_S}, true, ActionMap::InputType::KEYBOARD, ActionMap::ControlType::BUTTON);
+    movementActions.RegisterAction("move-left", HASH_ID("player-move-left"), {KEY_A}, true, ActionMap::InputType::KEYBOARD, ActionMap::ControlType::BUTTON);
+    movementActions.RegisterAction("move-right", HASH_ID("player-move-right"), {KEY_D}, true, ActionMap::InputType::KEYBOARD, ActionMap::ControlType::BUTTON);
+
+    return movementActions;
 }
 
-void Move(Scene *scene, Object object, entt::id_type eventID)
+void Move(Scene *scene, entt::id_type objectID, entt::id_type eventID)
 {
-    auto playerAttributes = scene->FindElement<PlayerAttributes>(object);
+    auto playerAttributes = scene->FindElement<PlayerAttributes>(objectID);
     if (!playerAttributes) return; // Always check if it exists!
 
     if (eventID == plrUpEvent)
@@ -121,12 +101,12 @@ namespace Player
 
     Then we set our gravity to nothing because we're in a void, pretty simple.
     */
-    void Init(Scene *scene, Object object, entt::id_type eventID)
+    void Init(Scene *scene, entt::id_type objectID, entt::id_type eventID)
     {
-        ConnectECSEvent(scene, object, plrDownEvent, Move);
-        ConnectECSEvent(scene, object, plrUpEvent, Move);   
-        ConnectECSEvent(scene, object, plrLeftEvent, Move);
-        ConnectECSEvent(scene, object, plrRightEvent, Move);
+        ConnectECSEvent(objectID, plrDownEvent, Move);
+        ConnectECSEvent(objectID, plrUpEvent, Move);   
+        ConnectECSEvent(objectID, plrLeftEvent, Move);
+        ConnectECSEvent(objectID, plrRightEvent, Move);
 
         auto physicsSys = scene->GetSystem<PhysicsSystem>();
         b2World_SetGravity(physicsSys->worldID, b2Vec2{0, 0});
@@ -142,15 +122,17 @@ namespace Player
 
     We have an additional FPS counter at the top.
     */
-    void Update(Scene *scene, Object object, entt::id_type eventID, float delta)
+    void Update(Scene *scene, entt::id_type objectID, entt::id_type eventID, float delta)
     {
-        auto attributes = scene->FindElement<PlayerAttributes>(object);
+        auto attributes = scene->FindElement<PlayerAttributes>(objectID);
         Vector2 normalized_vel = Vector2Normalize(attributes->inputDirection);
         auto physicsSys = scene->GetSystem<PhysicsSystem>();
 
-        if (physicsSys && b2Body_IsValid(physicsSys->bodyMap[object]))
+        auto object = scene->FindObject(objectID);
+
+        if (physicsSys && b2Body_IsValid(physicsSys->bodyMap[*object]))
         {
-            b2Body_SetLinearVelocity(physicsSys->bodyMap[object], {normalized_vel.x * attributes->speed, normalized_vel.y * attributes->speed});
+            b2Body_SetLinearVelocity(physicsSys->bodyMap[*object], {normalized_vel.x * attributes->speed, normalized_vel.y * attributes->speed});
         }
         
         attributes->inputDirection = {0.f, 0.f};
@@ -167,9 +149,9 @@ with smoothness and all.
 
 namespace PlayerCamera
 {
-    void Update(Scene *scene, Object object, entt::id_type eventID, float delta)
+    void Update(Scene *scene, entt::id_type objectID, entt::id_type eventID, float delta)
     {
-        auto camElement = scene->FindElement<Camera2D>(object);
+        auto camElement = scene->FindElement<Camera2D>(objectID);
         if (!camElement) return;
 
         auto playerObject = *scene->FindObject(plrName);
@@ -204,16 +186,16 @@ namespace PlayerWithPhysics
         that scene is now cleared out.
         Even if you switched back to this main scene used here, you would have to call RegisterMovementActions again!
         */
-        RegisterMovementActions(world.mainScene->GetSystem<InputSystem>());
+        auto movementActions = RegisterMovementActions();
+        world.actionMaps["movement"] = movementActions;
+        world.currentActionMap = &world.actionMaps["movement"];
 
         
         // Here is where we connect our scripts to the event registry with the corresponding objects.
-        auto plrObject = *world.mainScene->FindObject(plrName);
-        ConnectECSEvent(world.mainScene, plrObject, plrCreate, Player::Init);
-        ConnectECSEvent<float>(world.mainScene, plrObject, plrUpdate, Player::Update);
-        
-        auto camObject = *world.mainScene->FindObject(HASH_ID("camera"));
-        ConnectECSEvent<float>(world.mainScene, camObject, camUpdate, PlayerCamera::Update);
+        ConnectECSEvent(plrName.value(), plrCreate, Player::Init);
+        ConnectECSEvent<float>(plrName.value(), plrUpdate, Player::Update);
+
+        ConnectECSEvent<float>(HASH_ID("camera"), camUpdate, PlayerCamera::Update);
 
         return true; // Return true if initialization was successful, false otherwise
     }
@@ -231,6 +213,11 @@ int main()
     If it is already contained within the project you are loading, you must register it beforehand.
     */
     Reflection::Register<PlayerAttributes>("player-attributes");
+
+    // Before we do anything lets check if the project was unpacked correctly
+    auto result = UnpackMultidirectoryProject("assets/project/project.json");
+    std::cout << "Project unpacking result: " << result.dump() << std::endl;
+
     Project project = UnpackProject(ReadFileToString("assets/project/project.json"));
 
     PlayerWithPhysics::Game game(project);

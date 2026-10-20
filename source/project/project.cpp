@@ -1,7 +1,9 @@
 #include "elements.hpp"
 #include "reflection.hpp"
-#include "jsonstructs.hpp"
-#include "project.hpp"
+#include "json/structs.hpp"
+#include "project/deserializer.hpp"
+
+#include "json/unpacker.hpp"
 
 #include <nlohmann/json.hpp>
 #include <iostream>
@@ -21,42 +23,7 @@ using namespace ELEMENTS::Physics;
 
 using namespace Functions;
 
-/*
-TODO:
-Allow the developer to be able to change/modify the elements/(object data) of an instanced prefab
 
-Could look like this:
-
-["inventory-slot", {
-    "name": "inventory-slot-0x0",
-    "parent": "inventory-menu-row-0"
-    "children": {
-        "inventory-slot-count": {
-            "name": "inventory-slot-count-0x0",
-            "parent": "inventory-slot-0x0",
-            "elements": [
-                {
-                    "type": "ui-text-label",
-                    "data": {
-                        "text": "test"
-                    }
-                }
-            ]
-        }
-    }
-}, 3]
-
-*/
-
-bool jsonContainsArray(const nlohmann::json &json, const std::string &key)
-{
-    return json.contains(key) && json[key].is_array() && !json[key].empty();
-}
-
-bool jsonContainsObject(const nlohmann::json &json, const std::string &key)
-{
-    return json.contains(key) && json[key].is_object() && !json[key].empty();
-}
 
 // Gathers data from an element JSON object, which should contain a type string and data array, returns a ProjectElementData struct
 std::unique_ptr<IProjectElementData> GetElement(const nlohmann::json &elementJson)
@@ -390,105 +357,6 @@ std::vector<std::pair<std::string, ProjectObjectData>> GetPrefabInstances(const 
         {
             prefabInstances.push_back(prefab);
         }
-
-        /* This will be a bit tricky, index 1 will be the prefab name, index 2 will be any modifications made to that prefab, index 3 will be the count of those instances
-        for (int i = 0; i < prefabJson.at(2).get<unsigned int>(); i++)
-        {
-            std::string prefabName = prefabJson.at(0).get<std::string>();
-            dbgln("Loading prefab instance: " + prefabName, LogType::INFO);
-
-            for (const auto &prefab : prefabs)
-            {
-                if (prefab.name == prefabName)
-                {
-                    ProjectObjectData instanceData = prefab;
-
-                    auto modifications = prefabJson.at(1);
-                    instanceData.name = modifications.value("name", prefab.name + "_" + std::to_string(i));
-                    instanceData.parent = modifications.value("parent", prefab.parent);
-                    instanceData.child_index = modifications.value("child-index", prefab.child_index);
-
-                    // This must be recursive, meaning that it can be looped forever and ever, because a modified child can also have a "children" object
-                    if (modifications.contains("children") && modifications["children"].is_object())
-                    {
-                        // Here we must find any other prefabs that are parented to this prefab type, aka the children
-                        std::vector<ProjectObjectData> prefabChildren;
-                        auto childrenModificationJson = modifications["children"];
-
-                        for (const auto& prefabData : prefabs)
-                        {
-                            if (prefabData.parent == prefabName)
-                                prefabChildren.push_back(prefabData);
-                        }
-
-                        for (const auto& child : prefabChildren)
-                        {
-                            if (childrenModificationJson.contains(child.name)) // This child is being modified within the prefab instance
-                            {
-                                if (childrenModificationJson[child.name] == "exclude") continue;
-
-
-                            }
-                        }
-                    }
-
-                    if (modifications.contains("elements"))
-                    {
-                        for (const auto &modificationJson : modifications.at("elements"))
-                        {
-                            std::string elementType = modificationJson.value("type", "");
-                            dbgln("Applying modification to prefab instance: " + elementType, LogType::INFO);
-
-                            bool elementFoundInPrefab = false;
-
-                            for (auto &element : instanceData.elements)
-                            {
-                                auto it = Reflection::reverseLookup.find(elementType);
-                                if (element.get()->GetTypeID() == it->second)
-                                {
-                                    elementFoundInPrefab = true;
-
-                                    auto entry = Reflection::TryGet(elementType);
-                                    if (!entry)
-                                    {
-                                        dbgln("Unknown element type in prefab modification: " + elementType, LogType::WARNING);
-                                        break;
-                                    }
-
-                                    // make a new modifications json that is a combination of the two (prefab and instance)
-                                    json merged = element->sourceJson;
-
-                                    JSON::Merge(merged.at("data"), modificationJson.at("data"));
-                                    auto newElement = entry->create_project_data(merged.at("data"), elementType);
-
-                                    // replace element in instanceData with this new modified element
-                                    element = std::move(newElement);
-                                    break;
-                                }
-                            }
-
-                            if (!elementFoundInPrefab)
-                            {
-                                // add the modification
-                                auto entry = Reflection::TryGet(elementType);
-                                if (!entry)
-                                {
-                                    dbgln("Unknown element type in prefab modification: " + elementType, LogType::WARNING);
-                                    continue;
-                                }
-
-                                auto element = entry->create_project_data(modificationJson.at("data"), elementType);
-                                instanceData.elements.push_back(std::move(element));
-                                continue;
-                            }
-                        }
-                    }
-
-                    prefabInstances.push_back({prefabName, instanceData});
-                    break;
-                }
-            }
-        }*/
     }
 
     return prefabInstances;
@@ -796,6 +664,8 @@ size_t GetMainScene(const nlohmann::json_abi_v3_12_0::json &projectJson)
     return 0; // Return -1 if no main scene is found
 }
 
+
+
 // Unpacks a project file from a JSON file path into a project object, returns the Project struct
 Project lapCore::UnpackProject(const std::string projectJsonString)
 {
@@ -819,92 +689,94 @@ Project lapCore::UnpackProject(const std::string projectJsonString)
     return project;
 }
 
-
-
-json UnpackFile(std::filesystem::path jsonFilePath)
+namespace lapCore
 {
-    auto jsonStr = ReadFileToString(jsonFilePath.string());
-    return json::parse(jsonStr);
-}
-
-json lapCore::UnpackMultidirectoryProject(std::filesystem::path projectFilePath)
-{
-    auto projectJson = UnpackFile(projectFilePath);
-
-    // Loop through the project JSON and unpack directories
-    if (jsonContainsArray(projectJson, "assets"))
+    Project LoadProject(const filesystem::path& path)
     {
-        projectFilePath = projectFilePath.parent_path().append("assets");
-        for (auto &asset : projectJson["assets"])
-        {
-            if (asset.is_string())
-            {
-                // Go back by one to the project.json's parent directory
-                projectFilePath.append(asset.get<std::string>()).append(".json");
-                json assetJson = UnpackFile(projectFilePath);
+        // First we must register the default structs
+        if (!defaultStructsRegistered)
+            defaultStructsRegistered = RegisterDefaultStructs();
 
-                // Then we replace this string with the unpacked JSON
-                asset = assetJson;
-            }
-            else
-            {
-                // Handle the case where the asset is not a string
-            }
+        // Then we unpack the entire project directory
+        json projectJson = UnpackMultidirectoryProject(path);
+        if (projectJson.is_null())
+            return Project();
+
+        // Then make it
+        return MakeProject(projectJson);
+    }
+
+    bool RegisterDefaultStructs()
+    {
+        // ELEMENTS
+        Reflection::Register<Transform2D>("transform-2d");
+        Reflection::Register<Physics2D>("physics-2d");
+        Reflection::Register<SoundPoint>("sound-point");
+        Reflection::Register<UIFrame>("ui-frame");
+        Reflection::Register<UIList>("ui-list");
+        Reflection::Register<UIGradient>("ui-gradient");
+        //Reflection::Register<UIGrid>("ui-grid");
+        Reflection::Register<Sprite>("sprite");
+        Reflection::Register<UIImage>("ui-image");
+        Reflection::Register<UITextLabel>("ui-text-label");
+        Reflection::Register<UIButton>("ui-button");
+        Reflection::Register<Tags>("tags");
+        Reflection::Register<Parameter>("parameter");
+        Reflection::Register<Parameters>("parameters");
+        Reflection::Register<Script>("script");
+
+        // EUTIL
+        Reflection::Register<HorizontalAlignment>("horizontal-alignment");
+        Reflection::Register<VerticalAlignment>("vertical-alignment");
+        Reflection::Register<Alignment>("alignment");
+        Reflection::Register<Renderable>("renderable");
+        Reflection::Register<Axis2D>("axis-2d");
+        Reflection::Register<ScrollSettings>("scroll-settings");
+        Reflection::Register<Animated>("animated");
+        Reflection::Register<Direction2D>("direction-2d");
+        Reflection::Register<FrameVector>("frame-vector");
+        Reflection::Register<Padding>("padding");
+        Reflection::Register<UITransform>("ui-transform");
+
+        // RAYLIB
+        Reflection::Register<Camera2D>("rl-camera-2d");
+        Reflection::Register<Vector2>("rl-vector2");
+        Reflection::Register<Color>("rl-color");
+        Reflection::Register<Rectangle>("rl-rectangle");
+
+        // BOX2D
+        Reflection::Register<b2BodyDef>("b2-body-def");
+        Reflection::Register<b2ShapeDef>("b2-shape-def");
+        Reflection::Register<b2Polygon>("b2-polygon");
+        Reflection::Register<b2Filter>("b2-filter");
+        Reflection::Register<b2SurfaceMaterial>("b2-surface-material");
+        Reflection::Register<b2MotionLocks>("b2-motion-locks");
+        Reflection::Register<b2BodyType>("b2-body-type");
+        Reflection::Register<b2Vec2>("b2-vec2");
+        Reflection::Register<b2Rot>("b2-rot");
+
+        return true;
+    }
+
+    ProjectObjectData::ProjectObjectData(const ProjectObjectData &other)
+        : name(other.name), parent(other.parent), index(other.index)
+    {
+        elements.reserve(other.elements.size());
+        for (const auto &element : other.elements)
+        {
+            elements.push_back(element ? element->Clone() : nullptr);
         }
     }
 
-}
+    ProjectObjectData& ProjectObjectData::operator=(const ProjectObjectData& other)
+    {
+        if (this == &other)
+            return *this;
 
-void lapCore::ProjectSceneData::Clear() {
-    name.clear();
-    systems.clear();
-    instances.objects.clear();
-    instances.prefabs.clear();
-}
+        ProjectObjectData copy(other);
 
-void lapCore::Project::RegisterDefaultElements()
-{
-    // ELEMENTS
-    Reflection::Register<Transform2D>("transform-2d");
-    Reflection::Register<Physics2D>("physics-2d");
-    Reflection::Register<SoundPoint>("sound-point");
-    Reflection::Register<UIFrame>("ui-frame");
-    Reflection::Register<UIList>("ui-list");
-    Reflection::Register<UIGradient>("ui-gradient");
-    //Reflection::Register<UIGrid>("ui-grid");
-    Reflection::Register<Sprite>("sprite");
-    Reflection::Register<UIImage>("ui-image");
-    Reflection::Register<UITextLabel>("ui-text-label");
-    Reflection::Register<UIButton>("ui-button");
-    Reflection::Register<Script>("script");
+        *this = std::move(copy);
 
-    // EUTIL
-    Reflection::Register<HorizontalAlignment>("horizontal-alignment");
-    Reflection::Register<VerticalAlignment>("vertical-alignment");
-    Reflection::Register<Alignment>("alignment");
-    Reflection::Register<Renderable>("renderable");
-    Reflection::Register<Axis2D>("axis-2d");
-    Reflection::Register<ScrollSettings>("scroll-settings");
-    Reflection::Register<Animated>("animated");
-    Reflection::Register<Direction2D>("direction-2d");
-    Reflection::Register<FrameVector>("frame-vector");
-    Reflection::Register<Padding>("padding");
-    Reflection::Register<UITransform>("ui-transform");
-
-    // RAYLIB
-    Reflection::Register<Camera2D>("rl-camera-2d");
-    Reflection::Register<Vector2>("rl-vector2");
-    Reflection::Register<Color>("rl-color");
-    Reflection::Register<Rectangle>("rl-rectangle");
-
-    // BOX2D
-    Reflection::Register<b2BodyDef>("b2-body-def");
-    Reflection::Register<b2ShapeDef>("b2-shape-def");
-    Reflection::Register<b2Polygon>("b2-polygon");
-    Reflection::Register<b2Filter>("b2-filter");
-    Reflection::Register<b2SurfaceMaterial>("b2-surface-material");
-    Reflection::Register<b2MotionLocks>("b2-motion-locks");
-    Reflection::Register<b2BodyType>("b2-body-type");
-    Reflection::Register<b2Vec2>("b2-vec2");
-    Reflection::Register<b2Rot>("b2-rot");
+        return *this;
+    }
 }

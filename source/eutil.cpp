@@ -7,9 +7,9 @@
 using namespace lapCore::EUTIL;
 using namespace Other;
 
-std::string Functions::ReadFileToString(const std::string &filePath, bool withPrefix)
+std::string Functions::ReadFileToString(const std::filesystem::path &filePath, bool withPrefix)
 {
-    std::string fullPath = withPrefix ? GetApplicationDirectory() + filePath : filePath;
+    std::string fullPath = withPrefix ? GetApplicationDirectory() + filePath.string() : filePath.string();
     std::ifstream file(fullPath);
 
     if (!file.is_open())

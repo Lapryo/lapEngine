@@ -34,6 +34,14 @@ namespace lapCore
         return HASH(name).value();
     }
 
+    inline const std::string GET_FORMER_HASHED(entt::id_type id)
+    {
+        auto it = hashRegistry.find(id);
+        if (it != hashRegistry.end())
+            return it->second;
+        return "";
+    }
+
     #define DEBUG_LEVEL DebugLevel::HIGH
 
     namespace EUTIL
@@ -198,7 +206,7 @@ namespace lapCore
         {
             using namespace Render::UI;
 
-            std::string ReadFileToString(const std::string &filePath, bool withPrefix = true);
+            std::string ReadFileToString(const std::filesystem::path &filePath, bool withPrefix = true);
             void WriteStringToFile(const std::string &filePath, const std::string &data);
 
             nlohmann::json ReadFileToJsonObject(const std::string &filePath, bool withPrefix = true);

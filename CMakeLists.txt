@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.22.1)
 project(lapEngine)
 
-set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
 
@@ -83,3 +84,6 @@ if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         $<$<COMPILE_LANGUAGE:CXX>:-Wa,-mbig-obj>
     )
 endif()
+
+add_subdirectory(examples/blank_window)
+add_subdirectory(examples/player_with_physics)

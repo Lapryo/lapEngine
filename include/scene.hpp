@@ -1,14 +1,17 @@
 #pragma once
 
 #include "system.hpp"
-#include "project.hpp"
+#include "project/project.hpp"
 #include "map.hpp"
+#include "tree.hpp"
 
 #include <iostream>
 
 using namespace lapCore;
 using namespace ELEMENTS;
 using namespace ELEMENTS::Other;
+using namespace entt;
+using namespace std;
 
 namespace lapCore
 {
@@ -35,79 +38,7 @@ namespace lapCore
         bool fromPrefab = false;
     };
 
-    /*struct ObjectInfo
-    {
-        Object object;
-        Object parent;
-    };
-
-    struct NewContainer
-    {
-        std::unordered_map<entt::id_type, tree<std::forward_list<ObjectInfo>>::iterator> objectLookup;
-        tree<std::forward_list<ObjectInfo>> objectTree;
-
-        
-            Implement a queue system that works in layers, layer 1 is the children of the root node (the window),
-            layer 2 is the children of the layer 1 nodes, and so on.
-
-            In the ResolvePendingObjects function, we will determine what objects are in what layers based of their distance
-            from the head node.
-        
-
-        Object AddObject(const std::string& name, Object parent = entt::null)
-        {
-            Object object = objects.create();
-
-            entt::id_type id = HASH_ID(name.c_str());
-            if (parent == entt::null)
-            {
-                std::forward_list<ObjectInfo> objectList;
-                objectList.push_front({ object, entt::null });
-                objectLookup[id] = objectTree.insert_after(objectTree.head->last_child, std::move(objectList));
-
-                return object;
-            }
-
-            if (objectLookup.contains(id))
-            {
-                // That means the iterator exists and we can just add the object to the linked list
-                auto node = objectLookup[id].node;
-
-                bool matchingParent = false;
-                for (const auto& obj : node->parent->data)
-                {
-                    if (obj.object == parent)
-                    {
-                        matchingParent = true;
-                        break;
-                    }
-                }
-
-                if (matchingParent)
-                {
-                    return object;
-                }
-
-                // The object parent may soon exist, so we need to add it to a queue to get resolved later
-
-                node->data.push_front({ object, parent });
-            }
-            else
-            {
-                // The object doesn't exist, so we create it
-                // The problem is, the parent may soon exist, so we need to add it to a queue to be resolved later
-
-            }
-
-            return object;
-        }
-
-        void ResolvePendingObjects();
-
-    private:
-        entt::registry objects;
-        std::vector<ObjectInfo> objectQueue;
-    };*/
+    
 
     struct ObjectContainer
     {
@@ -191,6 +122,77 @@ namespace lapCore
         }
 
         void ClearObjects();
+    };
+
+    struct NewScene
+    {
+        id_type id;
+        registry objects;
+
+        ObjectInfo AddObject(id_type id);
+        ObjectInfo AddObject(ObjectInfo info);
+        ObjectInfo AddChild();
+
+        void AddObjectFromData(const ProjectObjectData& data);
+
+        template <typename Element, typename... ElementArgs>
+        Element& AddElement(Object object, ElementArgs &&...args)
+        {
+            return objects.emplace<Element>(object, std::forward<ElementArgs>(args)...);
+        }
+
+        template <typename Element>
+        void RemoveElement(Object object)
+        {
+            objects.remove<Element>(object);
+        }
+
+        template <typename Element>
+        Element *FindElement(Object object)
+        {
+            return objects.try_get<Element>(object);
+        }
+
+        template <typename System, typename... Args>
+        System* AddSystem(int order, Args&&... args)
+        {
+            if (order == -1) order = systems.rbegin()->first + 1;
+            auto sys = std::make_unique<T>(this, order, std::forward<Args>(args)...);
+            if constexpr (requires(T& t, entt::registry& r) { t.Connect(r); })
+                sys->Connect(objects);
+
+            systems[order] = std::move(sys);
+            return systems[order].get();
+        }
+
+        template <typename System>
+        System* FindSystem()
+        {
+            for (const auto& [order, systemPtr] : systems)
+            {
+                if (System* foundSystem = dynamic_cast<System*>(systemPtr.get()))
+                {
+                    return foundSystem;
+                }
+            }
+
+            return nullptr;
+        }
+
+        template <typename System>
+        bool RemoveSystem()
+        {
+            auto sys = FindSystem<System>();
+            if (sys)
+            {
+                systems.erase(std::find_if(systems.begin(), systems.end(), [sys](const auto& pair) { return pair.second.get() == sys; }));
+                return true;
+            }
+            return false;
+        }
+
+    private:
+        ObjectTree<Object, id_type> tree;
     };
 
     struct Scene : ObjectContainer

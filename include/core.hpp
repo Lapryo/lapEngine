@@ -62,7 +62,8 @@ _ = No AI use
 #include <rlgl.h>
 #include <raymath.h>
 
-#include "jsonstructs.hpp"
+#include "json/structs.hpp"
+#include "json/unpacker.hpp"
 
 using namespace lapCore;
 using namespace EUTIL;

@@ -20,35 +20,48 @@ namespace lapCore
     {
         namespace Render
         {
+            /**
+             * @brief A sprite element is used to display an image/texture as a physical object within the scene,
+             * different from the UIImage element.
+             */
             struct Sprite
             {
-                Renderable renderable{};
-                Animated animated{};
+                Renderable renderable{}; ///< Used for rendering the sprite
+                Animated animated{}; ///< Used for animation settings for the sprite
 
                 // Not serializable, for runtime only
-                Rectangle sourceRect{0, 0, 0, 0}, destRect{0, 0, 0, 0};
-                bool flipX, flipY, flipD = false;
+                Rectangle sourceRect{0, 0, 0, 0}, destRect{0, 0, 0, 0}; ///< Used for animations primarily, other uses are possible
+                bool flipX, flipY, flipD = false; ///< Flags for flipping the sprite horizontally, vertically, and diagonally
 
-                entt::id_type textureID{0};
+                entt::id_type textureID{0}; ///< The ID of the texture to be used for the sprite
             };
 
             namespace UI
             {
+                /**
+                 * @brief A UIFrame element is used to display a rectangle onto the screen.
+                 * This element is essentially the core, or base, of a UI hierarchy.
+                 * Primarily used as either a container, or simply a visual element.
+                 */
                 struct UIFrame
                 {
-                    Renderable renderable{};
-                    UITransform transform{};
+                    Renderable renderable{}; ///< Used for rendering the UIFrame
+                    UITransform transform{}; ///< Used to transform the dimensions of the UIFrame
                 };
 
+                /**
+                 * @brief A UIList element is used to display a list of objects containing UI elements in a vertical or horizontal layout.
+                 * The scrolling behavior depends on the specified settings and the scroll size.
+                 */
                 struct UIList
                 {
-                    FrameVector scrollSize{};
-                    FrameVector displaySize{};
-                    ScrollSettings settings{};
+                    FrameVector scrollSize{}; ///< Used to define the scrolling area of the UIList, relative to that of the sibling UIFrame
+                    FrameVector displaySize{}; ///< Used to define how much of an element in the UIList takes up the scrolling area
+                    ScrollSettings settings{}; ///< Used to define the behavior of the scrolling
 
-                    UIListSpreading spreading{UIListSpreading::BUNCH_START};
+                    UIListSpreading spreading{UIListSpreading::BUNCH_START}; ///< Used to define how elements are spread within the UIList
 
-                    float scrollOffset{0.f};
+                    float scrollOffset{0.f}; ///< Used to define the offset of the scrolling
                 };
 
                 /*
@@ -172,6 +185,31 @@ namespace lapCore
 
         namespace Other
         {
+            struct Tags
+            {
+                std::unordered_set<entt::id_type> tags;
+            };
+
+            using ParameterValue = std::variant<
+                bool,
+                int,
+                float,
+                std::string
+            >;
+
+            struct Parameter
+            {
+                entt::id_type id{0};
+                ParameterValue value{false};
+
+                bool active{true};
+            };
+
+            struct Parameters
+            {
+                std::vector<Parameter> parameters;
+            };
+
             struct Script
             {
                 std::vector<entt::id_type> onCreateFunctions{}, onUpdateFunctions{}, onDestroyFunctions{};

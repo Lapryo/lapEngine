@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 4.1.2)
 project(player_physics)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 
 # Source files
 file(GLOB_RECURSE GAME_SOURCES 
