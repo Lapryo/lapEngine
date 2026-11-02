@@ -192,6 +192,7 @@ namespace lapCore
         if (!elementsJson.is_null())
             childPrefabJson["elements"] = elementsJson;
 
+        // TODO: I'm 99% sure this is wrong, the name's of the children of the prefab should be the keys of the "children" object JSON
         json childrenJson = UnpackArrayOrInline(childPrefabJson, "children", UnpackChildPrefab, directoryPath, optional);
         if (!childrenJson.is_null())
             childPrefabJson["children"] = childrenJson;

@@ -90,6 +90,8 @@ namespace lapCore
     {
         string prefabName;
         ProjectObjectData objectData;
+
+        vector<ProjectInstancedPrefabData> children;
     };
 
     struct ProjectSceneData

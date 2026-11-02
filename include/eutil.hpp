@@ -200,6 +200,13 @@ namespace lapCore
                 WARNING,
                 ERROR
             };
+
+            enum class SuccessType
+            {
+                SUCCESS,
+                PARTIAL,
+                FAILURE
+            };
         }
 
         namespace Functions

@@ -869,7 +869,7 @@ void RenderSystem::Update(
     // ========================================================
 
     auto guiSys =
-        scene->GetSystem<GUISystem>();
+        scene->FindSystem<GUISystem>();
 
     if (guiSys)
         guiSys->ResetInUIList();

@@ -45,7 +45,10 @@ namespace lapCore
 
         World(App* app, Project project) : project(project), app(app) {
             prefabs = new ObjectContainer();
-            prefabs->AddObjectsFromProjectData(project.prefabs);
+            for (const auto& prefabData : project.prefabs)
+            {
+                prefabs->AddObject(prefabData);
+            }
         }
 
         Scene* mainScene = nullptr;

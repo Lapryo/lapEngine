@@ -1,19 +1,8 @@
 /*
 TODO:
-1. Move all the JSON serialization logic for elements, eutil structs, and project structs here (do the same for box2d and raylib)
-2. Determine if the same approach can be used for the scene struct
-3. Scenes and ObjectContainers need a whole new implementation
-4. Add Snapshot functionality (at a later date)
-
-A lookup for hash id => vector of object nodes (used for if you don't know the parent of the object you're looking for)
-A lookup for hash id w/ parent object node => object node
-A lookup for entity id => object node
-
-struct ObjectEntry
-{
-    entt::id_type id;
-    entt::entity object;
-};
+1. ObjectNode and ObjectTree needs implementation
+2. "New"Scene needs implementation after todo #1
+2. Add Snapshot functionality (at a later date)
 
 struct ObjectNode
 {
@@ -103,6 +92,8 @@ struct Scene : ObjectTree
 
 #include "reflection.hpp"
 #include "json/structs/lapcore.hpp"
+
+#include "project/deserializer.hpp"
 
 namespace lapCore::JSON
 {
@@ -823,7 +814,7 @@ namespace lapCore::JSON
     }
     void Serializer<Project>::from_json(Project& s, const json& j)
     {
-
+        s = MakeProject(j);
     }
 
     // PROJECT SCENE DATA
@@ -833,7 +824,7 @@ namespace lapCore::JSON
     }
     void Serializer<ProjectSceneData>::from_json(ProjectSceneData& s, const json& j)
     {
-
+        s = MakeScene(j);
     }
 
     // PROJECT ASSET DATA
@@ -843,7 +834,7 @@ namespace lapCore::JSON
     }
     void Serializer<ProjectAssetData>::from_json(ProjectAssetData& s, const json& j)
     {
-
+        s = MakeAsset(j);
     }
 
     // PROJECT SYSTEM DATA
@@ -853,7 +844,7 @@ namespace lapCore::JSON
     }
     void Serializer<ProjectSystemData>::from_json(ProjectSystemData& s, const json& j)
     {
-
+        s = MakeSystem(j);
     }
 
     // PROJECT OBJECT DATA
@@ -863,7 +854,17 @@ namespace lapCore::JSON
     }
     void Serializer<ProjectObjectData>::from_json(ProjectObjectData& s, const json& j)
     {
+        s = MakeObject(j);
+    }
 
+    // PROJECT INSTANCED PREFAB DATA
+    json Serializer<ProjectInstancedPrefabData>::to_json(const ProjectInstancedPrefabData& p, SerializeContext* ctx)
+    {
+        return json();
+    }
+    void Serializer<ProjectInstancedPrefabData>::from_json(ProjectInstancedPrefabData& s, const json& j)
+    {
+        s = MakeInstancedPrefab(j);
     }
 
     // Not sure how to handle element data serialization

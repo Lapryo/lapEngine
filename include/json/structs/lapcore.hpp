@@ -252,5 +252,12 @@ namespace lapCore::JSON
         static void from_json(ProjectObjectData& s, const json& j);
     };
 
+    template <>
+    struct Serializer<ProjectInstancedPrefabData>
+    {
+        static json to_json(const ProjectInstancedPrefabData& p, SerializeContext* ctx = nullptr);
+        static void from_json(ProjectInstancedPrefabData& s, const json& j);
+    };
+
     // Not sure how to handle element data serialization
 }

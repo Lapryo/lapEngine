@@ -21,24 +21,20 @@ namespace lapCore
 
     struct World;
 
-    using Object = entt::entity;
+    using Object = entity;
 
-    struct ObjectInfo
+    struct ObjectMetadata
     {
-        entt::id_type id;
-        Object object;
+        Object* object;
+        id_type* type;
+
+        int* child_index;
+        bool* fromPrefab;
     };
 
-    struct ObjectEntry
-    {
-        ObjectInfo info;
-        ObjectInfo parent;
-        std::map<unsigned int, ObjectInfo> children;
-        int childIndex = -1;
-        bool fromPrefab = false;
-    };
+    /*
 
-    
+
 
     struct ObjectContainer
     {
@@ -123,22 +119,50 @@ namespace lapCore
 
         void ClearObjects();
     };
+    */
 
-    struct NewScene
+    struct ObjectContainer
     {
         id_type id;
         registry objects;
 
-        ObjectInfo AddObject(id_type id);
-        ObjectInfo AddObject(ObjectInfo info);
-        ObjectInfo AddChild();
+        // Adders
+        Object AddObject(id_type id);
+        Object AddObject(const ProjectObjectData& data);
+        Object AddObject(Object parent, id_type id);
+        Object AddChild(Object parent, id_type id);
 
-        void AddObjectFromData(const ProjectObjectData& data);
+        Object CloneObject(Object object, id_type newID);
+        Object CloneObject(Object object, id_type newID, Object newParent);
+
+        // Getters
+        vector<Object> FindObjects(id_type id);
+        Object FindFirstObject(id_type id); // Gets the object closest to the trees root node and with the lowest child_index
+        KVNode<ObjectMetadata, Object, id_type>* GetNode(Object object);
+
+        vector<Object> GetChildren(Object object);
+        vector<Object> FindChildren(Object parent, id_type id);
+        Object FindFirstChild(Object parent, id_type id);
+
+        bool RemoveObject(Object object);
+        SuccessType RemoveAllObjects(id_type id);
+        bool ReparentObject(Object object, Object newParent);
+        
+        ObjectMetadata* SetObjectData(Object object, ObjectMetadata data);
+        ObjectMetadata* GetObjectData(Object object);
 
         template <typename Element, typename... ElementArgs>
         Element& AddElement(Object object, ElementArgs &&...args)
         {
             return objects.emplace<Element>(object, std::forward<ElementArgs>(args)...);
+        }
+
+        template <typename Element>
+        Element* CloneElement(Object srcObject, Object dstObject)
+        {
+            auto element = FindElement<Element>(srcObject);
+            if (element) return &AddElement<Element>(dstObject, &element);
+            return nullptr;
         }
 
         template <typename Element>
@@ -153,12 +177,23 @@ namespace lapCore
             return objects.try_get<Element>(object);
         }
 
+    private:
+        KVTree<ObjectMetadata, Object, id_type> tree;
+    };
+
+    struct Scene : ObjectContainer
+    {
+        Scene(World* world);
+        Scene(World* world, const ProjectSceneData& data);
+
+        World* world;
+
         template <typename System, typename... Args>
         System* AddSystem(int order, Args&&... args)
         {
             if (order == -1) order = systems.rbegin()->first + 1;
-            auto sys = std::make_unique<T>(this, order, std::forward<Args>(args)...);
-            if constexpr (requires(T& t, entt::registry& r) { t.Connect(r); })
+            auto sys = std::make_unique<System>(this, order, std::forward<Args>(args)...);
+            if constexpr (requires(System& t, entt::registry& r) { t.Connect(r); })
                 sys->Connect(objects);
 
             systems[order] = std::move(sys);
@@ -192,9 +227,10 @@ namespace lapCore
         }
 
     private:
-        ObjectTree<Object, id_type> tree;
+        map<int, unique_ptr<System>> systems;
     };
 
+    /*
     struct Scene : ObjectContainer
     {
         Scene(World* world, const std::string& name) : world(world), name(name) {}
@@ -264,4 +300,5 @@ namespace lapCore
 
         void Clear();
     };
+    */
 }

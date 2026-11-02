@@ -126,19 +126,17 @@ void GUISystem::MarkUIDirty(
 
     transform->dirty = true;
 
-    auto entry =
-        scene->FindEntry(entity);
-
+    auto entry = scene->GetNode(entity);
     if (!entry)
         return;
 
     for (const auto &child :
-         entry->children)
+         scene->GetChildren(entity))
     {
         MarkUIDirty(
             scene,
             registry,
-            child.second.object);
+            child);
     }
 }
 
@@ -182,13 +180,12 @@ Rectangle ResolveUI(
     entt::entity entity,
     UITransform &transform)
 {
-    auto entry = scene->FindEntry(entity);
+    auto data = scene->GetObjectData(entity);
 
     if (!entry)
         return {};
 
-    const bool isRoot =
-        entry->parent.object == entt::null;
+    const bool isRoot = entry->parent->key == entt::null || entry->parent->key == entry->tree->root.key;
 
     if (!isRoot && !transform.dirty)
         return transform.absoluteRect;
@@ -206,7 +203,7 @@ Rectangle ResolveUI(
     }
     else
     {
-        auto parent = entry->parent.object;
+        auto parent = entry->parent.key;
 
         // The hierarchy parent should use its UIFrame
         // when one exists.

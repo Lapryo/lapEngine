@@ -9,7 +9,221 @@ using namespace ELEMENTS::Render;
 
 #include "systems/physics_sys.hpp"
 
-ObjectInfo lapCore::ObjectContainer::AddObject(
+namespace lapCore
+{
+    Object ObjectContainer::AddObject(id_type id)
+    {
+        auto object = objects.create();
+        tree.AddNode(object, id);
+        return object;
+    }
+
+    Object ObjectContainer::AddObject(const ProjectObjectData& data)
+    {
+        // TODO: By default, we'll get the closest index, or the one closest to the root, but maybe add a queue in the future that'll wait for the parents to exist (with timeouts of course)
+        auto parentObject = FindFirstObject(HASH_ID(data.parent.c_str()));
+        
+        Object object;
+        if (parentObject == null)
+            object = AddObject(HASH_ID(data.name.c_str()));
+        else
+            object = AddObject(parentObject, HASH_ID(data.name.c_str()));
+
+        for (const auto& elementData : data.elements)
+        {
+            auto entry = Reflection::TryGet(elementData->GetTypeID());
+            if (!entry) continue;
+            entry->emplace(objects, object, elementData->GetRawData());
+        }
+
+        return object;
+    }
+
+    Object ObjectContainer::AddObject(Object parent, id_type id)
+    {
+        auto parentNode = tree.GetNode(parent);
+        auto object = objects.create();
+        tree.AddNode(parentNode, object, id);
+        return object;
+    }
+
+    Object ObjectContainer::AddChild(Object parent, id_type id)
+    {
+        return AddObject(parent, id);
+    }
+
+    Object ObjectContainer::CloneObject(Object object, id_type newID)
+    {
+        return CloneObject(object, newID, tree.root->key);
+    }
+
+    Object ObjectContainer::CloneObject(Object object, id_type newID, Object newParent)
+    {
+        auto parentNode = tree.GetNode(newParent);
+        auto clonedObject = objects.create();
+
+        tree.AddNode(parentNode, clonedObject, newID);
+
+        for (auto&& curr : objects.storage())
+        {
+            auto& storage = curr.second;
+
+            if (storage.contains(object))
+            {
+                storage.push(
+                    clonedObject,
+                    storage.value(object)
+                );
+            }
+        }
+
+        return clonedObject;
+    }
+
+    vector<Object> ObjectContainer::FindObjects(id_type id)
+    {
+        auto nodes = tree.FindNodes(id);
+        return tree.GatherIdentifiers(nodes);
+    }
+
+    Object ObjectContainer::FindFirstObject(id_type id)
+    {
+        auto objects = FindObjects(id);
+        auto closestNodesToRoot = tree.GetNodesClosestToRoot(objects);
+        
+        int lowest_child_index = INT_MAX;
+        Object closestObject;
+
+        for (const auto& node : closestNodesToRoot)
+        {
+            auto data = GetObjectData(node->key);
+            if (data) 
+            {
+                if (data->child_index < lowest_child_index)
+                {
+                    lowest_child_index = data->child_index;
+                    closestObject = node->key;
+                }
+            }
+
+        }
+        return closestObject;
+    }
+
+    KVNode<ObjectMetadata, Object, id_type>* ObjectContainer::GetNode(Object object)
+    {
+        return tree.GetNode(object);
+    }
+
+    vector<Object> ObjectContainer::GetChildren(Object object)
+    {
+        auto node = tree.GetNode(object);
+        if (!node) return vector<Object>();
+
+        auto children = tree.GetChildren(node);
+        return tree.GatherIdentifiers(children);
+    }
+
+    vector<Object> ObjectContainer::FindChildren(Object parent, id_type id)
+    {
+        auto parentNode = tree.GetNode(parent);
+        if (!parentNode) return vector<Object>();
+
+        auto nodes = tree.FindChildren(parentNode, id);
+        return tree.GatherIdentifiers(nodes);
+    }
+
+    Object ObjectContainer::FindFirstChild(Object parent, id_type id)
+    {
+        auto parentNode = tree.GetNode(parent);
+        if (!parentNode) return null;
+
+        auto children = tree.GetChildren(parentNode);
+
+        // Find the child with the matching name and lowest "child_index"
+        KVNode<ObjectMetadata, Object, id_type>* firstChild = nullptr;
+        bool initialIndexSet = false;
+        int lowest_index = -1; // We must get the initial child index
+
+        for (const auto& child : children)
+        {
+            if (!initialIndexSet)
+            {
+                lowest_index = child->data.child_index;
+                initialIndexSet = true;
+            }
+
+            if (child->value == id)
+            {
+                if (child->data.child_index < lowest_index)
+                {
+                    firstChild = child;
+                    lowest_index = child->data.child_index;
+                }
+            }
+        }
+
+        if (firstChild) return firstChild->key;
+        return null;
+    }
+
+    bool ObjectContainer::RemoveObject(Object object)
+    {
+        return tree.RemoveNode(object);
+    }
+
+    SuccessType ObjectContainer::RemoveAllObjects(id_type id)
+    {
+        auto success = SuccessType::SUCCESS;
+
+        auto objects = FindObjects(id);
+        int failed = 0;
+
+        for (const auto& object : objects)
+            if (!RemoveObject(object))
+                failed++;
+
+        if (failed == objects.size())
+            return SuccessType::FAILURE;
+        else if (failed > 0)
+            return SuccessType::PARTIAL;
+
+        return SuccessType::SUCCESS;
+    }
+
+    bool ObjectContainer::ReparentObject(Object object, Object newParent)
+    {
+        return tree.ReparentNode(object, newParent);
+    }
+
+    ObjectMetaData* ObjectContainer::SetObjectData(Object object, ObjectMetadata data)
+    {
+        auto node = tree.GetNode(object);
+        if (!node) return nullptr;
+
+        if (data.child_index < 0)
+        {
+            // loop through the nextSibling until it is a nullptr
+            KVNode<ObjectMetadata, Object, id_type>* nextNode = node->nextSibling;
+            while (nextNode != nullptr)
+            {
+                nextNode = nextNode->nextSibling;
+            }
+
+            nextNode = nextNode->prevSibling;
+            auto lastIndex
+        }
+    }
+
+    ObjectMetadata* ObjectContainer::GetObjectData(Object object)
+    {
+        auto node = tree.GetNode(object);
+        if (node) return &node->data;
+        return nullptr;
+    }
+}
+
+/*ObjectInfo lapCore::ObjectContainer::AddObject(
     entt::hashed_string name,
     entt::hashed_string parent,
     int childIndex,
@@ -742,4 +956,4 @@ void lapCore::Scene::Clear()
     ClearObjects();
     systems.clear();
     name = "";
-}
+}*/
