@@ -1,0 +1,25 @@
+{
+    "name": "main",
+    "systems": [
+        {
+            "type": "render",
+            "order": 3
+        },
+        {
+            "type": "physics",
+            "order": 2
+        },
+        {
+            "type": "script",
+            "order": 1
+        },
+        {
+            "type": "input",
+            "order": 0
+        }
+    ],
+    "objects": [
+        "file@camera.json",
+        "file@player.json"
+    ]
+}

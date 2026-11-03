@@ -203,21 +203,6 @@ namespace lapCore
     // ECS Event Helpers
     // =========================================================================
 
-    // Fixed object ID.
-    template <typename... EventArgs, typename SystemFunc>
-    void ConnectECSEvent(entt::id_type objectID, entt::hashed_string name, SystemFunc&& systemHandler)
-    {
-        const entt::id_type eventID = name.value();
-
-        auto callback = [objectID, eventID, handler = std::forward<SystemFunc>(systemHandler)]
-            (Scene* scene, EventArgs... args)
-        {
-            handler(scene, objectID, eventID, std::forward<EventArgs>(args)...);
-        };
-
-        EventRegistry::Connect<EventArgs...>(name, std::move(callback));
-    }
-
     // Fixed ECS object.
     template <typename... EventArgs, typename SystemFunc>
     void ConnectECSEvent(Object object, entt::hashed_string name, SystemFunc&& systemHandler)

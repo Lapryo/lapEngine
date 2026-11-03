@@ -44,7 +44,7 @@ namespace lapCore
         App* app;
 
         World(App* app, Project project) : project(project), app(app) {
-            prefabs = new ObjectContainer();
+            prefabs = new Scene(this, ProjectSceneData());
             for (const auto& prefabData : project.prefabs)
             {
                 prefabs->AddObject(prefabData);
@@ -52,7 +52,7 @@ namespace lapCore
         }
 
         Scene* mainScene = nullptr;
-        ObjectContainer* prefabs = nullptr;
+        Scene* prefabs = nullptr;
 
         WindowProperties window;
         ResourceManager resources;

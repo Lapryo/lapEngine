@@ -126,17 +126,17 @@ void GUISystem::MarkUIDirty(
 
     transform->dirty = true;
 
-    auto entry = scene->GetNode(entity);
+    auto entry = scene->GetObject(entity);
     if (!entry)
         return;
 
     for (const auto &child :
-         scene->GetChildren(entity))
+         entry->children)
     {
         MarkUIDirty(
             scene,
             registry,
-            child);
+            child.second);
     }
 }
 
@@ -180,12 +180,12 @@ Rectangle ResolveUI(
     entt::entity entity,
     UITransform &transform)
 {
-    auto data = scene->GetObjectData(entity);
+    auto entry = scene->GetObject(entity);
 
     if (!entry)
         return {};
 
-    const bool isRoot = entry->parent->key == entt::null || entry->parent->key == entry->tree->root.key;
+    const bool isRoot = entry->parent == entt::null || entry->parent == scene->root;
 
     if (!isRoot && !transform.dirty)
         return transform.absoluteRect;
@@ -198,12 +198,11 @@ Rectangle ResolveUI(
             0.0f,
             0.0f,
             scene->world->window.logical_resolution.x,
-            scene->world->window.logical_resolution.y
-        };
+            scene->world->window.logical_resolution.y};
     }
     else
     {
-        auto parent = entry->parent.key;
+        auto parent = entry->parent;
 
         // The hierarchy parent should use its UIFrame
         // when one exists.
@@ -285,8 +284,7 @@ Rectangle ResolveUI(
         x,
         y,
         width,
-        height
-    };
+        height};
 
     transform.dirty = false;
 
@@ -329,7 +327,7 @@ void ApplyUIVisibility(
     bool hasParent)
 {
     auto entry =
-        scene->FindEntry(entity);
+        scene->GetObject(entity);
 
     if (!entry)
         return;
@@ -353,7 +351,7 @@ void ApplyUIVisibility(
         ApplyUIVisibility(
             scene,
             registry,
-            child.second.object,
+            child.second,
             currentVisible,
             true);
     }
@@ -380,12 +378,12 @@ void ApplyUIVisibilityHierarchy(
         for (auto entity : view)
         {
             auto entry =
-                scene->FindEntry(entity);
+                scene->GetObject(entity);
 
             if (!entry)
                 continue;
 
-            if (entry->parent.object != entt::null)
+            if (entry->parent != entt::null)
                 continue;
 
             if (!IsUIEntity(
@@ -559,21 +557,21 @@ float GetUIListSpacing(
 
     switch (list.spreading)
     {
-        case UIListSpreading::BUNCH_START:
-        case UIListSpreading::BUNCH_MIDDLE:
-        case UIListSpreading::BUNCH_END:
+    case UIListSpreading::BUNCH_START:
+    case UIListSpreading::BUNCH_MIDDLE:
+    case UIListSpreading::BUNCH_END:
+        return 0.0f;
+
+    case UIListSpreading::EVENLY:
+        return freeSpace /
+               static_cast<float>(elementCount + 1);
+
+    case UIListSpreading::DISTANCING:
+        if (elementCount <= 1)
             return 0.0f;
 
-        case UIListSpreading::EVENLY:
-            return freeSpace /
-                   static_cast<float>(elementCount + 1);
-
-        case UIListSpreading::DISTANCING:
-            if (elementCount <= 1)
-                return 0.0f;
-
-            return freeSpace /
-                   static_cast<float>(elementCount - 1);
+        return freeSpace /
+               static_cast<float>(elementCount - 1);
     }
 
     return 0.0f;
@@ -600,20 +598,20 @@ float GetUIListStartOffset(
 
     switch (list.spreading)
     {
-        case UIListSpreading::BUNCH_START:
-            return 0.0f;
+    case UIListSpreading::BUNCH_START:
+        return 0.0f;
 
-        case UIListSpreading::BUNCH_MIDDLE:
-            return freeSpace * 0.5f;
+    case UIListSpreading::BUNCH_MIDDLE:
+        return freeSpace * 0.5f;
 
-        case UIListSpreading::BUNCH_END:
-            return freeSpace;
+    case UIListSpreading::BUNCH_END:
+        return freeSpace;
 
-        case UIListSpreading::EVENLY:
-            return spacing;
+    case UIListSpreading::EVENLY:
+        return spacing;
 
-        case UIListSpreading::DISTANCING:
-            return 0.0f;
+    case UIListSpreading::DISTANCING:
+        return 0.0f;
     }
 
     return 0.0f;
@@ -653,7 +651,7 @@ void ArrangeUIList(
         return;
 
     auto entry =
-        scene->FindEntry(listEntity);
+        scene->GetObject(listEntity);
 
     if (!entry)
         return;
@@ -712,7 +710,7 @@ void ArrangeUIList(
          ++index)
     {
         const entt::entity childEntity =
-            entry->children[index].object;
+            entry->children[index];
 
         const float contentOffset =
             startOffset +
@@ -854,7 +852,7 @@ void ArrangeUIList(
          entry->children)
     {
         const entt::entity childEntity =
-            child.second.object;
+            child.second;
 
         if (!registry.all_of<UIList, UIFrame>(
                 childEntity))
@@ -884,13 +882,13 @@ void ArrangeUIListElements(
          listView.each())
     {
         auto entry =
-            scene->FindEntry(entity);
+            scene->GetObject(entity);
 
         if (!entry)
             continue;
 
         const entt::entity parent =
-            entry->parent.object;
+            entry->parent;
 
         // ----------------------------------------------------
         // If this list is inside another UIList, its parent
@@ -928,7 +926,7 @@ void ArrangeUIListElements(
 
 /*void ArrangeUIGrid(Scene* scene, entt::registry &registry, Object gridObject)
 {
-    
+
 }
 
 void ArrangeUIGridElements(Scene* scene, entt::registry &registry)
@@ -1135,6 +1133,18 @@ void GUISystem::Update(
     float deltaTime,
     entt::registry &registry)
 {
+    auto window = scene->world->window;
+    auto root = scene->root;
+
+    auto rootFrame = scene->FindElement<UIFrame>(root);
+    if (!rootFrame)
+        rootFrame = &scene->AddElement<UIFrame>(root);
+
+    // Setup the frame here
+    rootFrame->transform.size.offset = window.logical_resolution;
+    rootFrame->renderable.isScreenSpace = true;
+    rootFrame->renderable.inheritsUI = true;
+
     // ========================================================
     // 1. Reset transient UIList state.
     // ========================================================
@@ -1207,8 +1217,6 @@ void GUISystem::Update(
     // ========================================================
 
     ArrangeUIListElements(scene, registry);
-
-
 
     // ========================================================
     // 5. Propagate visibility through the scene hierarchy.

@@ -1,0 +1,70 @@
+{
+    "name": "player",
+    "parent": "",
+    "index": -1,
+    "elements": [
+        {
+            "type": "ui-frame",
+            "data": {
+                "renderable": {
+                    "is-screen-space": false,
+                    "visible": true,
+                    "z-layer": 2,
+                    "inherits-ui": false,
+                    "tint": [0, 255, 0, 255]
+                },
+                "origin": {
+                    "position": {
+                        "scale": [0, 0],
+                        "offset": [0, 0]
+                    },
+                    "size": {
+                        "scale": [0, 0],
+                        "offset": [10, 10]
+                    },
+                    "anchor": {
+                        "scale": [0.5, 0.5]
+                    }
+                }
+            }
+        },
+        {
+            "type": "script",
+            "data": {
+                "functions": {
+                    "create": ["player_create"],
+                    "update": ["player_update"]
+                }
+            }
+        },
+        {
+            "type": "physics-2d",
+            "data": {
+                "body": {
+                    "type": "dynamic",
+                    "motion-locks": {
+                        "lock-angular-z": true
+                    }
+                },
+                "polygon": {
+                    "hitbox-type": "box",
+                    "width": 10,
+                    "height": 14
+                }
+            }
+        },
+        {
+            "type": "transform-2d",
+            "data": {
+                "scale": [1, 1]
+            }
+        },
+        {
+            "type": "player-attributes",
+            "data": {
+                "speed": 50,
+                "input-direction": [0, 0]
+            }
+        }
+    ]
+}

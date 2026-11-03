@@ -70,9 +70,9 @@ ActionMap RegisterMovementActions()
     return movementActions;
 }
 
-void Move(Scene *scene, entt::id_type objectID, entt::id_type eventID)
+void Move(Scene *scene, Object object, entt::id_type eventID)
 {
-    auto playerAttributes = scene->FindElement<PlayerAttributes>(objectID);
+    auto playerAttributes = scene->FindElement<PlayerAttributes>(object);
     if (!playerAttributes) return; // Always check if it exists!
 
     if (eventID == plrUpEvent)
@@ -101,14 +101,14 @@ namespace Player
 
     Then we set our gravity to nothing because we're in a void, pretty simple.
     */
-    void Init(Scene *scene, entt::id_type objectID, entt::id_type eventID)
+    void Init(Scene *scene, Object object, entt::id_type eventID)
     {
-        ConnectECSEvent(objectID, plrDownEvent, Move);
-        ConnectECSEvent(objectID, plrUpEvent, Move);   
-        ConnectECSEvent(objectID, plrLeftEvent, Move);
-        ConnectECSEvent(objectID, plrRightEvent, Move);
+        ConnectECSEvent(object, plrDownEvent, Move);
+        ConnectECSEvent(object, plrUpEvent, Move);   
+        ConnectECSEvent(object, plrLeftEvent, Move);
+        ConnectECSEvent(object, plrRightEvent, Move);
 
-        auto physicsSys = scene->GetSystem<PhysicsSystem>();
+        auto physicsSys = scene->FindSystem<PhysicsSystem>();
         b2World_SetGravity(physicsSys->worldID, b2Vec2{0, 0});
     }
 
@@ -122,17 +122,15 @@ namespace Player
 
     We have an additional FPS counter at the top.
     */
-    void Update(Scene *scene, entt::id_type objectID, entt::id_type eventID, float delta)
+    void Update(Scene *scene, Object object, entt::id_type eventID, float delta)
     {
-        auto attributes = scene->FindElement<PlayerAttributes>(objectID);
+        auto attributes = scene->FindElement<PlayerAttributes>(object);
         Vector2 normalized_vel = Vector2Normalize(attributes->inputDirection);
-        auto physicsSys = scene->GetSystem<PhysicsSystem>();
+        auto physicsSys = scene->FindSystem<PhysicsSystem>();
 
-        auto object = scene->FindObject(objectID);
-
-        if (physicsSys && b2Body_IsValid(physicsSys->bodyMap[*object]))
+        if (physicsSys && b2Body_IsValid(physicsSys->bodyMap[object]))
         {
-            b2Body_SetLinearVelocity(physicsSys->bodyMap[*object], {normalized_vel.x * attributes->speed, normalized_vel.y * attributes->speed});
+            b2Body_SetLinearVelocity(physicsSys->bodyMap[object], {normalized_vel.x * attributes->speed, normalized_vel.y * attributes->speed});
         }
         
         attributes->inputDirection = {0.f, 0.f};
@@ -149,12 +147,12 @@ with smoothness and all.
 
 namespace PlayerCamera
 {
-    void Update(Scene *scene, entt::id_type objectID, entt::id_type eventID, float delta)
+    void Update(Scene *scene, Object object, entt::id_type eventID, float delta)
     {
-        auto camElement = scene->FindElement<Camera2D>(objectID);
+        auto camElement = scene->FindElement<Camera2D>(object);
         if (!camElement) return;
 
-        auto playerObject = *scene->FindObject(plrName);
+        auto playerObject = scene->FindFirstObject(plrName);
         auto transform = scene->FindElement<Transform2D>(playerObject);
         if (!transform) return;
 
@@ -192,16 +190,23 @@ namespace PlayerWithPhysics
 
         
         // Here is where we connect our scripts to the event registry with the corresponding objects.
-        ConnectECSEvent(plrName.value(), plrCreate, Player::Init);
-        ConnectECSEvent<float>(plrName.value(), plrUpdate, Player::Update);
+        auto playerObject = world.mainScene->FindFirstObject(plrName.value());
+        auto cameraObject = world.mainScene->FindFirstObject(HASH_ID("camera"));
 
-        ConnectECSEvent<float>(HASH_ID("camera"), camUpdate, PlayerCamera::Update);
+        ConnectECSEvent(playerObject, plrCreate, Player::Init);
+        ConnectECSEvent<float>(playerObject, plrUpdate, Player::Update);
+
+        ConnectECSEvent<float>(cameraObject, camUpdate, PlayerCamera::Update);
 
         return true; // Return true if initialization was successful, false otherwise
     }
 
     void Game::Update(float delta)
     {
+        if (WindowShouldClose())
+            Shutdown();
+        
+        
         world.mainScene->Update(delta, world.window.target);
     }
 }
@@ -213,12 +218,7 @@ int main()
     If it is already contained within the project you are loading, you must register it beforehand.
     */
     Reflection::Register<PlayerAttributes>("player-attributes");
-
-    // Before we do anything lets check if the project was unpacked correctly
-    auto result = UnpackMultidirectoryProject("assets/project/project.json");
-    std::cout << "Project unpacking result: " << result.dump() << std::endl;
-
-    Project project = UnpackProject(ReadFileToString("assets/project/project.json"));
+    Project project = LoadProject("assets/project/project.json");
 
     PlayerWithPhysics::Game game(project);
     game.Run();

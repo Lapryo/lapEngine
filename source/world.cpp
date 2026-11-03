@@ -15,82 +15,18 @@ void World::SetScene(ProjectSceneData &scene_data)
 {
     if (mainScene)
     {
-        auto sound_sys = mainScene->GetSystem<SoundSystem>();
+        auto sound_sys = mainScene->FindSystem<SoundSystem>();
         if (sound_sys)
             sound_sys->StopAll();
-
-        for (auto &scnData : project.scenes)
-        {
-            if (scnData.name != mainScene->name)
-                continue;
-
-            for (auto &instData : scnData.objects)
-            {
-                for (auto &elmntData : instData.elements)
-                {
-                    /*
-
-                    This will soon be used for project synchronization, so you can save an
-                    exact replica of the current state of the app.
-
-                    However, this may not be implemented, as I could just make a function called
-                    Snapshot() or something for instance. That way, it gives the developer full control
-                    over what to save/synchronize.
-                    
-                    continue;
-
-                    if (elmntData->synced != SyncProjectRuntimeMode::UPDATE_ON_SCENE)
-                        continue;
-
-                    void* existingElement = mainScene->FindElement(HASH_ID(instData.name.c_str()), elmntData->GetTypeID());
-                    if (!existingElement)
-                        continue;
-
-                    auto* serializer = Reflection::TryGet(elmntData->GetTypeName());
-                    if (!serializer)
-                        continue;
-
-                    auto ctx = SerializeContext{&resources};
-                    auto existingElementJson = serializer->to_json(existingElement, &ctx);
-                    serializer->from_json(elmntData->GetDataPtr(), existingElementJson);*/
-                }
-            }
-        }
     }
 
     // Clear out and set back up with new scene data
-    if (mainScene) mainScene->Clear();
-    mainScene = new Scene(this, scene_data.name);
-
-    mainScene->AddObjectsFromProjectData(scene_data.objects);
-    mainScene->AddObjectsFromPrefabProjectData(*prefabs, scene_data.prefabs);
-
-    mainScene->backgroundColor = scene_data.backgroundColor;
-
-    for (auto &system : scene_data.systems)
-    {
-        if (system.type == "render")
-            mainScene->AddSystem<RenderSystem>(system.order);
-        else if (system.type == "physics")
-        {
-            mainScene->AddSystem<PhysicsSystem>(system.order);
-            mainScene->GetSystem<PhysicsSystem>()->RegisterBodies();
-        }
-        else if (system.type == "script")
-            mainScene->AddSystem<ScriptSystem>(system.order);
-        else if (system.type == "gui")
-            mainScene->AddSystem<GUISystem>(system.order);
-        else if (system.type == "input")
-            mainScene->AddSystem<InputSystem>(system.order);
-        else if (system.type == "sound")
-            mainScene->AddSystem<SoundSystem>(system.order);
-        else
-            dbgln("Unknown system type: " + system.type, LogType::WARNING);
-    }
+    delete mainScene;
+    mainScene = new Scene(this, scene_data);
 
     // Cool thing to ensure there is a render system in the scene. cause if not, the window won't update at all and buffer the whole time
     if (IsWindowReady())
-        if (mainScene->GetSystem<RenderSystem>() == nullptr)
+        if (mainScene->FindSystem<RenderSystem>() == nullptr)
             mainScene->AddSystem<RenderSystem>(-1);
 
     if (preloadSceneCallback)
@@ -104,7 +40,19 @@ void World::SetScene(ProjectSceneData &scene_data)
 
 ProjectSceneData &lapCore::World::GetMainSceneData()
 {
-    return project.scenes[project.main_scene_index];
+    auto& mainSceneData = project.scenes[0];
+    auto mainKeyword = HASH_ID("main");
+
+    for (auto &scnData : project.scenes)
+    {
+        if (scnData.name == "main")
+        {
+            mainSceneData = scnData;
+            break;
+        }
+    }
+
+    return mainSceneData;
 }
 
 void lapCore::World::SwitchScene(const ProjectSceneData &scene_data, std::function<void()> preloadCallback)

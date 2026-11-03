@@ -17,11 +17,18 @@ namespace lapCore
     std::vector<ElementDataPtr> MakeElements(const json &elementsJson);
     ElementDataPtr MakeElement(const json &elementJson);
 
-    std::vector<ProjectSceneData> MakeScenes(const json &scenesJson);
-    ProjectSceneData MakeScene(const json &sceneJson);
+    std::vector<ProjectSceneData> MakeScenes(const json &scenesJson, const vector<ProjectObjectData>& prefabs);
+    ProjectSceneData MakeScene(const json &sceneJson, const vector<ProjectObjectData>& prefabs);
 
-    std::vector<ProjectInstancedPrefabData> MakeInstancedPrefabs(const json &instancedPrefabsJson);
-    ProjectInstancedPrefabData MakeInstancedPrefab(const json &prefabJson);
+    std::vector<ProjectInstancedPrefabData> MakeInstancedPrefabs(
+        const json& instancedPrefabsJson,
+        const std::vector<ProjectObjectData>& prefabs
+    );
+
+    ProjectInstancedPrefabData MakeInstancedPrefab(
+        const json& instancedPrefabJson,
+        const std::vector<ProjectObjectData>& prefabs
+    );
 
     std::vector<ProjectSystemData> MakeSystems(const json &systemsJson);
     ProjectSystemData MakeSystem(const json &systemJson);

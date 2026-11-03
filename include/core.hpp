@@ -65,6 +65,8 @@ _ = No AI use
 #include "json/structs.hpp"
 #include "json/unpacker.hpp"
 
+#include "project/deserializer.hpp"
+
 using namespace lapCore;
 using namespace EUTIL;
 using namespace ELEMENTS;

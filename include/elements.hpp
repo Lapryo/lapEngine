@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <any>
+#include <variant>
 
 using namespace lapCore;
 using namespace EUTIL::Render;

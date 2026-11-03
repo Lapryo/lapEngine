@@ -11,16 +11,19 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 #include <iostream>
 #include <fstream>
 
 using json = nlohmann::json;
+using namespace entt;
+using namespace std;
 
 namespace lapCore
 {
     inline std::unordered_map<entt::id_type, std::string> hashRegistry;
 
-    inline constexpr entt::hashed_string HASH(const char* name)
+    inline entt::hashed_string HASH(const char* name)
     {
         entt::hashed_string hash{name};
 
@@ -29,9 +32,10 @@ namespace lapCore
         return hash;
     }
 
-    inline constexpr entt::id_type HASH_ID(const char* name)
+    inline entt::id_type HASH_ID(const char* name)
     {
-        return HASH(name).value();
+        auto hash = HASH(name);
+        return hash.value();
     }
 
     inline const std::string GET_FORMER_HASHED(entt::id_type id)
@@ -207,6 +211,12 @@ namespace lapCore
                 PARTIAL,
                 FAILURE
             };
+
+            enum class ShiftMode
+            {
+                CLUMPING,
+                SUBSEQUENT
+            };
         }
 
         namespace Functions
@@ -230,6 +240,79 @@ namespace lapCore
 
             void dbgln(const std::string &message, Other::LogType type = Other::LogType::INFO);
             void dbgln(const std::string &message, const char* colorCode, Other::LogType type = Other::LogType::INFO);
+
+            template <typename T>
+            void ShiftMap(
+                std::map<unsigned int, T>& map,
+                Other::ShiftMode shiftMode,
+                unsigned int pos,
+                const T& replacementValue,
+                bool right = true
+            )
+            {
+                std::vector<unsigned int> keys;
+
+                if (right)
+                {
+                    // Find the keys that need shifting.
+                    unsigned int expected = pos;
+
+                    for (auto it = map.lower_bound(pos); it != map.end(); ++it)
+                    {
+                        if (shiftMode == Other::ShiftMode::CLUMPING &&
+                            it->first != expected)
+                            break;
+
+                        if (it->first == UINT_MAX)
+                            throw std::overflow_error("Cannot shift beyond UINT_MAX");
+
+                        keys.push_back(it->first);
+
+                        if (shiftMode == Other::ShiftMode::CLUMPING)
+                            ++expected;
+                    }
+
+                    // Shift right, highest index first.
+                    for (auto it = keys.rbegin(); it != keys.rend(); ++it)
+                    {
+                        auto node = map.extract(*it);
+                        node.key() = *it + 1;
+                        map.insert(std::move(node));
+                    }
+
+                    map.insert_or_assign(pos, replacementValue);
+                }
+                else
+                {
+                    // Remove the element at pos.
+                    map.erase(pos);
+
+                    if (pos == UINT_MAX)
+                        return;
+
+                    unsigned int expected = pos + 1;
+
+                    for (auto it = map.upper_bound(pos); it != map.end(); ++it)
+                    {
+                        if (shiftMode == Other::ShiftMode::CLUMPING &&
+                            it->first != expected)
+                            break;
+
+                        keys.push_back(it->first);
+
+                        if (shiftMode == Other::ShiftMode::CLUMPING)
+                            ++expected;
+                    }
+
+                    // Shift left, lowest index first.
+                    for (auto key : keys)
+                    {
+                        auto node = map.extract(key);
+                        node.key() = key - 1;
+                        map.insert(std::move(node));
+                    }
+                }
+            }
 
             template <typename T>
             void BinarySerialize(const T& value, const std::string& filePath)

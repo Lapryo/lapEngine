@@ -1,5 +1,8 @@
 #include "game.hpp"
 #include "project_data.hpp" // Note this
+
+// TODO: rewrite all these comments cause they're outdated
+
 /*
 When loading in project data, you have two options to choose from:
 1. You can load from a JSON files directly into the project.
@@ -36,11 +39,15 @@ namespace BlankWindow
         /*
         Anything you want to do every frame can go here.
         For example, checking for input to make the window fullscreen, updating the main scene, etc.
-        However, you wll most likely main do updates through scripts or other elements,vso it's recommended to keep this section
+        However, you wll most likely mainly do updates through scripts or other elements, so it's recommended to keep this section
         clean and only put things here that are necessary to be done every frame and aren't easily done through other means.
         */
 
         // For us, we simply update the main scene
+
+        if (WindowShouldClose())
+            Shutdown();
+
         world.mainScene->Update(deltaTime, world.window.target);
     }
 }
@@ -52,7 +59,9 @@ int main()
     Note here that we are loading the project from the proj_data string in the project_data.hpp file.
     */
 
-    Project project = UnpackProject(proj_data);
+    RegisterDefaultStructs();
+    Project project = MakeProject(json::parse(proj_data));
+
     BlankWindow::Game app(project);
     app.Run();
 

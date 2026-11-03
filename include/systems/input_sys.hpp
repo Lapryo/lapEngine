@@ -1,6 +1,7 @@
 #pragma once
 
 #include "system.hpp"
+#include "actionmap.hpp"
 using namespace lapCore;
 
 class InputSystem : public System

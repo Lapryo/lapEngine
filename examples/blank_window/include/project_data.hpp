@@ -10,14 +10,10 @@ const char proj_data[] = R"json(
 {
     "name": "Blank Window",
     "version": "1.0.0",
-    "assets": [],
     "scenes": [
         {
-            "name": "main",
-            "systems": [],
-            "instances": []
+            "name": "main"
         }
-    ],
-    "prefabs": []
+    ]
 }
 )json";

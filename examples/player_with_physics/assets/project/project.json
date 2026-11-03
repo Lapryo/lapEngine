@@ -1,0 +1,57 @@
+{
+    "scenes": [
+        "file@main.json"
+    ],
+    "prefabs": [
+        {
+            "name": "solid-block",
+            "elements": [
+                {
+                    "type": "ui-frame",
+                    "data": {
+                        "renderable": {
+                            "is-screen-space": false,
+                            "visible": true,
+                            "z-layer": 2,
+                            "inherits-ui": false,
+                            "tint": [0, 255, 0, 255]
+                        },
+                        "transform": {
+                            "position": {
+                                "scale": [0, 0],
+                                "offset": [0, 0]
+                            },
+                            "size": {
+                                "scale": [0, 0],
+                                "offset": [25, 25]
+                            },
+                            "anchor": {
+                                "scale": [0.5, 0.5]
+                            }
+                        }
+                    }
+                },
+                {
+                    "type": "physics-2d",
+                    "data": {
+                        "body": {
+                            "type": "dynamic",
+                            "initial-position": [50, 50]
+                        },
+                        "polygon": {
+                            "hitbox-type": "box",
+                            "width": 25,
+                            "height": 25
+                        }
+                    }
+                },
+                {
+                    "type": "transform-2d",
+                    "data": {
+                        "scale": [1, 1]
+                    }
+                }
+            ]
+        }
+    ]
+}

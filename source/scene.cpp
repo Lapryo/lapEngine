@@ -1,5 +1,6 @@
 #include "scene.hpp"
 #include "world.hpp"
+#include "systems.hpp"
 
 using namespace lapCore;
 using namespace EUTIL::Functions;
@@ -11,23 +12,11 @@ using namespace ELEMENTS::Render;
 
 namespace lapCore
 {
-    Object ObjectContainer::AddObject(id_type id)
-    {
-        auto object = objects.create();
-        tree.AddNode(object, id);
-        return object;
-    }
-
-    Object ObjectContainer::AddObject(const ProjectObjectData& data)
+    Object Scene::AddObject(const ProjectObjectData& data)
     {
         // TODO: By default, we'll get the closest index, or the one closest to the root, but maybe add a queue in the future that'll wait for the parents to exist (with timeouts of course)
-        auto parentObject = FindFirstObject(HASH_ID(data.parent.c_str()));
-        
-        Object object;
-        if (parentObject == null)
-            object = AddObject(HASH_ID(data.name.c_str()));
-        else
-            object = AddObject(parentObject, HASH_ID(data.name.c_str()));
+        auto parent = (data.parent.empty()) ? this->root : FindFirstObject(HASH_ID(data.parent.c_str()));
+        auto object = AddObject(HASH_ID(data.name.c_str()), parent, data.index);
 
         for (const auto& elementData : data.elements)
         {
@@ -39,921 +28,404 @@ namespace lapCore
         return object;
     }
 
-    Object ObjectContainer::AddObject(Object parent, id_type id)
+    Object Scene::AddPrefabObject(const ProjectInstancedPrefabData &data)
     {
-        auto parentNode = tree.GetNode(parent);
-        auto object = objects.create();
-        tree.AddNode(parentNode, object, id);
+        auto object = AddObject(data.objectData);
+        for (const auto &childData : data.children)
+        {
+            AddPrefabObject(childData);
+        }
+
         return object;
     }
 
-    Object ObjectContainer::AddChild(Object parent, id_type id)
+    Scene::Scene(World *world, const ProjectSceneData &data)
     {
-        return AddObject(parent, id);
-    }
+        this->world = world;
+        this->id = HASH_ID(data.name.c_str());
+        this->root = objects.create();
 
-    Object ObjectContainer::CloneObject(Object object, id_type newID)
-    {
-        return CloneObject(object, newID, tree.root->key);
-    }
+        ObjectData rootData;
+        rootData.id = HASH_ID("__root__");
+        rootData.parent = null;
+        rootData.index = -1;
 
-    Object ObjectContainer::CloneObject(Object object, id_type newID, Object newParent)
-    {
-        auto parentNode = tree.GetNode(newParent);
-        auto clonedObject = objects.create();
+        AddElement<ObjectData>(this->root, rootData);
 
-        tree.AddNode(parentNode, clonedObject, newID);
+        this->backgroundColor = data.backgroundColor;
 
-        for (auto&& curr : objects.storage())
+        for (const auto& objectData : data.objects)
         {
-            auto& storage = curr.second;
+            AddObject(objectData);
+        }
 
-            if (storage.contains(object))
+        for (const auto& prefabData : data.instancedPrefabs)
+        {
+            AddPrefabObject(prefabData);
+        }
+
+        for (const auto& systemData : data.systems)
+        {
+            if (systemData.type == "gui")
             {
-                storage.push(
-                    clonedObject,
-                    storage.value(object)
-                );
+                AddSystem<GUISystem>(systemData.order);
+            }
+            else if (systemData.type == "physics")
+            {
+                AddSystem<PhysicsSystem>(systemData.order)->RegisterBodies();
+            }
+            else if (systemData.type == "render")
+            {
+                AddSystem<RenderSystem>(systemData.order);
+            }
+            else if (systemData.type == "script")
+            {
+                AddSystem<ScriptSystem>(systemData.order);
+            }
+            else if (systemData.type == "input")
+            {
+                AddSystem<InputSystem>(systemData.order);
+            }
+            else if (systemData.type == "sound")
+            {
+                AddSystem<SoundSystem>(systemData.order);
+            }
+            else
+            {
+                dbgln("Unknown system type: " + systemData.type, LogType::WARNING);
+            }
+        }
+    }
+
+    Object Scene::AddObject(id_type id, int index, ShiftMode shiftMode)
+    {
+        return AddObject(id, root, index, shiftMode);
+    }
+
+    Object Scene::AddObject(
+        id_type id,
+        Object parent,
+        int index,
+        ShiftMode shiftMode
+    )
+    {
+        auto* parentData = GetObject(parent);
+
+        if (!parentData || index < -1)
+            return entt::null;
+
+        unsigned int newIndex;
+
+        if (index == -1)
+        {
+            // Append after the highest existing index.
+            if (parentData->children.empty())
+            {
+                newIndex = 0;
+            }
+            else
+            {
+                auto lastIndex = parentData->children.rbegin()->first;
+
+                if (lastIndex == UINT_MAX)
+                    return entt::null;
+
+                newIndex = lastIndex + 1;
+            }
+        }
+        else
+        {
+            newIndex = static_cast<unsigned int>(index);
+        }
+
+        auto object = objects.create();
+
+        ObjectData data{};
+        data.id = id;
+        data.parent = parent;
+        data.index = newIndex;
+
+        AddElement<ObjectData>(object, data);
+
+        // Reacquire in case component storage was reallocated.
+        parentData = GetObject(parent);
+
+        if (index == -1)
+        {
+            parentData->children.emplace(newIndex, object);
+        }
+        else
+        {
+            ShiftMap(
+                parentData->children,
+                shiftMode,
+                newIndex,
+                object,
+                true
+            );
+        }
+
+        // Synchronize child indices.
+        for (const auto& [childIndex, child] : parentData->children)
+        {
+            GetObject(child)->index = childIndex;
+        }
+
+        return object;
+    }
+
+    vector<Object> Scene::FindObjects(id_type id)
+    {
+        auto view = objects.view<ObjectData>();
+        vector<Object> result;
+
+        for (auto entity : view)
+        {
+            auto& data = view.get<ObjectData>(entity);
+            if (data.id == id)
+            {
+                result.push_back(entity);
             }
         }
 
-        return clonedObject;
+        return result;
     }
 
-    vector<Object> ObjectContainer::FindObjects(id_type id)
+    Object Scene::FindFirstObject(id_type id)
     {
-        auto nodes = tree.FindNodes(id);
-        return tree.GatherIdentifiers(nodes);
-    }
+        auto view = FindObjects(id);
 
-    Object ObjectContainer::FindFirstObject(id_type id)
-    {
-        auto objects = FindObjects(id);
-        auto closestNodesToRoot = tree.GetNodesClosestToRoot(objects);
-        
-        int lowest_child_index = INT_MAX;
-        Object closestObject;
+        // Get the one closest to the root
+        Object closestObject = entt::null;
+        int closestDepth = INT_MAX;
 
-        for (const auto& node : closestNodesToRoot)
+        for (const auto& object : view)
         {
-            auto data = GetObjectData(node->key);
-            if (data) 
+            int depth = 0;
+            auto current = object;
+
+            while (current != root && current != entt::null)
             {
-                if (data->child_index < lowest_child_index)
-                {
-                    lowest_child_index = data->child_index;
-                    closestObject = node->key;
-                }
+                auto* data = GetObject(current);
+                if (!data) break;
+                current = data->parent;
+                depth++;
             }
 
+            if (depth < closestDepth)
+            {
+                closestDepth = depth;
+                closestObject = object;
+            }
         }
+
         return closestObject;
     }
 
-    KVNode<ObjectMetadata, Object, id_type>* ObjectContainer::GetNode(Object object)
+    vector<Object> Scene::GetChildren(Object parent)
     {
-        return tree.GetNode(object);
-    }
-
-    vector<Object> ObjectContainer::GetChildren(Object object)
-    {
-        auto node = tree.GetNode(object);
-        if (!node) return vector<Object>();
-
-        auto children = tree.GetChildren(node);
-        return tree.GatherIdentifiers(children);
-    }
-
-    vector<Object> ObjectContainer::FindChildren(Object parent, id_type id)
-    {
-        auto parentNode = tree.GetNode(parent);
-        if (!parentNode) return vector<Object>();
-
-        auto nodes = tree.FindChildren(parentNode, id);
-        return tree.GatherIdentifiers(nodes);
-    }
-
-    Object ObjectContainer::FindFirstChild(Object parent, id_type id)
-    {
-        auto parentNode = tree.GetNode(parent);
-        if (!parentNode) return null;
-
-        auto children = tree.GetChildren(parentNode);
-
-        // Find the child with the matching name and lowest "child_index"
-        KVNode<ObjectMetadata, Object, id_type>* firstChild = nullptr;
-        bool initialIndexSet = false;
-        int lowest_index = -1; // We must get the initial child index
-
-        for (const auto& child : children)
-        {
-            if (!initialIndexSet)
-            {
-                lowest_index = child->data.child_index;
-                initialIndexSet = true;
-            }
-
-            if (child->value == id)
-            {
-                if (child->data.child_index < lowest_index)
-                {
-                    firstChild = child;
-                    lowest_index = child->data.child_index;
-                }
-            }
-        }
-
-        if (firstChild) return firstChild->key;
-        return null;
-    }
-
-    bool ObjectContainer::RemoveObject(Object object)
-    {
-        return tree.RemoveNode(object);
-    }
-
-    SuccessType ObjectContainer::RemoveAllObjects(id_type id)
-    {
-        auto success = SuccessType::SUCCESS;
-
-        auto objects = FindObjects(id);
-        int failed = 0;
-
-        for (const auto& object : objects)
-            if (!RemoveObject(object))
-                failed++;
-
-        if (failed == objects.size())
-            return SuccessType::FAILURE;
-        else if (failed > 0)
-            return SuccessType::PARTIAL;
-
-        return SuccessType::SUCCESS;
-    }
-
-    bool ObjectContainer::ReparentObject(Object object, Object newParent)
-    {
-        return tree.ReparentNode(object, newParent);
-    }
-
-    ObjectMetaData* ObjectContainer::SetObjectData(Object object, ObjectMetadata data)
-    {
-        auto node = tree.GetNode(object);
-        if (!node) return nullptr;
-
-        if (data.child_index < 0)
-        {
-            // loop through the nextSibling until it is a nullptr
-            KVNode<ObjectMetadata, Object, id_type>* nextNode = node->nextSibling;
-            while (nextNode != nullptr)
-            {
-                nextNode = nextNode->nextSibling;
-            }
-
-            nextNode = nextNode->prevSibling;
-            auto lastIndex
-        }
-    }
-
-    ObjectMetadata* ObjectContainer::GetObjectData(Object object)
-    {
-        auto node = tree.GetNode(object);
-        if (node) return &node->data;
-        return nullptr;
-    }
-}
-
-/*ObjectInfo lapCore::ObjectContainer::AddObject(
-    entt::hashed_string name,
-    entt::hashed_string parent,
-    int childIndex,
-    bool fromPrefab)
-{
-    ObjectEntry entry;
-
-    entry.info.object = this->objects.create();
-    entry.parent.id = parent.value();
-    entry.childIndex = childIndex;
-    entry.fromPrefab = fromPrefab;
-
-    // Resolve parent
-    entry.parent.object = entt::null;
-
-    const bool hasParent =
-        parent.value() != HASH_ID("");
-
-    if (hasParent)
-    {
-        auto parentEntry = FindEntry(parent.value());
-
-        if (parentEntry)
-        {
-            entry.parent.object = parentEntry->info.object;
-        }
-    }
-
-    std::string finalName = name.data();
-
-    // Resolve duplicate names
-    if (objectMap.contains(name.value()))
-    {
-        const std::string baseName = finalName;
-        int i = 1;
-
-        do
-        {
-            finalName =
-                baseName + "_" + std::to_string(i++);
-        }
-        while (
-            objectMap.contains(HASH_ID(finalName.c_str()))
-        );
-
-        name = HASH(finalName.c_str());
-    }
-
-    entry.info.id = name.value();
-
-    // Add to parent's children
-    if (hasParent &&
-        entry.parent.object != entt::null)
-    {
-        auto it = objectMap.find(parent.value());
-
-        if (it != objectMap.end())
-        {
-            if (childIndex == -1)
-                childIndex = static_cast<int>(it->second.children.size());
-
-            entry.childIndex = childIndex;
-            it->second.children[childIndex] = entry.info;
-        }
-    }
-
-    objectMap[name.value()] = entry;
-    lookup[entry.info.id] = finalName;
-
-    return entry.info;
-}
-
-void lapCore::ObjectContainer::RemoveObject(entt::id_type id)
-{
-    auto object = *FindObject(id);
-
-    objects.destroy(object);
-    objectMap.erase(id);
-}
-
-void lapCore::ObjectContainer::RemoveObject(Object object)
-{
-    auto entry = FindEntry(object);
-    if (!entry) return;
-
-    RemoveObject(*entry);
-}
-
-void lapCore::ObjectContainer::RemoveObject(ObjectEntry entry)
-{
-    objects.destroy(entry.info.object);
-    objectMap.erase(entry.info.id);
-}
-
-Object *lapCore::ObjectContainer::FindObject(entt::id_type id)
-{
-    auto it = objectMap.find(id);
-    if (it != objectMap.end())
-        return &it->second.info.object;
-    return nullptr;
-}
-
-ObjectEntry *lapCore::ObjectContainer::FindEntry(entt::id_type id)
-{
-    for (auto& objEntry : objectMap)
-    {
-        if (objEntry.second.info.id == id)
-            return &objEntry.second;
-    }
-    return nullptr;
-}
-
-ObjectEntry *lapCore::ObjectContainer::FindEntry(Object object)
-{
-    for (auto& objEntry : objectMap)
-    {
-        if (objEntry.second.info.object == object)
-            return &objEntry.second;
-    }
-    return nullptr;
-}
-
-ObjectInfo lapCore::ObjectContainer::CloneObject(Object object, std::string newName)
-{
-    auto* srcObject = FindEntry(object);
-    if (!srcObject)
-        return {};
-
-    auto srcObjNameIt = lookup.find(srcObject->info.id);
-    if (srcObjNameIt == lookup.end())
-        return {};
-
-    if (newName.empty())
-        newName = srcObjNameIt->second;
-
-    // Get the original parent name if one exists
-    std::string parentName;
-
-    auto srcObjParentNameIt = lookup.find(srcObject->parent.id);
-    if (srcObjParentNameIt != lookup.end())
-        parentName = srcObjParentNameIt->second;
-
-    std::function<ObjectInfo(Object, const std::string&, const std::string&)> cloneRecursive;
-
-    cloneRecursive =
-        [&](Object srcEntity,
-            const std::string& requestedName,
-            const std::string& dstParentName) -> ObjectInfo
-    {
-        auto* srcEntry = FindEntry(srcEntity);
-        if (!srcEntry)
+        auto parentData = GetObject(parent);
+        if (!parentData)
             return {};
 
-        auto srcNameIt = lookup.find(srcEntry->info.id);
-        if (srcNameIt == lookup.end())
-            return {};
-
-        std::string dstName = requestedName;
-
-        if (dstName.empty())
-            dstName = srcNameIt->second;
-
-        ObjectInfo dstObject = AddObject(
-            HASH(dstName.c_str()),
-            HASH(dstParentName.c_str()),
-            -1,
-            srcEntry->fromPrefab
-        );
-
-        // Get the actual name AddObject chose.
-        // Important if "enemy" became "enemy_1".
-        auto dstNameIt = lookup.find(dstObject.id);
-        if (dstNameIt == lookup.end())
-            return {};
-
-        const std::string actualDstName = dstNameIt->second;
-
-        // Copy all components
-        for (auto&& curr : objects.storage())
+        auto result = vector<Object>();
+        for (const auto& [index, child] : parentData->children)
         {
-            auto& storage = curr.second;
+            result.push_back(child);
+        }
 
-            if (storage.contains(srcEntry->info.object))
+        return result;
+    }
+
+    Object Scene::FindChild(Object parent, unsigned int index)
+    {
+        auto parentData = GetObject(parent);
+        if (!parentData)
+            return entt::null;
+
+        auto it = parentData->children.find(index);
+        if (it != parentData->children.end())
+            return it->second;
+
+        return entt::null;
+    }
+
+    vector<Object> Scene::FindChildren(Object parent, id_type id)
+    {
+        auto parentData = GetObject(parent);
+        if (!parentData)
+            return {};
+
+        vector<Object> result;
+        for (const auto& [index, child] : parentData->children)
+        {
+            auto* childData = GetObject(child);
+            if (childData && childData->id == id)
             {
-                storage.push(
-                    dstObject.object,
-                    storage.value(srcEntry->info.object)
-                );
+                result.push_back(child);
             }
         }
 
-        // Clone children under the NEW object
-        for (const auto& [childIndex, child] : srcEntry->children)
+        return result;
+    }
+
+    Object Scene::FindFirstChild(Object parent, id_type id)
+    {
+        auto parentData = GetObject(parent);
+        if (!parentData)
+            return entt::null;
+
+        for (const auto& [index, child] : parentData->children)
         {
-            cloneRecursive(
-                child.object,
-                "",
-                actualDstName
+            auto* childData = GetObject(child);
+            if (childData && childData->id == id)
+            {
+                return child;
+            }
+        }
+
+        return entt::null;
+    }
+
+    bool Scene::RemoveObject(Object object, ShiftMode shiftMode)
+    {
+        // Remove all descendants first
+        auto* data = GetObject(object);
+        if (!data)
+            return false;
+
+        for (const auto& [index, child] : data->children)
+        {
+            RemoveObject(child);
+        }
+
+        // Remove from the parent's children map and shift the indices
+        auto* parentData = GetObject(data->parent);
+        if (parentData)
+        {
+            ShiftMap(
+                parentData->children,
+                shiftMode,
+                data->index,
+                Object{},
+                false
             );
         }
 
-        return dstObject;
-    };
+        // Finally, destroy the object
+        objects.destroy(object);
+        return true;
+    }
 
-    return cloneRecursive(
-        object,
-        newName,
-        parentName
-    );
-}
-
-ObjectInfo lapCore::ObjectContainer::CloneObjectFromContainer(
-    ObjectContainer& container,
-    Object object,
-    entt::hashed_string newName,
-    entt::hashed_string newParent
-)
-{
-    auto* srcObject = container.FindEntry(object);
-    if (!srcObject)
-        return {};
-
-    auto srcObjNameIt = container.lookup.find(srcObject->info.id);
-    if (srcObjNameIt == container.lookup.end())
-        return {};
-
-    if (newName.value() == HASH_ID(""))
-        newName = HASH(srcObjNameIt->second.c_str());
-
-    std::function<ObjectInfo(
-        Object,
-        entt::hashed_string,
-        entt::hashed_string
-    )> cloneRecursive;
-
-    cloneRecursive =
-        [&](Object srcEntity,
-            entt::hashed_string dstName,
-            entt::hashed_string dstParentName) -> ObjectInfo
+    bool Scene::ReparentObject(Object object, Object newParent, ShiftMode startShiftMode, ShiftMode endShiftMode)
     {
-        auto* srcEntry = container.FindEntry(srcEntity);
-        if (!srcEntry)
-            return {};
+        auto* data = GetObject(object);
+        if (!data)
+            return false;
 
-        auto srcNameIt = container.lookup.find(srcEntry->info.id);
-        if (srcNameIt == container.lookup.end())
-            return {};
+        auto* oldParentData = GetObject(data->parent);
+        auto* newParentData = GetObject(newParent);
 
-        if (dstName.value() == HASH_ID(""))
-            dstName = HASH(srcNameIt->second.c_str());
+        if (!newParentData)
+            return false;
 
-        ObjectInfo dstObject = AddObject(
-            dstName,
-            dstParentName,
-            -1,
-            srcEntry->fromPrefab
-        );
-
-        auto dstNameIt = lookup.find(dstObject.id);
-        if (dstNameIt == lookup.end())
-            return {};
-
-        entt::hashed_string actualDstName =
-            HASH(dstNameIt->second.c_str());
-
-        for (auto&& curr : container.objects.storage())
+        // Remove from the old parent's children map and shift the indices
+        if (oldParentData)
         {
-            entt::id_type componentType = curr.first;
-            auto& storage = curr.second;
-
-            if (storage.contains(srcEntry->info.object))
-            {
-                AddElement(
-                    dstObject.object,
-                    componentType,
-                    storage.value(srcEntry->info.object)
-                );
-            }
-        }
-
-        for (const auto& [childIndex, childInfo] : srcEntry->children)
-        {
-            cloneRecursive(
-                childInfo.object,
-                HASH(""),
-                actualDstName
+            ShiftMap(
+                oldParentData->children,
+                startShiftMode,
+                data->index,
+                Object{},
+                false
             );
         }
 
-        return dstObject;
-    };
+        // Update the object's parent and index
+        data->parent = newParent;
+        data->index = static_cast<unsigned int>(newParentData->children.size());
 
-    return cloneRecursive(
-        object,
-        newName,
-        newParent
-    );
-}
-
-ObjectInfo lapCore::ObjectContainer::CloneHierarchyFromContainer(
-    ObjectContainer& container,
-    Object object,
-    entt::hashed_string newName,
-    entt::hashed_string newParent
-)
-{
-    auto* srcObject = container.FindEntry(object);
-    if (!srcObject)
-        return {};
-
-    auto srcObjNameIt = container.lookup.find(srcObject->info.id);
-    if (srcObjNameIt == container.lookup.end())
-        return {};
-
-    if (newName.value() == HASH_ID(""))
-        newName = HASH(srcObjNameIt->second.c_str());
-
-    std::function<ObjectInfo(
-        Object,
-        entt::hashed_string,
-        entt::hashed_string
-    )> cloneRecursive;
-
-    cloneRecursive =
-        [&](Object srcEntity,
-            entt::hashed_string dstName,
-            entt::hashed_string dstParentName) -> ObjectInfo
-    {
-        auto* srcEntry = container.FindEntry(srcEntity);
-        if (!srcEntry)
-            return {};
-
-        auto srcNameIt = container.lookup.find(srcEntry->info.id);
-        if (srcNameIt == container.lookup.end())
-            return {};
-
-        if (dstName.value() == HASH_ID(""))
-            dstName = HASH(srcNameIt->second.c_str());
-
-        ObjectInfo dstObject = AddObject(
-            dstName,
-            dstParentName,
-            -1,
-            srcEntry->fromPrefab
+        // Add to the new parent's children map and shift the indices
+        ShiftMap(
+            newParentData->children,
+            endShiftMode,
+            data->index,
+            object,
+            true
         );
 
-        auto dstNameIt = lookup.find(dstObject.id);
-        if (dstNameIt == lookup.end())
-            return {};
-
-        entt::hashed_string actualDstName =
-            HASH(dstNameIt->second.c_str());
-
-        for (const auto& [childIndex, childInfo] : srcEntry->children)
+        // Synchronize child indices for the new parent
+        for (const auto& [childIndex, child] : newParentData->children)
         {
-            cloneRecursive(
-                childInfo.object,
-                HASH(""),
-                actualDstName
-            );
+            GetObject(child)->index = childIndex;
         }
 
-        return dstObject;
-    };
+        return true;
+    }
 
-    return cloneRecursive(
-        object,
-        newName,
-        newParent
-    );
-}
-
-void lapCore::ObjectContainer::AddObjectsFromProjectData(std::vector<ProjectObjectData> objects)
-{
-    for (const auto& object_data : objects)
+    ObjectData *Scene::GetObject(Object object)
     {
-        auto prefabObject = AddObject(HASH(object_data.name.c_str()), HASH(object_data.parent.c_str()), object_data.index, true);
-        for (const auto& element : object_data.elements)
+        return FindElement<ObjectData>(object);
+    }
+
+    void Scene::Update(float deltaTime, RenderTexture2D &target)
+    {
+        /// Draw to render texture first
+        BeginTextureMode(target);
+        ClearBackground(this->backgroundColor);
+
+        for (auto &[order, system] : systems)
         {
-            if (!element.get())
+            if (!system || !system->active)
                 continue;
 
-            AddElement(prefabObject.object, element->GetTypeID(), element->GetRawData());
+            system->Update(deltaTime, objects);
         }
-    }
-}
 
-void lapCore::ObjectContainer::AddObjectsFromPrefabProjectData(
-    ObjectContainer& prefabContainer,
-    const std::vector<std::pair<std::string, ProjectObjectData>>& prefabs)
-{
-    for (const auto& [prefabName, objectData] : prefabs)
-    {
-        auto prefab = prefabContainer.FindObject(
-            HASH(prefabName.c_str())
-        );
+        EndTextureMode();
 
-        if (!prefab)
-            continue;
+        // Draw to the screen with the render texture afterwards
+        BeginDrawing();
+        ClearBackground(BLACK);
 
-        auto objInfo = CloneHierarchyFromContainer(
-            prefabContainer,
-            *prefab,
-            HASH(objectData.name.c_str()),
-            HASH(objectData.parent.c_str())
-        );
+        // Makes the window letterboxed/pillarboxed to maintain the aspect ratio of the logical resolution
+        int screenW = GetScreenWidth();
+        int screenH = GetScreenHeight();
+        float screenAspect = (float)screenW / screenH;
+        float targetAspect = (float)world->window.logical_resolution.x / world->window.logical_resolution.y;
 
-        for (const auto& element : objectData.elements)
+        int drawWidth, drawHeight;
+        int offsetX, offsetY;
+
+        if (screenAspect > targetAspect)
         {
-            if (!element.get())
-                continue;
-
-            AddElement(objInfo.object, element->GetTypeID(), element->GetRawData());
+            // window is wider than logical
+            drawHeight = screenH;
+            drawWidth = (int)(screenH * targetAspect);
+            offsetX = (screenW - drawWidth) / 2;
+            offsetY = 0;
         }
-    }
-}
-
-void lapCore::Scene::LoadMapObjects(Map &map)
-{
-    for (const auto& layer : map.layers)
-    {
-        for (const auto& tileData : layer.second.second)
+        else
         {
-            std::string tileName = "tile_" + 
-                std::to_string(layer.first) + "_" + 
-                std::to_string(tileData.id) + "_" + 
-                std::to_string(tileData.rect.x) + "_" + 
-                std::to_string(tileData.rect.y);
-
-            auto tile = AddObject(HASH(tileName.c_str()), HASH(""), -1);
-            map.objects[layer.first] = tile.id;
-
-            // Add tile properties as elements here
-
-            auto tileset = world->resources.tilesets.TryGet(map.tilesets[tileData.tileset].id);
-            if (!tileset) continue;
-
-            Transform2D tileTransform;
-            tileTransform.position = {tileData.rect.x, tileData.rect.y};
-
-            if (tileData.id != 0)
-            {
-                Sprite tileSprite;
-                tileSprite.textureID = tileset->asset.textureID;
-                tileSprite.animated.active = false;
-
-                unsigned int localID =
-                    tileData.id - map.tilesets[tileData.tileset].firstGID;
-
-                int column = localID % tileset->asset.columns;
-                int row    = localID / tileset->asset.columns;
-
-                tileSprite.sourceRect = {
-                    (float)(column * map.tileSize.x),
-                    (float)(row * map.tileSize.y),
-                    (float)map.tileSize.x,
-                    (float)map.tileSize.y
-                };
-
-                tileSprite.destRect = tileSprite.sourceRect;
-                tileSprite.destRect.x = 0.f;
-                tileSprite.destRect.y = 0.f;
-                tileSprite.destRect.width = (float)tileData.rect.width;
-                tileSprite.destRect.height = (float)tileData.rect.height;
-
-                tileSprite.renderable.zlayer = layer.first;
-
-                float rotation = 0.f;
-
-                const bool h = tileData.flipX;
-                const bool v = tileData.flipY;
-                const bool d = tileData.flipD;
-
-                bool flipX = false;
-                bool flipY = false;
-
-                if (!d)
-                {
-                    // Normal Tiled flips
-                    flipX = h;
-                    flipY = v;
-                }
-                else
-                {
-                    // Tiled diagonal transformations
-
-                    if (!h && !v)
-                    {
-                        // Diagonal only
-                        rotation = 90.f;
-                        flipY = true;
-                    }
-                    else if (h && !v)
-                    {
-                        // Diagonal + horizontal
-                        rotation = 90.f;
-                    }
-                    else if (!h && v)
-                    {
-                        // Diagonal + vertical
-                        rotation = -90.f;
-                    }
-                    else // h && v
-                    {
-                        // Diagonal + horizontal + vertical
-                        rotation = 90.f;
-                        flipX = true;
-                    }
-                }
-
-                if (flipX)
-                    tileSprite.sourceRect.width *= -1.f;
-
-                if (flipY)
-                    tileSprite.sourceRect.height *= -1.f;
-
-                tileTransform.rotation = rotation;
-
-                tileSprite.renderable.tint = {255, 255, 255, (unsigned char)(255 * tileData.opacity)};
-
-                tileSprite.renderable.ySort = tileTransform.position.y + map.tileSize.y;
-
-                AddElement<Sprite>(tile.object, tileSprite);
-
-                if (tileData.isObject)
-                {
-                    tileTransform.position.x += (tileData.rect.width / 2.f) - (map.tileSize.x / 2.f);
-                    tileTransform.position.y += (tileData.rect.height / 2.f) - (map.tileSize.y / 2.f);
-                }
-            }
-            else if (tileData.isObject)
-            {
-                tileTransform.position.y += map.tileSize.y;
-            }
-
-            AddElement<Transform2D>(tile.object, tileTransform);
-
-            auto it = tileData.properties.find("type");
-            if (it != tileData.properties.end())
-            {
-                auto tileType = it->second;
-                if (tileType == "solid")
-                {
-                    Physics2D tilephysics;
-                    tilephysics.bodyDef = b2DefaultBodyDef();
-                    tilephysics.bodyDef.position = Convert::Vec2::box2d(tileTransform.position);
-                    tilephysics.bodyDef.type = b2BodyType::b2_staticBody;
-                    tilephysics.shapeDef = b2DefaultShapeDef();
-                    tilephysics.polygon = b2MakeBox(((float)tileData.rect.width) / 2.f, ((float)tileData.rect.height) / 2.f);
-                    auto physics = AddElement<Physics2D>(tile.object, tilephysics);
-
-                    auto pSys = GetSystem<PhysicsSystem>();
-                    pSys->bodyMap[tile.object] = pSys->Create2DBody(tilephysics.bodyDef, tilephysics.shapeDef, tilephysics.polygon);
-                }
-                else if (tileType == "teleport")
-                {
-                    Physics2D tilephysics;
-                    tilephysics.bodyDef = b2DefaultBodyDef();
-                    tilephysics.bodyDef.position = Convert::Vec2::box2d(tileTransform.position);
-                    tilephysics.bodyDef.type = b2BodyType::b2_staticBody;
-                    tilephysics.shapeDef = b2DefaultShapeDef();
-                    tilephysics.polygon = b2MakeBox(((float)tileData.rect.width) / 2.f, ((float)tileData.rect.height) / 2.f);
-                    tilephysics.shapeDef.isSensor = true;
-
-                    auto physics = AddElement<Physics2D>(tile.object, tilephysics);
-
-                    auto pSys = GetSystem<PhysicsSystem>();
-                    pSys->bodyMap[tile.object] = pSys->Create2DBody(tilephysics.bodyDef, tilephysics.shapeDef, tilephysics.polygon);
-
-                    b2Body_SetUserData(
-                        pSys->bodyMap[tile.object],
-                        const_cast<Map::TileProperties*>(&tileData.properties)
-                    );
-                }
-            }
-
-            AddElement<Map::TileProperties>(tile.object, tileData.properties);
+            // window is taller than logical
+            drawWidth = screenW;
+            drawHeight = (int)(screenW / targetAspect);
+            offsetX = 0;
+            offsetY = (screenH - drawHeight) / 2;
         }
+
+        // Draw the render texture to the screen, scaling it
+        DrawTexturePro(
+            target.texture,
+            {0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height}, // source rect (flip y)
+            {(float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight},    // dest rect
+            {0.0f, 0.0f},                                                             // origin
+            0.0f,                                                                     // rotation
+            WHITE);
+
+        // TODO: Here we can draw a custom debug menu with system times, etc. if needed for developers
+        // This option can be toggleable and is checked via the App class
+
+        EndDrawing();
     }
 }
-
-lapCore::ObjectInfo* lapCore::Scene::AddPrefab(entt::id_type prefabName, std::string newName)
-{
-    auto prefab = world->prefabs->FindObject(prefabName);
-    if (!prefab) return nullptr;
-
-    auto obj = CloneObjectFromContainer(*world->prefabs, *prefab, HASH(newName.c_str()), "");
-    auto* entry = FindEntry(obj.object);
-    return entry ? &entry->info : nullptr;
-}
-
-lapCore::ObjectInfo lapCore::Scene::AddPrefab(Object prefab, std::string newName)
-{
-    return CloneObjectFromContainer(*world->prefabs, prefab, HASH(newName.c_str()), "");
-}
-
-void lapCore::ObjectContainer::AddElement(entt::hashed_string objectName, entt::id_type elementType, void *elementData)
-{
-    auto it = objectMap.find(objectName.value());
-    if (it == objectMap.end())
-        return;
-
-    AddElement(it->second.info.object, elementType, elementData);
-}
-
-void lapCore::ObjectContainer::AddElement(Object object, entt::id_type elementType, void *elementData)
-{
-    auto entry = Reflection::TryGet(elementType);
-    entry->emplace(objects, object, elementData);
-}
-
-void lapCore::ObjectContainer::RemoveElement(entt::id_type id, entt::id_type elementType)
-{
-    auto it = objectMap.find(id);
-    if (it == objectMap.end())
-        return;
-
-    RemoveElement(it->second.info.object, elementType);
-}
-
-void lapCore::ObjectContainer::RemoveElement(
-    Object object,
-    entt::id_type elementType
-)
-{
-    auto entry = Reflection::TryGet(elementType);
-    if (!entry)
-        return;
-
-    auto* storage = objects.storage(elementType);
-    if (!storage)
-        return;
-
-    if (!storage->contains(object))
-        return;
-
-    entry->erase(objects, object);
-}
-
-void *lapCore::ObjectContainer::FindElement(entt::id_type id, entt::id_type elementType)
-{
-    auto it = objectMap.find(id);
-    if (it == objectMap.end())
-        return nullptr;
-
-    return FindElement(it->second.info.object, elementType);
-}
-
-void *lapCore::ObjectContainer::FindElement(Object object, entt::id_type elementType)
-{
-    auto* storage = objects.storage(elementType);
-    if (!storage)
-        return nullptr;
-
-    if (!storage->contains(object))
-        return nullptr;
-
-    return storage->value(object);
-}
-
-void lapCore::ObjectContainer::ClearObjects()
-{
-    objects.clear();
-    objectMap.clear();
-}
-
-void lapCore::Scene::Update(float deltaTime, RenderTexture2D &target)
-{
-    /// Draw to render texture first
-    BeginTextureMode(target);
-    ClearBackground(backgroundColor);
-
-    for (auto &[order, system] : systems)
-    {
-        if (!system || !system->active)
-            continue;
-
-        system->Update(deltaTime, objects);
-    }
-
-    EndTextureMode();
-
-    // Draw to the screen with the render texture afterwards
-    BeginDrawing();
-    ClearBackground(BLACK);
-
-    // Makes the window letterboxed/pillarboxed to maintain the aspect ratio of the logical resolution
-    int screenW = GetScreenWidth();
-    int screenH = GetScreenHeight();
-    float screenAspect = (float)screenW / screenH;
-    float targetAspect = (float)world->window.logical_resolution.x / world->window.logical_resolution.y;
-
-    int drawWidth, drawHeight;
-    int offsetX, offsetY;
-
-    if (screenAspect > targetAspect)
-    {
-        // window is wider than logical
-        drawHeight = screenH;
-        drawWidth = (int)(screenH * targetAspect);
-        offsetX = (screenW - drawWidth) / 2;
-        offsetY = 0;
-    }
-    else
-    {
-        // window is taller than logical
-        drawWidth = screenW;
-        drawHeight = (int)(screenW / targetAspect);
-        offsetX = 0;
-        offsetY = (screenH - drawHeight) / 2;
-    }
-
-    // Draw the render texture to the screen, scaling it
-    DrawTexturePro(
-        target.texture,
-        {0.0f, 0.0f, (float)target.texture.width, -(float)target.texture.height}, // source rect (flip y)
-        {(float)offsetX, (float)offsetY, (float)drawWidth, (float)drawHeight},    // dest rect
-        {0.0f, 0.0f},                                                             // origin
-        0.0f,                                                                     // rotation
-        WHITE);
-
-    // TODO: Here we can draw a custom debug menu with system times, etc. if needed for developers
-    // This option can be toggleable and is checked via the App class
-
-    EndDrawing();
-}
-
-void lapCore::Scene::Clear()
-{
-    ClearObjects();
-    systems.clear();
-    name = "";
-}*/

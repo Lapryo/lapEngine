@@ -1,0 +1,24 @@
+{
+    "name": "camera",
+    "parent": "",
+    "index": -1,
+    "elements": [
+        {
+            "type": "rl-camera-2d",
+            "data": {
+                "offset": [320, 240],
+                "target": [0, 0],
+                "rotation": 0.0,
+                "zoom": 1.0
+            }
+        },
+        {
+            "type": "script",
+            "data": {
+                "functions": {
+                    "update": ["camera_update"]
+                }
+            }    
+        }
+    ]
+}

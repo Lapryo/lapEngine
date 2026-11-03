@@ -17,7 +17,7 @@ namespace lapCore
         if (projectJson.contains("prefabs"))
             project.prefabs = MakeObjects(projectJson.at("prefabs"), true);
         if (projectJson.contains("scenes"))
-            project.scenes = MakeScenes(projectJson.at("scenes"));
+            project.scenes = MakeScenes(projectJson.at("scenes"), project.prefabs);
 
         return project;
     }
@@ -100,18 +100,18 @@ namespace lapCore
         return element;
     }
     
-    vector<ProjectSceneData> MakeScenes(const json &scenesJson)
+    vector<ProjectSceneData> MakeScenes(const json &scenesJson, const vector<ProjectObjectData> &prefabs)
     {
         vector<ProjectSceneData> scenes;
 
         for (const auto &sceneJson : scenesJson)
             if (sceneJson.is_object())
-                scenes.push_back(MakeScene(sceneJson));
+                scenes.push_back(MakeScene(sceneJson, prefabs));
 
         return scenes;
     }
 
-    ProjectSceneData MakeScene(const json &sceneJson)
+    ProjectSceneData MakeScene(const json &sceneJson, const vector<ProjectObjectData> &prefabs)
     {
         ProjectSceneData scene;
 
@@ -122,7 +122,7 @@ namespace lapCore
         if (sceneJson.contains("background-color"))
             JSON::Serializer<Color>::from_json(scene.backgroundColor, sceneJson.at("background-color"));
         if (sceneJson.contains("prefabs"))
-            scene.instancedPrefabs = MakeInstancedPrefabs(sceneJson.at("prefabs"));
+            scene.instancedPrefabs = MakeInstancedPrefabs(sceneJson.at("prefabs"), prefabs);
         if (sceneJson.contains("systems"))
             scene.systems = MakeSystems(sceneJson.at("systems"));
 
