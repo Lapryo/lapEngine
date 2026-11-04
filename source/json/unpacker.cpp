@@ -7,28 +7,28 @@ namespace lapCore
 
     const char* REPLACEMENT_KEYWORD = "file@";
 
-    bool jsonContains(const json &j, const std::string &key, bool allowNull)
+    bool jsonContains(const json &j, const string &key, bool allowNull)
     {
         if (allowNull)
             return j.contains(key);
         return j.contains(key) && !j[key].is_null();
     }
 
-    bool jsonContainsArray(const json &j, const std::string &key, bool allowEmpty)
+    bool jsonContainsArray(const json &j, const string &key, bool allowEmpty)
     {
         if (allowEmpty)
             return jsonContains(j, key, true) && j[key].is_array();
         return jsonContainsArray(j, key, false) && !j[key].empty();
     }
 
-    bool jsonContainsObject(const json &j, const std::string &key, bool allowEmpty)
+    bool jsonContainsObject(const json &j, const string &key, bool allowEmpty)
     {
         if (allowEmpty)
             return jsonContains(j, key, true) && j[key].is_object();
         return jsonContainsObject(j, key, true) && !j[key].empty();
     }
 
-    bool jsonContainsString(const json &j, const std::string &key, bool allowEmpty)
+    bool jsonContainsString(const json &j, const string &key, bool allowEmpty)
     {
         if (allowEmpty)
             return jsonContains(j, key, true) && j[key].is_string();
@@ -61,23 +61,23 @@ namespace lapCore
     {
         if (j.is_string())
         {
-            if (j.get<std::string>().substr(0, strlen(REPLACEMENT_KEYWORD)) == REPLACEMENT_KEYWORD)
+            if (j.get<string>().substr(0, strlen(REPLACEMENT_KEYWORD)) == REPLACEMENT_KEYWORD)
                 return true;
         }
 
         return false;
     }
 
-    std::string GetReplacementValue(const json &j, const std::string &key)
+    string GetReplacementValue(const json &j, const string &key)
     {
         // Get the characters after the replacement keyword
-        return j[key].get<std::string>().substr(strlen(REPLACEMENT_KEYWORD));
+        return j[key].get<string>().substr(strlen(REPLACEMENT_KEYWORD));
     }
 
-    std::string GetReplacementValue(const json &j)
+    string GetReplacementValue(const json &j)
     {
         // Get the characters after the replacement keyword
-        return j.get<std::string>().substr(strlen(REPLACEMENT_KEYWORD));
+        return j.get<string>().substr(strlen(REPLACEMENT_KEYWORD));
     }
 
     json ReplaceWithFile(json &j, const filesystem::path &filePath)
@@ -94,7 +94,7 @@ namespace lapCore
         return json();
     }
 
-    json ReplaceKeyValueWithFile(json &j, const std::string &key, const filesystem::path &filePath)
+    json ReplaceKeyValueWithFile(json &j, const string &key, const filesystem::path &filePath)
     {
         if (jsonContains(j, key) && wantsReplacement(j[key]))
         {

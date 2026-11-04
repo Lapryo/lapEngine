@@ -40,7 +40,7 @@ void App::Run()
     if (!Init())
     {
         state = AppState::ERROR;
-        std::cerr << "Error: App initialization failed!\n";
+        cerr << "Error: App initialization failed!\n";
         Shutdown();
         return;
     }

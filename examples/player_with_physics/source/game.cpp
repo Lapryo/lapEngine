@@ -70,7 +70,7 @@ ActionMap RegisterMovementActions()
     return movementActions;
 }
 
-void Move(Scene *scene, Object object, entt::id_type eventID)
+void Move(Scene *scene, Object object, id_type eventID)
 {
     auto playerAttributes = scene->FindElement<PlayerAttributes>(object);
     if (!playerAttributes) return; // Always check if it exists!
@@ -101,7 +101,7 @@ namespace Player
 
     Then we set our gravity to nothing because we're in a void, pretty simple.
     */
-    void Init(Scene *scene, Object object, entt::id_type eventID)
+    void Init(Scene *scene, Object object, id_type eventID)
     {
         ConnectECSEvent(object, plrDownEvent, Move);
         ConnectECSEvent(object, plrUpEvent, Move);   
@@ -122,7 +122,7 @@ namespace Player
 
     We have an additional FPS counter at the top.
     */
-    void Update(Scene *scene, Object object, entt::id_type eventID, float delta)
+    void Update(Scene *scene, Object object, id_type eventID, float delta)
     {
         auto attributes = scene->FindElement<PlayerAttributes>(object);
         Vector2 normalized_vel = Vector2Normalize(attributes->inputDirection);
@@ -135,7 +135,7 @@ namespace Player
         
         attributes->inputDirection = {0.f, 0.f};
 
-        std::string fpsText = "FPS: " + std::to_string(GetFPS());
+        string fpsText = "FPS: " + to_string(GetFPS());
         DrawText(fpsText.c_str(), 10, 10, 20, RED);
     }
 }
@@ -147,7 +147,7 @@ with smoothness and all.
 
 namespace PlayerCamera
 {
-    void Update(Scene *scene, Object object, entt::id_type eventID, float delta)
+    void Update(Scene *scene, Object object, id_type eventID, float delta)
     {
         auto camElement = scene->FindElement<Camera2D>(object);
         if (!camElement) return;

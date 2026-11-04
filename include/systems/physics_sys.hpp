@@ -23,7 +23,7 @@ public:
 
     void Update(
         float deltaTime, 
-        entt::registry &reg
+        registry &reg
     ) override;
 
     void RegisterBodies();
@@ -34,8 +34,8 @@ public:
     );
 
     b2WorldId worldID;
-    std::unordered_map<Object, b2BodyId> bodyMap;
+    unordered_map<Object, b2BodyId> bodyMap;
 
-    std::string GetName() const override 
+    string GetName() const override 
     { return "PhysicsSystem"; }
 };

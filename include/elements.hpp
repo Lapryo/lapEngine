@@ -34,7 +34,7 @@ namespace lapCore
                 Rectangle sourceRect{0, 0, 0, 0}, destRect{0, 0, 0, 0}; ///< Used for animations primarily, other uses are possible
                 bool flipX, flipY, flipD = false; ///< Flags for flipping the sprite horizontally, vertically, and diagonally
 
-                entt::id_type textureID{0}; ///< The ID of the texture to be used for the sprite
+                id_type textureID{0}; ///< The ID of the texture to be used for the sprite
             };
 
             namespace UI
@@ -105,7 +105,7 @@ namespace lapCore
 
                 struct UIGradient
                 {
-                    std::vector<Color> colorPoints{};
+                    vector<Color> colorPoints{};
                     float angle{0.f};
                 };
 
@@ -119,8 +119,8 @@ namespace lapCore
                 {
                     UIFrame frame{};
 
-                    std::string text{""};
-                    entt::id_type fontID{0};
+                    string text{""};
+                    id_type fontID{0};
                     float fontSize{10.f};
                     float spacing{1.f};
 
@@ -133,7 +133,7 @@ namespace lapCore
 
                 struct UIButtonEventCallbacks
                 {
-                    entt::id_type mouseHover{0}, mouseEnter{0}, mouseExit{0}, leftClick{0}, rightClick{0}, middleClick{0};
+                    id_type mouseHover{0}, mouseEnter{0}, mouseExit{0}, leftClick{0}, rightClick{0}, middleClick{0};
                 };
 
                 struct UIButton
@@ -167,7 +167,7 @@ namespace lapCore
 
             struct SoundPoint
             {
-                entt::id_type audioID{0};
+                id_type audioID{0};
                 bool isMusic{false}, positional{true}, active{true}, usesOwn{true};
                 float cutoffDistance{100.f};
                 Vector2 target{0.f, 0.f}; // Target should be set to objects positions such as the player
@@ -180,7 +180,7 @@ namespace lapCore
                 bool autoPlay{true};
 
                 // Not serializeable
-                std::function<void()> onStart, onPlay, onEnd;
+                function<void()> onStart, onPlay, onEnd;
             };
         }
 
@@ -188,19 +188,19 @@ namespace lapCore
         {
             struct Tags
             {
-                std::unordered_set<entt::id_type> tags;
+                unordered_set<id_type> tags;
             };
 
-            using ParameterValue = std::variant<
+            using ParameterValue = variant<
                 bool,
                 int,
                 float,
-                std::string
+                string
             >;
 
             struct Parameter
             {
-                entt::id_type id{0};
+                id_type id{0};
                 ParameterValue value{false};
 
                 bool active{true};
@@ -208,12 +208,12 @@ namespace lapCore
 
             struct Parameters
             {
-                std::vector<Parameter> parameters;
+                vector<Parameter> parameters;
             };
 
             struct Script
             {
-                std::vector<entt::id_type> onCreateFunctions{}, onUpdateFunctions{}, onDestroyFunctions{};
+                vector<id_type> onCreateFunctions{}, onUpdateFunctions{}, onDestroyFunctions{};
 
                 bool active{true};
                 bool initiated{false};

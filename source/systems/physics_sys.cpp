@@ -28,13 +28,13 @@ b2BodyId PhysicsSystem::Create2DBody(b2BodyDef bodyDef, b2ShapeDef shapeDef, b2P
 
 const float timeStep = 1.f / 60.f;
 
-void PhysicsSystem::Update(float deltaTime, entt::registry &registry)
+void PhysicsSystem::Update(float deltaTime, registry &registry)
 {
     static float accumulator = 0.f;
     accumulator += deltaTime;
     while (accumulator >= timeStep)
     {
-        b2World_Step(worldID, timeStep, 12);
+        b2World_Step(worldID, timeStep, 4);
         accumulator -= timeStep;
     }
 

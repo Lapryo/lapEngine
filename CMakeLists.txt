@@ -85,5 +85,8 @@ if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     )
 endif()
 
+
 add_subdirectory(examples/blank_window)
 add_subdirectory(examples/player_with_physics)
+add_subdirectory(examples/stress_test)
+add_subdirectory(examples/prefab_children)

@@ -28,7 +28,7 @@ namespace lapCore
         {
             ControlType controlType;
             InputType inputType;
-            std::vector<int> codes;
+            vector<int> codes;
         };
 
         struct InputDeadzone
@@ -46,19 +46,19 @@ namespace lapCore
             bool pressed;
             bool sustain;
             bool shared = false;
-            entt::id_type eventID;
+            id_type eventID;
         };
 
-        std::map<std::string, InputEntry> actions;
+        map<string, InputEntry> actions;
 
         void RegisterAction(
-            const std::string &actionName, 
+            const string &actionName, 
             const InputEntry &entry
         );
         void RegisterAction(
-            const std::string &actionName, 
-            entt::id_type eventID, 
-            std::vector<int> codes, 
+            const string &actionName, 
+            id_type eventID, 
+            vector<int> codes, 
             bool sustain, 
             InputType inputType, 
             ControlType controlType

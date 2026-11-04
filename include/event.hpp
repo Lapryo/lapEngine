@@ -15,7 +15,9 @@ namespace lapCore
 {
     struct Scene;
 
-    using Object = entt::entity;
+    using Object = entity;
+    using namespace entt;
+    using namespace std;
 
     // =========================================================================
     // Event Containers
@@ -25,20 +27,20 @@ namespace lapCore
     {
         virtual ~IEventContainer() = default;
 
-        entt::id_type type;
+        id_type type;
     };
 
     template <typename... Args>
     struct EventContainer : IEventContainer
     {
-        using Listener = std::function<void(Scene*, Args...)>;
+        using Listener = function<void(Scene*, Args...)>;
 
         EventContainer()
         {
-            type = entt::type_hash<EventContainer<Args...>>::value();
+            type = type_hash<EventContainer<Args...>>::value();
         }
 
-        std::vector<Listener> listeners;
+        vector<Listener> listeners;
     };
 
     // =========================================================================
@@ -53,21 +55,21 @@ namespace lapCore
         // ---------------------------------------------------------------------
 
         template <typename... Args, typename Func>
-        static void Connect(entt::hashed_string name, Func&& func)
+        static void Connect(hashed_string name, Func&& func)
         {
-            using Container = EventContainer<std::decay_t<Args>...>;
+            using Container = EventContainer<decay_t<Args>...>;
 
-            const entt::id_type eventID = name.value();
+            const id_type eventID = name.value();
             auto& ptr = eventCallbacks[eventID];
 
             reverseLookup.try_emplace(eventID, name.data());
 
             if (!ptr)
-                ptr = std::make_unique<Container>();
+                ptr = make_unique<Container>();
 
-            if (ptr->type != entt::type_hash<Container>::value())
+            if (ptr->type != type_hash<Container>::value())
             {
-                std::cerr << "[EventRegistry] Mismatched event signature for '"
+                cerr << "[EventRegistry] Mismatched event signature for '"
                           << name.data() << "'.\n";
                 return;
             }
@@ -77,18 +79,18 @@ namespace lapCore
         }
 
         template <typename... Args>
-        static void Fire(Scene* scene, entt::id_type eventID, Args&&... args)
+        static void Fire(Scene* scene, id_type eventID, Args&&... args)
         {
             auto it = eventCallbacks.find(eventID);
 
             if (it == eventCallbacks.end())
                 return;
 
-            using Container = EventContainer<std::decay_t<Args>...>;
+            using Container = EventContainer<decay_t<Args>...>;
 
-            if (it->second->type != entt::type_hash<Container>::value())
+            if (it->second->type != type_hash<Container>::value())
             {
-                std::cerr << "[EventRegistry] Mismatched event signature.\n";
+                cerr << "[EventRegistry] Mismatched event signature.\n";
                 return;
             }
 
@@ -108,21 +110,21 @@ namespace lapCore
         template <typename... Args, typename Func>
         static void Connect(Object object, Func&& func)
         {
-            using Container = EventContainer<std::decay_t<Args>...>;
+            using Container = EventContainer<decay_t<Args>...>;
 
             auto& ptr = objEventCallbacks[object];
 
             if (!ptr)
-                ptr = std::make_unique<Container>();
+                ptr = make_unique<Container>();
 
-            if (ptr->type != entt::type_hash<Container>::value())
+            if (ptr->type != type_hash<Container>::value())
             {
-                std::cerr << "[EventRegistry] Mismatched object event signature.\n";
+                cerr << "[EventRegistry] Mismatched object event signature.\n";
                 return;
             }
 
             auto* container = static_cast<Container*>(ptr.get());
-            container->listeners.emplace_back(std::forward<Func>(func));
+            container->listeners.emplace_back(forward<Func>(func));
         }
 
         template <typename... Args>
@@ -133,11 +135,11 @@ namespace lapCore
             if (it == objEventCallbacks.end())
                 return;
 
-            using Container = EventContainer<std::decay_t<Args>...>;
+            using Container = EventContainer<decay_t<Args>...>;
 
-            if (it->second->type != entt::type_hash<Container>::value())
+            if (it->second->type != type_hash<Container>::value())
             {
-                std::cerr << "[EventRegistry] Mismatched object event signature.\n";
+                cerr << "[EventRegistry] Mismatched object event signature.\n";
                 return;
             }
 
@@ -146,7 +148,7 @@ namespace lapCore
             for (auto& listener : container->listeners)
             {
                 if (listener)
-                    listener(scene, std::forward<Args>(args)...);
+                    listener(scene, forward<Args>(args)...);
             }
         }
 
@@ -155,18 +157,18 @@ namespace lapCore
         // ---------------------------------------------------------------------
 
         template <typename... Args>
-        static void Fire(Scene* scene, entt::id_type eventID, Object source, Args&&... args)
+        static void Fire(Scene* scene, id_type eventID, Object source, Args&&... args)
         {
             auto it = eventCallbacks.find(eventID);
 
             if (it == eventCallbacks.end())
                 return;
 
-            using Container = EventContainer<Object, std::decay_t<Args>...>;
+            using Container = EventContainer<Object, decay_t<Args>...>;
 
-            if (it->second->type != entt::type_hash<Container>::value())
+            if (it->second->type != type_hash<Container>::value())
             {
-                std::cerr << "[EventRegistry] Mismatched event signature.\n";
+                cerr << "[EventRegistry] Mismatched event signature.\n";
                 return;
             }
 
@@ -175,7 +177,7 @@ namespace lapCore
             for (auto& listener : container->listeners)
             {
                 if (listener)
-                    listener(scene, source, std::forward<Args>(args)...);
+                    listener(scene, source, forward<Args>(args)...);
             }
         }
 
@@ -183,7 +185,7 @@ namespace lapCore
         // Disconnect
         // ---------------------------------------------------------------------
 
-        static void Disconnect(entt::id_type eventID)
+        static void Disconnect(id_type eventID)
         {
             eventCallbacks.erase(eventID);
             reverseLookup.erase(eventID);
@@ -194,9 +196,9 @@ namespace lapCore
             objEventCallbacks.erase(object);
         }
         
-        inline static std::unordered_map<entt::id_type, std::unique_ptr<IEventContainer>> eventCallbacks;
-        inline static std::unordered_map<Object, std::unique_ptr<IEventContainer>> objEventCallbacks;
-        inline static std::unordered_map<entt::id_type, std::string> reverseLookup;
+        inline static unordered_map<id_type, unique_ptr<IEventContainer>> eventCallbacks;
+        inline static unordered_map<Object, unique_ptr<IEventContainer>> objEventCallbacks;
+        inline static unordered_map<id_type, string> reverseLookup;
     };
 
     // =========================================================================
@@ -205,9 +207,9 @@ namespace lapCore
 
     // Fixed ECS object.
     template <typename... EventArgs, typename SystemFunc>
-    void ConnectECSEvent(Object object, entt::hashed_string name, SystemFunc&& systemHandler)
+    void ConnectECSEvent(Object object, hashed_string name, SystemFunc&& systemHandler)
     {
-        const entt::id_type eventID = name.value();
+        const id_type eventID = name.value();
 
         auto callback = [object, eventID, handler = std::forward<SystemFunc>(systemHandler)]
             (Scene* scene, EventArgs... args)
@@ -220,16 +222,16 @@ namespace lapCore
 
     // Object is provided when the event is fired.
     template <typename... EventArgs, typename SystemFunc>
-    void ConnectECSEventWithSource(entt::hashed_string name, SystemFunc&& systemHandler)
+    void ConnectECSEventWithSource(hashed_string name, SystemFunc&& systemHandler)
     {
-        const entt::id_type eventID = name.value();
+        const id_type eventID = name.value();
 
-        auto callback = [eventID, handler = std::forward<SystemFunc>(systemHandler)]
+        auto callback = [eventID, handler = forward<SystemFunc>(systemHandler)]
             (Scene* scene, Object object, EventArgs... args)
         {
-            handler(scene, object, eventID, std::forward<EventArgs>(args)...);
+            handler(scene, object, eventID, forward<EventArgs>(args)...);
         };
 
-        EventRegistry::Connect<Object, EventArgs...>(name, std::move(callback));
+        EventRegistry::Connect<Object, EventArgs...>(name, move(callback));
     }
 }

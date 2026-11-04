@@ -2,12 +2,12 @@
 
 using namespace lapCore;
 
-void ActionMap::RegisterAction(const std::string &actionName, const InputEntry &entry)
+void ActionMap::RegisterAction(const string &actionName, const InputEntry &entry)
 {
     actions[actionName] = entry;
 }
 
-void ActionMap::RegisterAction(const std::string &actionName, entt::id_type eventID, std::vector<int> codes, bool sustain, InputType inputType, ControlType controlType)
+void ActionMap::RegisterAction(const string &actionName, id_type eventID, vector<int> codes, bool sustain, InputType inputType, ControlType controlType)
 {
     InputEntry entry;
     entry.key.inputType = inputType;

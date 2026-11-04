@@ -2,7 +2,13 @@
 
 #include "reflection.hpp"
 
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <vector>
+
 using namespace lapCore;
+using namespace std;
 
 namespace lapCore
 {
@@ -69,7 +75,7 @@ namespace lapCore
 
         object.name = objectJson.value("name", "unknown");
         object.parent = objectJson.value("parent", "");
-        object.index = objectJson.value("index", -1);
+        object.index = objectJson.value("child-index", objectJson.value("index", -1));
 
         if (objectJson.contains("elements"))
             object.elements = MakeElements(objectJson.at("elements"));
@@ -83,7 +89,11 @@ namespace lapCore
 
         for (const auto &elementJson : elementsJson)
             if (elementJson.is_object())
-                elements.push_back(MakeElement(elementJson));
+            {
+                auto element = MakeElement(elementJson);
+                if (element)
+                    elements.push_back(std::move(element));
+            }
 
         return elements;
     }
@@ -94,7 +104,11 @@ namespace lapCore
         auto entry = Reflection::TryGet(type);
         if (!entry) return nullptr;
 
+        if (!elementJson.contains("data") || !elementJson.at("data").is_object())
+            return nullptr;
+
         auto element = entry->create_project_data(elementJson.at("data"), type);
+        if (!element) return nullptr;
         element->sourceJson = elementJson;
 
         return element;
@@ -129,121 +143,326 @@ namespace lapCore
         return scene;
     }
 
-    ElementDataPtr CreateModifiedElement(const json &elementModificationJson, const ProjectObjectData &baseData)
+    ElementDataPtr CreateModifiedElement(const json &elementModificationJson,
+                                        const ProjectObjectData &baseData)
     {
-        auto elementType = elementModificationJson.value("type", "");
-        auto entry = Reflection::TryGet(elementType);
-        if (!entry) return nullptr;
+        if (!elementModificationJson.is_object())
+            return nullptr;
 
-        ElementDataPtr elementData = nullptr;
-        for (auto& element : baseData.elements)
+        const std::string type = elementModificationJson.value("type", "");
+        auto entry = Reflection::TryGet(type);
+        if (!entry)
+            return nullptr;
+
+        const auto typeLookup = Reflection::reverseLookup.find(type);
+        if (typeLookup == Reflection::reverseLookup.end())
+            return nullptr;
+
+        ElementDataPtr existing;
+        for (const auto &element : baseData.elements)
         {
-            if (element->GetTypeID() == Reflection::reverseLookup.at(elementType))
+            if (element && element->GetTypeID() == typeLookup->second)
             {
-                // We must copy the data to the elementData
-                elementData = element->Clone();
+                existing = element->Clone();
                 break;
             }
         }
 
-        if (elementModificationJson.contains("data"))
-        {
-            if (!elementData && elementModificationJson.at("data").is_string() && elementModificationJson.at("data").get<std::string>() == "exclude")
-            {
-                // Then we do nothing, as the element already doesn't exist
-            }
-            else if (elementData && elementModificationJson.at("data").is_string() && elementModificationJson.at("data").get<std::string>() == "exclude")
-            {
-                // We must remove the element from the modified object
-                elementData = nullptr;
-            }
-            else if (!elementData && elementModificationJson.at("data").is_object())
-            {
-                // Create a new element with the provided data
-                elementData = entry->create_project_data(elementModificationJson.at("data"), elementType);
-            }
-            else if (elementData && elementModificationJson.at("data").is_object())
-            {
-                // Update the existing element with the new data
-                auto merged = elementData->sourceJson;
-                JSON::Merge(merged.at("data"), elementModificationJson.at("data"));
+        if (!elementModificationJson.contains("data"))
+            return existing;
 
-                auto newElement = entry->create_project_data(merged.at("data"), elementType);
-                elementData = std::move(newElement);
-            }
+        const auto &overrideData = elementModificationJson.at("data");
+        if (overrideData.is_string() && overrideData.get<std::string>() == "exclude")
+            return nullptr;
+
+        if (!overrideData.is_object())
+            return existing;
+
+        json merged = json::object();
+        if (existing && existing->sourceJson.is_object() &&
+            existing->sourceJson.contains("data") &&
+            existing->sourceJson.at("data").is_object())
+        {
+            merged = existing->sourceJson.at("data");
         }
 
-        return elementData;
+        // Merge into a clone of the original data, rather than replacing
+        // unspecified fields with reflection defaults.
+        // nlohmann::json's merge_patch mutates the target in place.
+        // This guarantees that {"text": "test"} overwrites the
+        // inherited ui-text-label text, regardless of the behavior
+        // of the project's JSON::Merge helper.
+        merged.merge_patch(overrideData);
+        auto result = entry->create_project_data(merged, type);
+        if (!result)
+            return nullptr;
+
+        result->sourceJson = existing ? existing->sourceJson : json::object();
+        result->sourceJson["type"] = type;
+        result->sourceJson["data"] = std::move(merged);
+        return result;
     }
 
-    ProjectObjectData ApplyModifications(const ProjectObjectData &base, const json &modifications)
+    ProjectObjectData ApplyModifications(const ProjectObjectData &base,
+                                         const json &modifications)
     {
-        ProjectObjectData modified = base;
-        modified.elements.clear();
+        ProjectObjectData modified = base; // Deep copy; preserve inherited elements.
+        if (!modifications.is_object())
+            return modified;
 
         modified.name = modifications.value("name", modified.name);
         modified.parent = modifications.value("parent", modified.parent);
-        modified.index = modifications.value("index", modified.index);
-        
-        // Apply modifications to elements here
-        if (modifications.contains("elements"))
-            for (const auto &elementModification : modifications.at("elements"))
-                modified.elements.push_back(CreateModifiedElement(elementModification, base));
+        modified.index = modifications.value(
+            "child-index", modifications.value("index", modified.index));
 
+        if (!modifications.contains("elements") ||
+            !modifications.at("elements").is_array())
+            return modified;
+
+        for (const auto &overrideElement : modifications.at("elements"))
+        {
+            if (!overrideElement.is_object())
+                continue;
+
+            const std::string type = overrideElement.value("type", "");
+            if (!Reflection::TryGet(type))
+                continue;
+
+            const auto typeLookup = Reflection::reverseLookup.find(type);
+            if (typeLookup == Reflection::reverseLookup.end())
+                continue;
+
+            const auto existing = std::find_if(
+                modified.elements.begin(), modified.elements.end(),
+                [&](const ElementDataPtr &element)
+                {
+                    return element && element->GetTypeID() == typeLookup->second;
+                });
+
+            // Use the *current* object so successive overrides are cumulative.
+            auto updated = CreateModifiedElement(overrideElement, modified);
+
+            if (existing != modified.elements.end())
+            {
+                if (updated)
+                    *existing = std::move(updated);
+                else if (overrideElement.contains("data") &&
+                         overrideElement.at("data") == "exclude")
+                    modified.elements.erase(existing);
+            }
+            else if (updated)
+            {
+                modified.elements.push_back(std::move(updated));
+            }
+        }
         return modified;
     }
 
-    ProjectInstancedPrefabData MakeInstancedPrefab(const json &instancedPrefabJson, const vector<ProjectObjectData> &prefabs)
+    namespace
     {
-        ProjectInstancedPrefabData instancedPrefab;
-
-        // Get the name and initialize the base object data
-        instancedPrefab.prefabName = instancedPrefabJson.value("prefab", "unknown");
-        for (const auto &prefab : prefabs)
+        const ProjectObjectData* FindPrefab(const std::vector<ProjectObjectData>& prefabs,
+                                            const std::string& name)
         {
-            if (prefab.name == instancedPrefab.prefabName)
-            {
-                instancedPrefab.objectData = prefab;
-                break;
-            }
+            for (const auto& prefab : prefabs)
+                if (prefab.name == name)
+                    return &prefab;
+            return nullptr;
         }
 
-        // Apply modifications if they exist
-        if (instancedPrefabJson.contains("modifications"))
+        // The definitions are flat. A prefab whose parent is "Enemy" is a
+        // default descendant of the prefab named "Enemy".
+        void BuildPrefabChildren(ProjectInstancedPrefabData& instance,
+                                 const std::vector<ProjectObjectData>& prefabs,
+                                 const json& childOverrides,
+                                 std::vector<std::string>& ancestry)
         {
-            auto modificationsJson = instancedPrefabJson.at("modifications");
-            if (modificationsJson.is_object())
+            for (const auto& childPrefab : prefabs)
             {
-                instancedPrefab.objectData = ApplyModifications(instancedPrefab.objectData, modificationsJson);
+                if (childPrefab.parent != instance.prefabName)
+                    continue;
+
+                if (std::find(ancestry.begin(), ancestry.end(), childPrefab.name)
+                    != ancestry.end())
+                {
+                    std::cerr << "Prefab hierarchy cycle at: "
+                              << childPrefab.name << '\n';
+                    continue;
+                }
+
+                json childMods = json::object();
+                if (childOverrides.is_object() &&
+                    childOverrides.contains(childPrefab.name))
+                {
+                    childMods = childOverrides.at(childPrefab.name);
+                }
+
+                if (childMods == "exclude")
+                    continue;
+                if (childMods == "default")
+                    childMods = json::object();
+                if (!childMods.is_object())
+                    continue;
+
+                // Also accept { "modifications": {...} } wrappers.
+                if (childMods.contains("modifications"))
+                    childMods = childMods.at("modifications");
+                if (childMods == "exclude")
+                    continue;
+                if (!childMods.is_object())
+                    childMods = json::object();
+
+                ProjectInstancedPrefabData child{};
+                child.prefabName = childPrefab.name;
+                child.objectData = ApplyModifications(childPrefab, childMods);
+
+                // Default parent is the *instance*, not the prefab template.
+                // Explicit parent overrides, including "", remain untouched.
+                if (!childMods.contains("parent"))
+                    child.objectData.parent = instance.objectData.name;
+
+                ancestry.push_back(childPrefab.name);
+                const json grandchildren = childMods.value("children", json::object());
+                BuildPrefabChildren(child, prefabs, grandchildren, ancestry);
+                ancestry.pop_back();
+
+                instance.children.push_back(std::move(child));
             }
-            else if (modificationsJson.is_string() && modificationsJson.get<std::string>() == "exclude")
+
+            // Previously, misspelled/missing child names were silently
+            // ignored. Warn when an override does not match a direct child
+            // of the current prefab template.
+            if (childOverrides.is_object())
             {
-                return ProjectInstancedPrefabData();
+                for (const auto& [childName, childOverride] : childOverrides.items())
+                {
+                    const bool matched = std::any_of(
+                        prefabs.begin(), prefabs.end(),
+                        [&](const ProjectObjectData& candidate)
+                        {
+                            return candidate.parent == instance.prefabName &&
+                                   candidate.name == childName;
+                        });
+
+                    if (!matched)
+                    {
+                        std::cerr << "No child prefab named '" << childName
+                                  << "' under '" << instance.prefabName
+                                  << "'. Its override was ignored.\n";
+                    }
+                }
             }
         }
-
-        // Get the children of the prefab and do this current function recursively
-        if (instancedPrefabJson.contains("children"))
-        {
-            for (const auto &childJson : instancedPrefabJson.at("children"))
-            {
-                ProjectInstancedPrefabData childData = MakeInstancedPrefab(childJson, prefabs);
-                instancedPrefab.children.push_back(childData);
-            }
-        }
-
-        return instancedPrefab;
     }
 
-    vector<ProjectInstancedPrefabData> MakeInstancedPrefabs(const json &instancedPrefabsJson, const vector<ProjectObjectData> &prefabs)
+    ProjectInstancedPrefabData MakeInstancedPrefab(
+        const json &instancedPrefabJson,
+        const vector<ProjectObjectData> &prefabs)
     {
-        vector<ProjectInstancedPrefabData> instancedPrefabs;
+        ProjectInstancedPrefabData result{};
+        if (!instancedPrefabJson.is_object())
+            return result;
 
-        for (const auto &instancedPrefabJson : instancedPrefabsJson)
-            if (instancedPrefabJson.is_object())
-                instancedPrefabs.push_back(MakeInstancedPrefab(instancedPrefabJson, prefabs));
+        result.prefabName = instancedPrefabJson.value("prefab", "");
+        const auto* prefab = FindPrefab(prefabs, result.prefabName);
+        if (!prefab)
+        {
+            std::cerr << "Unknown prefab: " << result.prefabName << '\n';
+            return {};
+        }
 
-        return instancedPrefabs;
+        const json modifications = instancedPrefabJson.value(
+            "modifications", json::object());
+
+        if (modifications == "exclude")
+            return {};
+
+        const json normalizedMods = modifications.is_object()
+            ? modifications : json::object();
+
+        result.objectData = ApplyModifications(*prefab, normalizedMods);
+
+        // An instance can override its root name/parent/index. Children are
+        // automatically derived from prefab definitions and then overridden
+        // by the keyed `modifications.children` object.
+        std::vector<std::string> ancestry{result.prefabName};
+        json childrenMods = normalizedMods.value("children", json::object());
+        // Also accept a top-level keyed "children" object for compatibility.
+        if (instancedPrefabJson.contains("children") &&
+            instancedPrefabJson.at("children").is_object())
+        {
+            if (!childrenMods.is_object())
+                childrenMods = json::object();
+            for (const auto& [name, value] : instancedPrefabJson.at("children").items())
+                childrenMods[name] = value;
+        }
+        BuildPrefabChildren(result, prefabs, childrenMods, ancestry);
+
+        // Backwards compatibility: explicit nested instance descriptors.
+        if (instancedPrefabJson.contains("children") &&
+            instancedPrefabJson.at("children").is_array())
+        {
+            for (const auto& childJson : instancedPrefabJson.at("children"))
+            {
+                if (!childJson.is_object())
+                    continue;
+
+                auto child = MakeInstancedPrefab(childJson, prefabs);
+                if (child.prefabName.empty())
+                    continue;
+
+                const auto& explicitMods = childJson.value(
+                    "modifications", json::object());
+                if (!explicitMods.is_object() || !explicitMods.contains("parent"))
+                    child.objectData.parent = result.objectData.name;
+
+                result.children.push_back(std::move(child));
+            }
+        }
+
+        return result;
+    }
+
+    vector<ProjectInstancedPrefabData> MakeInstancedPrefabs(
+        const json &instancedPrefabsJson,
+        const vector<ProjectObjectData> &prefabs)
+    {
+        vector<ProjectInstancedPrefabData> instances;
+        if (!instancedPrefabsJson.is_array())
+            return instances;
+
+        for (const auto& entry : instancedPrefabsJson)
+        {
+            if (!entry.is_object())
+                continue;
+
+            const int count = entry.value("count", 1);
+            if (count <= 0)
+                continue;
+
+            for (int i = 0; i < count; ++i)
+            {
+                json instanceJson = entry;
+                if (count > 1)
+                {
+                    json modifications = instanceJson.value(
+                        "modifications", json::object());
+                    if (modifications == "exclude")
+                        break;
+                    if (!modifications.is_object())
+                        modifications = json::object();
+
+                    const auto baseName = modifications.value(
+                        "name", entry.value("prefab", std::string("prefab")));
+                    modifications["name"] = baseName + std::to_string(i + 1);
+                    instanceJson["modifications"] = std::move(modifications);
+                }
+
+                auto instance = MakeInstancedPrefab(instanceJson, prefabs);
+                if (!instance.prefabName.empty())
+                    instances.push_back(std::move(instance));
+            }
+        }
+        return instances;
     }
 
     vector<ProjectSystemData> MakeSystems(const json &systemsJson)

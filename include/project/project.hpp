@@ -6,6 +6,8 @@
 
 namespace lapCore
 {
+    using namespace entt;
+
     inline bool defaultStructsRegistered = false;
     bool RegisterDefaultStructs();
 
@@ -27,7 +29,7 @@ namespace lapCore
     {
         virtual ~IProjectElementData() = default;
 
-        virtual entt::id_type GetTypeID() const = 0;
+        virtual id_type GetTypeID() const = 0;
         virtual string GetTypeName() const = 0;
 
         virtual void* GetRawData() = 0;
@@ -44,9 +46,9 @@ namespace lapCore
         string type;
         T data;
 
-        entt::id_type GetTypeID() const override
+        id_type GetTypeID() const override
         {
-            return entt::type_hash<T>::value();
+            return type_hash<T>::value();
         }
 
         string GetTypeName() const override

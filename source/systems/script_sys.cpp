@@ -3,7 +3,7 @@
 
 using namespace lapCore;
 
-void ScriptSystem::Update(float deltaTime, entt::registry &registry)
+void ScriptSystem::Update(float deltaTime, registry &registry)
 {
     auto view = registry.view<Script>();
 
@@ -25,7 +25,7 @@ void ScriptSystem::Update(float deltaTime, entt::registry &registry)
     }
 }
 
-void ScriptSystem::OnDestroy(entt::registry &registry)
+void ScriptSystem::OnDestroy(registry &registry)
 {
     auto view = registry.view<Script>();
     for (auto entity : view)

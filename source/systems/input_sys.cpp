@@ -24,7 +24,7 @@ bool InputSystem::HandleKeyboardInput(
         return true;
 
     const auto consumedIt =
-        std::find(consumedKeys.begin(), consumedKeys.end(), key);
+        find(consumedKeys.begin(), consumedKeys.end(), key);
 
     const bool consumed =
         consumedIt != consumedKeys.end();
@@ -63,7 +63,7 @@ bool InputSystem::HandleMouseInput(
         return true;
 
     const bool consumed =
-        std::find(
+        find(
             consumedKeys.begin(),
             consumedKeys.end(),
             button
@@ -140,7 +140,7 @@ bool InputSystem::HandleGamepadInput(
     // Sustained: every frame while held.
     // Non-sustained: only the physical down transition.
 
-    std::cout << "recieved input\n";
+    cout << "recieved input\n";
 
     const bool shouldFire =
         entry.sustain || freshlyPressed;
@@ -149,7 +149,7 @@ bool InputSystem::HandleGamepadInput(
         return true;
 
     const bool consumed =
-        std::find(
+        find(
             consumedKeys.begin(),
             consumedKeys.end(),
             button
@@ -162,11 +162,11 @@ bool InputSystem::HandleGamepadInput(
         consumedKeys.push_back(button);
 
     EventRegistry::Fire(scene, entry.eventID);
-    std::cout << "fired input\n";
+    cout << "fired input\n";
     return true;
 }
 
-void InputSystem::Update(float deltaTime, entt::registry &registry)
+void InputSystem::Update(float deltaTime, registry &registry)
 {
     consumedKeys.clear();
 

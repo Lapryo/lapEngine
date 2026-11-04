@@ -1,0 +1,60 @@
+{
+    "name": "main",
+    "systems": [
+        {
+            "type": "render",
+            "order": 1
+        },
+        {
+            "type": "gui",
+            "order": 0
+        }
+    ],
+    "prefabs": [
+        {
+            "prefab": "photo-frame",
+            "modifications": {
+                "name": "example"
+            }
+        },
+        {
+            "prefab": "photo-frame",
+            "modifications": {
+                "name": "example-2",
+                "elements": [
+                    {
+                        "type": "ui-frame",
+                        "data": {
+                            "transform": {
+                                "position": {
+                                    "scale": [0.25, 0.5]
+                                }
+                            }
+                        }
+                    }
+                ],
+                "children": {
+                    "photo": {
+                        "children": {
+                            "caption": {
+                                "elements": [
+                                    {
+                                        "type": "ui-text-label",
+                                        "data": {
+                                            "frame": {
+                                                "renderable": {
+                                                    "tint": [255, 0, 0, 255]
+                                                }
+                                            },
+                                            "text": "Fake Mona Lisa"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

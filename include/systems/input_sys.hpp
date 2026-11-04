@@ -13,15 +13,15 @@ public:
     ) : System(order, scene) {}
 
     void Update(float deltaTime, 
-        entt::registry &registry
+        registry &registry
     ) override;
 
-    std::vector<int> consumedKeys;
-    std::vector<int> consumedMouseButtons;
-    std::vector<int> consumedGamepadButtons;
-    std::vector<int> consumedGamepadAxes;
+    vector<int> consumedKeys;
+    vector<int> consumedMouseButtons;
+    vector<int> consumedGamepadButtons;
+    vector<int> consumedGamepadAxes;
 
-    std::string GetName() const override 
+    string GetName() const override 
     { return "InputSystem"; }
 private:
     bool HandleKeyboardInput(

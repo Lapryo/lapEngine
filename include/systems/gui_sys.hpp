@@ -13,23 +13,23 @@ public:
 
     void Update(
         float deltaTime, 
-        entt::registry &registry
+        registry &registry
     ) override;
     
     void ResetInUIList();
 
     void MarkUIDirty(
         Scene* scene,
-        entt::registry& registry,
-        entt::entity entity
+        registry& registry,
+        entity entity
     );
 
-    void Connect(entt::registry &registry);
+    void Connect(registry &registry);
     void OnUIUpdated(
-        entt::registry &registry, 
+        registry &registry, 
         Object entity
     );
 
-    std::string GetName() const override 
+    string GetName() const override 
     { return "GUISystem"; }
 };

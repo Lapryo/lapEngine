@@ -1,1245 +1,611 @@
 #include "core.hpp"
 #include "systems/gui_sys.hpp"
 
+#include <algorithm>
+#include <cstddef>
+
 using namespace lapCore;
 using namespace ELEMENTS;
 using namespace ELEMENTS::Render::UI;
 
-// ============================================================
-// UI TRANSFORM HELPERS
-// ============================================================
+// A drop-in replacement for gui_sys.cpp. No GUISystem header changes required.
+// Scene objects are assumed to live below scene->root, as in lapEngine.
 
-UITransform *GetUITransform(
-    entt::registry &registry,
-    entt::entity entity)
+namespace
 {
-    if (auto *frame = registry.try_get<UIFrame>(entity))
-        return &frame->transform;
+    Rectangle CanvasRect(const Scene *scene)
+    {
+        const Vector2 size = scene->world->window.logical_resolution;
+        return {0.0f, 0.0f, size.x, size.y};
+    }
 
-    if (auto *button = registry.try_get<UIButton>(entity))
-        return &button->bounds;
+    bool SameRect(const Rectangle &a, const Rectangle &b)
+    {
+        return a.x == b.x && a.y == b.y &&
+               a.width == b.width && a.height == b.height;
+    }
 
-    if (auto *text = registry.try_get<UITextLabel>(entity))
-        return &text->frame.transform;
+    // These don't generate on_update signals: derived UI state isn't a
+    // modification of authored UITransform properties.
+    void InvalidateTransform(registry &registry, Object entity)
+    {
+        if (auto *p = registry.try_get<UIFrame>(entity))
+            p->transform.dirty = true;
+        if (auto *p = registry.try_get<UIButton>(entity))
+            p->bounds.dirty = true;
+        if (auto *p = registry.try_get<UIImage>(entity))
+            p->transform.dirty = true;
+        if (auto *p = registry.try_get<UITextLabel>(entity))
+            p->frame.transform.dirty = true;
+    }
 
-    if (auto *image = registry.try_get<UIImage>(entity))
-        return &image->transform;
+    void InvalidateSubtree(Scene *scene, registry &registry, Object entity)
+    {
+        InvalidateTransform(registry, entity);
 
+        const auto *data = scene->GetObject(entity);
+        if (!data)
+            return;
+
+        for (const auto &[index, child] : data->children)
+            InvalidateSubtree(scene, registry, child);
+    }
+
+    void InvalidateDescendants(Scene *scene, registry &registry, Object entity)
+    {
+        const auto *data = scene->GetObject(entity);
+        if (!data)
+            return;
+
+        for (const auto &[index, child] : data->children)
+            InvalidateSubtree(scene, registry, child);
+    }
+
+    // Used when a UIList is removed, so skipping list resets in list-free
+    // scenes never leaves obsolete inUIList flags behind.
+    void ClearAllListFlags(registry &registry)
+    {
+        for (auto [entity, frame] : registry.view<UIFrame>().each())
+            frame.renderable.inUIList = false;
+        for (auto [entity, button] : registry.view<UIButton>().each())
+            button.inUIList = false;
+        for (auto [entity, text] : registry.view<UITextLabel>().each())
+            text.frame.renderable.inUIList = false;
+        for (auto [entity, image] : registry.view<UIImage>().each())
+            image.sprite.renderable.inUIList = false;
+    }
+
+    void InvalidateRegistryDescendants(registry &registry, Object entity)
+    {
+        const auto *node = registry.try_get<ObjectData>(entity);
+        if (!node)
+            return;
+        for (const auto &[index, child] : node->children)
+        {
+            InvalidateTransform(registry, child);
+            InvalidateRegistryDescendants(registry, child);
+        }
+    }
+
+    void OnListDestroyed(registry &registry, Object entity)
+    {
+        ClearAllListFlags(registry);
+        // Former list children must return to normal parent-relative layout.
+        InvalidateRegistryDescendants(registry, entity);
+    }
+
+    // If the UIFrame belonging to a UIList is removed, that list no longer
+    // participates in arrangement. Clear stale membership as well.
+    void OnFrameDestroyed(registry &registry, Object entity)
+    {
+        if (registry.all_of<UIList>(entity))
+        {
+            ClearAllListFlags(registry);
+            InvalidateRegistryDescendants(registry, entity);
+        }
+    }
+
+    // Does not override a UIList's clipping decision when the parent is
+    // visible. A hidden ancestor still hides everything below it.
+    void ApplyInheritedVisibility(registry &registry, Object entity, bool visible)
+    {
+        if (auto *p = registry.try_get<UIFrame>(entity))
+        {
+            if (p->renderable.inheritsUI)
+                p->renderable.visible = visible &&
+                    (!p->renderable.inUIList || p->renderable.visible);
+        }
+        if (auto *p = registry.try_get<UIButton>(entity))
+        {
+            if (p->inheritsUI)
+                p->active = visible && (!p->inUIList || p->active);
+        }
+        if (auto *p = registry.try_get<UITextLabel>(entity))
+        {
+            auto &r = p->frame.renderable;
+            if (r.inheritsUI)
+                r.visible = visible && (!r.inUIList || r.visible);
+        }
+        if (auto *p = registry.try_get<UIImage>(entity))
+        {
+            auto &r = p->sprite.renderable;
+            if (r.inheritsUI)
+                r.visible = visible && (!r.inUIList || r.visible);
+        }
+    }
+
+    // Performs the same list-assigned visibility changes as the old helper.
+    void AssignListVisibility(registry &registry, Object entity, bool visible)
+    {
+        if (auto *p = registry.try_get<UIFrame>(entity))
+            if (p->renderable.inheritsUI) p->renderable.visible = visible;
+        if (auto *p = registry.try_get<UIButton>(entity))
+            if (p->inheritsUI) p->active = visible;
+        if (auto *p = registry.try_get<UITextLabel>(entity))
+            if (p->frame.renderable.inheritsUI)
+                p->frame.renderable.visible = visible;
+        if (auto *p = registry.try_get<UIImage>(entity))
+            if (p->sprite.renderable.inheritsUI)
+                p->sprite.renderable.visible = visible;
+    }
+
+    void ResolveDirtyTransforms(Scene *scene, registry &registry);
+}
+
+UITransform *GetUITransform(registry &registry, entity entity)
+{
+    if (auto *p = registry.try_get<UIFrame>(entity))
+        return &p->transform;
+    if (auto *p = registry.try_get<UIButton>(entity))
+        return &p->bounds;
+    if (auto *p = registry.try_get<UIImage>(entity))
+        return &p->transform;
+    if (auto *p = registry.try_get<UITextLabel>(entity))
+        return &p->frame.transform;
     return nullptr;
 }
 
-// ============================================================
-// UI VISUAL HELPERS
-// ============================================================
-
-bool IsUIEntity(
-    entt::registry &registry,
-    entt::entity entity)
+bool IsUIEntity(registry &registry, entity entity)
 {
-    return registry.all_of<UIFrame>(entity) ||
-           registry.all_of<UIButton>(entity) ||
-           registry.all_of<UITextLabel>(entity) ||
-           registry.all_of<UIImage>(entity);
+    return registry.any_of<UIFrame, UIButton, UITextLabel, UIImage>(entity);
 }
 
-bool GetUIVisible(
-    entt::registry &registry,
-    entt::entity entity)
+bool GetUIVisible(registry &registry, entity entity)
 {
-    if (auto *frame =
-            registry.try_get<UIFrame>(entity))
-    {
-        return frame->renderable.visible;
-    }
-
-    if (auto *button =
-            registry.try_get<UIButton>(entity))
-    {
-        return button->active;
-    }
-
-    if (auto *text =
-            registry.try_get<UITextLabel>(entity))
-    {
-        return text->frame.renderable.visible;
-    }
-
-    if (auto *image =
-            registry.try_get<UIImage>(entity))
-    {
-        return image->sprite.renderable.visible;
-    }
-
+    if (auto *p = registry.try_get<UIFrame>(entity))
+        return p->renderable.visible;
+    if (auto *p = registry.try_get<UIButton>(entity))
+        return p->active;
+    if (auto *p = registry.try_get<UITextLabel>(entity))
+        return p->frame.renderable.visible;
+    if (auto *p = registry.try_get<UIImage>(entity))
+        return p->sprite.renderable.visible;
     return true;
 }
 
-void SetUIVisible(
-    entt::registry &registry,
-    entt::entity entity,
-    bool visible)
+void SetUIVisible(registry &registry, entity entity, bool visible)
 {
-    if (auto *frame =
-            registry.try_get<UIFrame>(entity))
-    {
-        if (frame->renderable.inheritsUI)
-            frame->renderable.visible = visible;
-    }
-
-    if (auto *button =
-            registry.try_get<UIButton>(entity))
-    {
-        if (button->inheritsUI)
-            button->active = visible;
-    }
-
-    if (auto *text =
-            registry.try_get<UITextLabel>(entity))
-    {
-        if (text->frame.renderable.inheritsUI)
-            text->frame.renderable.visible = visible;
-    }
-
-    if (auto *image =
-            registry.try_get<UIImage>(entity))
-    {
-        if (image->sprite.renderable.inheritsUI)
-            image->sprite.renderable.visible = visible;
-    }
+    AssignListVisibility(registry, entity, visible);
 }
 
-// ============================================================
-// MARK UI TRANSFORM DIRTY
-// ============================================================
-
-void GUISystem::MarkUIDirty(
-    Scene *scene,
-    entt::registry &registry,
-    entt::entity entity)
+void GUISystem::MarkUIDirty(Scene *scene, registry &registry, entity entity)
 {
-    UITransform *transform =
-        GetUITransform(
-            registry,
-            entity);
+    InvalidateSubtree(scene, registry, entity);
+}
 
-    if (!transform)
-        return;
+void GUISystem::Connect(registry &registry)
+{
+    registry.on_update<UIFrame>().connect<&GUISystem::OnUIUpdated>(*this);
+    registry.on_update<UIButton>().connect<&GUISystem::OnUIUpdated>(*this);
+    registry.on_update<UITextLabel>().connect<&GUISystem::OnUIUpdated>(*this);
+    registry.on_update<UIImage>().connect<&GUISystem::OnUIUpdated>(*this);
 
-    transform->dirty = true;
+    registry.on_construct<UIFrame>().connect<&GUISystem::OnUIUpdated>(*this);
+    registry.on_construct<UIButton>().connect<&GUISystem::OnUIUpdated>(*this);
+    registry.on_construct<UITextLabel>().connect<&GUISystem::OnUIUpdated>(*this);
+    registry.on_construct<UIImage>().connect<&GUISystem::OnUIUpdated>(*this);
 
-    auto entry = scene->GetObject(entity);
-    if (!entry)
-        return;
+    // Component removals are rare. Cleanup is cheaper than clearing every
+    // UIFrame in scenes that contain no UILists at all.
+    registry.on_destroy<UIList>().connect<&OnListDestroyed>();
+    registry.on_destroy<UIFrame>().connect<&OnFrameDestroyed>();
+}
 
-    for (const auto &child :
-         entry->children)
+void GUISystem::OnUIUpdated(registry &registry, Object entity)
+{
+    MarkUIDirty(scene, registry, entity);
+}
+
+Rectangle ResolveUI(Scene *scene, registry &registry,
+                    entity entity, UITransform &transform)
+{
+    if (entity == scene->root)
     {
-        MarkUIDirty(
-            scene,
-            registry,
-            child.second);
+        const Rectangle rect = CanvasRect(scene);
+        transform.parentAbsRect = rect;
+        transform.absoluteRect = rect;
+        transform.dirty = false;
+        return rect;
     }
-}
 
-// ============================================================
-// ENTT UI UPDATE SIGNALS
-// ============================================================
-
-void GUISystem::Connect(
-    entt::registry &registry)
-{
-    registry.on_update<UIFrame>()
-        .connect<&GUISystem::OnUIUpdated>(*this);
-
-    registry.on_update<UIButton>()
-        .connect<&GUISystem::OnUIUpdated>(*this);
-
-    registry.on_update<UITextLabel>()
-        .connect<&GUISystem::OnUIUpdated>(*this);
-
-    registry.on_update<UIImage>()
-        .connect<&GUISystem::OnUIUpdated>(*this);
-}
-
-void GUISystem::OnUIUpdated(
-    entt::registry &registry,
-    Object entity)
-{
-    MarkUIDirty(
-        scene,
-        registry,
-        entity);
-}
-
-// ============================================================
-// RESOLVE UI TRANSFORM
-// ============================================================
-
-Rectangle ResolveUI(
-    Scene *scene,
-    entt::registry &registry,
-    entt::entity entity,
-    UITransform &transform)
-{
-    auto entry = scene->GetObject(entity);
-
-    if (!entry)
-        return {};
-
-    const bool isRoot = entry->parent == entt::null || entry->parent == scene->root;
-
-    if (!isRoot && !transform.dirty)
+    // Most of the work in a static scene finishes here.
+    if (!transform.dirty)
         return transform.absoluteRect;
 
+    const auto *node = scene->GetObject(entity);
+    if (!node)
+        return {};
+
     Rectangle parentRect{};
-
-    if (isRoot)
-    {
-        parentRect = {
-            0.0f,
-            0.0f,
-            scene->world->window.logical_resolution.x,
-            scene->world->window.logical_resolution.y};
-    }
+    if (node->parent == scene->root || node->parent == null)
+        parentRect = CanvasRect(scene);
+    else if (auto *parentTransform = GetUITransform(registry, node->parent))
+        parentRect = ResolveUI(scene, registry, node->parent, *parentTransform);
     else
-    {
-        auto parent = entry->parent;
+        return {}; // Matches the existing non-UI-parent behavior.
 
-        // The hierarchy parent should use its UIFrame
-        // when one exists.
-        if (auto *parentFrame =
-                registry.try_get<UIFrame>(parent))
-        {
-            parentRect =
-                ResolveUI(
-                    scene,
-                    registry,
-                    parent,
-                    parentFrame->transform);
-        }
-        else if (auto *parentButton =
-                     registry.try_get<UIButton>(parent))
-        {
-            parentRect =
-                ResolveUI(
-                    scene,
-                    registry,
-                    parent,
-                    parentButton->bounds);
-        }
-        else if (auto *parentImage =
-                     registry.try_get<UIImage>(parent))
-        {
-            parentRect =
-                ResolveUI(
-                    scene,
-                    registry,
-                    parent,
-                    parentImage->transform);
-        }
-        else if (auto *parentText =
-                     registry.try_get<UITextLabel>(parent))
-        {
-            parentRect =
-                ResolveUI(
-                    scene,
-                    registry,
-                    parent,
-                    parentText->frame.transform);
-        }
-        else
-        {
-            return {};
-        }
-    }
+    const float w = parentRect.width * transform.size.scale.x + transform.size.offset.x;
+    const float h = parentRect.height * transform.size.scale.y + transform.size.offset.y;
+    const float x = parentRect.x + parentRect.width * transform.position.scale.x +
+                    transform.position.offset.x - w * transform.anchor.scale.x;
+    const float y = parentRect.y + parentRect.height * transform.position.scale.y +
+                    transform.position.offset.y - h * transform.anchor.scale.y;
 
     transform.parentAbsRect = parentRect;
-
-    const float width =
-        parentRect.width *
-            transform.size.scale.x +
-        transform.size.offset.x;
-
-    const float height =
-        parentRect.height *
-            transform.size.scale.y +
-        transform.size.offset.y;
-
-    const float x =
-        parentRect.x +
-        parentRect.width *
-            transform.position.scale.x +
-        transform.position.offset.x -
-        width *
-            transform.anchor.scale.x;
-
-    const float y =
-        parentRect.y +
-        parentRect.height *
-            transform.position.scale.y +
-        transform.position.offset.y -
-        height *
-            transform.anchor.scale.y;
-
-    transform.absoluteRect = {
-        x,
-        y,
-        width,
-        height};
-
+    transform.absoluteRect = {x, y, w, h};
     transform.dirty = false;
-
     return transform.absoluteRect;
 }
 
-// ============================================================
-// APPLY UI VISIBILITY
-// ============================================================
-//
-// inheritsUI:
-//
-//     child.visible = parent.visible
-//
-// UIList does NOT create another visibility inheritance rule.
-//
-// UIList directly controls the visibility of its direct
-// elements based on whether their element slot intersects
-// the list viewport.
-//
-// ApplyUIVisibility() then propagates that final visibility
-// through the normal scene hierarchy.
-//
-// Example:
-//
-//     row = false
-//       |
-//       +-- slot = false
-//             |
-//             +-- image = false
-//             +-- text  = false
-//
-// ============================================================
-
-void ApplyUIVisibility(
-    Scene *scene,
-    entt::registry &registry,
-    entt::entity entity,
-    bool parentVisible,
-    bool hasParent)
+namespace
 {
-    auto entry =
-        scene->GetObject(entity);
+    // No GetObject, no parent traversal, no recursive calls for the common
+    // 10,000-frame case. Every object is a direct child of the canvas and
+    // every entity has exactly one UIFrame; no other UI components exist.
+    bool ApplyFlatFrameVisibility(Scene *scene, registry &registry)
+    {
+        const auto *root = scene->GetObject(scene->root);
+        if (!root)
+            return false;
 
-    if (!entry)
+        const size_t count = root->children.size() + 1;
+        if (registry.storage<ObjectData>().size() != count ||
+            registry.storage<UIFrame>().size() != count ||
+            !registry.storage<UIButton>().empty() ||
+            !registry.storage<UITextLabel>().empty() ||
+            !registry.storage<UIImage>().empty() ||
+            !registry.storage<UIList>().empty())
+            return false;
+
+        const auto *rootFrame = registry.try_get<UIFrame>(scene->root);
+        if (!rootFrame)
+            return false;
+
+        const bool visible = rootFrame->renderable.visible;
+        for (auto [entity, frame] : registry.view<UIFrame>().each())
+        {
+            if (entity != scene->root && frame.renderable.inheritsUI)
+                frame.renderable.visible = visible;
+        }
+        return true;
+    }
+
+    void ResolveDirtyTransforms(Scene *scene, registry &registry)
+    {
+        // Iterate tightly packed component pools. Only dirty UI elements
+        // incur hierarchy lookups, parent recursion, or calculations.
+        for (auto [entity, frame] : registry.view<UIFrame>().each())
+            if (frame.transform.dirty)
+                ResolveUI(scene, registry, entity, frame.transform);
+
+        for (auto [entity, button] : registry.view<UIButton>().each())
+            if (button.bounds.dirty)
+                ResolveUI(scene, registry, entity, button.bounds);
+
+        for (auto [entity, text] : registry.view<UITextLabel>().each())
+            if (text.frame.transform.dirty)
+                ResolveUI(scene, registry, entity, text.frame.transform);
+
+        for (auto [entity, image] : registry.view<UIImage>().each())
+            if (image.transform.dirty)
+                ResolveUI(scene, registry, entity, image.transform);
+    }
+}
+
+void ApplyUIVisibility(Scene *scene, registry &registry,
+                       entity entity, bool parentVisible, bool hasParent)
+{
+    const auto *node = scene->GetObject(entity);
+    if (!node)
         return;
 
     if (hasParent)
-    {
-        SetUIVisible(
-            registry,
-            entity,
-            parentVisible);
-    }
+        ApplyInheritedVisibility(registry, entity, parentVisible);
 
-    const bool currentVisible =
-        GetUIVisible(
-            registry,
-            entity);
-
-    for (const auto &child :
-         entry->children)
-    {
-        ApplyUIVisibility(
-            scene,
-            registry,
-            child.second,
-            currentVisible,
-            true);
-    }
+    const bool visible = GetUIVisible(registry, entity);
+    for (const auto &[index, child] : node->children)
+        ApplyUIVisibility(scene, registry, child, visible, true);
 }
 
-// ============================================================
-// APPLY VISIBILITY TO ROOT UI OBJECTS
-// ============================================================
-
-void ApplyUIVisibilityHierarchy(
-    Scene *scene,
-    entt::registry &registry)
+void ApplyUIVisibilityHierarchy(Scene *scene, registry &registry)
 {
-    /*
-     * An entity can theoretically contain more than one UI
-     * component. Use a set so that a root entity is only
-     * processed once.
-     */
-    std::unordered_set<entt::entity> processed;
-
-    auto ProcessRoots =
-        [&](auto view)
-    {
-        for (auto entity : view)
-        {
-            auto entry =
-                scene->GetObject(entity);
-
-            if (!entry)
-                continue;
-
-            if (entry->parent != entt::null)
-                continue;
-
-            if (!IsUIEntity(
-                    registry,
-                    entity))
-            {
-                continue;
-            }
-
-            if (!processed.insert(entity).second)
-                continue;
-
-            ApplyUIVisibility(
-                scene,
-                registry,
-                entity,
-                true,
-                false);
-        }
-    };
-
-    ProcessRoots(
-        registry.view<UIFrame>());
-
-    ProcessRoots(
-        registry.view<UIButton>());
-
-    ProcessRoots(
-        registry.view<UITextLabel>());
-
-    ProcessRoots(
-        registry.view<UIImage>());
+    if (!ApplyFlatFrameVisibility(scene, registry))
+        ApplyUIVisibility(scene, registry, scene->root, true, false);
 }
 
-// ============================================================
-// UI LIST HELPERS
-// ============================================================
-
-Vector2 GetUIListScrollSize(
-    const UIList &list,
-    const Rectangle &listRect)
+Vector2 GetUIListScrollSize(const UIList &list, const Rectangle &listRect)
 {
-    return FrameVectorToVec2(
-        list.scrollSize,
-        {listRect.width,
-         listRect.height});
+    return FrameVectorToVec2(list.scrollSize, {listRect.width, listRect.height});
 }
 
-Vector2 GetUIListElementSize(
-    const UIList &list,
-    const Rectangle &listRect)
+Vector2 GetUIListElementSize(const UIList &list, const Rectangle &listRect)
 {
-    const Vector2 scrollSize =
-        GetUIListScrollSize(
-            list,
-            listRect);
-
-    return FrameVectorToVec2(
-        list.displaySize,
-        scrollSize);
+    const Vector2 scroll = GetUIListScrollSize(list, listRect);
+    return FrameVectorToVec2(list.displaySize, scroll);
 }
 
-// ============================================================
-// RESOLVE TRANSFORM INSIDE RECTANGLE
-// ============================================================
-
-Rectangle ResolveUITransform(
-    const UITransform &transform,
-    const Rectangle &parentRect)
+Rectangle ResolveUITransform(const UITransform &transform, const Rectangle &parentRect)
 {
-    const float width =
-        parentRect.width *
-            transform.size.scale.x +
-        transform.size.offset.x;
-
-    const float height =
-        parentRect.height *
-            transform.size.scale.y +
-        transform.size.offset.y;
-
-    const float x =
-        parentRect.x +
-        parentRect.width *
-            transform.position.scale.x +
-        transform.position.offset.x -
-        width *
-            transform.anchor.scale.x;
-
-    const float y =
-        parentRect.y +
-        parentRect.height *
-            transform.position.scale.y +
-        transform.position.offset.y -
-        height *
-            transform.anchor.scale.y;
-
+    const float w = parentRect.width * transform.size.scale.x + transform.size.offset.x;
+    const float h = parentRect.height * transform.size.scale.y + transform.size.offset.y;
     return {
-        x,
-        y,
-        width,
-        height};
+        parentRect.x + parentRect.width * transform.position.scale.x +
+            transform.position.offset.x - w * transform.anchor.scale.x,
+        parentRect.y + parentRect.height * transform.position.scale.y +
+            transform.position.offset.y - h * transform.anchor.scale.y,
+        w, h
+    };
 }
-
-// ============================================================
-// RESET UI LIST STATE
-// ============================================================
 
 void GUISystem::ResetInUIList()
 {
-    auto &registry =
-        scene->objects;
-
-    for (auto entity :
-         registry.view<UITextLabel>())
-    {
-        auto &text =
-            registry.get<UITextLabel>(entity);
-
-        text.frame.renderable.inUIList =
-            false;
-    }
-
-    for (auto entity :
-         registry.view<UIFrame>())
-    {
-        auto &frame =
-            registry.get<UIFrame>(entity);
-
-        frame.renderable.inUIList =
-            false;
-    }
-
-    for (auto entity :
-         registry.view<UIButton>())
-    {
-        auto &button =
-            registry.get<UIButton>(entity);
-
-        button.inUIList =
-            false;
-    }
-
-    for (auto entity :
-         registry.view<UIImage>())
-    {
-        auto &image =
-            registry.get<UIImage>(entity);
-
-        image.sprite.renderable.inUIList =
-            false;
-    }
+    // Important: RenderSystem also calls this in the supplied implementation.
+    // For the flat stress test, both calls now return in O(1).
+    if (scene->objects.storage<UIList>().empty())
+        return;
+    ClearAllListFlags(scene->objects);
 }
 
-float GetUIListSpacing(
-    const UIList &list,
-    size_t elementCount,
-    float elementLength,
-    float contentLength)
+float GetUIListSpacing(const UIList &list, size_t elementCount,
+                       float elementLength, float contentLength)
 {
-    if (elementCount == 0)
+    if (!elementCount)
         return 0.0f;
 
-    const float totalElementLength =
-        static_cast<float>(elementCount) *
-        elementLength;
-
-    const float freeSpace =
-        std::max(
-            0.0f,
-            contentLength - totalElementLength);
+    const float free = max(0.0f,
+        contentLength - static_cast<float>(elementCount) * elementLength);
 
     switch (list.spreading)
     {
-    case UIListSpreading::BUNCH_START:
-    case UIListSpreading::BUNCH_MIDDLE:
-    case UIListSpreading::BUNCH_END:
-        return 0.0f;
-
-    case UIListSpreading::EVENLY:
-        return freeSpace /
-               static_cast<float>(elementCount + 1);
-
-    case UIListSpreading::DISTANCING:
-        if (elementCount <= 1)
+        case UIListSpreading::EVENLY:
+            return free / static_cast<float>(elementCount + 1);
+        case UIListSpreading::DISTANCING:
+            return elementCount > 1 ? free / static_cast<float>(elementCount - 1) : 0.0f;
+        default:
             return 0.0f;
-
-        return freeSpace /
-               static_cast<float>(elementCount - 1);
     }
-
-    return 0.0f;
 }
 
-float GetUIListStartOffset(
-    const UIList &list,
-    size_t elementCount,
-    float elementLength,
-    float contentLength,
-    float spacing)
+float GetUIListStartOffset(const UIList &list, size_t elementCount,
+                           float elementLength, float contentLength, float spacing)
 {
-    if (elementCount == 0)
+    if (!elementCount)
         return 0.0f;
 
-    const float totalElementLength =
-        static_cast<float>(elementCount) *
-        elementLength;
-
-    const float freeSpace =
-        std::max(
-            0.0f,
-            contentLength - totalElementLength);
+    const float free = max(0.0f,
+        contentLength - static_cast<float>(elementCount) * elementLength);
 
     switch (list.spreading)
     {
-    case UIListSpreading::BUNCH_START:
-        return 0.0f;
-
-    case UIListSpreading::BUNCH_MIDDLE:
-        return freeSpace * 0.5f;
-
-    case UIListSpreading::BUNCH_END:
-        return freeSpace;
-
-    case UIListSpreading::EVENLY:
-        return spacing;
-
-    case UIListSpreading::DISTANCING:
-        return 0.0f;
+        case UIListSpreading::BUNCH_MIDDLE: return free * 0.5f;
+        case UIListSpreading::BUNCH_END:    return free;
+        case UIListSpreading::EVENLY:       return spacing;
+        default:                            return 0.0f;
     }
-
-    return 0.0f;
 }
 
-// ============================================================
-// ARRANGE ONE UI LIST
-// ============================================================
-//
-// UIList responsibilities:
-//
-// 1. Determine element slots.
-// 2. Move each element according to scrollOffset.
-// 3. Resolve the element's UI transform relative to its slot.
-// 4. Determine whether the element is inside the viewport.
-// 5. Set the element's visibility accordingly.
-// 6. Recursively arrange nested UILists.
-//
-// The normal hierarchy visibility pass happens later.
-//
-// ============================================================
-
-void ArrangeUIList(
-    Scene *scene,
-    entt::registry &registry,
-    entt::entity listEntity)
+namespace
 {
-    auto *list =
-        registry.try_get<UIList>(
-            listEntity);
-
-    auto *frame =
-        registry.try_get<UIFrame>(
-            listEntity);
-
-    if (!list || !frame)
-        return;
-
-    auto entry =
-        scene->GetObject(listEntity);
-
-    if (!entry)
-        return;
-
-    const Rectangle listRect =
-        frame->transform.absoluteRect;
-
-    const Vector2 scrollSize =
-        GetUIListScrollSize(
-            *list,
-            listRect);
-
-    const Vector2 elementSize =
-        FrameVectorToVec2(
-            list->displaySize,
-            scrollSize);
-
-    const bool vertical =
-        list->settings.direction ==
-        Axis2D::VERTICAL;
-
-    const size_t elementCount =
-        entry->children.size();
-
-    const float elementLength =
-        vertical
-            ? elementSize.y
-            : elementSize.x;
-
-    const float contentLength =
-        vertical
-            ? scrollSize.y
-            : scrollSize.x;
-
-    const float spacing =
-        GetUIListSpacing(
-            *list,
-            elementCount,
-            elementLength,
-            contentLength);
-
-    const float startOffset =
-        GetUIListStartOffset(
-            *list,
-            elementCount,
-            elementLength,
-            contentLength,
-            spacing);
-
-    // --------------------------------------------------------
-    // Arrange each direct child.
-    // --------------------------------------------------------
-
-    for (size_t index = 0;
-         index < entry->children.size();
-         ++index)
+    // UIList gives each child a slot. Returns whether the absolute rectangle
+    // changed; descendants only need invalidation in that case.
+    bool AssignListRect(UITransform &transform, const Rectangle &slot)
     {
-        const entt::entity childEntity =
-            entry->children[index];
+        const Rectangle rect = ResolveUITransform(transform, slot);
+        const bool changed = !SameRect(transform.absoluteRect, rect) ||
+                             !SameRect(transform.parentAbsRect, slot);
+        transform.parentAbsRect = slot;
+        transform.absoluteRect = rect;
+        transform.dirty = false;
+        return changed;
+    }
+}
 
-        const float contentOffset =
-            startOffset +
-            static_cast<float>(index) *
-                (elementLength + spacing);
+void ArrangeUIList(Scene *scene, registry &registry, entity listEntity)
+{
+    auto *list = registry.try_get<UIList>(listEntity);
+    auto *frame = registry.try_get<UIFrame>(listEntity);
+    const auto *node = scene->GetObject(listEntity);
+    if (!list || !frame || !node)
+        return;
 
-        Rectangle elementRect = {
-            listRect.x,
-            listRect.y,
-            elementSize.x,
-            elementSize.y};
+    const Rectangle viewport = frame->transform.absoluteRect;
+    const Vector2 scrollSize = GetUIListScrollSize(*list, viewport);
+    const Vector2 cellSize = FrameVectorToVec2(list->displaySize, scrollSize);
+    const bool vertical = list->settings.direction == Axis2D::VERTICAL;
+    const float cellLength = vertical ? cellSize.y : cellSize.x;
+    const float contentLength = vertical ? scrollSize.y : scrollSize.x;
+    const size_t count = node->children.size();
+    const float spacing = GetUIListSpacing(*list, count, cellLength, contentLength);
+    const float start = GetUIListStartOffset(*list, count, cellLength, contentLength, spacing);
 
+    size_t ordinal = 0;
+    for (const auto &[index, child] : node->children)
+    {
+        Rectangle slot{viewport.x, viewport.y, cellSize.x, cellSize.y};
+        const float offset = start + static_cast<float>(ordinal++) *
+            (cellLength + spacing) - list->scrollOffset;
         if (vertical)
-        {
-            elementRect.y +=
-                contentOffset -
-                list->scrollOffset;
-        }
+            slot.y += offset;
         else
+            slot.x += offset;
+
+        const bool inViewport = CheckCollisionRecs(slot, viewport);
+        bool moved = false;
+
+        if (auto *p = registry.try_get<UIFrame>(child))
         {
-            elementRect.x +=
-                contentOffset -
-                list->scrollOffset;
+            p->renderable.inUIList = true;
+            moved |= AssignListRect(p->transform, slot);
+        }
+        if (auto *p = registry.try_get<UIButton>(child))
+        {
+            p->inUIList = true;
+            moved |= AssignListRect(p->bounds, slot);
+        }
+        if (auto *p = registry.try_get<UITextLabel>(child))
+        {
+            p->frame.renderable.inUIList = true;
+            moved |= AssignListRect(p->frame.transform, slot);
+        }
+        if (auto *p = registry.try_get<UIImage>(child))
+        {
+            p->sprite.renderable.inUIList = true;
+            moved |= AssignListRect(p->transform, slot);
         }
 
-        // ----------------------------------------------------
-        // Determine whether the ELEMENT is inside the
-        // list viewport.
-        //
-        // Use elementRect, not the child's final rectangle.
-        // ----------------------------------------------------
+        AssignListVisibility(registry, child, inViewport);
 
-        const bool elementVisible =
-            CheckCollisionRecs(
-                elementRect,
-                listRect);
-
-        // ----------------------------------------------------
-        // Apply list membership.
-        // ----------------------------------------------------
-
-        if (auto *text =
-                registry.try_get<UITextLabel>(
-                    childEntity))
-        {
-            text->frame.renderable.inUIList =
-                true;
-
-            text->frame.transform.parentAbsRect =
-                elementRect;
-
-            text->frame.transform.absoluteRect =
-                ResolveUITransform(
-                    text->frame.transform,
-                    elementRect);
-
-            text->frame.transform.dirty =
-                false;
-        }
-
-        if (auto *childFrame =
-                registry.try_get<UIFrame>(
-                    childEntity))
-        {
-            childFrame->renderable.inUIList =
-                true;
-
-            childFrame->transform.parentAbsRect =
-                elementRect;
-
-            childFrame->transform.absoluteRect =
-                ResolveUITransform(
-                    childFrame->transform,
-                    elementRect);
-
-            childFrame->transform.dirty =
-                false;
-        }
-
-        if (auto *button =
-                registry.try_get<UIButton>(
-                    childEntity))
-        {
-            button->inUIList =
-                true;
-
-            button->bounds.parentAbsRect =
-                elementRect;
-
-            button->bounds.absoluteRect =
-                ResolveUITransform(
-                    button->bounds,
-                    elementRect);
-
-            button->bounds.dirty =
-                false;
-        }
-
-        if (auto *image =
-                registry.try_get<UIImage>(
-                    childEntity))
-        {
-            image->sprite.renderable.inUIList =
-                true;
-
-            image->transform.parentAbsRect =
-                elementRect;
-
-            image->transform.absoluteRect =
-                ResolveUITransform(
-                    image->transform,
-                    elementRect);
-
-            image->transform.dirty =
-                false;
-        }
-
-        // ----------------------------------------------------
-        // IMPORTANT:
-        //
-        // UIList controls the visibility of its direct
-        // element.
-        //
-        // ApplyUIVisibilityHierarchy() will propagate this
-        // state to the element's descendants afterward.
-        // ----------------------------------------------------
-
-        SetUIVisible(
-            registry,
-            childEntity,
-            elementVisible);
+        // The new child rectangle changes the coordinate system for its
+        // descendants. Recompute only if the slot/rectangle has moved.
+        if (moved)
+            InvalidateDescendants(scene, registry, child);
     }
 
-    // --------------------------------------------------------
-    // Recursively arrange nested UILists.
-    // --------------------------------------------------------
-
-    for (const auto &child :
-         entry->children)
+    // Nested lists use their newly assigned rectangles, not the values
+    // computed before their parent list was arranged.
+    for (const auto &[index, child] : node->children)
     {
-        const entt::entity childEntity =
-            child.second;
-
-        if (!registry.all_of<UIList, UIFrame>(
-                childEntity))
-        {
-            continue;
-        }
-
-        ArrangeUIList(
-            scene,
-            registry,
-            childEntity);
+        if (registry.all_of<UIList, UIFrame>(child))
+            ArrangeUIList(scene, registry, child);
     }
 }
 
-// ============================================================
-// ARRANGE ALL UI LISTS
-// ============================================================
-
-void ArrangeUIListElements(
-    Scene *scene,
-    entt::registry &registry)
+void ArrangeUIListElements(Scene *scene, registry &registry)
 {
-    auto listView =
-        registry.view<UIList, UIFrame>();
-
-    for (auto [entity, list, frame] :
-         listView.each())
+    auto lists = registry.view<UIList, UIFrame>();
+    for (auto [entity, list, frame] : lists.each())
     {
-        auto entry =
-            scene->GetObject(entity);
-
-        if (!entry)
+        const auto *node = scene->GetObject(entity);
+        if (!node)
             continue;
-
-        const entt::entity parent =
-            entry->parent;
-
-        // ----------------------------------------------------
-        // If this list is inside another UIList, its parent
-        // list will arrange it recursively.
-        // ----------------------------------------------------
-
-        if (parent != entt::null &&
-            registry.all_of<UIList>(parent))
-        {
+        // Nested lists are processed recursively by their parent list.
+        if (node->parent != null && registry.all_of<UIList, UIFrame>(node->parent))
             continue;
-        }
-
-        // ----------------------------------------------------
-        // Otherwise this is the top-level UIList in its
-        // UIList hierarchy.
-        //
-        // It can still have a normal UI parent.
-        //
-        // Example:
-        //
-        // inventory-menu
-        //     |
-        //     +-- inventory-menu-row-list
-        //
-        // inventory-menu-row-list is NOT a scene root,
-        // but it IS a UIList root.
-        // ----------------------------------------------------
-
-        ArrangeUIList(
-            scene,
-            registry,
-            entity);
+        ArrangeUIList(scene, registry, entity);
     }
 }
 
-/*void ArrangeUIGrid(Scene* scene, entt::registry &registry, Object gridObject)
+void HandleButtonInputs(Scene *scene, registry &registry)
 {
+    auto buttons = registry.view<UIButton>();
+    if (buttons.begin() == buttons.end())
+        return;
 
-}
+    const Vector2 mouse = GetMouseInViewportSpace(scene->world->window.logical_resolution);
+    const bool left = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+    const bool right = IsMouseButtonPressed(MOUSE_RIGHT_BUTTON);
+    const bool middle = IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON);
 
-void ArrangeUIGridElements(Scene* scene, entt::registry &registry)
-{
-    auto gridView = registry.view<UIGrid, UIFrame>();
-
-    for (auto [entity, grid, frame] : gridView.each())
+    for (auto [entity, button] : buttons.each())
     {
-        auto entry = scene->FindEntry(entity);
-        if (!entry) continue;
-
-        if (entry->parent.object != entt::null && registry.all_of<UIGrid>(entry->parent.object)) continue;
-
-        ArrangeUIGrid(scene, registry, entity);
-    }
-}*/
-
-// ============================================================
-// BUTTON INPUT
-// ============================================================
-
-void HandleButtonInputs(
-    Scene *scene,
-    entt::registry &registry)
-{
-    auto buttonView =
-        registry.view<UIButton>();
-
-    const Vector2 mouse =
-        GetMouseInViewportSpace(
-            scene->world->window.logical_resolution);
-
-    for (auto entity : buttonView)
-    {
-        auto &button =
-            buttonView.get<UIButton>(
-                entity);
-
         if (!button.active)
             continue;
 
-        const Rectangle rect =
-            button.bounds.absoluteRect;
-
-        const bool hovered =
-            CheckCollisionPointRec(
-                mouse,
-                rect);
-
+        const bool hovered = CheckCollisionPointRec(mouse, button.bounds.absoluteRect);
         if (hovered)
         {
-            if (IsMouseButtonPressed(
-                    MOUSE_LEFT_BUTTON))
+            if (left)
             {
-                std::cout
-                    << "firing event: "
-                    << EventRegistry::reverseLookup[button.eventCallbacks.leftClick]
-                    << '\n';
-
-                EventRegistry::Fire(
-                    scene,
-                    button.eventCallbacks.leftClick,
-                    entity);
+                cout << "firing event: "
+                          << EventRegistry::reverseLookup[button.eventCallbacks.leftClick] << '\n';
+                EventRegistry::Fire(scene, button.eventCallbacks.leftClick, entity);
             }
-
-            if (IsMouseButtonPressed(
-                    MOUSE_RIGHT_BUTTON))
-            {
-                EventRegistry::Fire(
-                    scene,
-                    button.eventCallbacks.rightClick,
-                    entity);
-            }
-
-            if (IsMouseButtonPressed(
-                    MOUSE_MIDDLE_BUTTON))
-            {
-                EventRegistry::Fire(
-                    scene,
-                    button.eventCallbacks.middleClick,
-                    entity);
-            }
-
+            if (right)
+                EventRegistry::Fire(scene, button.eventCallbacks.rightClick, entity);
+            if (middle)
+                EventRegistry::Fire(scene, button.eventCallbacks.middleClick, entity);
             if (!button.mouseHovering)
-            {
-                EventRegistry::Fire(
-                    scene,
-                    button.eventCallbacks.mouseEnter,
-                    entity);
-            }
+                EventRegistry::Fire(scene, button.eventCallbacks.mouseEnter, entity);
 
-            button.mouseHovering =
-                true;
-
-            EventRegistry::Fire(
-                scene,
-                button.eventCallbacks.mouseHover,
-                entity);
+            button.mouseHovering = true;
+            EventRegistry::Fire(scene, button.eventCallbacks.mouseHover, entity);
         }
         else
         {
             if (button.mouseHovering)
-            {
-                EventRegistry::Fire(
-                    scene,
-                    button.eventCallbacks.mouseExit,
-                    entity);
-            }
-
-            button.mouseHovering =
-                false;
+                EventRegistry::Fire(scene, button.eventCallbacks.mouseExit, entity);
+            button.mouseHovering = false;
         }
     }
 }
 
-// ============================================================
-// UI LIST SCROLL
-// ============================================================
-
-void HandleUIListScroll(
-    float deltaTime,
-    Scene *scene,
-    entt::registry &registry)
+void HandleUIListScroll(float deltaTime, Scene *scene, registry &registry)
 {
-    const float wheel =
-        GetMouseWheelMove();
-
+    const float wheel = GetMouseWheelMove();
     if (wheel == 0.0f)
         return;
 
-    const Vector2 mouse =
-        GetMouseInViewportSpace(
-            scene->world->window.logical_resolution);
-
-    auto uilistView =
-        registry.view<UIList, UIFrame>();
-
-    for (auto [entity, list, frame] :
-         uilistView.each())
+    const Vector2 mouse = GetMouseInViewportSpace(scene->world->window.logical_resolution);
+    for (auto [entity, list, frame] : registry.view<UIList, UIFrame>().each())
     {
-        const Rectangle listRect =
-            frame.transform.absoluteRect;
-
-        if (!CheckCollisionPointRec(
-                mouse,
-                listRect))
-        {
+        const Rectangle viewport = frame.transform.absoluteRect;
+        if (!CheckCollisionPointRec(mouse, viewport))
             continue;
-        }
 
-        const Vector2 scrollSize =
-            GetUIListScrollSize(
-                list,
-                listRect);
+        const Vector2 content = GetUIListScrollSize(list, viewport);
+        const bool vertical = list.settings.direction == Axis2D::VERTICAL;
+        const float maxScroll = max(0.0f, vertical ?
+            content.y - viewport.height : content.x - viewport.width);
 
-        const Vector2 viewportSize = {
-            listRect.width,
-            listRect.height};
-
-        float maxScroll = 0.0f;
-
-        if (list.settings.direction ==
-            Axis2D::VERTICAL)
-        {
-            maxScroll =
-                scrollSize.y -
-                viewportSize.y;
-        }
-        else
-        {
-            maxScroll =
-                scrollSize.x -
-                viewportSize.x;
-        }
-
-        maxScroll =
-            std::max(
-                0.0f,
-                maxScroll);
-
-        /*
-         * Positive scrollOffset means moving through the
-         * content in the positive direction.
-         */
-        list.scrollOffset -=
-            wheel *
-            list.settings.scrollSpeed *
-            deltaTime *
-            1000.0f;
-
-        list.scrollOffset =
-            std::clamp(
-                list.scrollOffset,
-                0.0f,
-                maxScroll);
+        list.scrollOffset = clamp(
+            list.scrollOffset - wheel * list.settings.scrollSpeed * deltaTime * 1000.0f,
+            0.0f, maxScroll);
     }
 }
 
-// ============================================================
-// GUI UPDATE
-// ============================================================
-
-void GUISystem::Update(
-    float deltaTime,
-    entt::registry &registry)
+void GUISystem::Update(float deltaTime, registry &registry)
 {
-    auto window = scene->world->window;
-    auto root = scene->root;
-
-    auto rootFrame = scene->FindElement<UIFrame>(root);
+    const Rectangle viewport = CanvasRect(scene);
+    const Object root = scene->root;
+    auto *rootFrame = registry.try_get<UIFrame>(root);
     if (!rootFrame)
         rootFrame = &scene->AddElement<UIFrame>(root);
 
-    // Setup the frame here
-    rootFrame->transform.size.offset = window.logical_resolution;
+    if (!SameRect(rootFrame->transform.absoluteRect, viewport))
+        MarkUIDirty(scene, registry, root);
+
+    rootFrame->transform.size.offset = {viewport.width, viewport.height};
+    rootFrame->transform.parentAbsRect = viewport;
+    rootFrame->transform.absoluteRect = viewport;
+    rootFrame->transform.dirty = false;
     rootFrame->renderable.isScreenSpace = true;
     rootFrame->renderable.inheritsUI = true;
 
-    // ========================================================
-    // 1. Reset transient UIList state.
-    // ========================================================
+    // Empty UIList storage is a very common (and very cheap) fast path.
+    const bool hasLists = !registry.storage<UIList>().empty();
+    if (hasLists)
+        ResetInUIList();
 
-    ResetInUIList();
+    ResolveDirtyTransforms(scene, registry);
 
-    // ========================================================
-    // 2. Resolve normal UI hierarchy.
-    // ========================================================
-
-    for (auto entity : registry.view<UIFrame>())
+    if (hasLists)
     {
-        auto &frame = registry.get<UIFrame>(entity);
-
-        ResolveUI(
-            scene,
-            registry,
-            entity,
-            frame.transform);
+        HandleUIListScroll(deltaTime, scene, registry);
+        ArrangeUIListElements(scene, registry);
+        // List placement can invalidate transforms of nested non-list UI.
+        ResolveDirtyTransforms(scene, registry);
     }
 
-    for (auto entity : registry.view<UIButton>())
-    {
-        auto &button = registry.get<UIButton>(entity);
-
-        ResolveUI(
-            scene,
-            registry,
-            entity,
-            button.bounds);
-    }
-
-    for (auto entity : registry.view<UITextLabel>())
-    {
-        auto &text = registry.get<UITextLabel>(entity);
-
-        ResolveUI(
-            scene,
-            registry,
-            entity,
-            text.frame.transform);
-    }
-
-    for (auto entity : registry.view<UIImage>())
-    {
-        auto &image = registry.get<UIImage>(entity);
-
-        ResolveUI(
-            scene,
-            registry,
-            entity,
-            image.transform);
-    }
-
-    // ========================================================
-    // 3. Handle scrolling.
-    // ========================================================
-
-    HandleUIListScroll(
-        deltaTime,
-        scene,
-        registry);
-
-    // ========================================================
-    // 4. Arrange UILists.
-    //
-    // Sets the visibility of direct list
-    // elements based on whether their slots intersect
-    // the viewport.
-    // ========================================================
-
-    ArrangeUIListElements(scene, registry);
-
-    // ========================================================
-    // 5. Propagate visibility through the scene hierarchy.
-    //
-    // This handles:
-    //
-    //     row
-    //       -> slot
-    //           -> image
-    //           -> text
-    //
-    // as well as arbitrarily nested UILists.
-    // ========================================================
-
-    ApplyUIVisibilityHierarchy(
-        scene,
-        registry);
-
-    // ========================================================
-    // 6. Handle input using final UI state.
-    // ========================================================
-
-    HandleButtonInputs(
-        scene,
-        registry);
+    ApplyUIVisibilityHierarchy(scene, registry);
+    HandleButtonInputs(scene, registry);
 }

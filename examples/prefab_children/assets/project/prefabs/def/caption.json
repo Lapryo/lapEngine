@@ -1,0 +1,41 @@
+{
+    "name": "caption",
+    "parent": "photo",
+    "elements": [
+        {
+            "type": "ui-text-label",
+            "data": {
+                "frame": {
+                    "renderable": {
+                        "is-screen-space": true,
+                        "visible": true,
+                        "z-layer": 0,
+                        "y-sort": 2,
+                        "inherits-ui": true,
+                        "tint": [0, 0, 0, 255]
+                    },
+                    "transform": {
+                        "position": {
+                            "scale": [0, 0],
+                            "offset": [0, 0]
+                        },
+                        "size": {
+                            "scale": [1, 1],
+                            "offset": [0, 0]
+                        },
+                        "anchor": {
+                            "scale": [0, 0]
+                        }
+                    }
+                },
+                "text": "Mona Lisa",
+                "font": "",
+                "font-size": 15,
+                "alignment": {
+                    "horizontal": "middle",
+                    "vertical": "bottom"
+                }
+            }
+        }
+    ]
+}

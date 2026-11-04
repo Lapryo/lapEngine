@@ -4,24 +4,27 @@
 #include <entt/entt.hpp>
 #include <raylib.h>
 
+using namespace std;
+
 namespace lapCore
 {
     struct Scene;
     struct ResourceManager;
+    using namespace entt;
 
-    using Object = entt::entity;
+    using Object = entity;
 
     struct Tileset {
-        entt::id_type textureID = 0;
+        id_type textureID = 0;
         unsigned int columns = 0, count = 0;
-        std::map<unsigned int, std::string> types = {};
+        map<unsigned int, string> types = {};
 
-        void LoadFromTSJ(const std::string& filePath);
+        void LoadFromTSJ(const string& filePath);
         void Unload();
     };
 
     struct Map {
-        using TileProperties = std::map<std::string, std::string>;
+        using TileProperties = map<string, string>;
 
         struct Tile {
             unsigned int tileset = 0, id = 0;
@@ -33,22 +36,22 @@ namespace lapCore
 
         struct TilesetInfo {
             unsigned int firstGID = 0, count = 0;
-            entt::id_type id = 0;
-            std::map<unsigned int, std::string> types;
+            id_type id = 0;
+            map<unsigned int, string> types;
         };
 
         Vector2 size = {0, 0}, tileSize = {0, 0};
         
-        using TileLayer = std::pair<std::string, std::vector<Tile>>;
-        std::map<unsigned int, TileLayer> layers;
+        using TileLayer = pair<string, vector<Tile>>;
+        map<unsigned int, TileLayer> layers;
 
         //         LAYER ID     TILESET INFO
-        std::map<unsigned int, TilesetInfo> tilesets;
+        map<unsigned int, TilesetInfo> tilesets;
 
         //.        LAYER ID      OBJECT ID
-        std::map<unsigned int, entt::id_type> objects;
+        map<unsigned int, id_type> objects;
 
-        void LoadFromTMJ(ResourceManager* resources, const std::string& filePath);
+        void LoadFromTMJ(ResourceManager* resources, const string& filePath);
         void Unload();
     };
 }

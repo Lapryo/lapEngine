@@ -9,12 +9,12 @@ using namespace lapCore;
 using namespace EUTIL;
 using namespace Functions;
 
-void GetTileset(Map& map, const json& tilesetJson, const std::string &filePath, unsigned int tilesetIndex, ResourceManager* resources)
+void GetTileset(Map& map, const json& tilesetJson, const string &filePath, unsigned int tilesetIndex, ResourceManager* resources)
 {
     Map::TilesetInfo tileset;
 
     // tilesetJson will have a "source" field that points to the tileset
-    std::string sourceFile = tilesetJson.value("source", "");
+    string sourceFile = tilesetJson.value("source", "");
     if (!sourceFile.empty())
     {
         tileset.id = HASH_ID(sourceFile.c_str());
@@ -31,7 +31,7 @@ void GetTileset(Map& map, const json& tilesetJson, const std::string &filePath, 
     map.tilesets[tilesetIndex] = tileset;
 }
 
-void GetTilesets(Map& map, const json& mapJson, const std::string& filePath, ResourceManager* resources)
+void GetTilesets(Map& map, const json& mapJson, const string& filePath, ResourceManager* resources)
 {
     if (mapJson.contains("tilesets"))
     {
@@ -49,7 +49,7 @@ constexpr uint32_t FLIP_V = 0x40000000;
 constexpr uint32_t FLIP_D = 0x20000000;
 constexpr uint32_t TILE_MASK = 0x1FFFFFFF;
 
-void GetTiles(Map& map, const json& layerDataJson, unsigned int layerID, std::string layerName)
+void GetTiles(Map& map, const json& layerDataJson, unsigned int layerID, string layerName)
 {
     Map::TileLayer tileLayer;
     tileLayer.first = layerName;
@@ -100,7 +100,7 @@ void GetTiles(Map& map, const json& layerDataJson, unsigned int layerID, std::st
     map.layers[layerID] = tileLayer;
 }
 
-void GetObjects(Map& map, const json& objectsJson, unsigned int layerID, std::string layerName)
+void GetObjects(Map& map, const json& objectsJson, unsigned int layerID, string layerName)
 {
     Map::TileLayer tileLayer;
     tileLayer.first = layerName;
@@ -126,10 +126,10 @@ void GetObjects(Map& map, const json& objectsJson, unsigned int layerID, std::st
         {
             for (const auto& propJson : objectJson.at("properties"))
             {
-                std::string propName = propJson.value("name", "");
+                string propName = propJson.value("name", "");
                 if (propName == "") break;
                 
-                std::string propVal = propJson.value("value", "");
+                string propVal = propJson.value("value", "");
                 tile.properties[propName] = propVal;
             }
         }
@@ -155,8 +155,8 @@ void GetObjects(Map& map, const json& objectsJson, unsigned int layerID, std::st
 
 void GetLayer(Map& map, const json& layerJson, unsigned int index)
 {
-    std::string layerType = layerJson.value("type", "");
-    std::string layerName = layerJson.value("name", "");
+    string layerType = layerJson.value("type", "");
+    string layerName = layerJson.value("name", "");
     
     if (layerType == "tilelayer")
     {
@@ -185,7 +185,7 @@ void GetLayers(Map& map, const json& mapJson)
     }
 }
 
-void lapCore::Map::LoadFromTMJ(ResourceManager* resources, const std::string &filePath)
+void lapCore::Map::LoadFromTMJ(ResourceManager* resources, const string &filePath)
 {
     json mapJson = ReadFileToJsonObject(filePath, false);
 
@@ -205,7 +205,7 @@ void lapCore::Map::Unload()
     objects.clear();
 }
 
-void lapCore::Tileset::LoadFromTSJ(const std::string &filePath)
+void lapCore::Tileset::LoadFromTSJ(const string &filePath)
 {
     json tilesetJson = ReadFileToJsonObject(filePath, false);
 
@@ -219,7 +219,7 @@ void lapCore::Tileset::LoadFromTSJ(const std::string &filePath)
         for (const auto& tileJson : tilesetJson.at("tiles"))
         {
             unsigned int tileID = tileJson.value("id", 0);
-            std::string type = tileJson.value("type", "");
+            string type = tileJson.value("type", "");
             types[tileID] = type;
         }
     }

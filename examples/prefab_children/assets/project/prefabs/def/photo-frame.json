@@ -1,0 +1,32 @@
+{
+    "name": "photo-frame",
+    "parent": "",
+    "elements": [
+        {
+            "type": "ui-frame",
+            "data": {
+                "renderable": {
+                    "is-screen-space": true,
+                    "visible": true,
+                    "z-layer": 0,
+                    "y-sort": 0,
+                    "inherits-ui": true,
+                    "tint": [100, 100, 100, 255]
+                },
+                "transform": {
+                    "position": {
+                        "scale": [0.5, 0.5],
+                        "offset": [0, 0]
+                    },
+                    "size": {
+                        "scale": [0, 0],
+                        "offset": [100, 100]
+                    },
+                    "anchor": {
+                        "scale": [0.5, 0.5]
+                    }
+                }
+            }
+        }
+    ]
+}

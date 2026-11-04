@@ -16,6 +16,7 @@ namespace lapCore
 
         return groupPath;
     }
+
     filesystem::path UnpackGroupedFile(json &fileJson, const filesystem::path &startingPath, const string &category)
     {
         auto categoryPath = startingPath / category;
@@ -33,12 +34,12 @@ namespace lapCore
         }
         else if (fileJson.is_object() && fileJson.contains("group"))
         {
-            groupPath = fileJson.at("group").get<std::string>();
+            groupPath = fileJson.at("group").get<string>();
         }
 
         if (!fileJson.is_object())
         {
-            throw std::runtime_error(
+            throw runtime_error(
                 "UnpackGroupedFile: Expected a JSON object."
             );
         }
@@ -49,7 +50,7 @@ namespace lapCore
         return categoryPath / groupPath;
     }
     
-    json UnpackArrayOrInline(const json &projectJson, const std::string &key, function<json(json&, filesystem::path, string)> unpackerFunction, filesystem::path startingPath, string optional)
+    json UnpackArrayOrInline(const json &projectJson, const string &key, function<json(json&, filesystem::path, string)> unpackerFunction, filesystem::path startingPath, string optional)
     {
         if (!jsonContains(projectJson, key))
             return json();
@@ -68,12 +69,11 @@ namespace lapCore
             {
                 json loadedJson = UnpackFile(path);
 
-                if (loadedJson.is_array())
+                // Collections can contain arrays OR keyed objects (e.g.
+                // modifications.children is keyed by child prefab name).
+                if (loadedJson.is_array() || loadedJson.is_object())
                 {
                     resultJson = loadedJson;
-
-                    // Use the collection file's directory as the
-                    // starting directory for its contained entries.
                     startingPath = path.parent_path();
                 }
             }
@@ -88,10 +88,10 @@ namespace lapCore
         return resultJson;
     }
 
-    filesystem::path GetDirectoryPath(json &fileJson, const filesystem::path &startingPath, const string &category, const std::string &key)
+    filesystem::path GetDirectoryPath(json &fileJson, const filesystem::path &startingPath, const string &category, const string &key)
     {
         auto groupDirectory = UnpackGroupedFile(fileJson, startingPath, category);
-        return groupDirectory / fileJson.at(key).get<std::string>();
+        return groupDirectory / fileJson.at(key).get<string>();
     }
 
     // Unpacking
@@ -150,52 +150,175 @@ namespace lapCore
         return objectJson;
     }
     
-    json UnpackInstancedPrefab(json &instancedPrefabJson, const filesystem::path &startingPath, const string &optional)
+    // Resolve children overrides while preserving their *keys*.
+    // Accepted form: {"childName": {...}, "otherChild": "exclude"}
+    // External "file@..." collections may also contain that keyed object or
+    // an array of child entries with a name/prefab field.
+    json UnpackChildOverrides(const json& parentJson,
+                              filesystem::path startingPath)
     {
-        // Very complicated!
-        json modificationsJson = UnpackArrayOrInline(
-            instancedPrefabJson, "modifications", UnpackPrefabModification, 
-            GetDirectoryPath(instancedPrefabJson, startingPath, "prefabs", "name"), 
-            instancedPrefabJson.at("prefab").get<std::string>()
-        );
-        if (!modificationsJson.is_null())
-            instancedPrefabJson["modifications"] = modificationsJson;
+        if (!parentJson.is_object() || !parentJson.contains("children"))
+            return json();
+
+        json children = parentJson.at("children");
+        if (wantsReplacement(children))
+        {
+            const filesystem::path path = startingPath / GetReplacementValue(children);
+            if (filesystem::is_regular_file(path))
+            {
+                children = UnpackFile(path);
+                startingPath = path.parent_path();
+            }
+        }
+
+        json result = json::object();
+
+        if (children.is_object())
+        {
+            for (const auto& [childName, overrideJson] : children.items())
+            {
+                if (overrideJson == "exclude" || overrideJson == "default" ||
+                    overrideJson.is_null())
+                {
+                    result[childName] = overrideJson.is_null()
+                        ? json("default") : overrideJson;
+                    continue;
+                }
+
+                json child = overrideJson;
+                result[childName] = UnpackChildPrefab(child, startingPath, childName);
+            }
+        }
+        else if (children.is_array())
+        {
+            for (const auto& childEntry : children)
+            {
+                std::string childName;
+                if (childEntry.is_object())
+                    childName = childEntry.value("name", childEntry.value("prefab", ""));
+                else if (wantsReplacement(childEntry))
+                    childName = filesystem::path(GetReplacementValue(childEntry)).stem().string();
+
+                else if (childEntry.is_string())
+                {
+                    // Bare child names in arrays mean "use the default".
+                    childName = childEntry.get<string>();
+                    result[childName] = "default";
+                    continue;
+                }
+
+                if (childName.empty())
+                    continue;
+
+                json child = childEntry;
+                result[childName] = UnpackChildPrefab(child, startingPath, childName);
+            }
+        }
+
+        return result;
+    }
+
+    json UnpackInstancedPrefab(json &instancedPrefabJson,
+                              const filesystem::path &startingPath,
+                              const string &optional)
+    {
+        const auto directoryPath = GetDirectoryPath(
+            instancedPrefabJson, startingPath, "prefabs", "prefab");
+
+        // "exclude" and "default" are markers, not JSON objects to unpack.
+        if (instancedPrefabJson.contains("modifications") &&
+            instancedPrefabJson.at("modifications") != "exclude" &&
+            instancedPrefabJson.at("modifications") != "default")
+        {
+            json modificationsJson = UnpackArrayOrInline(
+                instancedPrefabJson, "modifications", UnpackPrefabModification,
+                directoryPath, instancedPrefabJson.at("prefab").get<string>());
+            if (!modificationsJson.is_null())
+                instancedPrefabJson["modifications"] = std::move(modificationsJson);
+        }
+
+        // Preserve support for explicitly nested instance descriptors.
+        if (instancedPrefabJson.contains("children"))
+        {
+            if (instancedPrefabJson.at("children").is_array())
+            {
+                json childrenJson = UnpackArrayOrInline(
+                    instancedPrefabJson, "children", UnpackInstancedPrefab,
+                    directoryPath, optional);
+                if (!childrenJson.is_null())
+                    instancedPrefabJson["children"] = std::move(childrenJson);
+            }
+            else
+            {
+                // Keyed children are modifications, not nested instance
+                // descriptors with a required "prefab" property.
+                json childrenJson = UnpackChildOverrides(
+                    instancedPrefabJson, directoryPath);
+                if (!childrenJson.is_null())
+                    instancedPrefabJson["children"] = std::move(childrenJson);
+            }
+        }
 
         return instancedPrefabJson;
     }
 
-    json UnpackPrefabModification(json &prefabModificationJson, const filesystem::path &startingPath, const string &optional)
+    json UnpackPrefabModification(json &prefabModificationJson,
+                                  const filesystem::path &startingPath,
+                                  const string &optional)
     {
-        // Because the prefab name isn't a key of the modification JSON, we have to get it from the optional string
-        // There's probably a better way to do this, but whatever
-        auto groupDirectory = UnpackGroupedFile(prefabModificationJson, startingPath, "modifications");
-        auto directoryPath = groupDirectory / optional;
+        auto groupDirectory = UnpackGroupedFile(
+            prefabModificationJson, startingPath, "modifications");
+        const auto directoryPath = groupDirectory / optional;
 
-        json childrenJson = UnpackArrayOrInline(prefabModificationJson, "children", UnpackChildPrefab, directoryPath, optional);
+        // Child overrides are keyed by the prefab child's name. Treating the
+        // map as a single child loses those keys and fails on "exclude".
+        json childrenJson = UnpackChildOverrides(prefabModificationJson, directoryPath);
         if (!childrenJson.is_null())
-            prefabModificationJson["children"] = childrenJson;
+            prefabModificationJson["children"] = std::move(childrenJson);
 
-        json elementsJson = UnpackArrayOrInline(prefabModificationJson, "elements", UnpackElement, directoryPath, optional);
+        json elementsJson = UnpackArrayOrInline(
+            prefabModificationJson, "elements", UnpackElement,
+            directoryPath, optional);
         if (!elementsJson.is_null())
-            prefabModificationJson["elements"] = elementsJson;
+            prefabModificationJson["elements"] = std::move(elementsJson);
 
         return prefabModificationJson;
     }
 
-    json UnpackChildPrefab(json &childPrefabJson, const filesystem::path &startingPath, const string &optional)
+    json UnpackChildPrefab(json &childPrefabJson,
+                           const filesystem::path &startingPath,
+                           const string &optional)
     {
-        // Like before, the prefab name isn't a key of the child prefab JSON, prefabs are very complicated!
-        auto groupDirectory = UnpackGroupedFile(childPrefabJson, startingPath, "children");
-        auto directoryPath = groupDirectory / optional;
+        // A child override can be a marker, an inline override object, or
+        // a file reference to an override object.
+        if (childPrefabJson == "exclude" || childPrefabJson == "default")
+            return childPrefabJson;
 
-        json elementsJson = UnpackArrayOrInline(childPrefabJson, "elements", UnpackElement, directoryPath, optional);
+        const auto groupDirectory = UnpackGroupedFile(
+            childPrefabJson, startingPath, "children");
+        const auto directoryPath = groupDirectory / optional;
+
+        // Some formats wrap the child override in "modifications".
+        if (childPrefabJson.contains("modifications") &&
+            childPrefabJson.at("modifications") != "exclude" &&
+            childPrefabJson.at("modifications") != "default")
+        {
+            json nestedMods = UnpackArrayOrInline(
+                childPrefabJson, "modifications", UnpackPrefabModification,
+                directoryPath, optional);
+            if (!nestedMods.is_null())
+                childPrefabJson["modifications"] = std::move(nestedMods);
+        }
+
+        json elementsJson = UnpackArrayOrInline(
+            childPrefabJson, "elements", UnpackElement,
+            directoryPath, optional);
         if (!elementsJson.is_null())
-            childPrefabJson["elements"] = elementsJson;
+            childPrefabJson["elements"] = std::move(elementsJson);
 
-        // TODO: I'm 99% sure this is wrong, the name's of the children of the prefab should be the keys of the "children" object JSON
-        json childrenJson = UnpackArrayOrInline(childPrefabJson, "children", UnpackChildPrefab, directoryPath, optional);
+        json childrenJson = UnpackChildOverrides(childPrefabJson, directoryPath);
         if (!childrenJson.is_null())
-            childPrefabJson["children"] = childrenJson;
+            childPrefabJson["children"] = std::move(childrenJson);
 
         return childPrefabJson;
     }

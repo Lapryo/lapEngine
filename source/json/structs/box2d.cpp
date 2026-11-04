@@ -18,7 +18,7 @@ namespace lapCore::JSON
     }
     void Serializer<b2BodyType>::from_json(b2BodyType& t, const json& j)
     {
-        const auto val = j.get<std::string>();
+        const auto val = j.get<string>();
 
         if (val == "kinematic")
             t = b2_kinematicBody;
@@ -194,8 +194,8 @@ namespace lapCore::JSON
     // B2POLYGON
     json Serializer<b2Polygon>::to_json(const b2Polygon& p, SerializeContext* ctx)
     {
-        std::vector<float> vertices;
-        std::vector<float> normals;
+        vector<float> vertices;
+        vector<float> normals;
 
         for (int i = 0; i < p.count; i++)
         {
@@ -216,7 +216,7 @@ namespace lapCore::JSON
     }
     void Serializer<b2Polygon>::from_json(b2Polygon& p, const json& j)
     {
-        std::string hitboxType = j.value("hitbox-type", "box");
+        string hitboxType = j.value("hitbox-type", "box");
         if (hitboxType == "box")
         {
             p = b2MakeBox(j.value("width", 1.f) / 2.f, j.value("height", 1.f) / 2.f);
@@ -227,7 +227,7 @@ namespace lapCore::JSON
         }
         else if (hitboxType == "bounding-box")
         {
-            Model model = LoadModel(j.value("model-path", std::string()).c_str());
+            Model model = LoadModel(j.value("model-path", string()).c_str());
             BoundingBox box = GetModelBoundingBox(model);
             p = b2MakeBox((box.max.x - box.min.x) / 2.f, (box.max.y - box.min.y) / 2.f);
         }
@@ -295,8 +295,8 @@ namespace lapCore::JSON
                 Serializer<b2Vec2>::from_json(p.centroid, j.at("centroid"));
             p.radius = j.value("radius", 0.f);
             p.count = j.value("count", 0);
-            std::vector<float> vertices = j.value("vertices", std::vector<float>());
-            std::vector<float> normals = j.value("normals", std::vector<float>());
+            vector<float> vertices = j.value("vertices", vector<float>());
+            vector<float> normals = j.value("normals", vector<float>());
             for (int i = 0; i < p.count; i++)
             {
                 p.vertices[i] = b2Vec2{vertices[i * 2], vertices[i * 2 + 1]};

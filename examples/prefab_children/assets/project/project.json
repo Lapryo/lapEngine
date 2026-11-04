@@ -1,0 +1,17 @@
+{
+    "scenes": [
+        "file@main.json"
+    ],
+    "prefabs": "file@prefabs.json",
+    "assets": [
+        {
+            "type": "texture",
+            "name": "photo",
+            "path": "assets/textures/photo.png",
+            "data": {
+                "gen-mipmaps": "true",
+				"filter": "point"
+            }
+        }
+    ]
+}

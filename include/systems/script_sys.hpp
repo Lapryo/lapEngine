@@ -13,11 +13,11 @@ public:
 
     void Update(
         float deltaTime, 
-        entt::registry &registry
+        registry &registry
     ) override;
 
-    void OnDestroy(entt::registry &registry);
+    void OnDestroy(registry &registry);
 
-    std::string GetName() const override 
+    string GetName() const override 
     { return "ScriptSystem"; }
 };

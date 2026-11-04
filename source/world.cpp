@@ -55,7 +55,7 @@ ProjectSceneData &lapCore::World::GetMainSceneData()
     return mainSceneData;
 }
 
-void lapCore::World::SwitchScene(const ProjectSceneData &scene_data, std::function<void()> preloadCallback)
+void lapCore::World::SwitchScene(const ProjectSceneData &scene_data, function<void()> preloadCallback)
 {
     switchingScene = true;
     nextSceneData = scene_data;
@@ -103,7 +103,7 @@ void lapCore::World::LoadAssets()
 {
     for (const auto& asset : project.assets)
     {
-        std::string assetPath = std::string(GetApplicationDirectory()) + asset.path.string();
+        string assetPath = string(GetApplicationDirectory()) + asset.path.string();
         auto name = HASH(asset.name.c_str());
 
         if (asset.type == "texture")
@@ -147,7 +147,7 @@ void lapCore::World::LoadAssets()
             resources.textures.Load(name, {texture, assetPath});
         }
         else if (asset.type == "shader")
-            resources.shaders.Load(HASH(asset.name.c_str()), {LoadShader(std::string(assetPath + ".vs").c_str(), std::string(assetPath + ".fs").c_str()), assetPath});
+            resources.shaders.Load(HASH(asset.name.c_str()), {LoadShader(string(assetPath + ".vs").c_str(), string(assetPath + ".fs").c_str()), assetPath});
         else if (asset.type == "music")
         {
             auto music = LoadMusicStream(assetPath.c_str());
@@ -157,11 +157,11 @@ void lapCore::World::LoadAssets()
                 if (data.first == "looped")
                     data.second == "true" ? music.looping = true : music.looping = false;
                 else if (data.first == "volume")
-                    SetMusicVolume(music, std::stof(data.second));
+                    SetMusicVolume(music, stof(data.second));
                 else if (data.first == "pan")
-                    SetMusicPan(music, std::stof(data.second));
+                    SetMusicPan(music, stof(data.second));
                 else if (data.first == "pitch")
-                    SetMusicPitch(music, std::stof(data.second));
+                    SetMusicPitch(music, stof(data.second));
             }
 
             resources.music.Load(name, {music, assetPath});
@@ -173,11 +173,11 @@ void lapCore::World::LoadAssets()
             for (const auto& data : asset.data)
             {
                 if (data.first == "volume")
-                    SetSoundVolume(sound, std::stof(data.second));
+                    SetSoundVolume(sound, stof(data.second));
                 else if (data.first == "pan")
-                    SetSoundPan(sound, std::stof(data.second));
+                    SetSoundPan(sound, stof(data.second));
                 else if (data.first == "pitch")
-                    SetSoundPitch(sound, std::stof(data.second));
+                    SetSoundPitch(sound, stof(data.second));
             }
 
             resources.sounds.Load(name, {sound, assetPath});
@@ -213,26 +213,26 @@ void lapCore::World::LoadAssets()
                     if (data.second == "true") ImageAlphaPremultiply(&image); 
                 }
                 else if (data.first == "blur")
-                    ImageBlurGaussian(&image, std::stof(data.second));
+                    ImageBlurGaussian(&image, stof(data.second));
                 else if (data.first == "background-color")
                 {
                     Color c;
-                    std::stringstream ss(data.second);
-                    std::string value;
-                    std::getline(ss, value, ',');
-                    c.r = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c.g = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c.b = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c.a = static_cast<unsigned char>(std::stoi(value));
+                    stringstream ss(data.second);
+                    string value;
+                    getline(ss, value, ',');
+                    c.r = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c.g = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c.b = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c.a = static_cast<unsigned char>(stoi(value));
                     ImageClearBackground(&image, c);
                 }
                 else if (data.first == "brightness")
-                    ImageColorBrightness(&image, std::stoi(data.second));
+                    ImageColorBrightness(&image, stoi(data.second));
                 else if (data.first == "contrast")
-                    ImageColorContrast(&image, std::stof(data.second));
+                    ImageColorContrast(&image, stof(data.second));
                 else if (data.first == "grayscale")
                 {
                     if (data.second == "true") ImageColorGrayscale(&image);
@@ -244,71 +244,71 @@ void lapCore::World::LoadAssets()
                 else if (data.first == "tint")
                 {
                     Color c;
-                    std::stringstream ss(data.second);
-                    std::string value;
-                    std::getline(ss, value, ',');
-                    c.r = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c.g = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c.b = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c.a = static_cast<unsigned char>(std::stoi(value));
+                    stringstream ss(data.second);
+                    string value;
+                    getline(ss, value, ',');
+                    c.r = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c.g = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c.b = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c.a = static_cast<unsigned char>(stoi(value));
                     ImageColorTint(&image, c);
                 }
                 else if (data.first == "replace")
                 {
                     Color c, c2;
-                    std::stringstream ss(data.second);
-                    std::string value;
-                    std::getline(ss, value, ',');
-                    c.r = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c.g = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c.b = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c.a = static_cast<unsigned char>(std::stoi(value));
+                    stringstream ss(data.second);
+                    string value;
+                    getline(ss, value, ',');
+                    c.r = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c.g = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c.b = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c.a = static_cast<unsigned char>(stoi(value));
 
-                    std::getline(ss, value, ',');
-                    c2.r = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c2.g = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c2.b = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c2.a = static_cast<unsigned char>(std::stoi(value));
+                    getline(ss, value, ',');
+                    c2.r = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c2.g = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c2.b = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c2.a = static_cast<unsigned char>(stoi(value));
                     ImageColorReplace(&image, c, c2);
                 }
                 else if (data.first == "crop")
                 {
                     Rectangle r;
-                    std::stringstream ss(data.second);
-                    std::string value;
-                    std::getline(ss, value, ',');
-                    r.x = std::stof(value);
-                    std::getline(ss, value, ',');
-                    r.y = std::stof(value);
-                    std::getline(ss, value, ',');
-                    r.width = std::stof(value);
-                    std::getline(ss, value, ',');
-                    r.height = std::stof(value);
+                    stringstream ss(data.second);
+                    string value;
+                    getline(ss, value, ',');
+                    r.x = stof(value);
+                    getline(ss, value, ',');
+                    r.y = stof(value);
+                    getline(ss, value, ',');
+                    r.width = stof(value);
+                    getline(ss, value, ',');
+                    r.height = stof(value);
 
                     ImageCrop(&image, r);
                 }
                 else if (data.first == "dither")
                 {
                     int r, g, b, a;
-                    std::stringstream ss(data.second);
-                    std::string value;
-                    std::getline(ss, value, ',');
-                    r = std::stoi(value);
-                    std::getline(ss, value, ',');
-                    g = std::stoi(value);
-                    std::getline(ss, value, ',');
-                    b = std::stoi(value);
-                    std::getline(ss, value, ',');
-                    a = std::stoi(value);
+                    stringstream ss(data.second);
+                    string value;
+                    getline(ss, value, ',');
+                    r = stoi(value);
+                    getline(ss, value, ',');
+                    g = stoi(value);
+                    getline(ss, value, ',');
+                    b = stoi(value);
+                    getline(ss, value, ',');
+                    a = stoi(value);
 
                     ImageDither(&image, r, g, b, a);
                 }
@@ -316,23 +316,23 @@ void lapCore::World::LoadAssets()
                 {
                     Color c;
                     float t;
-                    std::stringstream ss(data.second);
-                    std::string value;
-                    std::getline(ss, value, ',');
-                    c.r = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c.g = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c.b = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    c.a = static_cast<unsigned char>(std::stoi(value));
-                    std::getline(ss, value, ',');
-                    t = std::stof(value);
+                    stringstream ss(data.second);
+                    string value;
+                    getline(ss, value, ',');
+                    c.r = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c.g = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c.b = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    c.a = static_cast<unsigned char>(stoi(value));
+                    getline(ss, value, ',');
+                    t = stof(value);
 
                     ImageAlphaClear(&image, c, t);
                 }
                 else if (data.first == "alpha-crop")
-                    ImageAlphaCrop(&image, std::stof(data.second));
+                    ImageAlphaCrop(&image, stof(data.second));
                 else if (data.first == "flip-horizontal")
                 {
                     if (data.second == "true") ImageFlipHorizontal(&image);
@@ -348,27 +348,27 @@ void lapCore::World::LoadAssets()
                 else if (data.first == "resize")
                 {
                     int w, h;
-                    std::stringstream ss(data.second);
-                    std::string value;
-                    std::getline(ss, value, ',');
-                    w = std::stoi(value);
-                    std::getline(ss, value, ',');
-                    h = std::stoi(value);
+                    stringstream ss(data.second);
+                    string value;
+                    getline(ss, value, ',');
+                    w = stoi(value);
+                    getline(ss, value, ',');
+                    h = stoi(value);
                     ImageResize(&image, w, h);
                 }
                 else if (data.first == "resize-nearest-neighbor")
                 {
                     int w, h;
-                    std::stringstream ss(data.second);
-                    std::string value;
-                    std::getline(ss, value, ',');
-                    w = std::stoi(value);
-                    std::getline(ss, value, ',');
-                    h = std::stoi(value);
+                    stringstream ss(data.second);
+                    string value;
+                    getline(ss, value, ',');
+                    w = stoi(value);
+                    getline(ss, value, ',');
+                    h = stoi(value);
                     ImageResizeNN(&image, w, h);
                 }
                 else if (data.first == "rotation")
-                    ImageRotate(&image, std::stoi(data.second));
+                    ImageRotate(&image, stoi(data.second));
                 else if (data.first == "rotate-cw")
                 {
                     if (data.second == "true") ImageRotateCW(&image);
@@ -415,9 +415,9 @@ void lapCore::World::LoadAssets()
     }
 }
 
-void World::LoadSettings(const std::string &settingsFilePath)
+void World::LoadSettings(const string &settingsFilePath)
 {
-    std::string fileStr = ReadFileToString(settingsFilePath);
+    string fileStr = ReadFileToString(settingsFilePath);
     if (fileStr == "")
     {
         dbgln("Could not get settings file, loading default for window.", LogType::NOTICE);

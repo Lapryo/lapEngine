@@ -12,9 +12,9 @@ namespace lapCore
     // Helpers
     filesystem::path GetGroupPath(const filesystem::path &replacementPath);
     filesystem::path UnpackGroupedFile(const json &fileJson, const filesystem::path &startingPath, const string &category);
-    filesystem::path GetDirectoryPath(json &fileJson, const filesystem::path &startingPath, const string &category, const std::string &key);
+    filesystem::path GetDirectoryPath(json &fileJson, const filesystem::path &startingPath, const string &category, const string &key);
 
-    json UnpackArrayOrInline(const json &projectJson, const std::string &key, function<json(json&, filesystem::path, string)> unpackerFunction, filesystem::path startingPath, string optional);
+    json UnpackArrayOrInline(const json &projectJson, const string &key, function<json(json&, filesystem::path, string)> unpackerFunction, filesystem::path startingPath, string optional);
 
     // Unpacking
     

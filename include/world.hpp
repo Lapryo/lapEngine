@@ -22,7 +22,7 @@ namespace lapCore
 
     struct WindowProperties
     {
-        std::string title = "Default Window";
+        string title = "Default Window";
 
         Vector2 resolution = {1200, 900};
         Vector2 logical_resolution = {800, 600};
@@ -58,7 +58,7 @@ namespace lapCore
         ResourceManager resources;
 
         void LoadAssets();
-        void LoadSettings(const std::string &settingsFilePath);
+        void LoadSettings(const string &settingsFilePath);
 
         void LoadWindow();
         void ResetWindowProperties();
@@ -66,7 +66,7 @@ namespace lapCore
         void SetScene(ProjectSceneData &scene_data);
         ProjectSceneData &GetMainSceneData();
 
-        void SwitchScene(const ProjectSceneData &scene_data, std::function<void()> preloadCallback);
+        void SwitchScene(const ProjectSceneData &scene_data, function<void()> preloadCallback);
 
         const Project &GetProject() const {
             return project;
@@ -75,9 +75,9 @@ namespace lapCore
         bool switchingScene = false;
         ProjectSceneData nextSceneData;
 
-        std::function<void()> preloadSceneCallback = nullptr;
+        function<void()> preloadSceneCallback = nullptr;
 
-        std::unordered_map<std::string, ActionMap> actionMaps;
+        unordered_map<string, ActionMap> actionMaps;
         ActionMap* currentActionMap = nullptr;
 
     private:

@@ -39,6 +39,19 @@ namespace lapCore
         return object;
     }
 
+    Scene::Scene(World *world)
+    {
+        this->world = world;
+        this->root = objects.create();
+
+        ObjectData rootData;
+        rootData.id = HASH_ID("__root__");
+        rootData.parent = null;
+        rootData.index = -1;
+
+        AddElement<ObjectData>(this->root, rootData);
+    }
+
     Scene::Scene(World *world, const ProjectSceneData &data)
     {
         this->world = world;
@@ -112,13 +125,12 @@ namespace lapCore
         auto* parentData = GetObject(parent);
 
         if (!parentData || index < -1)
-            return entt::null;
+            return null;
 
         unsigned int newIndex;
 
         if (index == -1)
         {
-            // Append after the highest existing index.
             if (parentData->children.empty())
             {
                 newIndex = 0;
@@ -128,7 +140,7 @@ namespace lapCore
                 auto lastIndex = parentData->children.rbegin()->first;
 
                 if (lastIndex == UINT_MAX)
-                    return entt::null;
+                    return null;
 
                 newIndex = lastIndex + 1;
             }
@@ -147,12 +159,17 @@ namespace lapCore
 
         AddElement<ObjectData>(object, data);
 
-        // Reacquire in case component storage was reallocated.
+        // Reacquire after possible component storage reallocation.
         parentData = GetObject(parent);
 
         if (index == -1)
         {
-            parentData->children.emplace(newIndex, object);
+            // Appending does not affect existing indices.
+            parentData->children.emplace_hint(
+                parentData->children.end(),
+                newIndex,
+                object
+            );
         }
         else
         {
@@ -163,12 +180,12 @@ namespace lapCore
                 object,
                 true
             );
-        }
 
-        // Synchronize child indices.
-        for (const auto& [childIndex, child] : parentData->children)
-        {
-            GetObject(child)->index = childIndex;
+            // Only needed when an existing child may have shifted.
+            for (const auto& [childIndex, child] : parentData->children)
+            {
+                GetObject(child)->index = childIndex;
+            }
         }
 
         return object;
@@ -196,7 +213,7 @@ namespace lapCore
         auto view = FindObjects(id);
 
         // Get the one closest to the root
-        Object closestObject = entt::null;
+        Object closestObject = null;
         int closestDepth = INT_MAX;
 
         for (const auto& object : view)
@@ -204,7 +221,7 @@ namespace lapCore
             int depth = 0;
             auto current = object;
 
-            while (current != root && current != entt::null)
+            while (current != root && current != null)
             {
                 auto* data = GetObject(current);
                 if (!data) break;
@@ -241,13 +258,13 @@ namespace lapCore
     {
         auto parentData = GetObject(parent);
         if (!parentData)
-            return entt::null;
+            return null;
 
         auto it = parentData->children.find(index);
         if (it != parentData->children.end())
             return it->second;
 
-        return entt::null;
+        return null;
     }
 
     vector<Object> Scene::FindChildren(Object parent, id_type id)
@@ -273,7 +290,7 @@ namespace lapCore
     {
         auto parentData = GetObject(parent);
         if (!parentData)
-            return entt::null;
+            return null;
 
         for (const auto& [index, child] : parentData->children)
         {
@@ -284,7 +301,7 @@ namespace lapCore
             }
         }
 
-        return entt::null;
+        return null;
     }
 
     bool Scene::RemoveObject(Object object, ShiftMode shiftMode)
@@ -374,13 +391,38 @@ namespace lapCore
         BeginTextureMode(target);
         ClearBackground(this->backgroundColor);
 
+        /*static unordered_map<string, double> timers;
+        static double timerforseconds = GetTime();
+        static int frameCounter = 0;
+        static int counter = 0;*/
+
         for (auto &[order, system] : systems)
         {
             if (!system || !system->active)
                 continue;
 
+            //auto now = GetTime();
             system->Update(deltaTime, objects);
+            //auto time = GetTime() - now;
+
+            //timers[system->GetName()] += time;
         }
+
+        /*if (GetTime() - timerforseconds >= 1)
+        {
+            counter++;
+            cout << "[AVERAGES FROM SECOND " << counter << "]\n";
+            for (const auto& [name, time] : timers)
+            {
+                cout << name << ": " << (time / frameCounter) * 1000.0 << '\n';
+            }
+
+            timers.clear();
+            frameCounter = 0;
+            timerforseconds = GetTime();
+        }
+
+        frameCounter++;*/
 
         EndTextureMode();
 

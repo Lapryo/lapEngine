@@ -32,7 +32,7 @@ namespace lapCore
 
     struct Scene
     {
-        Scene(World* world) : world(world) {}
+        Scene(World* world);
         Scene(World* world, const ProjectSceneData& data);
 
         Color backgroundColor = BLACK;
@@ -79,9 +79,9 @@ namespace lapCore
         System* AddSystem(int order, Args&&... args)
         {
             if (order == -1) order = systems.end()->first + 1;
-            auto sys = std::make_unique<System>(this, order, std::forward<Args>(args)...);
+            auto sys = make_unique<System>(this, order, forward<Args>(args)...);
             auto ptr = sys.get();
-            if constexpr (requires(System& t, entt::registry& r) { t.Connect(r); })
+            if constexpr (requires(System& t, registry& r) { t.Connect(r); })
                 sys->Connect(objects);
 
             systems[order] = std::move(sys);
@@ -108,7 +108,7 @@ namespace lapCore
             auto sys = FindSystem<System>();
             if (sys)
             {
-                systems.erase(std::find_if(systems.begin(), systems.end(), [sys](const auto& pair) { return pair.second.get() == sys; }));
+                systems.erase(find_if(systems.begin(), systems.end(), [sys](const auto& pair) { return pair.second.get() == sys; }));
                 return true;
             }
             return false;

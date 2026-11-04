@@ -13,6 +13,9 @@
 
 namespace lapCore
 {
+    using namespace std;
+    using namespace entt;
+
     class IAssetStorage
     {
     public:
@@ -24,17 +27,17 @@ namespace lapCore
     struct AssetData
     {
         AssetData();
-        AssetData(T a, std::string p) : asset(a), path(p) {}
+        AssetData(T a, string p) : asset(a), path(p) {}
 
         T asset;
-        std::string path;
+        string path;
     };
 
     template <typename T>
     class AssetStorage : public IAssetStorage
     {
     public:
-        using Deleter = std::function<void(T&)>;
+        using Deleter = function<void(T&)>;
 
         AssetStorage(Deleter deleter = nullptr)
             : deleter(deleter)
@@ -46,9 +49,9 @@ namespace lapCore
             UnloadAll();
         }
 
-        entt::id_type Load(entt::hashed_string name, AssetData<T> asset)
+        id_type Load(hashed_string name, AssetData<T> asset)
         {
-            entt::id_type id = name.value();
+            id_type id = name.value();
 
             auto [it, inserted] = assets.emplace(id, asset);
 
@@ -65,7 +68,7 @@ namespace lapCore
             return id;
         }
 
-        std::string GetName(entt::id_type id) const
+        string GetName(id_type id) const
         {
             auto it = reverseLookup.find(id);
             if (it != reverseLookup.end())
@@ -73,7 +76,7 @@ namespace lapCore
             return "";
         }
 
-        void Unload(entt::id_type id)
+        void Unload(id_type id)
         {
             auto assetIt = assets.find(id);
             if (assetIt == assets.end())
@@ -101,7 +104,7 @@ namespace lapCore
             reverseLookup.clear();
         }
 
-        AssetData<T>* TryGet(entt::id_type id)
+        AssetData<T>* TryGet(id_type id)
         {
             auto it = assets.find(id);
             if (it == assets.end())
@@ -110,7 +113,7 @@ namespace lapCore
             return &it->second;
         }
 
-        const AssetData<T>* TryGet(entt::id_type id) const
+        const AssetData<T>* TryGet(id_type id) const
         {
             auto it = assets.find(id);
             if (it == assets.end())
@@ -119,14 +122,14 @@ namespace lapCore
             return &it->second;
         }
 
-        AssetData<T>& Get(entt::id_type id)
+        AssetData<T>& Get(id_type id)
         {
             AssetData<T>* asset = TryGet(id);
             assert(asset && "Asset not found");
             return *asset;
         }
 
-        const AssetData<T>& Get(entt::id_type id) const
+        const AssetData<T>& Get(id_type id) const
         {
             const AssetData<T>* asset = TryGet(id);
             assert(asset && "Asset not found");
@@ -137,7 +140,7 @@ namespace lapCore
          * @brief Attempts to find the data of a given id and returns its asset value of type T
          * @return The asset value of AssetData<T>
          */
-        T* GetAsset(entt::id_type id)
+        T* GetAsset(id_type id)
         {
             auto assetData = TryGet(id);
             if (!assetData) return nullptr;
@@ -147,10 +150,10 @@ namespace lapCore
 
         /**
         * @brief Attempts to find the data of a given id and returns its path value
-        * @param id The hash ID of the asset data's name, entt::id_type
+        * @param id The hash ID of the asset data's name, id_type
         * @return The path string of AssetData<T>
         */
-        std::string GetPath(entt::id_type id)
+        string GetPath(id_type id)
         {
             auto assetData = TryGet(id);
             if (!assetData) return "";
@@ -158,24 +161,24 @@ namespace lapCore
             return assetData->path;
         }
 
-        bool Has(entt::id_type id) const
+        bool Has(id_type id) const
         {
             return assets.find(id) != assets.end();
         }
 
-        std::unordered_map<entt::id_type, AssetData<T>>& GetAssets()
+        unordered_map<id_type, AssetData<T>>& GetAssets()
         {
             return assets;
         }
 
-        const std::unordered_map<entt::id_type, AssetData<T>>& GetAssets() const
+        const unordered_map<id_type, AssetData<T>>& GetAssets() const
         {
             return assets;
         }
 
     private:
-        std::unordered_map<entt::id_type, AssetData<T>> assets;
-        std::unordered_map<entt::id_type, std::string> reverseLookup;
+        unordered_map<id_type, AssetData<T>> assets;
+        unordered_map<id_type, string> reverseLookup;
 
         Deleter deleter;
     };
@@ -253,27 +256,27 @@ namespace lapCore
             }
         };
 
-        std::unordered_map<entt::id_type, std::unique_ptr<IAssetStorage>> others;
+        unordered_map<id_type, unique_ptr<IAssetStorage>> others;
 
         template <typename T>
         AssetStorage<T>* AddStorageToOthers(
-            entt::id_type id,
-            std::function<void(T&)> deleter)
+            id_type id,
+            function<void(T&)> deleter)
         {
             if (others.contains(id))
                 return nullptr;
 
-            auto storage = std::make_unique<AssetStorage<T>>(deleter);
+            auto storage = make_unique<AssetStorage<T>>(deleter);
 
             auto* storagePointer = storage.get();
 
-            others.emplace(id, std::move(storage));
+            others.emplace(id, move(storage));
 
             return storagePointer;
         }
 
         template <typename T>
-        AssetStorage<T>* GetStorageFromOthers(entt::id_type id)
+        AssetStorage<T>* GetStorageFromOthers(id_type id)
         {
             auto it = others.find(id);
             if (it == others.end())

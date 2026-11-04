@@ -23,6 +23,7 @@ using namespace EUTIL::Other;
 using namespace ELEMENTS::Physics;
 
 using namespace Functions;
+using namespace std;
 
 size_t GetMainScene(const nlohmann::json_abi_v3_12_0::json &projectJson)
 {
@@ -31,14 +32,14 @@ size_t GetMainScene(const nlohmann::json_abi_v3_12_0::json &projectJson)
         for (size_t i = 0; i < projectJson["scenes"].size(); ++i)
         {
             const auto &sceneEntry = projectJson["scenes"].at(i);
-            std::string sceneName;
+            string sceneName;
 
             if (sceneEntry.is_string())
             {
-                std::string sceneFilePath = sceneEntry.get<std::string>();
+                string sceneFilePath = sceneEntry.get<string>();
                 size_t lastSlash = sceneFilePath.find_last_of("/\\");
                 size_t lastDot = sceneFilePath.find_last_of('.');
-                if (lastDot != std::string::npos)
+                if (lastDot != string::npos)
                     sceneName = sceneFilePath.substr(lastSlash + 1, lastDot - lastSlash - 1);
                 else
                     sceneName = sceneFilePath.substr(lastSlash + 1);
@@ -53,7 +54,7 @@ size_t GetMainScene(const nlohmann::json_abi_v3_12_0::json &projectJson)
 
             if (sceneName == "main")
             {
-                dbgln("Main scene found: " + sceneName + " at index " + std::to_string(i), LogType::INFO);
+                dbgln("Main scene found: " + sceneName + " at index " + to_string(i), LogType::INFO);
                 return i;
             }
         }
@@ -147,10 +148,16 @@ namespace lapCore
         if (this == &other)
             return *this;
 
-        ProjectObjectData copy(other);
+        // Clone before modifying this object (clone failures are harmless).
+        vector<ElementDataPtr> clonedElements;
+        clonedElements.reserve(other.elements.size());
+        for (const auto& element : other.elements)
+            clonedElements.push_back(element ? element->Clone() : nullptr);
 
-        *this = std::move(copy);
-
+        name = other.name;
+        parent = other.parent;
+        index = other.index;
+        elements = std::move(clonedElements);
         return *this;
     }
 }

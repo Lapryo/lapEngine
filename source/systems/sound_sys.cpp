@@ -46,7 +46,7 @@ void SoundSystem::StopAll()
     }
 }
 
-void SoundSystem::Update(float deltaTime, entt::registry& registry)
+void SoundSystem::Update(float deltaTime, registry& registry)
 {
     if (!IsAudioDeviceReady())
         return;
@@ -199,7 +199,7 @@ void SoundSystem::Update(float deltaTime, entt::registry& registry)
             else
             {
                 volume = 1.0f - (distance / sound.cutoffDistance);
-                volume = std::clamp(volume, 0.0f, 1.0f);
+                volume = clamp(volume, 0.0f, 1.0f);
 
                 if (distance > 0.0f)
                     pan = CalculatePan(direction);

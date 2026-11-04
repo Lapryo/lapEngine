@@ -1,92 +1,20 @@
 /*
-TODO:
-1. ObjectNode and ObjectTree needs implementation
-2. "New"Scene needs implementation after todo #1
-2. Add Snapshot functionality (at a later date)
+TODO NOW:
+1. Make prefab children example (for testing purposes)
+2. Fix prefab instances and children
 
-struct ObjectNode
-{
-    entt::id_type name;
-    entt::entity entity = entt::null;
+TODO LATER-DATE:
+1. Rewrite the comments for the examples
+2. Rewrite the comments for the examples
+3. Fully comment the code before release
+4. Fix the CMakeLists to make the builds for the examples in their directories,
+rather than the overall build directory
 
-    ObjectNode* parent = nullptr;
-
-    ObjectNode* firstChild = nullptr;
-    ObjectNode* lastChild = nullptr;
-
-    ObjectNode* nextSibling = nullptr;
-    ObjectNode* prevSibling = nullptr;
-};
-
-class ObjectTree
-{
-public:
-    std::span<ObjectNode*> GetObjects(entt::id_type id);
-    std::span<ObjectNode*> GetChildren(ObjectNode* parent, entt::id_type id);
-    ObjectNode* GetObject(entt::entity object);
-
-    ObjectNode* GetFirstChild(ObjectNode* parent, entt::id_type id);
-
-    ObjectEntry AddObject(entt::id_type id);
-    ObjectEntry AddObject(entt::entity parent, entt::id_type id);
-    ObjectEntry AddChild(entt::entity parent, entt::id_type id) = AddObject(parent, id);
-
-    bool RemoveObject(entt::entity object);
-    bool RemoveObjectAndReparentDescendants(entt::entity object, entt::entity newParent);
-
-    bool ReparentObject(entt::entity object, entt::entity newParent);
-
-private:
-    // These are more complicated so you just can't call it and expect it to work as expected
-    ObjectEntry CloneObject(entt::entity object);
-    ObjectEntry CloneObjectTo(entt::entity object, entt::entity newParent);
-
-    // 1. Find every object with a particular name
-    std::unordered_map<
-        HASH_ID,
-        std::vector<ObjectNode*>
-    > nameLookup;
-
-    // 2. Find every child with a particular name under a parent
-    std::unordered_map<
-        ObjectNode*,
-        std::unordered_map<HASH_ID, std::vector<ObjectNode*>>
-    > childLookup;
-
-    // 3. Find an exact object using its entity
-    std::unordered_map<
-        entt::entity,
-        ObjectNode*
-    > entityLookup;
-};
-
-struct Scene : ObjectTree
-{
-    entt::id_type id;
-    entt::registry objects;
-
-    ObjectEntry CloneObject(entt::entity object);
-    ObjectEntry CloneObjectTo(entt::entity object, entt::entity newParent);
-    ObjectEntry CloneObjectFrom(entt::registry otherRegistry, entt::entity otherObject, entt::id_type id, entt::entity newParent);
-
-    template <typename Element>
-    Element* AddElement(entt::entity object, Element elementData);
-
-    template <typename Element>
-    Element* FindElement(entt::entity object);
-
-    template <typename Element>
-    bool RemoveElement(entt::entity object);
-
-    template <typename System>
-    System* AddSystem(System systemData);
-
-    template <typename System>
-    System* FindSystem(entt::id_type id);
-
-    template <typename System>
-    bool RemoveSystem(entt::id_type id);
-};
+WISHLIST:
+1. Snapshot functionality
+2. Full console support (including handhelds like Anbernic, etc.)
+3. Add debug rendering for physics system and render system overall
+4. Performance checker (with time ranges and everything)
 
 */
 
@@ -94,6 +22,8 @@ struct Scene : ObjectTree
 #include "json/structs/lapcore.hpp"
 
 #include "project/deserializer.hpp"
+
+using namespace std;
 
 namespace lapCore::JSON
 {
@@ -138,7 +68,7 @@ namespace lapCore::JSON
     }
     void Serializer<Axis2D>::from_json(Axis2D& a, const json& j)
     {
-        const auto val = j.get<std::string>();
+        const auto val = j.get<string>();
 
         if (val == "horizontal")
             a = Axis2D::HORIZONTAL;
@@ -203,7 +133,7 @@ namespace lapCore::JSON
     }
     void Serializer<HorizontalAlignment>::from_json(HorizontalAlignment& h, const json& j)
     {
-        const auto val = j.get<std::string>();
+        const auto val = j.get<string>();
 
         if (val == "left")
             h = HorizontalAlignment::LEFT;
@@ -228,7 +158,7 @@ namespace lapCore::JSON
     }
     void Serializer<VerticalAlignment>::from_json(VerticalAlignment& v, const json& j)
     {
-        const auto val = j.get<std::string>();
+        const auto val = j.get<string>();
 
         if (val == "top")
             v = VerticalAlignment::TOP;
@@ -255,7 +185,7 @@ namespace lapCore::JSON
     }
     void Serializer<Direction2D>::from_json(Direction2D& d, const json& j)
     {
-        const auto val = j.get<std::string>();
+        const auto val = j.get<string>();
 
         if (val == "up")
             d = Direction2D::UP;
@@ -399,7 +329,7 @@ namespace lapCore::JSON
     {
         s.isMusic = j.value("is-music", s.isMusic);
         if (j.contains("audio-id"))
-            s.audioID = entt::hashed_string{j.at("audio-id").get<std::string>().c_str()}.value();
+            s.audioID = hashed_string{j.at("audio-id").get<string>().c_str()}.value();
         
         s.cutoffDistance = j.value("cutoff-distance", s.cutoffDistance);
         s.active = j.value("active", s.active);
@@ -448,7 +378,7 @@ namespace lapCore::JSON
     }
     void Serializer<UIListSpreading>::from_json(UIListSpreading& s, const json& j)
     {
-        const auto& value = j.get<std::string>();
+        const auto& value = j.get<string>();
         if (value == "bunch-start")
             s = UIListSpreading::BUNCH_START;
         else if (value == "bunch-middle")
@@ -491,7 +421,7 @@ namespace lapCore::JSON
     // UIGRADIENT
     json Serializer<UIGradient>::to_json(const UIGradient& g, SerializeContext* ctx)
     {
-        std::vector<std::vector<unsigned char>> colorPts;
+        vector<vector<unsigned char>> colorPts;
         for (const auto& color : g.colorPoints)
             colorPts.push_back({color.r, color.g, color.b, color.a});
 
@@ -550,7 +480,7 @@ namespace lapCore::JSON
         s.flipD = j.value("flip-diagonal", s.flipD);
         
         if (j.contains("texture"))
-            s.textureID = entt::hashed_string{j.at("texture").get<std::string>().c_str()}.value();
+            s.textureID = hashed_string{j.at("texture").get<string>().c_str()}.value();
     }
 
     // UIIMAGE
@@ -588,7 +518,7 @@ namespace lapCore::JSON
             JSON::Serializer<UIFrame>::from_json(l.frame, j.at("frame"));
         l.text = j.value("text", l.text);
         if (j.contains("font"))
-            l.fontID = entt::hashed_string{j.at("font").get<std::string>().c_str()}.value();
+            l.fontID = hashed_string{j.at("font").get<string>().c_str()}.value();
         l.fontSize = j.value("font-size", l.fontSize);
         l.spacing = j.value("spacing", l.spacing);
         
@@ -613,17 +543,17 @@ namespace lapCore::JSON
     void Serializer<UIButtonEventCallbacks>::from_json(UIButtonEventCallbacks& c, const json& j)
     {
         if (j.contains("mouse-hover"))
-            c.mouseHover  = entt::hashed_string{j.at("mouse-hover").get<std::string>().c_str()}.value();
+            c.mouseHover  = hashed_string{j.at("mouse-hover").get<string>().c_str()}.value();
         if (j.contains("mouse-enter"))
-            c.mouseEnter  = entt::hashed_string{j.at("mouse-enter").get<std::string>().c_str()}.value();
+            c.mouseEnter  = hashed_string{j.at("mouse-enter").get<string>().c_str()}.value();
         if (j.contains("mouse-exit"))
-            c.mouseExit   = entt::hashed_string{j.at("mouse-exit").get<std::string>().c_str()}.value();
+            c.mouseExit   = hashed_string{j.at("mouse-exit").get<string>().c_str()}.value();
         if (j.contains("left-click"))
-            c.leftClick   = entt::hashed_string{j.at("left-click").get<std::string>().c_str()}.value();
+            c.leftClick   = hashed_string{j.at("left-click").get<string>().c_str()}.value();
         if (j.contains("middle-click"))
-            c.middleClick = entt::hashed_string{j.at("middle-click").get<std::string>().c_str()}.value();
+            c.middleClick = hashed_string{j.at("middle-click").get<string>().c_str()}.value();
         if (j.contains("right-click"))
-            c.rightClick  = entt::hashed_string{j.at("right-click").get<std::string>().c_str()}.value();
+            c.rightClick  = hashed_string{j.at("right-click").get<string>().c_str()}.value();
     }
 
     // UIBUTTON
@@ -650,7 +580,7 @@ namespace lapCore::JSON
     // TAGS
     json Serializer<Tags>::to_json(const Tags& t, SerializeContext* ctx)
     {
-        std::unordered_set<std::string> tagStrings;
+        unordered_set<string> tagStrings;
         for (const auto& tag : t.tags)
         {
             // Get string for tag
@@ -666,10 +596,10 @@ namespace lapCore::JSON
     {
         if (j.contains("tags"))
         {
-            std::unordered_set<entt::id_type> tagIds;
+            unordered_set<id_type> tagIds;
             for (const auto& tagString : j["tags"])
             {
-                tagIds.insert(HASH_ID(tagString.get<std::string>().c_str()));
+                tagIds.insert(HASH_ID(tagString.get<string>().c_str()));
             }
             t.tags = tagIds;
         }
@@ -681,7 +611,7 @@ namespace lapCore::JSON
         return json{
             {
                 GET_FORMER_HASHED(param.id),
-                std::visit([](const auto& actualValue) -> json
+                visit([](const auto& actualValue) -> json
                 {
                     return actualValue;
                 }, param.value)
@@ -710,7 +640,7 @@ namespace lapCore::JSON
             else if (val.is_number_float())
                 param.value = val.get<float>();
             else if (val.is_string())
-                param.value = val.get<std::string>();
+                param.value = val.get<string>();
             else
                 dbgln("Unsupported parameter type: " + val.dump(), LogType::WARNING);
         }
@@ -719,7 +649,7 @@ namespace lapCore::JSON
     // PARAMETERS
     json Serializer<Parameters>::to_json(const Parameters& p, SerializeContext* ctx)
     {
-        std::vector<json> parameters;
+        vector<json> parameters;
         for (const auto& param : p.parameters)
         {
             auto paramJson = JSON::Serializer<Parameter>::to_json(param, ctx);
@@ -734,7 +664,7 @@ namespace lapCore::JSON
     {
         if (j.contains("values"))
         {
-            std::vector<Parameter> params;
+            vector<Parameter> params;
             for (const auto& paramJson : j["values"])
             {
                 Parameter param;
@@ -749,7 +679,7 @@ namespace lapCore::JSON
     // SCRIPT
     json Serializer<Script>::to_json(const Script& s, SerializeContext* ctx)
     {
-        std::vector<std::string> onCreates;
+        vector<string> onCreates;
         for (const auto& func : s.onCreateFunctions)
         {
             auto it = EventRegistry::reverseLookup.find(func);
@@ -757,7 +687,7 @@ namespace lapCore::JSON
                 onCreates.push_back(it->second);
         }
 
-        std::vector<std::string> onUpdates;
+        vector<string> onUpdates;
         for (const auto& func : s.onUpdateFunctions)
         {
             auto it = EventRegistry::reverseLookup.find(func);
@@ -765,7 +695,7 @@ namespace lapCore::JSON
                 onUpdates.push_back(it->second);
         }
 
-        std::vector<std::string> onDestroys;
+        vector<string> onDestroys;
         for (const auto& func : s.onDestroyFunctions)
         {
             auto it = EventRegistry::reverseLookup.find(func);
@@ -787,16 +717,16 @@ namespace lapCore::JSON
         if (j.contains("functions"))
         {
             auto j_functions = j.at("functions");
-            std::vector<entt::id_type> onCreates, onUpdates, onDestroys;
+            vector<id_type> onCreates, onUpdates, onDestroys;
             if (j_functions.contains("create"))
                 for (const auto& funcName : j_functions.at("create"))
-                    onCreates.push_back(HASH_ID(funcName.get<std::string>().c_str()));
+                    onCreates.push_back(HASH_ID(funcName.get<string>().c_str()));
             if (j_functions.contains("update"))
                 for (const auto& funcName : j_functions.at("update"))
-                    onUpdates.push_back(HASH_ID(funcName.get<std::string>().c_str()));
+                    onUpdates.push_back(HASH_ID(funcName.get<string>().c_str()));
             if (j_functions.contains("destroy"))
                 for (const auto& funcName : j_functions.at("destroy"))
-                    onDestroys.push_back(HASH_ID(funcName.get<std::string>().c_str()));
+                    onDestroys.push_back(HASH_ID(funcName.get<string>().c_str()));
 
             s.onCreateFunctions = onCreates;
             s.onUpdateFunctions = onUpdates;

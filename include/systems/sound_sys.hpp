@@ -13,11 +13,11 @@ public:
 
     void Update(
         float deltaTime, 
-        entt::registry &reg
+        registry &reg
     ) override;
 
     void StopAll();
 
-    std::string GetName() const override 
+    string GetName() const override 
     { return "SoundSystem"; }
 };

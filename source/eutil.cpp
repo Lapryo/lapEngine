@@ -7,30 +7,30 @@
 using namespace lapCore::EUTIL;
 using namespace Other;
 
-std::string Functions::ReadFileToString(const std::filesystem::path &filePath, bool withPrefix)
+string Functions::ReadFileToString(const filesystem::path &filePath, bool withPrefix)
 {
-    std::string fullPath = withPrefix ? GetApplicationDirectory() + filePath.string() : filePath.string();
-    std::ifstream file(fullPath);
+    string fullPath = withPrefix ? GetApplicationDirectory() + filePath.string() : filePath.string();
+    ifstream file(fullPath);
 
     if (!file.is_open())
     {
-        std::cerr << "Failed.\n";
+        cerr << "Failed.\n";
         return "";
     }
 
-    std::stringstream buffer;
+    stringstream buffer;
     buffer << file.rdbuf();
     file.close();
 
     return buffer.str();
 }
 
-void Functions::WriteStringToFile(const std::string &filePath, const std::string &data)
+void Functions::WriteStringToFile(const string &filePath, const string &data)
 {
-    std::ofstream file(GetApplicationDirectory() + filePath);
+    ofstream file(GetApplicationDirectory() + filePath);
     if (!file.is_open())
     {
-        std::cerr << "Failed to open file for writing: " << filePath << "\n";
+        cerr << "Failed to open file for writing: " << filePath << "\n";
         return;
     }
 
@@ -38,7 +38,7 @@ void Functions::WriteStringToFile(const std::string &filePath, const std::string
     file.close();
 }
 
-nlohmann::json Functions::ReadFileToJsonObject(const std::string &filePath, bool withPrefix)
+nlohmann::json Functions::ReadFileToJsonObject(const string &filePath, bool withPrefix)
 {
     return nlohmann::json::parse(ReadFileToString(filePath, withPrefix));
 }
@@ -82,9 +82,6 @@ bool Functions::IsRectangleInViewportSpace(
 {
     Rectangle viewport =
         GetCameraViewport(logicalResolution, camera);
-
-    rect.x -= (rect.width * 0.5f);
-    rect.y -= (rect.height * 0.5f);
 
     return CheckCollisionRecs(rect, viewport);
 }
@@ -185,49 +182,49 @@ Vector2 Functions::FrameVectorToVec2(Functions::FrameVector vector, Vector2 logi
     return vec;
 }
 
-void Functions::dbgln(const std::string &message, Other::LogType type)
+void Functions::dbgln(const string &message, Other::LogType type)
 {
     switch (type)
     {
         case Other::LogType::INFO:
             if (DEBUG_LEVEL == DebugLevel::HIGH)
-                std::cout << Console::_BLUE << "[INFO] " << Console::_RESET << message << '\n';
+                cout << Console::_BLUE << "[INFO] " << Console::_RESET << message << '\n';
             break;
         case Other::LogType::NOTICE:
             if (DEBUG_LEVEL >= DebugLevel::MEDIUM)
-                std::cout << Console::_GREEN << "[NOTICE] " << Console::_RESET << message << '\n';
+                cout << Console::_GREEN << "[NOTICE] " << Console::_RESET << message << '\n';
             break;
         case Other::LogType::WARNING:
         
             if (DEBUG_LEVEL >= DebugLevel::MEDIUM)
-                std::cout << Console::_YELLOW << "[WARNING] " << Console::_RESET << message << '\n';
+                cout << Console::_YELLOW << "[WARNING] " << Console::_RESET << message << '\n';
             break;
         case Other::LogType::ERROR:
             if (DEBUG_LEVEL >= DebugLevel::LOW)
-                std::cout << Console::_RED << "[ERROR] " << Console::_RESET << message << '\n';
+                cout << Console::_RED << "[ERROR] " << Console::_RESET << message << '\n';
             break;
     }
 }
 
-void lapCore::EUTIL::Functions::dbgln(const std::string &message, const char *colorCode, Other::LogType type)
+void lapCore::EUTIL::Functions::dbgln(const string &message, const char *colorCode, Other::LogType type)
 {
     switch (type)
     {
         case Other::LogType::INFO:
             if (DEBUG_LEVEL == DebugLevel::HIGH)
-                std::cout << Console::_BLUE << "[INFO] " << Console::_RESET << colorCode << message << Console::_RESET << '\n';
+                cout << Console::_BLUE << "[INFO] " << Console::_RESET << colorCode << message << Console::_RESET << '\n';
             break;
         case Other::LogType::NOTICE:
             if (DEBUG_LEVEL >= DebugLevel::MEDIUM)
-                std::cout << Console::_GREEN << "[NOTICE] " << Console::_RESET << colorCode << message << Console::_RESET << '\n';
+                cout << Console::_GREEN << "[NOTICE] " << Console::_RESET << colorCode << message << Console::_RESET << '\n';
             break;
         case Other::LogType::WARNING:
             if (DEBUG_LEVEL >= DebugLevel::MEDIUM)
-                std::cout << Console::_YELLOW << "[WARNING] " << Console::_RESET << colorCode << message << Console::_RESET << '\n';
+                cout << Console::_YELLOW << "[WARNING] " << Console::_RESET << colorCode << message << Console::_RESET << '\n';
             break;
         case Other::LogType::ERROR:
             if (DEBUG_LEVEL >= DebugLevel::LOW)
-                std::cerr << Console::_RED << "[ERROR] " << Console::_RESET << colorCode << message << Console::_RESET << '\n';
+                cerr << Console::_RED << "[ERROR] " << Console::_RESET << colorCode << message << Console::_RESET << '\n';
             break;
     }
 }

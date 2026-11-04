@@ -21,24 +21,24 @@ using namespace std;
 
 namespace lapCore
 {
-    inline std::unordered_map<entt::id_type, std::string> hashRegistry;
+    inline unordered_map<id_type, string> hashRegistry;
 
-    inline entt::hashed_string HASH(const char* name)
+    inline hashed_string HASH(const char* name)
     {
-        entt::hashed_string hash{name};
+        hashed_string hash{name};
 
         hashRegistry.try_emplace(hash.value(), name);
 
         return hash;
     }
 
-    inline entt::id_type HASH_ID(const char* name)
+    inline id_type HASH_ID(const char* name)
     {
         auto hash = HASH(name);
         return hash.value();
     }
 
-    inline const std::string GET_FORMER_HASHED(entt::id_type id)
+    inline const string GET_FORMER_HASHED(id_type id)
     {
         auto it = hashRegistry.find(id);
         if (it != hashRegistry.end())
@@ -183,7 +183,7 @@ namespace lapCore
             {
                 bool active{true};
                 unsigned int index{0}, columns{0};
-                std::vector<float> frameTimes{0.f};
+                vector<float> frameTimes{0.f};
             };
         }
 
@@ -223,10 +223,10 @@ namespace lapCore
         {
             using namespace Render::UI;
 
-            std::string ReadFileToString(const std::filesystem::path &filePath, bool withPrefix = true);
-            void WriteStringToFile(const std::string &filePath, const std::string &data);
+            string ReadFileToString(const filesystem::path &filePath, bool withPrefix = true);
+            void WriteStringToFile(const string &filePath, const string &data);
 
-            nlohmann::json ReadFileToJsonObject(const std::string &filePath, bool withPrefix = true);
+            nlohmann::json ReadFileToJsonObject(const string &filePath, bool withPrefix = true);
 
             bool IsPointInViewportSpace(::Vector2 point, ::Vector2 logicalResolution, ::Camera2D* camera);
             bool IsRectangleInViewportSpace(Rectangle rect, ::Vector2 logicalResolution, ::Camera2D* camera);
@@ -238,19 +238,19 @@ namespace lapCore
             Rectangle UITransformToRect(UITransform transform, ::Vector2 logicalResolution);
             Vector2 FrameVectorToVec2(FrameVector vector, ::Vector2 logicalResolution);
 
-            void dbgln(const std::string &message, Other::LogType type = Other::LogType::INFO);
-            void dbgln(const std::string &message, const char* colorCode, Other::LogType type = Other::LogType::INFO);
+            void dbgln(const string &message, Other::LogType type = Other::LogType::INFO);
+            void dbgln(const string &message, const char* colorCode, Other::LogType type = Other::LogType::INFO);
 
             template <typename T>
             void ShiftMap(
-                std::map<unsigned int, T>& map,
+                map<unsigned int, T>& map,
                 Other::ShiftMode shiftMode,
                 unsigned int pos,
                 const T& replacementValue,
                 bool right = true
             )
             {
-                std::vector<unsigned int> keys;
+                vector<unsigned int> keys;
 
                 if (right)
                 {
@@ -264,7 +264,7 @@ namespace lapCore
                             break;
 
                         if (it->first == UINT_MAX)
-                            throw std::overflow_error("Cannot shift beyond UINT_MAX");
+                            throw overflow_error("Cannot shift beyond UINT_MAX");
 
                         keys.push_back(it->first);
 
@@ -315,17 +315,17 @@ namespace lapCore
             }
 
             template <typename T>
-            void BinarySerialize(const T& value, const std::string& filePath)
+            void BinarySerialize(const T& value, const string& filePath)
             {
-                std::ofstream stream(GetApplicationDirectory() + filePath, std::ios::binary);
+                ofstream stream(GetApplicationDirectory() + filePath, ios::binary);
 
                 dbgln("Saving to: " + filePath, Other::LogType::INFO);
-                dbgln("Stream open: " + std::to_string(stream.is_open()), Other::LogType::INFO);
-                dbgln("Stream good: " + std::to_string(stream.good()), Other::LogType::INFO);
+                dbgln("Stream open: " + to_string(stream.is_open()), Other::LogType::INFO);
+                dbgln("Stream good: " + to_string(stream.good()), Other::LogType::INFO);
 
                 if (!stream.is_open())
                 {
-                    throw std::runtime_error(
+                    throw runtime_error(
                         "Could not open save file: " + filePath
                     );
                 }
@@ -335,15 +335,15 @@ namespace lapCore
             }
 
             template <typename T>
-            T BinaryDeserialize(const std::string& filePath)
+            T BinaryDeserialize(const string& filePath)
             {
                 T value;
 
-                std::ifstream stream(GetApplicationDirectory() + filePath, std::ios::binary);
+                ifstream stream(GetApplicationDirectory() + filePath, ios::binary);
 
                 if (!stream.is_open())
                 {
-                    throw std::runtime_error("Failed to open file for binary deserialization");
+                    throw runtime_error("Failed to open file for binary deserialization");
                 }
 
                 cereal::BinaryInputArchive archive(stream);

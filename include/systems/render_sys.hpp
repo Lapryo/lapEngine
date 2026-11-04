@@ -3,7 +3,7 @@
 #include "system.hpp"
 using namespace lapCore;
 
-const std::string UIGradient_fragShaderSrc = R"(
+const string UIGradient_fragShaderSrc = R"(
 #version 330
 
 out vec4 finalColor;
@@ -85,7 +85,7 @@ public:
         RenderType type;
     };
 
-    std::vector<RenderEntry> worldSpace, screenSpace;
+    vector<RenderEntry> worldSpace, screenSpace;
 
     ~RenderSystem()
     {
@@ -125,21 +125,23 @@ public:
 
     void Update(
         float deltaTime, 
-        entt::registry &reg
+        registry &reg
     ) override;
 
-    void Connect(entt::registry &registry);
+    void Connect(registry &registry);
     void OnRenderableUpdated(
-        entt::registry &registry, 
+        registry &registry, 
         Object entity
     );
 
-    void RebuildRenderList(entt::registry &registry);
+    void RebuildRenderList(registry &registry);
 
-    std::vector<RenderEntry> renderList;
+    vector<RenderEntry> renderList;
     bool needsResort = true;
 
-    std::string GetName() const override 
+    DebugLevel debugLevel = DebugLevel::NONE;
+
+    string GetName() const override 
     { return "RenderSystem"; }
 
 private:

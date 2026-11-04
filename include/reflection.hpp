@@ -10,10 +10,12 @@
 
 #include "resourcemanager.hpp"
 
+using namespace entt;
+
 namespace lapCore
 {
     using json = nlohmann::json;
-    using Object = entt::entity;
+    using Object = entity;
 
     struct IProjectElementData;
     template <typename T>
@@ -22,13 +24,13 @@ namespace lapCore
     struct SerializeContext
     {
         ResourceManager* resources = nullptr;
-        std::string objectName = "";
+        string objectName = "";
     };
 
     template<typename T>
-    constexpr entt::id_type GetTypeID()
+    constexpr id_type GetTypeID()
     {
-        return entt::type_hash<T>::value();
+        return type_hash<T>::value();
     }
 
     namespace JSON
@@ -55,22 +57,22 @@ namespace lapCore
 
     struct ReflectionEntry
     {
-        std::string name;
+        string name;
 
-        std::function<json(const void*, SerializeContext*)> to_json;
-        std::function<void(void*, const json&)> from_json;
+        function<json(const void*, SerializeContext*)> to_json;
+        function<void(void*, const json&)> from_json;
 
-        std::function<void(entt::registry&, Object, void*)> emplace;
-        std::function<void(entt::registry&, Object)> erase;
-        std::function<void(void*, const void*)> copy;
+        function<void(registry&, Object, void*)> emplace;
+        function<void(registry&, Object)> erase;
+        function<void(void*, const void*)> copy;
 
-        std::function<
-            std::unique_ptr<IProjectElementData>(
+        function<
+            unique_ptr<IProjectElementData>(
                 const json&,
-                const std::string&
+                const string&
             )
         > create_project_data;
-        std::function<
+        function<
             json(const IProjectElementData*, SerializeContext*)
         > serialize_project_data;
     };
@@ -81,20 +83,20 @@ namespace lapCore
 
         Reflection() = delete;
 
-        inline static std::unordered_map<
-            entt::id_type,
+        inline static unordered_map<
+            id_type,
             ReflectionEntry
         > registry;
 
-        inline static std::unordered_map<
-            std::string,
-            entt::id_type
+        inline static unordered_map<
+            string,
+            id_type
         > reverseLookup;
 
         template<typename T>
-        static void Register(const std::string& name)
+        static void Register(const string& name)
         {
-            const entt::id_type id = GetTypeID<T>();
+            const id_type id = GetTypeID<T>();
 
             reverseLookup[name] = id;
 
@@ -131,11 +133,11 @@ namespace lapCore
                     *static_cast<T*>(dst) =
                         *static_cast<const T*>(src);
                 },
-                [](const json& j, const std::string& typeName)
-                    -> std::unique_ptr<IProjectElementData>
+                [](const json& j, const string& typeName)
+                    -> unique_ptr<IProjectElementData>
                 {
                     auto ptr =
-                        std::make_unique<ProjectElementData<T>>();
+                        make_unique<ProjectElementData<T>>();
 
                     ptr->type = typeName;
 
@@ -160,7 +162,7 @@ namespace lapCore
             };
         }
         
-        static ReflectionEntry* TryGet(entt::id_type id)
+        static ReflectionEntry* TryGet(id_type id)
         {
             auto it = registry.find(id);
 
@@ -176,7 +178,7 @@ namespace lapCore
             return TryGet(GetTypeID<T>());
         }
 
-        static ReflectionEntry* TryGet(const std::string& name)
+        static ReflectionEntry* TryGet(const string& name)
         {
             auto it = reverseLookup.find(name);
 
