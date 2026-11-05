@@ -86,7 +86,6 @@ namespace lapCore::JSON
             {"is-awake", def.isAwake},
             {"initial-rotation", Serializer<b2Rot>::to_json(def.rotation, ctx)},
             {"is-bullet", def.isBullet},
-            {"debug-name", def.name},
             {"initial-position", Serializer<b2Vec2>::to_json(def.position, ctx)},
             {"gravity-scale", def.gravityScale},
             {"motion-locks", Serializer<b2MotionLocks>::to_json(def.motionLocks, ctx)},

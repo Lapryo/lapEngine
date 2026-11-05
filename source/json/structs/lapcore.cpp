@@ -147,9 +147,9 @@ namespace lapCore::JSON
             case VerticalAlignment::MIDDLE:
                 return "middle";
             case VerticalAlignment::TOP:
-                return "bottom";
-            default:
                 return "top";
+            default:
+                return "bottom";
         }
     }
     void Serializer<VerticalAlignment>::from_json(VerticalAlignment& v, const json& j)
@@ -316,7 +316,7 @@ namespace lapCore::JSON
             {"cutoff-distance", s.cutoffDistance},
             {"uses-own"       , s.usesOwn},
             {"auto-play"      , s.autoPlay},
-            {"audio-id"       , s.audioID},
+            {"audio-id"       , SerializeEventID(s.audioID)},
             {"positional"     , s.positional},
             {"target"         , JSON::Serializer<Vector2>::to_json(s.target, ctx)}
         };
@@ -325,7 +325,7 @@ namespace lapCore::JSON
     {
         s.isMusic = j.value("is-music", s.isMusic);
         if (j.contains("audio-id"))
-            s.audioID = hashed_string{j.at("audio-id").get<string>().c_str()}.value();
+            s.audioID = DeserializeEventID(j.at("audio-id"));
         
         s.cutoffDistance = j.value("cutoff-distance", s.cutoffDistance);
         s.active = j.value("active", s.active);
@@ -527,29 +527,35 @@ namespace lapCore::JSON
     // UIBUTTON EVENT CALLBACKS
     json Serializer<UIButtonEventCallbacks>::to_json(const UIButtonEventCallbacks& c, SerializeContext* ctx)
     {
+        
         return json{
-            { "mouse-hover"  , EventRegistry::reverseLookup[c.mouseHover]  },
-            { "mouse-enter"  , EventRegistry::reverseLookup[c.mouseEnter]  },
-            { "mouse-exit"   , EventRegistry::reverseLookup[c.mouseExit]   },
-            { "left-click"   , EventRegistry::reverseLookup[c.leftClick]   },
-            { "middle-click" , EventRegistry::reverseLookup[c.middleClick] },
-            { "right-click"  , EventRegistry::reverseLookup[c.rightClick]  }
+            { "mouse-hover"  , SerializeEventID(c.mouseHover)  },
+            { "mouse-enter"  , SerializeEventID(c.mouseEnter)  },
+            { "mouse-exit"   , SerializeEventID(c.mouseExit)   },
+            { "left-click"   , SerializeEventID(c.leftClick)   },
+            { "middle-click" , SerializeEventID(c.middleClick) },
+            { "right-click"  , SerializeEventID(c.rightClick)  }
         };
     }
     void Serializer<UIButtonEventCallbacks>::from_json(UIButtonEventCallbacks& c, const json& j)
     {
         if (j.contains("mouse-hover"))
-            c.mouseHover  = hashed_string{j.at("mouse-hover").get<string>().c_str()}.value();
+            c.mouseHover = DeserializeEventID(j.at("mouse-hover"));
+
         if (j.contains("mouse-enter"))
-            c.mouseEnter  = hashed_string{j.at("mouse-enter").get<string>().c_str()}.value();
+            c.mouseEnter = DeserializeEventID(j.at("mouse-enter"));
+
         if (j.contains("mouse-exit"))
-            c.mouseExit   = hashed_string{j.at("mouse-exit").get<string>().c_str()}.value();
+            c.mouseExit = DeserializeEventID(j.at("mouse-exit"));
+
         if (j.contains("left-click"))
-            c.leftClick   = hashed_string{j.at("left-click").get<string>().c_str()}.value();
+            c.leftClick = DeserializeEventID(j.at("left-click"));
+
         if (j.contains("middle-click"))
-            c.middleClick = hashed_string{j.at("middle-click").get<string>().c_str()}.value();
+            c.middleClick = DeserializeEventID(j.at("middle-click"));
+
         if (j.contains("right-click"))
-            c.rightClick  = hashed_string{j.at("right-click").get<string>().c_str()}.value();
+            c.rightClick = DeserializeEventID(j.at("right-click"));
     }
 
     // UIBUTTON
@@ -569,36 +575,38 @@ namespace lapCore::JSON
         if (j.contains("bounds"))
             JSON::Serializer<UITransform>::from_json(b.bounds, j.at("bounds"));
 
-        b.inheritsUI = j.value("inherits-list-visibility", b.inheritsUI);
+        b.inheritsUI = j.value("inherits-ui", b.inheritsUI);
         b.active                 = j.value("active", b.active);
     }
 
     // TAGS
-    json Serializer<Tags>::to_json(const Tags& t, SerializeContext* ctx)
+    json Serializer<Tags>::to_json(
+        const Tags& t,
+        SerializeContext* ctx
+    )
     {
-        unordered_set<string> tagStrings;
-        for (const auto& tag : t.tags)
-        {
-            // Get string for tag
-            auto tagString = GET_FORMER_HASHED(tag);
-            tagStrings.insert(tagString);
-        }
+        json tags = json::array();
 
-        return json{
-            { "tags" , tagStrings }
+        for (auto tag : t.tags)
+            tags.push_back(SerializeEventID(tag));
+
+        return {
+            {"tags", std::move(tags)}
         };
     }
-    void Serializer<Tags>::from_json(Tags& t, const json& j)
+
+    void Serializer<Tags>::from_json(
+        Tags& t,
+        const json& j
+    )
     {
-        if (j.contains("tags"))
-        {
-            unordered_set<id_type> tagIds;
-            for (const auto& tagString : j["tags"])
-            {
-                tagIds.insert(HASH_ID(tagString.get<string>().c_str()));
-            }
-            t.tags = tagIds;
-        }
+        if (!j.contains("tags"))
+            return;
+
+        t.tags.clear();
+
+        for (const auto& value : j.at("tags"))
+            t.tags.insert(DeserializeEventID(value));
     }
 
     // PARAMETER
@@ -673,63 +681,79 @@ namespace lapCore::JSON
     }
 
     // SCRIPT
-    json Serializer<Script>::to_json(const Script& s, SerializeContext* ctx)
+    json Serializer<Script>::to_json(
+        const Script& s,
+        SerializeContext* ctx
+    )
     {
-        vector<string> onCreates;
-        for (const auto& func : s.onCreateFunctions)
+        auto serializeFunctions = [](const auto& functions) -> json
         {
-            auto it = EventRegistry::reverseLookup.find(func);
-            if (it != EventRegistry::reverseLookup.end())
-                onCreates.push_back(it->second);
-        }
+            json result = json::array();
 
-        vector<string> onUpdates;
-        for (const auto& func : s.onUpdateFunctions)
-        {
-            auto it = EventRegistry::reverseLookup.find(func);
-            if (it != EventRegistry::reverseLookup.end())
-                onUpdates.push_back(it->second);
-        }
+            for (auto id : functions)
+                result.push_back(SerializeEventID(id));
 
-        vector<string> onDestroys;
-        for (const auto& func : s.onDestroyFunctions)
-        {
-            auto it = EventRegistry::reverseLookup.find(func);
-            if (it != EventRegistry::reverseLookup.end())
-                onDestroys.push_back(it->second);
-        }
+            return result;
+        };
 
         return json{
-            { "functions"   ,
-            {   { "create"  , onCreates  },
-                { "update"  , onUpdates  },
-                { "destroy" , onDestroys }  }             },
-            { "active"      , s.active                    },
-            { "initiated"   , s.initiated                 }
+            {
+                "functions",
+                {
+                    {"create", serializeFunctions(s.onCreateFunctions)},
+                    {"update", serializeFunctions(s.onUpdateFunctions)},
+                    {"destroy", serializeFunctions(s.onDestroyFunctions)}
+                }
+            },
+            {"active", s.active},
+            {"initiated", s.initiated}
         };
     }
-    void Serializer<Script>::from_json(Script& s, const json& j)
+
+    void Serializer<Script>::from_json(
+        Script& s,
+        const json& j
+    )
     {
         if (j.contains("functions"))
         {
-            auto j_functions = j.at("functions");
-            vector<id_type> onCreates, onUpdates, onDestroys;
-            if (j_functions.contains("create"))
-                for (const auto& funcName : j_functions.at("create"))
-                    onCreates.push_back(HASH_ID(funcName.get<string>().c_str()));
-            if (j_functions.contains("update"))
-                for (const auto& funcName : j_functions.at("update"))
-                    onUpdates.push_back(HASH_ID(funcName.get<string>().c_str()));
-            if (j_functions.contains("destroy"))
-                for (const auto& funcName : j_functions.at("destroy"))
-                    onDestroys.push_back(HASH_ID(funcName.get<string>().c_str()));
+            const auto& functions = j.at("functions");
 
-            s.onCreateFunctions = onCreates;
-            s.onUpdateFunctions = onUpdates;
-            s.onDestroyFunctions = onDestroys;
+            auto deserializeFunctions = [](
+                const json& source,
+                const char* key,
+                auto& destination
+            )
+            {
+                if (!source.contains(key))
+                    return;
+
+                destination.clear();
+
+                for (const auto& value : source.at(key))
+                    destination.push_back(DeserializeEventID(value));
+            };
+
+            deserializeFunctions(
+                functions,
+                "create",
+                s.onCreateFunctions
+            );
+
+            deserializeFunctions(
+                functions,
+                "update",
+                s.onUpdateFunctions
+            );
+
+            deserializeFunctions(
+                functions,
+                "destroy",
+                s.onDestroyFunctions
+            );
         }
 
-        s.active    = j.value("active", s.active);
+        s.active = j.value("active", s.active);
         s.initiated = j.value("initiated", s.initiated);
     }
 }

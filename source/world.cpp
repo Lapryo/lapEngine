@@ -91,6 +91,7 @@ void World::LoadScenes(id_type mainID)
 {
     for (auto& data : project.scenes)
     {
+        std::cout << "loading scene " << data.name << '\n';
         id_type sceneID = HASH_ID(data.name.c_str());
 
         if (sceneID == mainID)

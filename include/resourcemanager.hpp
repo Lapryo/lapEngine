@@ -273,7 +273,7 @@ namespace lapCore
 
             auto* storagePointer = storage.get();
 
-            others.emplace(id, move(storage));
+            others.emplace(id, std::move(storage));
 
             return storagePointer;
         }

@@ -46,6 +46,34 @@ namespace lapCore
         return "";
     }
 
+    static json SerializeEventID(entt::id_type id)
+    {
+        std::string name = GET_FORMER_HASHED(id);
+
+        if (!name.empty())
+            return name;
+
+        return id;
+    }
+
+    static entt::id_type DeserializeEventID(const json& j)
+    {
+        if (j.is_number_unsigned())
+            return j.get<entt::id_type>();
+
+        if (j.is_string())
+        {
+            std::string name = j.get<std::string>();
+
+            if (name.empty())
+                return 0;
+
+            return entt::hashed_string{name.c_str()}.value();
+        }
+
+        return 0;
+    }
+
     #define DEBUG_LEVEL DebugLevel::HIGH
 
     namespace EUTIL

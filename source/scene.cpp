@@ -150,11 +150,13 @@ namespace lapCore
         Scene::LoadMode mode
     )
     {
+        std::cout << "Initializing scene.\n";
         this->world = world;
         this->id = HASH_ID(data.name.c_str());
         this->initialData = data;
         this->backgroundColor = data.backgroundColor;
 
+        std::cout << "Creating root.\n";
         ObjectData rootData;
         rootData.id = HASH_ID("__root__");
         rootData.parent = null;
@@ -163,6 +165,7 @@ namespace lapCore
         this->root = objects.create();
         AddElement<ObjectData>(this->root, rootData);
 
+        std::cout << "Creating objects.\n";
         // Create all entities and attach their components.
         for (auto& objectData : initialData->objects)
         {
@@ -170,22 +173,26 @@ namespace lapCore
             objectData.object = obj;
         }
 
+        std::cout << "Creating instanced prefabs.\n";
         for (auto& prefabData : initialData->instancedPrefabs)
         {
             auto obj = AddPrefabObject(prefabData);
             prefabData.objectData.object = obj;
         }
 
+        std::cout << "Getting snapshot.\n";
         // Flatten all instantiated objects into ProjectSceneData.
         ProjectSceneData snapshot = toData();
 
         // Systems haven't been initialized, so retain
         // their definitions from the original project.
+        std::cout << "Assigning initial data.\n";
         snapshot.systems = data.systems;
 
         initialData = std::move(snapshot);
 
         // Preserve entity handles and remove runtime components.
+        std::cout << "Making the scene stale.\n";
         MakeStale(false);
 
         // MakeStale() currently captures runtimeData using toData(),
@@ -196,6 +203,7 @@ namespace lapCore
         // Activate only the requested scene.
         if (mode == Scene::LoadMode::ACTIVE)
         {
+            std::cout << "Restoring scene.\n";
             Restore(true);
         }
     }
@@ -314,7 +322,8 @@ namespace lapCore
             }
             else if (systemData.type == "physics")
             {
-                AddSystem<PhysicsSystem>(systemData.order)->RegisterBodies();
+                auto physics = AddSystem<PhysicsSystem>(systemData.order);
+                physics->RegisterBodies();
             }
             else if (systemData.type == "render")
             {
@@ -716,6 +725,8 @@ namespace lapCore
         data.backgroundColor = this->backgroundColor;
 
         // Serialize systems.
+
+        std::cout << "Gathering systems.\n";
         for (const auto& [order, system] : systems)
         {
             if (!system)
@@ -729,6 +740,7 @@ namespace lapCore
         }
 
         // Serialize objects.
+        std::cout << "Gathering objects.\n";
         for (auto [object, objectData] : objects.view<ObjectData>().each())
         {
             if (object == root)
@@ -740,25 +752,35 @@ namespace lapCore
             projectObjData.name = GET_FORMER_HASHED(objectData.id);
             projectObjData.index = objectData.index;
 
-            // Resolve parent.
+            std::cout << "Making object " << projectObjData.name << '\n';
+
             if (objectData.parent == root)
             {
                 projectObjData.parent = "";
             }
             else
             {
+                std::cout << "Getting parent information.\n";
+                if (objectData.parent == null) continue;
                 auto* parentData = GetObject(objectData.parent);
 
                 if (!parentData)
+                {
+                    std::cerr << "Invalid parent for object "
+                            << projectObjData.name << '\n';
                     continue;
+                }
 
                 projectObjData.parent = GET_FORMER_HASHED(parentData->id);
+                std::cout << "Finished getting parent information.\n";
             }
 
+            std::cout << "Making context.\n";
             SerializeContext ctx;
             ctx.resources = &world->resources;
             ctx.objectName = projectObjData.name;
 
+            std::cout << "Gathering elements.\n";
             // Serialize every registered component.
             for (auto&& [type, storage] : objects.storage())
             {
@@ -768,31 +790,53 @@ namespace lapCore
                 if (!storage.contains(object))
                     continue;
 
+                std::cout << "Getting element of type: " << type << '\n';
                 auto* entry = Reflection::TryGet(type);
 
                 if (!entry)
                     continue;
 
-                json elementJson = entry->to_json(
-                    storage.value(object),
-                    &ctx
-                );
+                json elementJson;
 
-                auto elementData = entry->create_project_data(
-                    elementJson,
-                    entry->name
-                );
-
-                if (elementData)
+                try
                 {
-                    projectObjData.elements.push_back(
-                        std::move(elementData)
+                    std::cout << "Attempting to create data for element: " << entry->name << '\n';
+                    elementJson = entry->to_json(
+                        storage.value(object),
+                        &ctx
                     );
+                    std::cout << "Converted to json.\n";
+
+                    auto elementData = entry->create_project_data(
+                        elementJson,
+                        entry->name
+                    );
+                    std::cout << "Made data.\n";
+
+                    if (elementData)
+                        projectObjData.elements.push_back(
+                            std::move(elementData)
+                        );
+                }
+                catch (const nlohmann::json::exception& e)
+                {
+                    std::cerr
+                        << "\n[SCENE SERIALIZATION ERROR]\n"
+                        << "Scene: " << data.name << '\n'
+                        << "Object: " << projectObjData.name << '\n'
+                        << "Element: " << entry->name << '\n'
+                        << "Error: " << e.what() << '\n'
+                        << "Serialized JSON:\n"
+                        << elementJson.dump(2) << '\n';
+
+                    throw;
                 }
             }
 
             data.objects.push_back(std::move(projectObjData));
         }
+
+        std::cout << "Finished turning scene into ProjectSceneData.\n";
 
         return data;
     }
