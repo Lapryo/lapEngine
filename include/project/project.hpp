@@ -7,6 +7,7 @@
 namespace lapCore
 {
     using namespace entt;
+    using Object = entity;
 
     inline bool defaultStructsRegistered = false;
     bool RegisterDefaultStructs();
@@ -74,6 +75,7 @@ namespace lapCore
 
     struct ProjectObjectData
     {
+        optional<Object> object = nullopt;
         string name, parent;
         int index;
 

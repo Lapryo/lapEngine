@@ -28,12 +28,13 @@ namespace lapCore
         return object;
     }
 
-    Object Scene::AddPrefabObject(const ProjectInstancedPrefabData &data)
+    Object Scene::AddPrefabObject(ProjectInstancedPrefabData &data)
     {
         auto object = AddObject(data.objectData);
-        for (const auto &childData : data.children)
+        for (auto &childData : data.children)
         {
-            AddPrefabObject(childData);
+            auto obj = AddPrefabObject(childData);
+            childData.objectData.object = obj;
         }
 
         return object;
@@ -143,32 +144,169 @@ namespace lapCore
         AddElement<ObjectData>(this->root, rootData);
     }
 
-    Scene::Scene(World *world, const ProjectSceneData &data)
+    Scene::Scene(
+        World* world,
+        const ProjectSceneData& data,
+        Scene::LoadMode mode
+    )
     {
         this->world = world;
         this->id = HASH_ID(data.name.c_str());
-        this->root = objects.create();
+        this->initialData = data;
+        this->backgroundColor = data.backgroundColor;
 
         ObjectData rootData;
         rootData.id = HASH_ID("__root__");
         rootData.parent = null;
         rootData.index = -1;
 
+        this->root = objects.create();
         AddElement<ObjectData>(this->root, rootData);
 
-        this->backgroundColor = data.backgroundColor;
-
-        for (const auto& objectData : data.objects)
+        // Create all entities and attach their components.
+        for (auto& objectData : initialData->objects)
         {
-            AddObject(objectData);
+            auto obj = AddObject(objectData);
+            objectData.object = obj;
         }
 
-        for (const auto& prefabData : data.instancedPrefabs)
+        for (auto& prefabData : initialData->instancedPrefabs)
         {
-            AddPrefabObject(prefabData);
+            auto obj = AddPrefabObject(prefabData);
+            prefabData.objectData.object = obj;
         }
 
-        for (const auto& systemData : data.systems)
+        // Flatten all instantiated objects into ProjectSceneData.
+        ProjectSceneData snapshot = toData();
+
+        // Systems haven't been initialized, so retain
+        // their definitions from the original project.
+        snapshot.systems = data.systems;
+
+        initialData = std::move(snapshot);
+
+        // Preserve entity handles and remove runtime components.
+        MakeStale(false);
+
+        // MakeStale() currently captures runtimeData using toData(),
+        // which also doesn't see any initialized systems yet.
+        if (runtimeData)
+            runtimeData->systems = data.systems;
+
+        // Activate only the requested scene.
+        if (mode == Scene::LoadMode::ACTIVE)
+        {
+            Restore(true);
+        }
+    }
+
+    Scene::~Scene()
+    {
+        objects.clear();
+        systems.clear();
+        runtimeData.reset();
+        initialData.reset();
+    }
+
+    void Scene::MakeStale(bool disableEvents, vector<Object> excludeList)
+    {
+        if (disableEvents)
+        {
+            for (const auto &object : objects.view<Object>())
+            {
+                bool found = false;
+                for (const auto& excludedObject : excludeList)
+                {
+                    if (object == excludedObject)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found) continue;
+                auto it = EventRegistry::objEventCallbacks.find(object);
+                if (it != EventRegistry::objEventCallbacks.end())
+                {
+                    it->second->active = false;
+                }
+            }
+        }
+
+        runtimeData = toData();
+        systems.clear();
+
+        // Remove components here
+        for (auto&& [id, storage] : objects.storage())
+        {
+            if (id == entt::type_hash<ObjectData>::value())
+                continue;
+
+            storage.clear();
+        }
+    }
+
+    void GatherAllPrefabObjectData(vector<ProjectObjectData> &list, const ProjectInstancedPrefabData &data)
+    {
+        list.push_back(data.objectData);
+        for (const auto& childData : data.children)
+        {
+            GatherAllPrefabObjectData(list, childData);
+        }
+    }
+
+    void Scene::RestoreObject(const ProjectObjectData& data)
+    {
+        if (!data.object)
+            return;
+
+        Object object = *data.object;
+
+        if (!objects.valid(object))
+            return;
+
+        for (const auto& elementData : data.elements)
+        {
+            if (!elementData)
+                continue;
+
+            auto entry = Reflection::TryGet(elementData->GetTypeID());
+            if (!entry)
+                continue;
+
+            entry->emplace(
+                objects,
+                object,
+                elementData->GetRawData()
+            );
+        }
+    }
+
+    void Scene::Restore(bool useRuntimeData)
+    {
+        const ProjectSceneData* sourceData = nullptr;
+
+        if (useRuntimeData && runtimeData)
+            sourceData = &*runtimeData;
+        else if (initialData)
+            sourceData = &*initialData;
+
+        if (!sourceData)
+            return;
+
+        // Normal scene objects
+        for (const auto& data : sourceData->objects)
+        {
+            RestoreObject(data);
+        }
+
+        /*
+            Because we are restoring from an already existing scene, we don't need to go through the
+            instanced prefabs, because they were already instanciated! (i think thats how you spell it)
+        */
+
+        // Straightforward
+        for (const auto& systemData : sourceData->systems)
         {
             if (systemData.type == "gui")
             {
@@ -199,6 +337,14 @@ namespace lapCore
                 dbgln("Unknown system type: " + systemData.type, LogType::WARNING);
             }
         }
+
+        // Retoggle all events
+        for (const auto& callback : EventRegistry::objEventCallbacks)
+        {
+            callback.second->active = true;
+        }
+
+        runtimeData.reset();
     }
 
     Object Scene::AddObject(id_type id, int index, ShiftMode shiftMode)
@@ -560,5 +706,94 @@ namespace lapCore
         // This option can be toggleable and is checked via the App class
 
         EndDrawing();
+    }
+
+    ProjectSceneData Scene::toData()
+    {
+        ProjectSceneData data;
+
+        data.name = GET_FORMER_HASHED(this->id);
+        data.backgroundColor = this->backgroundColor;
+
+        // Serialize systems.
+        for (const auto& [order, system] : systems)
+        {
+            if (!system)
+                continue;
+
+            ProjectSystemData systemData;
+            systemData.order = system->order;
+            systemData.type = system->GetName();
+
+            data.systems.push_back(std::move(systemData));
+        }
+
+        // Serialize objects.
+        for (auto [object, objectData] : objects.view<ObjectData>().each())
+        {
+            if (object == root)
+                continue;
+
+            ProjectObjectData projectObjData;
+
+            projectObjData.object = object;
+            projectObjData.name = GET_FORMER_HASHED(objectData.id);
+            projectObjData.index = objectData.index;
+
+            // Resolve parent.
+            if (objectData.parent == root)
+            {
+                projectObjData.parent = "";
+            }
+            else
+            {
+                auto* parentData = GetObject(objectData.parent);
+
+                if (!parentData)
+                    continue;
+
+                projectObjData.parent = GET_FORMER_HASHED(parentData->id);
+            }
+
+            SerializeContext ctx;
+            ctx.resources = &world->resources;
+            ctx.objectName = projectObjData.name;
+
+            // Serialize every registered component.
+            for (auto&& [type, storage] : objects.storage())
+            {
+                if (type == GetTypeID<ObjectData>())
+                    continue;
+
+                if (!storage.contains(object))
+                    continue;
+
+                auto* entry = Reflection::TryGet(type);
+
+                if (!entry)
+                    continue;
+
+                json elementJson = entry->to_json(
+                    storage.value(object),
+                    &ctx
+                );
+
+                auto elementData = entry->create_project_data(
+                    elementJson,
+                    entry->name
+                );
+
+                if (elementData)
+                {
+                    projectObjData.elements.push_back(
+                        std::move(elementData)
+                    );
+                }
+            }
+
+            data.objects.push_back(std::move(projectObjData));
+        }
+
+        return data;
     }
 }

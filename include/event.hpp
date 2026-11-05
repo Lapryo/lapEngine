@@ -28,6 +28,7 @@ namespace lapCore
         virtual ~IEventContainer() = default;
 
         id_type type;
+        bool active = true;
     };
 
     template <typename... Args>
@@ -86,6 +87,9 @@ namespace lapCore
             if (it == eventCallbacks.end())
                 return;
 
+            if (!it->second->active)
+                return;
+
             using Container = EventContainer<decay_t<Args>...>;
 
             if (it->second->type != type_hash<Container>::value())
@@ -135,6 +139,9 @@ namespace lapCore
             if (it == objEventCallbacks.end())
                 return;
 
+            if (!it->second->active)
+                return;
+
             using Container = EventContainer<decay_t<Args>...>;
 
             if (it->second->type != type_hash<Container>::value())
@@ -162,6 +169,9 @@ namespace lapCore
             auto it = eventCallbacks.find(eventID);
 
             if (it == eventCallbacks.end())
+                return;
+
+            if (!it->second->active)
                 return;
 
             using Container = EventContainer<Object, decay_t<Args>...>;

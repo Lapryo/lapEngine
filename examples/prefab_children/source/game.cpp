@@ -6,7 +6,7 @@ namespace PrefabChildren
     {
         world.LoadSettings("");
         world.LoadWindow();
-        world.SetScene(world.GetMainSceneData());
+        world.LoadScenes(HASH_ID("main"));
 
         auto photoFramePrefab = world.prefabs->FindFirstObject(HASH_ID("photo-frame"));
         if (photoFramePrefab == null) return false;

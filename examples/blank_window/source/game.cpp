@@ -26,7 +26,7 @@ namespace BlankWindow
         */
             
         world.LoadWindow();
-        world.SetScene(world.GetMainSceneData());
+        world.LoadScenes(HASH_ID("main"));
 
         // You can also do other things here such as setting script functions, loading assets or using assets,
         // or really anything else you can think of.

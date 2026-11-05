@@ -70,6 +70,9 @@ void App::Shutdown()
     delete world.mainScene;
     delete world.prefabs;
 
+    for (auto& [id, scene] : world.staleScenes)
+        delete scene;
+
     world.resources.ClearAll();
 
     UnloadRenderTexture(world.window.target);

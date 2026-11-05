@@ -45,7 +45,7 @@ namespace lapCore
         App* app;
 
         World(App* app, Project project) : project(project), app(app) {
-            prefabs = new Scene(this, ProjectSceneData());
+            prefabs = new Scene(this, ProjectSceneData(), Scene::LoadMode::ACTIVE);
             for (const auto& prefabData : project.prefabs)
             {
                 prefabs->AddObject(prefabData);
@@ -54,6 +54,8 @@ namespace lapCore
 
         Scene* mainScene = nullptr;
         Scene* prefabs = nullptr;
+
+        unordered_map<id_type, Scene*> staleScenes;
 
         WindowProperties window;
         ResourceManager resources;
@@ -64,8 +66,8 @@ namespace lapCore
         void LoadWindow();
         void ResetWindowProperties();
 
+        void LoadScenes(id_type mainID);
         void SetScene(ProjectSceneData &scene_data);
-        ProjectSceneData &GetMainSceneData();
 
         void SwitchScene(const ProjectSceneData &scene_data, function<void()> preloadCallback);
 

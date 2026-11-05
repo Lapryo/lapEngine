@@ -176,7 +176,7 @@ namespace PlayerWithPhysics
         world.LoadSettings("assets/settings.json");
         world.LoadWindow();
 
-        world.SetScene(world.GetMainSceneData());
+        world.LoadScenes(HASH_ID("main"));
 
         /*
         Here we register our inputs for this scene.

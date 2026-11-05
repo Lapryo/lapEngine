@@ -31,13 +31,23 @@ namespace lapCore
 
     struct Scene
     {
+        enum class LoadMode
+        {
+            STALE,
+            ACTIVE
+        };
+
         Scene(World* world);
-        Scene(World* world, const ProjectSceneData& data);
+        Scene(World* world, const ProjectSceneData& data, LoadMode mode);
+        ~Scene();
+
+        void MakeStale(bool disableEvents = false, vector<Object> excludeList = {});
+        void Restore(bool useRuntimeData);
 
         Color backgroundColor = BLACK;
 
         Object AddObject(const ProjectObjectData& data);
-        Object AddPrefabObject(const ProjectInstancedPrefabData& data);
+        Object AddPrefabObject(ProjectInstancedPrefabData& data);
 
         Object CloneObject(Object object, ObjectData newData);
         Object CloneObjectFromRegistry(Object otherObject, const registry &otherRegistry, ObjectData newData);
@@ -150,5 +160,10 @@ namespace lapCore
         registry objects;
 
         Object root;
+    private:
+        optional<ProjectSceneData> initialData, runtimeData;
+
+        ProjectSceneData toData();
+        void RestoreObject(const ProjectObjectData& data);
     };
 }

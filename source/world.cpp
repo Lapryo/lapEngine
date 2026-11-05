@@ -11,48 +11,105 @@
 
 using namespace lapCore;
 
-void World::SetScene(ProjectSceneData &scene_data)
+void World::SetScene(ProjectSceneData& scene_data)
 {
+    id_type targetID = HASH_ID(scene_data.name.c_str());
+
+    // Already in the requested scene.
+    if (mainScene && mainScene->id == targetID)
+    {
+        if (preloadSceneCallback)
+            preloadSceneCallback();
+
+        preloadSceneCallback = nullptr;
+        return;
+    }
+
+    Scene* nextScene = nullptr;
+    bool wasStale = false;
+
+    // Find the scene among the preloaded stale scenes.
+    auto it = staleScenes.find(targetID);
+
+    if (it != staleScenes.end())
+    {
+        nextScene = it->second;
+        staleScenes.erase(it);
+
+        wasStale = true;
+    }
+    else
+    {
+        // Fallback for scenes that weren't preloaded.
+        nextScene = new Scene(
+            this,
+            scene_data,
+            Scene::LoadMode::ACTIVE
+        );
+    }
+
+    // Make the previous active scene stale.
     if (mainScene)
     {
-        auto sound_sys = mainScene->FindSystem<SoundSystem>();
-        if (sound_sys)
-            sound_sys->StopAll();
+        if (auto* soundSys = mainScene->FindSystem<SoundSystem>())
+            soundSys->StopAll();
+
+        mainScene->MakeStale(true);
+
+        staleScenes[mainScene->id] = mainScene;
     }
 
-    // Clear out and set back up with new scene data
-    delete mainScene;
-    mainScene = new Scene(this, scene_data);
+    // Activate the requested scene.
+    mainScene = nextScene;
 
-    // Cool thing to ensure there is a render system in the scene. cause if not, the window won't update at all and buffer the whole time
-    if (IsWindowReady())
-        if (mainScene->FindSystem<RenderSystem>() == nullptr)
-            mainScene->AddSystem<RenderSystem>(-1);
-
-    if (preloadSceneCallback)
+    if (wasStale)
     {
-        preloadSceneCallback();
+        // Use saved runtime state if available;
+        // otherwise restore the original project data.
+        mainScene->Restore(
+            true
+        );
     }
+
+    // Ensure the active scene can render.
+    if (IsWindowReady())
+    {
+        if (!mainScene->FindSystem<RenderSystem>())
+            mainScene->AddSystem<RenderSystem>(-1);
+    }
+
+    // Run the callback after restoring the scene.
+    if (preloadSceneCallback)
+        preloadSceneCallback();
+
     preloadSceneCallback = nullptr;
 
     dbgln("Finished setting scene.", LogType::INFO);
 }
 
-ProjectSceneData &lapCore::World::GetMainSceneData()
+void World::LoadScenes(id_type mainID)
 {
-    auto& mainSceneData = project.scenes[0];
-    auto mainKeyword = HASH_ID("main");
-
-    for (auto &scnData : project.scenes)
+    for (auto& data : project.scenes)
     {
-        if (scnData.name == "main")
+        id_type sceneID = HASH_ID(data.name.c_str());
+
+        if (sceneID == mainID)
         {
-            mainSceneData = scnData;
-            break;
+            mainScene = new Scene(
+                this,
+                data,
+                Scene::LoadMode::ACTIVE
+            );
+        }
+        else
+        {
+            staleScenes[sceneID] = new Scene(
+                this,
+                data,
+                Scene::LoadMode::STALE
+            );
         }
     }
-
-    return mainSceneData;
 }
 
 void lapCore::World::SwitchScene(const ProjectSceneData &scene_data, function<void()> preloadCallback)
