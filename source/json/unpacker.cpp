@@ -35,26 +35,32 @@ namespace lapCore
         return jsonContainsString(j, key, true) && !j[key].empty();
     }
 
-    json UnpackFile(const filesystem::path &jsonFilePath)
+    json UnpackFile(const filesystem::path& path)
     {
-        auto fileStr = ReadFileToString(jsonFilePath);
-        if (fileStr.empty())
+        filesystem::path resolvedPath = path;
+
+        if (resolvedPath.is_relative())
         {
-            dbgln("UnpackFile: Failed to read JSON file: " + jsonFilePath.string() + "\nReturning null JSON.");
-            return json();
+            resolvedPath =
+                filesystem::path(GetApplicationDirectory()) / resolvedPath;
         }
 
-        try
+        resolvedPath = resolvedPath.lexically_normal();
+
+        std::ifstream file(resolvedPath);
+
+        if (!file.is_open())
         {
-            return json::parse(fileStr);
-        }
-        catch (const json::parse_error& e)
-        {
-            dbgln("UnpackFile: Failed to parse JSON file: " + jsonFilePath.string() + ": " + e.what() + "\nReturning null JSON.");
-            return json();
+            dbgln(
+                "UnpackFile: Failed to read JSON file: " +
+                resolvedPath.string(),
+                EUTIL::Other::LogType::ERROR
+            );
+
+            return nullptr;
         }
 
-        return json();
+        return json::parse(file);
     }
 
     bool wantsReplacement(const json &j)

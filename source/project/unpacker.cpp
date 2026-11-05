@@ -337,14 +337,20 @@ namespace lapCore
 
     json UnpackMultidirectoryProject(const filesystem::path &projectFilePath)
     {
-        json projectJson = UnpackFile(projectFilePath);
-        if (projectJson.is_null())
+        filesystem::path resolvedPath = projectFilePath;
+
+        if (resolvedPath.is_relative())
         {
-            dbgln("UnpackMultidirectoryProject: Failed to unpack project file: " + projectFilePath.string() + "\nReturning null JSON.", LogType::ERROR);
-            return json();
+            resolvedPath =
+                filesystem::path(GetApplicationDirectory()) / resolvedPath;
         }
 
-        auto rootPath = projectFilePath.parent_path();
+        resolvedPath = resolvedPath.lexically_normal();
+
+        json projectJson = UnpackFile(resolvedPath);
+
+        // Collection files must be relative to project.json.
+        filesystem::path rootPath = resolvedPath.parent_path();
 
         json assetsJson = UnpackArrayOrInline(projectJson, "assets", UnpackAsset, rootPath, "");
         if (!assetsJson.is_null())
