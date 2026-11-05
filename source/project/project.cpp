@@ -75,7 +75,9 @@ namespace lapCore
         // Then we unpack the entire project directory
         json projectJson = UnpackMultidirectoryProject(path);
         if (projectJson.is_null())
-            return Project();
+        {
+            throw runtime_error("[ERROR] Project JSON returned null when loading project");
+        }
 
         // Then make it
         return MakeProject(projectJson);

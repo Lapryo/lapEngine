@@ -19,6 +19,7 @@
 namespace lapCore
 {
     class App;
+    struct ResourceManager;
 
     struct WindowProperties
     {

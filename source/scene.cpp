@@ -39,6 +39,97 @@ namespace lapCore
         return object;
     }
 
+    Object Scene::CloneObject(
+        Object object,
+        ObjectData newData
+    )
+    {
+        return CloneObjectFromRegistry(
+            object,
+            objects,
+            newData
+        );
+    }
+
+    Object Scene::CloneObjectFromRegistry(
+        Object otherObject,
+        const registry& otherRegistry,
+        ObjectData newData
+    )
+    {
+        const auto* sourceData = otherRegistry.try_get<ObjectData>(otherObject);
+        if (!sourceData)
+            return entt::null;
+
+        // Copy the children before adding anything to the registry.
+        // This prevents same-registry cloning from modifying our iteration.
+        auto children = sourceData->children;
+
+        // Create the cloned object.
+        Object object = AddObject(
+            newData.id,
+            newData.parent,
+            newData.index
+        );
+
+        if (object == entt::null)
+            return entt::null;
+
+        // Copy all components without knowing their types.
+        for (auto&& [id, storage] : otherRegistry.storage())
+        {
+            // ObjectData is managed by AddObject.
+            if (id == entt::type_hash<ObjectData>::value())
+                continue;
+
+            if (!storage.contains(otherObject))
+                continue;
+
+            auto* destination = objects.storage(id);
+
+            if (!destination)
+            {
+                // A matching storage must exist in the destination.
+                std::cerr << "Missing destination storage: " << id << '\n';
+                continue;
+            }
+
+            destination->push(object, storage.value(otherObject));
+        }
+
+        // Clone descendants recursively.
+        for (const auto& [index, child] : children)
+        {
+            const auto* childData = otherRegistry.try_get<ObjectData>(child);
+            if (!childData)
+                continue;
+
+            ObjectData data{};
+            data.id = childData->id;
+            data.parent = object;
+            data.index = static_cast<int>(index);
+
+            CloneObjectFromRegistry(child, otherRegistry, data);
+        }
+
+        return object;
+    }
+
+    Object Scene::AddPrefab(
+        Object prefabObject,
+        ObjectData newData
+    )
+    {
+        if (!world || !world->prefabs)
+            return null;
+
+        return CloneObjectFromRegistry(
+            prefabObject,
+            world->prefabs->objects,
+            newData
+        );
+    }
+
     Scene::Scene(World *world)
     {
         this->world = world;

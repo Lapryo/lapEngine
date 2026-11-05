@@ -1,6 +1,7 @@
 #include "project/unpacker.hpp"
 #include "json/unpacker.hpp"
 #include "eutil.hpp"
+#include <stdexcept>
 
 namespace lapCore
 {
@@ -55,35 +56,46 @@ namespace lapCore
         if (!jsonContains(projectJson, key))
             return json();
 
-        json resultJson = projectJson[key];
+        json resultJson = projectJson.at(key);
 
-        // Check if the entire value references an external JSON array.
+        // A file@ reference for an entire collection is relative to the
+        // file that references it (e.g. project.json -> prefabs.json).
+        // This is different from a reference to ONE prefab definition.
         if (wantsReplacement(resultJson))
         {
-            filesystem::path replacementPath = GetReplacementValue(resultJson);
+            const filesystem::path replacementPath = GetReplacementValue(resultJson);
+            const filesystem::path path = startingPath / replacementPath;
 
-            // Collection files are relative to the starting directory.
-            auto path = startingPath / replacementPath;
-
-            if (filesystem::is_regular_file(path))
+            // Do NOT pass an unresolved collection reference to UnpackPrefab:
+            // it would incorrectly look under prefabs/def/.
+            if (!filesystem::is_regular_file(path))
             {
-                json loadedJson = UnpackFile(path);
-
-                // Collections can contain arrays OR keyed objects (e.g.
-                // modifications.children is keyed by child prefab name).
-                if (loadedJson.is_array() || loadedJson.is_object())
-                {
-                    resultJson = loadedJson;
-                    startingPath = path.parent_path();
-                }
+                throw runtime_error(
+                    "UnpackArrayOrInline: Missing collection '" + key +
+                    "' at: " + filesystem::absolute(path).string());
             }
+
+            resultJson = UnpackFile(path);
+            if (!resultJson.is_array() && !resultJson.is_object())
+            {
+                throw runtime_error(
+                    "UnpackArrayOrInline: Collection '" + key +
+                    "' must contain a JSON array or object: " +
+                    filesystem::absolute(path).string());
+            }
+
+            startingPath = path.parent_path();
         }
 
         if (resultJson.is_array())
+        {
             for (auto &itemJson : resultJson)
                 itemJson = unpackerFunction(itemJson, startingPath, optional);
+        }
         else if (resultJson.is_object() || resultJson.is_string())
+        {
             resultJson = unpackerFunction(resultJson, startingPath, optional);
+        }
 
         return resultJson;
     }

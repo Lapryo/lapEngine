@@ -2,7 +2,6 @@
 
 #include "system.hpp"
 #include "project/project.hpp"
-#include "map.hpp"
 
 #include <iostream>
 
@@ -39,6 +38,10 @@ namespace lapCore
 
         Object AddObject(const ProjectObjectData& data);
         Object AddPrefabObject(const ProjectInstancedPrefabData& data);
+
+        Object CloneObject(Object object, ObjectData newData);
+        Object CloneObjectFromRegistry(Object otherObject, const registry &otherRegistry, ObjectData newData);
+        Object AddPrefab(Object prefabObject, ObjectData newData);
 
         // Adds an object to the root object of the scene
         Object AddObject(id_type id, int index = -1, ShiftMode shiftMode = ShiftMode::CLUMPING);

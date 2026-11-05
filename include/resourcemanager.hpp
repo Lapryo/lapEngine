@@ -13,6 +13,9 @@
 
 namespace lapCore
 {
+    struct Map;
+    struct Tileset;
+
     using namespace std;
     using namespace entt;
 

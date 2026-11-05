@@ -1,8 +1,4 @@
 /*
-TODO NOW:
-1. Make prefab children example (for testing purposes)
-2. Fix prefab instances and children
-
 TODO LATER-DATE:
 1. Rewrite the comments for the examples
 2. Rewrite the comments for the examples

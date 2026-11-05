@@ -8,8 +8,8 @@ using namespace std;
 
 namespace lapCore
 {
-    struct Scene;
     struct ResourceManager;
+    struct Scene;
     using namespace entt;
 
     using Object = entity;
@@ -40,6 +40,27 @@ namespace lapCore
             map<unsigned int, string> types;
         };
 
+        struct MapObjectData
+        {
+            // Object information for scene
+            Object object;
+
+            // Map information
+            bool isTileObject;
+            Map::TileProperties properties;
+
+            // Position information (in-world)
+            Vector2 position;
+            float rotation;
+
+            // Visuals
+            id_type textureID;
+            Color tint;
+            Rectangle sourceRect, destRect;
+
+            int zLayer, ySort;
+        };
+
         Vector2 size = {0, 0}, tileSize = {0, 0};
         
         using TileLayer = pair<string, vector<Tile>>;
@@ -52,6 +73,8 @@ namespace lapCore
         map<unsigned int, id_type> objects;
 
         void LoadFromTMJ(ResourceManager* resources, const string& filePath);
+        vector<MapObjectData> LoadObjects(Scene* scene);
+        
         void Unload();
     };
 }

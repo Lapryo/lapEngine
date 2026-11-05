@@ -43,7 +43,7 @@
                                         "data": {
                                             "frame": {
                                                 "renderable": {
-                                                    "tint": [255, 0, 0, 255]
+                                                    "tint": [255, 165, 0, 255]
                                                 }
                                             },
                                             "text": "Fake Mona Lisa"

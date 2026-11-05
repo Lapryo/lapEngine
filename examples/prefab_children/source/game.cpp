@@ -8,17 +8,31 @@ namespace PrefabChildren
         world.LoadWindow();
         world.SetScene(world.GetMainSceneData());
 
-        auto children = world.mainScene->GetChildren(world.mainScene->root);
-        for (const auto& obj : children)
-        {
-            auto data = world.mainScene->GetObject(obj);
-            if (data)
-            {
-                cout << data->id << '\n';
-            }
+        auto photoFramePrefab = world.prefabs->FindFirstObject(HASH_ID("photo-frame"));
+        if (photoFramePrefab == null) return false;
 
-            if (world.mainScene->FindElement<UIFrame>(obj))
-                cout << "True\n";
+        auto photoFrameData = world.prefabs->GetObject(photoFramePrefab);
+        if (!photoFrameData) return false;
+
+        ObjectData newData = *photoFrameData;
+        newData.id = HASH_ID("example-3");
+
+        auto newPhotoFrame = world.mainScene->AddPrefab(photoFramePrefab, newData);
+        auto frame = world.mainScene->FindElement<UIFrame>(newPhotoFrame);
+        
+        auto photoObj = world.mainScene->FindFirstChild(newPhotoFrame, HASH_ID("photo"));
+        auto caption = world.mainScene->FindFirstChild(photoObj, HASH_ID("caption"));
+        auto text = world.mainScene->FindElement<UITextLabel>(caption);
+
+        if (frame)
+        {
+            frame->transform.position.scale.x = 0.75f;
+        }
+
+        if (text)
+        {
+            text->frame.renderable.tint = {255, 0, 0, 255};
+            text->text = "SUPER Fake Mona Lisa";
         }
 
         return true;

@@ -4,6 +4,7 @@
 #include "resourcemanager.hpp"
 
 #include <nlohmann/json.hpp>
+#include "world.hpp"
 
 using namespace lapCore;
 using namespace EUTIL;
@@ -196,6 +197,122 @@ void lapCore::Map::LoadFromTMJ(ResourceManager* resources, const string &filePat
 
     GetTilesets(*this, mapJson, filePath, resources);
     GetLayers(*this, mapJson);
+}
+
+vector<lapCore::Map::MapObjectData> lapCore::Map::LoadObjects(Scene *scene)
+{
+    vector<MapObjectData> mapObjects;
+
+    // Should i load it as children to the root? or should they be grouped by objects?
+
+    for (const auto& layer : layers)
+    {
+        for (const auto& tileData : layer.second.second)
+        {
+            MapObjectData data;
+
+            std::string tileName = "tile_" + 
+                std::to_string(layer.first) + "_" + 
+                std::to_string(tileData.id) + "_" + 
+                std::to_string(tileData.rect.x) + "_" + 
+                std::to_string(tileData.rect.y);
+
+            auto tileObjID = HASH_ID(tileName.c_str());
+            auto tileObject = scene->AddObject(tileObjID);
+            objects[layer.first] = tileObjID;
+
+            auto tileset = scene->world->resources.tilesets.TryGet(tilesets[tileData.tileset].id);
+            if (!tileset) continue;
+
+            data.position = {tileData.rect.x, tileData.rect.y};
+            if (tileData.id != 0)
+            {
+                unsigned int localID = tileData.id - tilesets[tileData.tileset].firstGID;
+                int column = localID % tileset->asset.columns;
+                int row = localID / tileset->asset.columns;
+
+                data.textureID = tileset->asset.textureID;
+                data.sourceRect = {
+                    (float)(column * tileSize.x),
+                    (float)(row * tileSize.y),
+                    (float)tileSize.x,
+                    (float)tileSize.y
+                };
+
+                data.destRect = data.sourceRect;
+                data.destRect.x = 0.f;
+                data.destRect.y = 0.f;
+                data.destRect.width = (float)tileData.rect.width;
+                data.destRect.height = (float)tileData.rect.height;
+                data.zLayer = layer.first;
+
+                float rotation = 0.f;
+                const bool h = tileData.flipX;
+                const bool v = tileData.flipY;
+                const bool d = tileData.flipD;
+                bool flipX, flipY = false;
+
+                if (!d)
+                {
+                    // Normal Tiled flips
+                    flipX = h;
+                    flipY = v;
+                }
+                else
+                {
+                    // Tiled diagonal transformations
+
+                    if (!h && !v)
+                    {
+                        // Diagonal only
+                        rotation = 90.f;
+                        flipY = true;
+                    }
+                    else if (h && !v)
+                    {
+                        // Diagonal + horizontal
+                        rotation = 90.f;
+                    }
+                    else if (!h && v)
+                    {
+                        // Diagonal + vertical
+                        rotation = -90.f;
+                    }
+                    else // h && v
+                    {
+                        // Diagonal + horizontal + vertical
+                        rotation = 90.f;
+                        flipX = true;
+                    }
+                }
+
+                if (flipX) data.sourceRect.width *= -1.f;
+                if (flipY) data.sourceRect.height *= -1.f;
+                data.rotation = rotation;
+
+                data.tint = {255, 255, 255, (unsigned char)(255 * tileData.opacity)};
+                data.ySort = data.position.y + tileSize.y;
+
+                if (tileData.isObject)
+                {
+                    data.position.x += (tileData.rect.width / 2.f) - (tileSize.x / 2.f);
+                    data.position.y += (tileData.rect.height / 2.f) - (tileSize.y / 2.f);
+                }
+            }
+            else if (tileData.isObject)
+            {
+                data.position.y += tileSize.y;
+            }
+
+            data.properties = tileData.properties;
+            data.isTileObject = tileData.isObject;
+            data.object = tileObject;
+
+            mapObjects.push_back(data);
+        }
+    }
+
+    return mapObjects;
 }
 
 void lapCore::Map::Unload()
