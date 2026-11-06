@@ -187,7 +187,7 @@ namespace lapCore
             for (auto& listener : container->listeners)
             {
                 if (listener)
-                    listener(scene, source, forward<Args>(args)...);
+                    listener(scene, source, std::forward<Args>(args)...);
             }
         }
 
@@ -236,12 +236,12 @@ namespace lapCore
     {
         const id_type eventID = name.value();
 
-        auto callback = [eventID, handler = forward<SystemFunc>(systemHandler)]
+        auto callback = [eventID, handler = std::forward<SystemFunc>(systemHandler)]
             (Scene* scene, Object object, EventArgs... args)
         {
             handler(scene, object, eventID, forward<EventArgs>(args)...);
         };
 
-        EventRegistry::Connect<Object, EventArgs...>(name, move(callback));
+        EventRegistry::Connect<Object, EventArgs...>(name, std::move(callback));
     }
 }

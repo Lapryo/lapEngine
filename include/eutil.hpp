@@ -197,6 +197,8 @@ namespace lapCore
                 int zlayer{0}, ySort{0};
                 bool isScreenSpace{false};
                 bool visible{true};
+                bool inheritedVisible{true};
+                bool listVisible{true};
                 Color tint{255, 255, 255, 255};
 
                 bool inheritsUI{false};
@@ -265,6 +267,11 @@ namespace lapCore
 
             Rectangle UITransformToRect(UITransform transform, ::Vector2 logicalResolution);
             Vector2 FrameVectorToVec2(FrameVector vector, ::Vector2 logicalResolution);
+
+            inline bool isRenderableVisible(const Render::Renderable &r)
+            {
+                return r.visible && r.inheritedVisible && (!r.inUIList || !r.inheritsUI || r.listVisible);
+            }
 
             void dbgln(const string &message, Other::LogType type = Other::LogType::INFO);
             void dbgln(const string &message, const char* colorCode, Other::LogType type = Other::LogType::INFO);

@@ -246,48 +246,44 @@ vector<lapCore::Map::MapObjectData> lapCore::Map::LoadObjects(Scene *scene)
                 data.destRect.height = (float)tileData.rect.height;
                 data.zLayer = layer.first;
 
-                float rotation = 0.f;
                 const bool h = tileData.flipX;
                 const bool v = tileData.flipY;
                 const bool d = tileData.flipD;
-                bool flipX, flipY = false;
+
+                bool flipX = false;
+                bool flipY = false;
+                float rotation = 0.0f;
 
                 if (!d)
                 {
-                    // Normal Tiled flips
                     flipX = h;
                     flipY = v;
                 }
+                else if (h && v)
+                {
+                    rotation = 90.0f;
+                    flipX = true;
+                }
+                else if (h)
+                {
+                    rotation = 90.0f;
+                }
+                else if (v)
+                {
+                    rotation = -90.0f;
+                }
                 else
                 {
-                    // Tiled diagonal transformations
-
-                    if (!h && !v)
-                    {
-                        // Diagonal only
-                        rotation = 90.f;
-                        flipY = true;
-                    }
-                    else if (h && !v)
-                    {
-                        // Diagonal + horizontal
-                        rotation = 90.f;
-                    }
-                    else if (!h && v)
-                    {
-                        // Diagonal + vertical
-                        rotation = -90.f;
-                    }
-                    else // h && v
-                    {
-                        // Diagonal + horizontal + vertical
-                        rotation = 90.f;
-                        flipX = true;
-                    }
+                    rotation = 90.0f;
+                    flipY = true;
                 }
 
-                if (flipX) data.sourceRect.width *= -1.f;
-                if (flipY) data.sourceRect.height *= -1.f;
+                if (flipX)
+                    data.sourceRect.width = -data.sourceRect.width;
+
+                if (flipY)
+                    data.sourceRect.height = -data.sourceRect.height;
+
                 data.rotation = rotation;
 
                 data.tint = {255, 255, 255, (unsigned char)(255 * tileData.opacity)};

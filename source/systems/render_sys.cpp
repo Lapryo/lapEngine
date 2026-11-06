@@ -308,7 +308,7 @@ void RenderSystem::Update(float deltaTime, registry &registry)
     auto drawSprite = [&](Object obj, Camera2D *camera)
     {
         auto *sprite = registry.try_get<Sprite>(obj);
-        if (!sprite || !sprite->renderable.visible)
+        if (!sprite || !isRenderableVisible(sprite->renderable))
             return;
 
         auto textureAsset = scene->world->resources.textures.GetAsset(sprite->textureID);
@@ -335,7 +335,7 @@ void RenderSystem::Update(float deltaTime, registry &registry)
     auto drawImage = [&](Object obj, Camera2D *camera)
     {
         auto *image = registry.try_get<UIImage>(obj);
-        if (!image || !image->sprite.renderable.visible)
+        if (!image || !isRenderableVisible(image->sprite.renderable))
             return;
 
         auto *textureEntry = scene->world->resources.textures.TryGet(image->sprite.textureID);
@@ -362,7 +362,7 @@ void RenderSystem::Update(float deltaTime, registry &registry)
     auto drawRect = [&](Object obj, Camera2D *camera)
     {
         auto *frame = registry.try_get<UIFrame>(obj);
-        if (!frame || !frame->renderable.visible)
+        if (!frame || !isRenderableVisible(frame->renderable))
             return;
 
         const DrawGeometry geometry = GetUIGeometry(
@@ -434,7 +434,7 @@ void RenderSystem::Update(float deltaTime, registry &registry)
     auto drawText = [&](Object obj, Camera2D *camera)
     {
         auto *label = registry.try_get<UITextLabel>(obj);
-        if (!label || !label->frame.renderable.visible)
+        if (!label || !isRenderableVisible(label->frame.renderable))
             return;
 
         const DrawGeometry geometry = GetUIGeometry(

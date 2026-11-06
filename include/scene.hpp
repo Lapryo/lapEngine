@@ -160,7 +160,7 @@ namespace lapCore
         registry objects;
 
         Object root;
-    private:
+
         optional<ProjectSceneData> initialData, runtimeData;
 
         ProjectSceneData toData();

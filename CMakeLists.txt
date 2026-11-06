@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
 
+option(INCLUDE_EXAMPLES "Include examples" OFF)
+
 FetchContent_Declare(
     box2d
     GIT_REPOSITORY https://github.com/erincatto/box2d.git
@@ -85,8 +87,9 @@ if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     )
 endif()
 
-
-add_subdirectory(examples/blank_window)
-add_subdirectory(examples/player_with_physics)
-add_subdirectory(examples/stress_test)
-add_subdirectory(examples/prefab_children)
+if (INCLUDE_EXAMPLES)
+    add_subdirectory(examples/blank_window)
+    add_subdirectory(examples/player_with_physics)
+    add_subdirectory(examples/stress_test)
+    add_subdirectory(examples/prefab_children)
+endif()

@@ -113,6 +113,38 @@ void World::LoadScenes(id_type mainID)
     }
 }
 
+Scene* lapCore::World::GetScene(id_type sceneID)
+{
+    if (mainScene->id == sceneID)
+        return mainScene;
+
+    auto it = staleScenes.find(sceneID);
+    if (it != staleScenes.end())
+        return it->second;
+    return nullptr;
+}
+
+ProjectSceneData* lapCore::World::GetSceneData(id_type sceneID)
+{
+    for (auto& sceneData : project.scenes)
+        if (HASH_ID(sceneData.name.c_str()) == sceneID)
+            return &sceneData;
+    return nullptr;
+}
+
+void lapCore::World::SwitchScene(Scene* scene, function<void()> preloadCallback)
+{
+    SwitchScene(scene->runtimeData.value(), preloadCallback);
+}
+
+void lapCore::World::SwitchScene(id_type sceneID, function<void()> preloadCallback)
+{
+    auto scene = GetScene(sceneID);
+    if (!scene) return;
+
+    SwitchScene(scene->runtimeData.value(), preloadCallback);
+}
+
 void lapCore::World::SwitchScene(const ProjectSceneData &scene_data, function<void()> preloadCallback)
 {
     switchingScene = true;

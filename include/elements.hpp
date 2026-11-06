@@ -143,9 +143,16 @@ namespace lapCore
                     UITransform bounds;
 
                     bool inheritsUI{false};
+                    bool inheritedActive{true};
+                    bool listActive{true};
 
                     bool mouseHovering{false}, inUIList{false}; // not serialized, used for runtime data
                 };
+
+                inline bool isUIButtonActive(const UIButton &b)
+                {
+                    return b.active && b.inheritedActive && (!b.inUIList || !b.inheritsUI || b.listActive);
+                }
             }
         }
 

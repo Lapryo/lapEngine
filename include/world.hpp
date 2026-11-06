@@ -69,7 +69,12 @@ namespace lapCore
         void LoadScenes(id_type mainID);
         void SetScene(ProjectSceneData &scene_data);
 
+        ProjectSceneData* GetSceneData(id_type sceneID);
+        void SwitchScene(Scene* scene, function<void()> preloadCallback);
         void SwitchScene(const ProjectSceneData &scene_data, function<void()> preloadCallback);
+
+        Scene* GetScene(id_type sceneID);
+        void SwitchScene(id_type sceneID, function<void()> preloadCallback);
 
         const Project &GetProject() const {
             return project;

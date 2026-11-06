@@ -107,46 +107,51 @@ namespace
 
     // Does not override a UIList's clipping decision when the parent is
     // visible. A hidden ancestor still hides everything below it.
-    void ApplyInheritedVisibility(registry &registry, Object entity, bool visible)
+    void ApplyInheritedVisibility(
+        registry& registry,
+        Object entity,
+        bool parentVisible
+    )
     {
-        if (auto *p = registry.try_get<UIFrame>(entity))
+        if (auto* p = registry.try_get<UIFrame>(entity))
         {
-            if (p->renderable.inheritsUI)
-                p->renderable.visible = visible &&
-                    (!p->renderable.inUIList || p->renderable.visible);
+            p->renderable.inheritedVisible =
+                !p->renderable.inheritsUI || parentVisible;
         }
-        if (auto *p = registry.try_get<UIButton>(entity))
+
+        if (auto* p = registry.try_get<UIButton>(entity))
         {
-            if (p->inheritsUI)
-                p->active = visible && (!p->inUIList || p->active);
+            p->inheritedActive =
+                !p->inheritsUI || parentVisible;
         }
-        if (auto *p = registry.try_get<UITextLabel>(entity))
+
+        if (auto* p = registry.try_get<UITextLabel>(entity))
         {
-            auto &r = p->frame.renderable;
-            if (r.inheritsUI)
-                r.visible = visible && (!r.inUIList || r.visible);
+            auto& r = p->frame.renderable;
+            r.inheritedVisible = !r.inheritsUI || parentVisible;
         }
-        if (auto *p = registry.try_get<UIImage>(entity))
+
+        if (auto* p = registry.try_get<UIImage>(entity))
         {
-            auto &r = p->sprite.renderable;
-            if (r.inheritsUI)
-                r.visible = visible && (!r.inUIList || r.visible);
+            auto& r = p->sprite.renderable;
+            r.inheritedVisible = !r.inheritsUI || parentVisible;
         }
     }
 
     // Performs the same list-assigned visibility changes as the old helper.
-    void AssignListVisibility(registry &registry, Object entity, bool visible)
+    void AssignListVisibility(registry& registry, Object entity, bool visible)
     {
-        if (auto *p = registry.try_get<UIFrame>(entity))
-            if (p->renderable.inheritsUI) p->renderable.visible = visible;
-        if (auto *p = registry.try_get<UIButton>(entity))
-            if (p->inheritsUI) p->active = visible;
-        if (auto *p = registry.try_get<UITextLabel>(entity))
-            if (p->frame.renderable.inheritsUI)
-                p->frame.renderable.visible = visible;
-        if (auto *p = registry.try_get<UIImage>(entity))
-            if (p->sprite.renderable.inheritsUI)
-                p->sprite.renderable.visible = visible;
+        if (auto* p = registry.try_get<UIFrame>(entity))
+            p->renderable.listVisible = visible;
+
+        if (auto* p = registry.try_get<UIButton>(entity))
+            p->listActive = visible;
+
+        if (auto* p = registry.try_get<UITextLabel>(entity))
+            p->frame.renderable.listVisible = visible;
+
+        if (auto* p = registry.try_get<UIImage>(entity))
+            p->sprite.renderable.listVisible = visible;
     }
 
     void ResolveDirtyTransforms(Scene *scene, registry &registry);
@@ -170,22 +175,36 @@ bool IsUIEntity(registry &registry, entity entity)
     return registry.any_of<UIFrame, UIButton, UITextLabel, UIImage>(entity);
 }
 
-bool GetUIVisible(registry &registry, entity entity)
+bool GetUIVisible(registry& registry, Object entity)
 {
-    if (auto *p = registry.try_get<UIFrame>(entity))
-        return p->renderable.visible;
-    if (auto *p = registry.try_get<UIButton>(entity))
-        return p->active;
-    if (auto *p = registry.try_get<UITextLabel>(entity))
-        return p->frame.renderable.visible;
-    if (auto *p = registry.try_get<UIImage>(entity))
-        return p->sprite.renderable.visible;
+    if (auto* p = registry.try_get<UIFrame>(entity))
+        return isRenderableVisible(p->renderable);
+
+    if (auto* p = registry.try_get<UIButton>(entity))
+        return isUIButtonActive(*p);
+
+    if (auto* p = registry.try_get<UITextLabel>(entity))
+        return isRenderableVisible(p->frame.renderable);
+
+    if (auto* p = registry.try_get<UIImage>(entity))
+        return isRenderableVisible(p->sprite.renderable);
+
     return true;
 }
 
-void SetUIVisible(registry &registry, entity entity, bool visible)
+void SetUIVisible(registry& registry, Object entity, bool visible)
 {
-    AssignListVisibility(registry, entity, visible);
+    if (auto* frame = registry.try_get<UIFrame>(entity))
+        frame->renderable.visible = visible;
+
+    if (auto* button = registry.try_get<UIButton>(entity))
+        button->active = visible;
+
+    if (auto* text = registry.try_get<UITextLabel>(entity))
+        text->frame.renderable.visible = visible;
+
+    if (auto* image = registry.try_get<UIImage>(entity))
+        image->sprite.renderable.visible = visible;
 }
 
 void GUISystem::MarkUIDirty(Scene *scene, registry &registry, entity entity)
@@ -281,11 +300,16 @@ namespace
         if (!rootFrame)
             return false;
 
-        const bool visible = rootFrame->renderable.visible;
+        const bool parentVisible =
+            isRenderableVisible(rootFrame->renderable);
+
         for (auto [entity, frame] : registry.view<UIFrame>().each())
         {
-            if (entity != scene->root && frame.renderable.inheritsUI)
-                frame.renderable.visible = visible;
+            if (entity == scene->root)
+                continue;
+
+            frame.renderable.inheritedVisible =
+                !frame.renderable.inheritsUI || parentVisible;
         }
         return true;
     }
@@ -312,18 +336,29 @@ namespace
     }
 }
 
-void ApplyUIVisibility(Scene *scene, registry &registry,
-                       entity entity, bool parentVisible, bool hasParent)
+void ApplyUIVisibility(
+    Scene* scene,
+    registry& registry,
+    Object entity,
+    bool parentVisible,
+    bool hasParent
+)
 {
-    const auto *node = scene->GetObject(entity);
+    const auto* node = scene->GetObject(entity);
     if (!node)
         return;
 
-    if (hasParent)
-        ApplyInheritedVisibility(registry, entity, parentVisible);
+    ApplyInheritedVisibility(
+        registry,
+        entity,
+        hasParent ? parentVisible : true
+    );
 
-    const bool visible = GetUIVisible(registry, entity);
-    for (const auto &[index, child] : node->children)
+    const bool visible = IsUIEntity(registry, entity)
+        ? GetUIVisible(registry, entity)
+        : parentVisible;
+
+    for (const auto& [index, child] : node->children)
         ApplyUIVisibility(scene, registry, child, visible, true);
 }
 
@@ -518,7 +553,7 @@ void HandleButtonInputs(Scene *scene, registry &registry)
 
     for (auto [entity, button] : buttons.each())
     {
-        if (!button.active)
+        if (!isUIButtonActive(button))
             continue;
 
         const bool hovered = CheckCollisionPointRec(mouse, button.bounds.absoluteRect);
