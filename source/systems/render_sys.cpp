@@ -1,4 +1,6 @@
-#include "core.hpp"
+#include "systems/render_sys.hpp"
+#include "world.hpp"
+#include "elements.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -7,6 +9,7 @@
 using namespace lapCore;
 using namespace ELEMENTS::Render;
 using namespace ELEMENTS::Render::UI;
+using namespace ELEMENTS::Physics;
 
 namespace
 {

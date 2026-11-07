@@ -1,10 +1,12 @@
 #pragma once
 
 #include <entt/entt.hpp>
-#include "elements.hpp"
 
 namespace lapCore
 {
+    using namespace std;
+    using namespace entt;
+
     struct Scene;
     
     using Object = entity;

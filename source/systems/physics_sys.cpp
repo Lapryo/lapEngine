@@ -1,5 +1,6 @@
-#include "core.hpp"
 #include "systems/physics_sys.hpp"
+#include "scene.hpp"
+#include "elements.hpp"
 
 using namespace lapCore;
 using namespace ELEMENTS::Physics;

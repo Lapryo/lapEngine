@@ -5,14 +5,12 @@
 #include <box2d/box2d.h>
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/vector.hpp>
-#include <cereal/cereal.hpp>
 
 #include <entt/entt.hpp>
 
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include <iostream>
 #include <fstream>
 
 using json = nlohmann::json;

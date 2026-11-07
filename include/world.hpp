@@ -3,10 +3,7 @@
 #include "project/project.hpp"
 #include "resourcemanager.hpp"
 #include "scene.hpp"
-#include "reflection.hpp"
 #include "actionmap.hpp"
-
-#include <memory>
 
 // This file will completely refactor the project structure
 // "Worlds" will take in a project, and they will own the ECS, systems, and runtime state

@@ -81,12 +81,6 @@ target_link_libraries(lapEngine PUBLIC
     cereal
 )
 
-if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(lapEngine PRIVATE
-        $<$<COMPILE_LANGUAGE:CXX>:-Wa,-mbig-obj>
-    )
-endif()
-
 if (INCLUDE_EXAMPLES)
     add_subdirectory(examples/blank_window)
     add_subdirectory(examples/player_with_physics)

@@ -1,14 +1,10 @@
 #include "project/unpacker.hpp"
 #include "json/unpacker.hpp"
-#include "eutil.hpp"
+#include "raylib.h"
 #include <stdexcept>
 
 namespace lapCore
 {
-    using namespace EUTIL;
-    using namespace Functions;
-    using namespace Other;
-
     filesystem::path GetGroupPath(const filesystem::path &replacementPath)
     {
         auto groupPath = replacementPath.parent_path();

@@ -1,8 +1,7 @@
-#include "core.hpp"
 #include "systems/gui_sys.hpp"
-
-#include <algorithm>
-#include <cstddef>
+#include "world.hpp"
+#include "elements.hpp"
+#include "event.hpp"
 
 using namespace lapCore;
 using namespace ELEMENTS;

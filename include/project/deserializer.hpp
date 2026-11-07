@@ -5,6 +5,8 @@
 
 namespace lapCore
 {
+    using namespace std;
+
     using json = nlohmann::json;
     using ElementDataPtr = unique_ptr<IProjectElementData>;
 

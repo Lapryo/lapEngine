@@ -1,13 +1,16 @@
 #pragma once
 
+#include <nlohmann/json.hpp>
 #include <raylib.h>
 #include <entt/entt.hpp>
-#include "project/unpacker.hpp"
+#include <filesystem>
 
 namespace lapCore
 {
+    using namespace std;
     using namespace entt;
     using Object = entity;
+    using json = nlohmann::json;
 
     inline bool defaultStructsRegistered = false;
     bool RegisterDefaultStructs();

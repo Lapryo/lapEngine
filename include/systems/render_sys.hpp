@@ -3,6 +3,9 @@
 #include "system.hpp"
 using namespace lapCore;
 
+#include "raylib.h"
+#include "eutil.hpp"
+
 const string UIGradient_fragShaderSrc = R"(
 #version 330
 
@@ -61,9 +64,12 @@ void main()
     );
 })";
 
+using namespace EUTIL::Other;
+
 class RenderSystem : public System
 {
 public:
+
     // TODO: Add support for models and custom 2d shapes
     enum class RenderType
     {

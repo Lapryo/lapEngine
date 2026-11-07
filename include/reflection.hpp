@@ -1,21 +1,21 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
+#include <entt/entt.hpp>
 
 #include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <iostream>
-
-#include "resourcemanager.hpp"
-
-using namespace entt;
 
 namespace lapCore
 {
+    using namespace std;
+    using namespace entt;
     using json = nlohmann::json;
     using Object = entity;
+
+    struct ResourceManager;
 
     struct IProjectElementData;
     template <typename T>

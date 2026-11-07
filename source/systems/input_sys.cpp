@@ -1,5 +1,6 @@
-#include "core.hpp"
 #include "systems/input_sys.hpp"
+#include "world.hpp"
+#include "event.hpp"
 
 using namespace lapCore;
 

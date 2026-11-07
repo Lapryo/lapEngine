@@ -1,9 +1,6 @@
 #include "world.hpp"
-#include "eutil.hpp"
-
-#include "systems.hpp"
-
-#include "reflection.hpp"
+#include "systems/render_sys.hpp"
+#include "systems/sound_sys.hpp"
 
 #include <sstream>
 

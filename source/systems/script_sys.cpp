@@ -1,7 +1,9 @@
-#include "core.hpp"
 #include "systems/script_sys.hpp"
+#include "elements.hpp"
+#include "event.hpp"
 
 using namespace lapCore;
+using namespace ELEMENTS::Other;
 
 void ScriptSystem::Update(float deltaTime, registry &registry)
 {

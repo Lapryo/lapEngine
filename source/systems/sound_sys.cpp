@@ -1,8 +1,12 @@
-#include "core.hpp"
 #include "systems/sound_sys.hpp"
+#include "world.hpp"
+#include "elements.hpp"
+#include "raymath.h"
 
 #include <algorithm>
 #include <cmath>
+
+using namespace lapCore::ELEMENTS::Physics;
 
 static float CalculatePan(Vector2 direction)
 {

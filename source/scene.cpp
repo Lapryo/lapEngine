@@ -1,14 +1,14 @@
 #include "scene.hpp"
 #include "world.hpp"
 #include "systems.hpp"
+#include "event.hpp"
+
+#include "reflection.hpp"
+
+#include <iostream>
 
 using namespace lapCore;
 using namespace EUTIL::Functions;
-
-using namespace ELEMENTS::Physics;
-using namespace ELEMENTS::Render;
-
-#include "systems/physics_sys.hpp"
 
 namespace lapCore
 {
