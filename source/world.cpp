@@ -48,11 +48,7 @@ void World::SetScene(ProjectSceneData& scene_data)
     // Make the previous active scene stale.
     if (mainScene)
     {
-        if (auto* soundSys = mainScene->FindSystem<SoundSystem>())
-            soundSys->StopAll();
-
         mainScene->MakeStale(true);
-
         staleScenes[mainScene->id] = mainScene;
     }
 

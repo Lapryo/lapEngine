@@ -14,42 +14,6 @@ static float CalculatePan(Vector2 direction)
     return (cosf(angle) + 1.0f) * 0.5f;
 }
 
-void SoundSystem::StopAll()
-{
-    if (!IsAudioDeviceReady())
-        return;
-
-    auto view = scene->objects.view<SoundPoint>();
-
-    for (auto [object, sound] : view.each())
-    {
-        if (sound.isMusic)
-        {
-            if (IsMusicValid(sound.musicPlayback))
-            {
-                StopMusicStream(sound.musicPlayback);
-                UnloadMusicStream(sound.musicPlayback);
-                sound.musicPlayback = {};
-            }
-        }
-        else
-        {
-            if (IsSoundValid(sound.soundPlayback))
-            {
-                StopSound(sound.soundPlayback);
-
-                if (sound.usesOwn)
-                    UnloadSoundAlias(sound.soundPlayback);
-
-                sound.soundPlayback = {};
-            }
-        }
-
-        sound.playing = false;
-        sound.initialized = false;
-    }
-}
-
 void SoundSystem::Update(float deltaTime, registry& registry)
 {
     if (!IsAudioDeviceReady())

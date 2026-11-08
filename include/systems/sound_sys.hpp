@@ -16,8 +16,6 @@ public:
         registry &reg
     ) override;
 
-    void StopAll();
-
     string GetName() const override 
     { return "SoundSystem"; }
 };

@@ -66,6 +66,8 @@ void App::Shutdown()
 {
     if (state == AppState::DEAD) // If the app is already dead, do nothing
         return;
+
+        
     
     delete world.mainScene;
     delete world.prefabs;

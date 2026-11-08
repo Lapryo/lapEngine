@@ -186,6 +186,36 @@ namespace lapCore
 
                 // Not serializeable
                 function<void()> onStart, onPlay, onEnd;
+
+                ~SoundPoint()
+                {
+                    if (!IsAudioDeviceReady()) return;
+
+                    if (isMusic)
+                    {
+                        if (IsMusicValid(musicPlayback))
+                        {
+                            StopMusicStream(musicPlayback);
+                            UnloadMusicStream(musicPlayback);
+                            musicPlayback = {};
+                        }
+                    }
+                    else
+                    {
+                        if (IsSoundValid(soundPlayback))
+                        {
+                            StopSound(soundPlayback);
+
+                            if (usesOwn)
+                                UnloadSoundAlias(soundPlayback);
+
+                            soundPlayback = {};
+                        }
+                    }
+
+                    playing = false;
+                    initialized = false;
+                }
             };
         }
 
