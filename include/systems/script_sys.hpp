@@ -19,5 +19,5 @@ public:
     void OnDestroy(registry &registry);
 
     string GetName() const override 
-    { return "ScriptSystem"; }
+    { return "script"; }
 };

@@ -233,11 +233,7 @@ namespace lapCore
                 }
 
                 if (found) continue;
-                auto it = EventRegistry::objEventCallbacks.find(object);
-                if (it != EventRegistry::objEventCallbacks.end())
-                {
-                    it->second->active = false;
-                }
+                EventRegistry::SetActive(this, false, true);
             }
         }
 
@@ -348,11 +344,7 @@ namespace lapCore
         }
 
         // Retoggle all events
-        for (const auto& callback : EventRegistry::objEventCallbacks)
-        {
-            callback.second->active = true;
-        }
-
+        EventRegistry::SetActive(this, true, true);
         runtimeData.reset();
     }
 

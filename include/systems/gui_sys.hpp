@@ -31,5 +31,5 @@ public:
     );
 
     string GetName() const override 
-    { return "GUISystem"; }
+    { return "gui"; }
 };

@@ -560,8 +560,9 @@ void HandleButtonInputs(Scene *scene, registry &registry)
         {
             if (left)
             {
+                auto eventName = GET_FORMER_HASHED(button.eventCallbacks.leftClick);
                 cout << "firing event: "
-                          << EventRegistry::reverseLookup[button.eventCallbacks.leftClick] << '\n';
+                          << eventName << '\n';
                 EventRegistry::Fire(scene, button.eventCallbacks.leftClick, entity);
             }
             if (right)

@@ -148,7 +148,7 @@ public:
     DebugLevel debugLevel = DebugLevel::NONE;
 
     string GetName() const override 
-    { return "RenderSystem"; }
+    { return "render"; }
 
 private:
     Shader UIGradient_fragShader;

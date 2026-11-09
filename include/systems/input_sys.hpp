@@ -22,7 +22,7 @@ public:
     vector<int> consumedGamepadAxes;
 
     string GetName() const override 
-    { return "InputSystem"; }
+    { return "input"; }
 private:
     bool HandleKeyboardInput(
         Scene* scene, 

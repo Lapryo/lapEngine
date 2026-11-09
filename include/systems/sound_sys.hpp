@@ -17,5 +17,5 @@ public:
     ) override;
 
     string GetName() const override 
-    { return "SoundSystem"; }
+    { return "sound"; }
 };

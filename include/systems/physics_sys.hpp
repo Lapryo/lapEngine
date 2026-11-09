@@ -37,5 +37,5 @@ public:
     unordered_map<Object, b2BodyId> bodyMap;
 
     string GetName() const override 
-    { return "PhysicsSystem"; }
+    { return "physics"; }
 };
