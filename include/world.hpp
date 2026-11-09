@@ -13,6 +13,16 @@
 
 // EACH SCENE NEEDS A REFERENCE TO THE WORLD IN THE FORM OF A POINTER
 
+/*
+Now that i think about it, stale scenes are kinda pointless. It'd be much simpler
+to just store a vector<Scene*> cause we're already storing saved data inside the scene
+as a ProjectSceneData, which basically means no memory reduction besides the systems
+removals.
+
+I'd have to do tests to compare the two, but I'd likely go with that approach cause
+it makes thing a whole lot simpler (probably faster too).
+*/
+
 namespace lapCore
 {
     class App;
