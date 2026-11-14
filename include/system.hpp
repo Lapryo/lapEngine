@@ -18,6 +18,7 @@ namespace lapCore
         virtual ~System() = default;
         virtual void Update(float deltaTime, registry &reg) = 0;
         virtual string GetName() const = 0;
+        virtual void Disconnect(registry&) {} // Remove EnTT callbacks before teardown.
 
         unsigned int order;
         bool active = true;

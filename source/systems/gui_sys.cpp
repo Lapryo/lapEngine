@@ -229,6 +229,22 @@ void GUISystem::Connect(registry &registry)
     registry.on_destroy<UIFrame>().connect<&OnFrameDestroyed>();
 }
 
+void GUISystem::Disconnect(registry &registry)
+{
+    registry.on_update<UIFrame>().disconnect<&GUISystem::OnUIUpdated>(*this);
+    registry.on_update<UIButton>().disconnect<&GUISystem::OnUIUpdated>(*this);
+    registry.on_update<UITextLabel>().disconnect<&GUISystem::OnUIUpdated>(*this);
+    registry.on_update<UIImage>().disconnect<&GUISystem::OnUIUpdated>(*this);
+
+    registry.on_construct<UIFrame>().disconnect<&GUISystem::OnUIUpdated>(*this);
+    registry.on_construct<UIButton>().disconnect<&GUISystem::OnUIUpdated>(*this);
+    registry.on_construct<UITextLabel>().disconnect<&GUISystem::OnUIUpdated>(*this);
+    registry.on_construct<UIImage>().disconnect<&GUISystem::OnUIUpdated>(*this);
+
+    registry.on_destroy<UIList>().disconnect<&OnListDestroyed>();
+    registry.on_destroy<UIFrame>().disconnect<&OnFrameDestroyed>();
+}
+
 void GUISystem::OnUIUpdated(registry &registry, Object entity)
 {
     MarkUIDirty(scene, registry, entity);

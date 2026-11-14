@@ -53,12 +53,8 @@ void App::Run()
         ResetLogLevel(DEBUG_LEVEL);
 
         Update(GetFrameTime());
-        if (world.switchingScene && world.nextSceneData.name != "")
-        {
-            world.SetScene(world.nextSceneData);
-            world.switchingScene = false;
-            world.nextSceneData = ProjectSceneData();
-        }
+        if (world.switchingScene && world.pendingScene)
+            world.SetScene(world.pendingScene);
     }
 }
 
@@ -69,11 +65,10 @@ void App::Shutdown()
 
         
     
-    delete world.mainScene;
+    // World owns every loaded scene exactly once; mainScene is not an owner.
+    world.ClearScenes();
     delete world.prefabs;
-
-    for (auto& [id, scene] : world.staleScenes)
-        delete scene;
+    world.prefabs = nullptr;
 
     world.resources.ClearAll();
 

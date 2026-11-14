@@ -3,146 +3,137 @@
 #include "systems/sound_sys.hpp"
 
 #include <sstream>
+#include <algorithm>
+#include <utility>
 
 // TODO: Add string serialization
 
 using namespace lapCore;
 
-void World::SetScene(ProjectSceneData& scene_data)
+World::~World()
 {
-    id_type targetID = HASH_ID(scene_data.name.c_str());
+    ClearScenes();
+    delete prefabs;
+    prefabs = nullptr;
+}
 
-    // Already in the requested scene.
-    if (mainScene && mainScene->id == targetID)
+void World::ClearScenes()
+{
+    // A scene only belongs to the World once. Never separately delete mainScene.
+    mainScene = nullptr;
+    pendingScene = nullptr;
+    switchingScene = false;
+    preloadSceneCallback = nullptr;
+    for (Scene* scene : scenes)
+        delete scene;
+    scenes.clear();
+}
+
+Scene* World::AddScene(Scene* scene)
+{
+    if (!scene || scene->world != this)
+        return nullptr;
+
+    if (std::find(scenes.begin(), scenes.end(), scene) != scenes.end())
+        return scene;
+
+    if (GetScene(scene->id))
     {
-        if (preloadSceneCallback)
-            preloadSceneCallback();
+        dbgln("Cannot add duplicate scene ID.", LogType::ERROR);
+        return nullptr;
+    }
 
+    scenes.push_back(scene);
+    if (!mainScene)
+        mainScene = scene;
+    return scene;
+}
+
+void World::SetScene(Scene* scene)
+{
+    if (!scene || std::find(scenes.begin(), scenes.end(), scene) == scenes.end())
+    {
+        dbgln("Scene switch rejected: target is not owned by World.", LogType::ERROR);
+        switchingScene = false;
+        pendingScene = nullptr;
         preloadSceneCallback = nullptr;
         return;
     }
 
-    Scene* nextScene = nullptr;
-    bool wasStale = false;
+    // No serialization, unloading, or system/component destruction on switch.
+    mainScene = scene;
+    switchingScene = false;
+    pendingScene = nullptr;
 
-    // Find the scene among the preloaded stale scenes.
-    auto it = staleScenes.find(targetID);
-
-    if (it != staleScenes.end())
-    {
-        nextScene = it->second;
-        staleScenes.erase(it);
-
-        wasStale = true;
-    }
-    else
-    {
-        // Fallback for scenes that weren't preloaded.
-        nextScene = new Scene(
-            this,
-            scene_data,
-            Scene::LoadMode::ACTIVE
-        );
-    }
-
-    // Make the previous active scene stale.
-    if (mainScene)
-    {
-        mainScene->MakeStale(true);
-        staleScenes[mainScene->id] = mainScene;
-    }
-
-    // Activate the requested scene.
-    mainScene = nextScene;
-
-    if (wasStale)
-    {
-        // Use saved runtime state if available;
-        // otherwise restore the original project data.
-        mainScene->Restore(
-            true
-        );
-    }
-
-    // Ensure the active scene can render.
-    if (IsWindowReady())
-    {
-        if (!mainScene->FindSystem<RenderSystem>())
-            mainScene->AddSystem<RenderSystem>(-1);
-    }
-
-    // Run the callback after restoring the scene.
-    if (preloadSceneCallback)
-        preloadSceneCallback();
-
+    auto callback = std::move(preloadSceneCallback);
     preloadSceneCallback = nullptr;
-
-    dbgln("Finished setting scene.", LogType::INFO);
+    if (callback)
+        callback();
 }
 
 void World::LoadScenes(id_type mainID)
 {
-    for (auto& data : project.scenes)
-    {
-        std::cout << "loading scene " << data.name << '\n';
-        id_type sceneID = HASH_ID(data.name.c_str());
+    ClearScenes();
 
-        if (sceneID == mainID)
+    for (const auto& data : project.scenes)
+    {
+        auto* scene = new Scene(this, data);
+        if (!AddScene(scene))
         {
-            mainScene = new Scene(
-                this,
-                data,
-                Scene::LoadMode::ACTIVE
-            );
-        }
-        else
-        {
-            staleScenes[sceneID] = new Scene(
-                this,
-                data,
-                Scene::LoadMode::STALE
-            );
+            delete scene;
+            continue;
         }
     }
+
+    if (Scene* target = GetScene(mainID))
+        mainScene = target;
+    else
+        dbgln("Requested initial scene was not found.", LogType::WARNING);
 }
 
-Scene* lapCore::World::GetScene(id_type sceneID)
+Scene* World::GetScene(id_type sceneID)
 {
-    if (mainScene->id == sceneID)
-        return mainScene;
-
-    auto it = staleScenes.find(sceneID);
-    if (it != staleScenes.end())
-        return it->second;
+    for (Scene* scene : scenes)
+        if (scene && scene->id == sceneID)
+            return scene;
     return nullptr;
 }
 
-ProjectSceneData* lapCore::World::GetSceneData(id_type sceneID)
+void World::SwitchScene(Scene* scene, function<void()> preloadCallback)
 {
-    for (auto& sceneData : project.scenes)
-        if (HASH_ID(sceneData.name.c_str()) == sceneID)
-            return &sceneData;
-    return nullptr;
-}
+    if (!scene || std::find(scenes.begin(), scenes.end(), scene) == scenes.end())
+    {
+        dbgln("Scene switch rejected: unknown scene pointer.", LogType::WARNING);
+        return;
+    }
 
-void lapCore::World::SwitchScene(Scene* scene, function<void()> preloadCallback)
-{
-    SwitchScene(scene->runtimeData.value(), preloadCallback);
-}
-
-void lapCore::World::SwitchScene(id_type sceneID, function<void()> preloadCallback)
-{
-    auto scene = GetScene(sceneID);
-    if (!scene) return;
-
-    SwitchScene(scene->runtimeData.value(), preloadCallback);
-}
-
-void lapCore::World::SwitchScene(const ProjectSceneData &scene_data, function<void()> preloadCallback)
-{
+    // Defer until App::Run has completed the current scene update.
+    pendingScene = scene;
     switchingScene = true;
-    nextSceneData = scene_data;
-    preloadSceneCallback = preloadCallback;
+    preloadSceneCallback = std::move(preloadCallback);
+}
+
+void World::SwitchScene(id_type sceneID, function<void()> preloadCallback)
+{
+    SwitchScene(GetScene(sceneID), std::move(preloadCallback));
+}
+
+void World::SwitchScene(const ProjectSceneData& scene_data,
+                        function<void()> preloadCallback)
+{
+    const id_type targetID = HASH_ID(scene_data.name.c_str());
+    Scene* target = GetScene(targetID);
+    if (!target)
+    {
+        // Support a scene authored at runtime, without reloading existing scenes.
+        target = new Scene(this, scene_data);
+        if (!AddScene(target))
+        {
+            delete target;
+            return;
+        }
+    }
+    SwitchScene(target, std::move(preloadCallback));
 }
 
 WindowProperties LoadWindowProperties(const nlohmann::json_abi_v3_12_0::json &windowJson)

@@ -31,7 +31,6 @@ const float timeStep = 1.f / 60.f;
 
 void PhysicsSystem::Update(float deltaTime, registry &registry)
 {
-    static float accumulator = 0.f;
     accumulator += deltaTime;
     while (accumulator >= timeStep)
     {

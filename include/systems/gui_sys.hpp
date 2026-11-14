@@ -25,6 +25,7 @@ public:
     );
 
     void Connect(registry &registry);
+    void Disconnect(registry &registry) override;
     void OnUIUpdated(
         registry &registry, 
         Object entity

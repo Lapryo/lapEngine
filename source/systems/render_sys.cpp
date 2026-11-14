@@ -222,6 +222,25 @@ void RenderSystem::Connect(registry &registry)
     registry.on_destroy<UIFrame>().connect<&RenderSystem::OnRenderableUpdated>(*this);
 }
 
+void RenderSystem::Disconnect(registry &registry)
+{
+    registry.on_construct<Sprite>().disconnect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_update<Sprite>().disconnect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_destroy<Sprite>().disconnect<&RenderSystem::OnRenderableUpdated>(*this);
+
+    registry.on_construct<UIImage>().disconnect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_update<UIImage>().disconnect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_destroy<UIImage>().disconnect<&RenderSystem::OnRenderableUpdated>(*this);
+
+    registry.on_construct<UITextLabel>().disconnect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_update<UITextLabel>().disconnect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_destroy<UITextLabel>().disconnect<&RenderSystem::OnRenderableUpdated>(*this);
+
+    registry.on_construct<UIFrame>().disconnect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_update<UIFrame>().disconnect<&RenderSystem::OnRenderableUpdated>(*this);
+    registry.on_destroy<UIFrame>().disconnect<&RenderSystem::OnRenderableUpdated>(*this);
+}
+
 void RenderSystem::OnRenderableUpdated(registry &registry, Object object)
 {
     needsResort = true;

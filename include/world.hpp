@@ -5,23 +5,8 @@
 #include "scene.hpp"
 #include "actionmap.hpp"
 
-// This file will completely refactor the project structure
-// "Worlds" will take in a project, and they will own the ECS, systems, and runtime state
-// Projects will just be data containers that can be loaded into worlds (JSONs converted to code (vectors, unordered_maps, etc))
-
-// App (container) -> Project (data) -> World (runtime) -> Scene (data) -> ECS (data + runtime)
-
-// EACH SCENE NEEDS A REFERENCE TO THE WORLD IN THE FORM OF A POINTER
-
-/*
-Now that i think about it, stale scenes are kinda pointless. It'd be much simpler
-to just store a vector<Scene*> cause we're already storing saved data inside the scene
-as a ProjectSceneData, which basically means no memory reduction besides the systems
-removals.
-
-I'd have to do tests to compare the two, but I'd likely go with that approach cause
-it makes thing a whole lot simpler (probably faster too).
-*/
+// World owns its scene pointers. `mainScene` always refers to one element of
+// `scenes`; switching scenes does not reconstruct entities or systems.
 
 namespace lapCore
 {
@@ -51,18 +36,21 @@ namespace lapCore
     {
         App* app;
 
-        World(App* app, Project project) : project(project), app(app) {
-            prefabs = new Scene(this, ProjectSceneData(), Scene::LoadMode::ACTIVE);
-            for (const auto& prefabData : project.prefabs)
-            {
+        World(App* app, Project project) : app(app), project(std::move(project))
+        {
+            prefabs = new Scene(this);
+            for (const auto& prefabData : this->project.prefabs)
                 prefabs->AddObject(prefabData);
-            }
         }
 
+        ~World();
+        World(const World&) = delete;
+        World& operator=(const World&) = delete;
+
+        // Owned scene pointers. Custom scenes must be registered here too.
+        vector<Scene*> scenes;
         Scene* mainScene = nullptr;
         Scene* prefabs = nullptr;
-
-        unordered_map<id_type, Scene*> staleScenes;
 
         WindowProperties window;
         ResourceManager resources;
@@ -73,23 +61,26 @@ namespace lapCore
         void LoadWindow();
         void ResetWindowProperties();
 
+        // Load scenes exactly once. All scene systems are initialized up front.
         void LoadScenes(id_type mainID);
-        void SetScene(ProjectSceneData &scene_data);
+        void ClearScenes();
+        Scene* AddScene(Scene* scene);
 
-        ProjectSceneData* GetSceneData(id_type sceneID);
-        void SwitchScene(Scene* scene, function<void()> preloadCallback);
-        void SwitchScene(const ProjectSceneData &scene_data, function<void()> preloadCallback);
-
+        // Apply a pending scene switch (normally called by App after Update).
+        void SetScene(Scene* scene);
         Scene* GetScene(id_type sceneID);
-        void SwitchScene(id_type sceneID, function<void()> preloadCallback);
+
+        void SwitchScene(Scene* scene, function<void()> preloadCallback = nullptr);
+        void SwitchScene(id_type sceneID, function<void()> preloadCallback = nullptr);
+        void SwitchScene(const ProjectSceneData& scene_data,
+                         function<void()> preloadCallback = nullptr);
 
         const Project &GetProject() const {
             return project;
         }
 
         bool switchingScene = false;
-        ProjectSceneData nextSceneData;
-
+        Scene* pendingScene = nullptr;
         function<void()> preloadSceneCallback = nullptr;
 
         unordered_map<string, ActionMap> actionMaps;

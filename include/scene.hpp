@@ -20,7 +20,7 @@ namespace lapCore
 
     struct ObjectData
     {
-        id_type id;
+        id_type id = 0;
         Object parent;
         map<unsigned int, Object> children;
         int index = -1;
@@ -28,18 +28,9 @@ namespace lapCore
 
     struct Scene
     {
-        enum class LoadMode
-        {
-            STALE,
-            ACTIVE
-        };
-
         Scene(World* world);
-        Scene(World* world, const ProjectSceneData& data, LoadMode mode);
+        Scene(World* world, const ProjectSceneData& data);
         ~Scene();
-
-        void MakeStale(bool disableEvents = false, vector<Object> excludeList = {});
-        void Restore(bool useRuntimeData);
 
         Color backgroundColor = BLACK;
 
@@ -88,12 +79,16 @@ namespace lapCore
         template <typename System, typename... Args>
         System* AddSystem(int order, Args&&... args)
         {
-            if (order == -1) order = systems.end()->first + 1;
+            if (order == -1) order = systems.empty() ? 0 : systems.rbegin()->first + 1;
             auto sys = make_unique<System>(this, order, forward<Args>(args)...);
             auto ptr = sys.get();
             if constexpr (requires(System& t, registry& r) { t.Connect(r); })
                 sys->Connect(objects);
 
+            // Replacing a system must not leave its EnTT callbacks connected.
+            auto previous = systems.find(order);
+            if (previous != systems.end() && previous->second)
+                previous->second->Disconnect(objects);
             systems[order] = std::move(sys);
             return ptr;
         }
@@ -118,6 +113,7 @@ namespace lapCore
             auto sys = FindSystem<System>();
             if (sys)
             {
+                sys->Disconnect(objects);
                 systems.erase(find_if(systems.begin(), systems.end(), [sys](const auto& pair) { return pair.second.get() == sys; }));
                 return true;
             }
@@ -151,16 +147,13 @@ namespace lapCore
         }
 
         World* world;
-        id_type id;
+        id_type id = 0;
 
         map<int, unique_ptr<System>> systems;
         registry objects;
 
         Object root;
 
-        optional<ProjectSceneData> initialData, runtimeData;
-
         ProjectSceneData toData();
-        void RestoreObject(const ProjectObjectData& data);
     };
 }

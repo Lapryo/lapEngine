@@ -36,6 +36,9 @@ public:
     b2WorldId worldID;
     unordered_map<Object, b2BodyId> bodyMap;
 
+    // Each retained scene advances its own physics timeline.
+    float accumulator = 0.f;
+
     string GetName() const override 
     { return "physics"; }
 };

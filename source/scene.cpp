@@ -131,221 +131,58 @@ namespace lapCore
         );
     }
 
-    Scene::Scene(World *world)
+    Scene::Scene(World* owningWorld) : world(owningWorld), id(0)
     {
-        this->world = world;
-        this->root = objects.create();
-
-        ObjectData rootData;
-        rootData.id = HASH_ID("__root__");
-        rootData.parent = null;
-        rootData.index = -1;
-
-        AddElement<ObjectData>(this->root, rootData);
+        root = objects.create();
+        AddElement<ObjectData>(root, ObjectData{HASH_ID("__root__"), null, {}, -1});
     }
 
-    Scene::Scene(
-        World* world,
-        const ProjectSceneData& data,
-        Scene::LoadMode mode
-    )
+    Scene::Scene(World* owningWorld, const ProjectSceneData& data)
+        : Scene(owningWorld)
     {
-        std::cout << "Initializing scene.\n";
-        this->world = world;
-        this->id = HASH_ID(data.name.c_str());
-        this->initialData = data;
-        this->backgroundColor = data.backgroundColor;
+        id = HASH_ID(data.name.c_str());
+        backgroundColor = data.backgroundColor;
 
-        std::cout << "Creating root.\n";
-        ObjectData rootData;
-        rootData.id = HASH_ID("__root__");
-        rootData.parent = null;
-        rootData.index = -1;
+        // Populate the registry only once. Other scenes stay fully constructed
+        // and do not need component serialization/restoration when selected.
+        for (const auto& objectData : data.objects)
+            AddObject(objectData);
 
-        this->root = objects.create();
-        AddElement<ObjectData>(this->root, rootData);
+        for (auto prefabData : data.instancedPrefabs)
+            AddPrefabObject(prefabData);
 
-        std::cout << "Creating objects.\n";
-        // Create all entities and attach their components.
-        for (auto& objectData : initialData->objects)
+        // Systems are installed once per scene, not each time it becomes active.
+        for (const auto& systemData : data.systems)
         {
-            auto obj = AddObject(objectData);
-            objectData.object = obj;
-        }
-
-        std::cout << "Creating instanced prefabs.\n";
-        for (auto& prefabData : initialData->instancedPrefabs)
-        {
-            auto obj = AddPrefabObject(prefabData);
-            prefabData.objectData.object = obj;
-        }
-
-        std::cout << "Getting snapshot.\n";
-        // Flatten all instantiated objects into ProjectSceneData.
-        ProjectSceneData snapshot = toData();
-
-        // Systems haven't been initialized, so retain
-        // their definitions from the original project.
-        std::cout << "Assigning initial data.\n";
-        snapshot.systems = data.systems;
-
-        initialData = std::move(snapshot);
-
-        // Preserve entity handles and remove runtime components.
-        std::cout << "Making the scene stale.\n";
-        MakeStale(false);
-
-        // MakeStale() currently captures runtimeData using toData(),
-        // which also doesn't see any initialized systems yet.
-        if (runtimeData)
-            runtimeData->systems = data.systems;
-
-        // Activate only the requested scene.
-        if (mode == Scene::LoadMode::ACTIVE)
-        {
-            std::cout << "Restoring scene.\n";
-            Restore(true);
+            if (systemData.type == "gui")
+                AddSystem<GUISystem>(systemData.order);
+            else if (systemData.type == "physics")
+                AddSystem<PhysicsSystem>(systemData.order);
+            else if (systemData.type == "render")
+                AddSystem<RenderSystem>(systemData.order);
+            else if (systemData.type == "script")
+                AddSystem<ScriptSystem>(systemData.order);
+            else if (systemData.type == "input")
+                AddSystem<InputSystem>(systemData.order);
+            else if (systemData.type == "sound")
+                AddSystem<SoundSystem>(systemData.order);
+            else
+                dbgln("Unknown system type: " + systemData.type, LogType::WARNING);
         }
     }
 
     Scene::~Scene()
     {
+        EventRegistry::Disconnect(this);
+
+        // Disconnect signals before destroying system owners OR components.
+        // Otherwise EnTT callbacks may point at freed systems or traverse a
+        // partially cleared ObjectData hierarchy (the previous crash path).
+        for (auto& [order, system] : systems)
+            if (system)
+                system->Disconnect(objects);
+        systems.clear();
         objects.clear();
-        systems.clear();
-        runtimeData.reset();
-        initialData.reset();
-    }
-
-    void Scene::MakeStale(bool disableEvents, vector<Object> excludeList)
-    {
-        if (disableEvents)
-        {
-            for (const auto &object : objects.view<Object>())
-            {
-                bool found = false;
-                for (const auto& excludedObject : excludeList)
-                {
-                    if (object == excludedObject)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (found) continue;
-                EventRegistry::SetActive(this, false, true);
-            }
-        }
-
-        runtimeData = toData();
-        systems.clear();
-
-        // Remove components here
-        for (auto&& [id, storage] : objects.storage())
-        {
-            if (id == entt::type_hash<ObjectData>::value())
-                continue;
-
-            storage.clear();
-        }
-    }
-
-    void GatherAllPrefabObjectData(vector<ProjectObjectData> &list, const ProjectInstancedPrefabData &data)
-    {
-        list.push_back(data.objectData);
-        for (const auto& childData : data.children)
-        {
-            GatherAllPrefabObjectData(list, childData);
-        }
-    }
-
-    void Scene::RestoreObject(const ProjectObjectData& data)
-    {
-        if (!data.object)
-            return;
-
-        Object object = *data.object;
-
-        if (!objects.valid(object))
-            return;
-
-        for (const auto& elementData : data.elements)
-        {
-            if (!elementData)
-                continue;
-
-            auto entry = Reflection::TryGet(elementData->GetTypeID());
-            if (!entry)
-                continue;
-
-            entry->emplace(
-                objects,
-                object,
-                elementData->GetRawData()
-            );
-        }
-    }
-
-    void Scene::Restore(bool useRuntimeData)
-    {
-        const ProjectSceneData* sourceData = nullptr;
-
-        if (useRuntimeData && runtimeData)
-            sourceData = &*runtimeData;
-        else if (initialData)
-            sourceData = &*initialData;
-
-        if (!sourceData)
-            return;
-
-        // Normal scene objects
-        for (const auto& data : sourceData->objects)
-        {
-            RestoreObject(data);
-        }
-
-        /*
-            Because we are restoring from an already existing scene, we don't need to go through the
-            instanced prefabs, because they were already instanciated! (i think thats how you spell it)
-        */
-
-        // Straightforward
-        for (const auto& systemData : sourceData->systems)
-        {
-            if (systemData.type == "gui")
-            {
-                AddSystem<GUISystem>(systemData.order);
-            }
-            else if (systemData.type == "physics")
-            {
-                auto physics = AddSystem<PhysicsSystem>(systemData.order);
-                physics->RegisterBodies();
-            }
-            else if (systemData.type == "render")
-            {
-                AddSystem<RenderSystem>(systemData.order);
-            }
-            else if (systemData.type == "script")
-            {
-                AddSystem<ScriptSystem>(systemData.order);
-            }
-            else if (systemData.type == "input")
-            {
-                AddSystem<InputSystem>(systemData.order);
-            }
-            else if (systemData.type == "sound")
-            {
-                AddSystem<SoundSystem>(systemData.order);
-            }
-            else
-            {
-                dbgln("Unknown system type: " + systemData.type, LogType::WARNING);
-            }
-        }
-
-        // Retoggle all events
-        EventRegistry::SetActive(this, true, true);
-        runtimeData.reset();
     }
 
     Object Scene::AddObject(id_type id, int index, ShiftMode shiftMode)

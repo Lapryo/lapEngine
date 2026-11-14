@@ -135,6 +135,7 @@ public:
     ) override;
 
     void Connect(registry &registry);
+    void Disconnect(registry &registry) override;
     void OnRenderableUpdated(
         registry &registry, 
         Object entity

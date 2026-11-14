@@ -87,3 +87,8 @@ if (INCLUDE_EXAMPLES)
     add_subdirectory(examples/stress_test)
     add_subdirectory(examples/prefab_children)
 endif()
+# libc++ can treat nlohmann/json's dependent get<U>() as ambiguous
+# when std and EnTT names are imported before its declaration.
+if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(lapEngine PRIVATE "SHELL:-include nlohmann/json.hpp")
+endif()

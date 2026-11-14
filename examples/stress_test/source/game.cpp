@@ -400,7 +400,7 @@ namespace StressTest
         // ACTIVATE SCENE
         // -----------------------------------------------------
 
-        world.mainScene = mainScene;
+        world.AddScene(mainScene);
 
         // Register the ground body before the simulation.
         physicsSystem->RegisterBodies();
