@@ -1,6 +1,7 @@
 #include "world.hpp"
 #include "systems/render_sys.hpp"
 #include "systems/sound_sys.hpp"
+#include "elements.hpp"
 
 #include <sstream>
 #include <algorithm>
@@ -9,6 +10,51 @@
 // TODO: Add string serialization
 
 using namespace lapCore;
+
+namespace
+{
+    // Retained scenes keep their SoundPoints (and raylib playback handles) alive.
+    // An inactive scene no longer updates, so its SoundSystem cannot stop or
+    // pause playback on its own. Do it at the World scene-switch boundary.
+    // Keep the initialized/playing state intact so returning to the scene
+    // can resume its audio without recreating audio resources.
+    void PauseSceneAudio(Scene* scene, bool paused)
+    {
+        if (!scene || !IsAudioDeviceReady()) return;
+
+        auto sounds = scene->objects.view<ELEMENTS::Physics::SoundPoint>();
+        for (auto [entity, sound] : sounds.each())
+        {
+            if (!sound.initialized || !sound.playing) continue;
+
+            if (sound.isMusic)
+            {
+                if (!IsMusicValid(sound.musicPlayback)) continue;
+                if (paused) PauseMusicStream(sound.musicPlayback);
+                else
+                {
+                    sound.fadeInElapsed = 0.f;
+                    sound.sceneMix = 1.f;
+                    SetMusicVolume(sound.musicPlayback, 0.f);
+                    ResumeMusicStream(sound.musicPlayback);
+                }
+            }
+            else
+            {
+                // This also catches the title screen's non-music intro sound.
+                if (!IsSoundValid(sound.soundPlayback)) continue;
+                if (paused) PauseSound(sound.soundPlayback);
+                else
+                {
+                    sound.fadeInElapsed = 0.f;
+                    sound.sceneMix = 1.f;
+                    SetSoundVolume(sound.soundPlayback, 0.f);
+                    ResumeSound(sound.soundPlayback);
+                }
+            }
+        }
+    }
+}
 
 World::~World()
 {
@@ -60,8 +106,15 @@ void World::SetScene(Scene* scene)
         return;
     }
 
-    // No serialization, unloading, or system/component destruction on switch.
-    mainScene = scene;
+    // Do not let audio continue playing from a retained, inactive scene.
+    // This pauses both the menu's intro SoundPoint and its background Music.
+    // On reactivation, previously playing sounds/music can resume.
+    if (mainScene != scene)
+    {
+        PauseSceneAudio(mainScene, true);
+        mainScene = scene;
+        PauseSceneAudio(mainScene, false);
+    }
     switchingScene = false;
     pendingScene = nullptr;
 

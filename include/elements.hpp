@@ -183,6 +183,9 @@ namespace lapCore
                 bool playing{false};
                 bool initialized{false};
                 bool autoPlay{true};
+                float fadeInElapsed{0.f}; // Runtime, not serialized
+                float sceneMix{1.f};      // Runtime scene transition gain
+
 
                 // Not serializeable
                 function<void()> onStart, onPlay, onEnd;

@@ -65,7 +65,9 @@ void SoundSystem::Update(float deltaTime, registry& registry)
                 if (!IsMusicValid(sound.musicPlayback))
                     continue;
 
+                SetMusicVolume(sound.musicPlayback, 0.f);
                 PlayMusicStream(sound.musicPlayback);
+                sound.fadeInElapsed = 0.f;
 
                 sound.initialized = true;
                 sound.playing = true;
@@ -88,7 +90,11 @@ void SoundSystem::Update(float deltaTime, registry& registry)
                 if (!IsSoundValid(sound.soundPlayback))
                     continue;
 
+                // Title theme is a SoundPoint of type Sound, not Music;
+                // soften its start too without touching the WAV itself.
+                SetSoundVolume(sound.soundPlayback, 0.f);
                 PlaySound(sound.soundPlayback);
+                sound.fadeInElapsed = 0.f;
 
                 sound.initialized = true;
                 sound.playing = true;
@@ -173,6 +179,11 @@ void SoundSystem::Update(float deltaTime, registry& registry)
                     pan = CalculatePan(direction);
             }
         }
+
+        // SoundPoint music fades in rather than starting at full volume.
+        // Independently, sceneMix is faded out by the owning game's transition.
+        sound.fadeInElapsed = std::min(0.40f, sound.fadeInElapsed + std::max(0.f, deltaTime));
+        volume *= (sound.fadeInElapsed / 0.40f) * std::clamp(sound.sceneMix, 0.f, 1.f);
 
         // ---------------------------------------------------------------------
         // Update volume and pan

@@ -16,10 +16,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(box2d)
 
+# raylib 6.2 (official October 2026 release).
+# Allow raylib to update even if older game builds cached the 5.5 checkout
+# with FETCHCONTENT_UPDATES_DISCONNECTED enabled globally.
+set(FETCHCONTENT_UPDATES_DISCONNECTED_RAYLIB OFF CACHE BOOL
+    "Allow raylib dependency to move from 5.5 to the pinned 6.2 tag" FORCE)
 FetchContent_Declare(
     raylib
     GIT_REPOSITORY https://github.com/raysan5/raylib.git
-    GIT_TAG 5.5
+    GIT_TAG 6.2
     GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(raylib)
