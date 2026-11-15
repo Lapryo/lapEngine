@@ -501,6 +501,11 @@ namespace lapCore
 
         EndTextureMode();
 
+        Present(target);
+    }
+
+    void Scene::Present(const RenderTexture2D& target)
+    {
         // Draw to the screen with the render texture afterwards
         BeginDrawing();
         ClearBackground(BLACK);

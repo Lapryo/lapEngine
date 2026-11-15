@@ -76,6 +76,10 @@ namespace lapCore
 
         void Update(float delta, RenderTexture2D &target);
 
+        // Present the existing render target and poll window/input events
+        // without running any scene systems (e.g. while simulation is paused).
+        void Present(const RenderTexture2D& target);
+
         template <typename System, typename... Args>
         System* AddSystem(int order, Args&&... args)
         {
