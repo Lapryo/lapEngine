@@ -505,7 +505,8 @@ namespace lapCore::JSON
             { "font-size" , l.fontSize                                             },
             { "alignment" , JSON::Serializer<Alignment>::to_json(l.alignment, ctx) },
             { "padding"   , JSON::Serializer<Padding>::to_json(l.padding, ctx)     },
-            { "spacing"   , l.spacing                                              }
+            { "spacing"   , l.spacing                                              },
+            { "word-wrap" , l.wordWrap                                            }
         };
     }
     void Serializer<UITextLabel>::from_json(UITextLabel& l, const json& j)
@@ -517,6 +518,7 @@ namespace lapCore::JSON
             l.fontID = hashed_string{j.at("font").get<string>().c_str()}.value();
         l.fontSize = j.value("font-size", l.fontSize);
         l.spacing = j.value("spacing", l.spacing);
+        l.wordWrap = j.value("word-wrap", l.wordWrap);
         
         if (j.contains("alignment"))
             JSON::Serializer<Alignment>::from_json(l.alignment, j.at("alignment"));

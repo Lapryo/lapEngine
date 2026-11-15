@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <string>
+#include <vector>
 
 using namespace lapCore;
 using namespace ELEMENTS::Render;
@@ -13,6 +15,54 @@ using namespace ELEMENTS::Physics;
 
 namespace
 {
+    // Preserve authored newlines. Wrap words inside the frame; an individual
+    // oversize word wraps by UTF-8 codepoint instead of overflowing the panel.
+    std::vector<std::string> WrapLabelText(const std::string& text,
+                                           Font font, float size, float spacing,
+                                           float maxWidth)
+    {
+        std::vector<std::string> lines;
+        if (maxWidth <= 0.f) return {text};
+        auto fits = [&](const std::string& value)
+        {
+            return MeasureTextEx(font, value.c_str(), size, spacing).x <= maxWidth;
+        };
+        std::string line;
+        auto commit = [&]() { lines.push_back(line); line.clear(); };
+        auto appendWord = [&](const std::string& word)
+        {
+            if (word.empty()) return;
+            std::string candidate = line.empty() ? word : line + " " + word;
+            if (fits(candidate)) { line = std::move(candidate); return; }
+            if (!line.empty()) commit();
+            if (fits(word)) { line = word; return; }
+            // UTF-8 codepoint boundaries (non-ASCII glyphs remain intact).
+            for (size_t i = 0; i < word.size(); )
+            {
+                const unsigned char c = static_cast<unsigned char>(word[i]);
+                const size_t span = (c < 0x80) ? 1 : (c < 0xE0) ? 2 :
+                                    (c < 0xF0) ? 3 : 4;
+                const std::string glyph = word.substr(i, std::min(span, word.size()-i));
+                if (!line.empty() && !fits(line + glyph)) commit();
+                line += glyph;
+                i += glyph.size();
+            }
+        };
+        std::string word;
+        for (char ch : text)
+        {
+            if (ch == ' ' || ch == '\t' || ch == '\n')
+            {
+                appendWord(word); word.clear();
+                if (ch == '\n') commit();
+            }
+            else word.push_back(ch);
+        }
+        appendWord(word);
+        lines.push_back(line);
+        return lines;
+    }
+
     // The visible (top-left based) rectangle and its local rotation pivot.
     struct DrawGeometry
     {
@@ -472,56 +522,47 @@ void RenderSystem::Update(float deltaTime, registry &registry)
         if (foundFont)
             font = foundFont->asset;
 
-        const Vector2 textSize = MeasureTextEx(
-            font, label->text.c_str(), label->fontSize, label->spacing);
+        const float usableWidth = std::max(0.f,
+            geometry.rect.width - label->padding.left - label->padding.right);
+        const std::vector<std::string> lines = label->wordWrap ?
+            WrapLabelText(label->text, font, label->fontSize, label->spacing, usableWidth) :
+            std::vector<std::string>{label->text};
+        const float lineHeight = label->fontSize * 1.5f;
+        float maxLineWidth = 0.f;
+        for (const auto& line : lines)
+            maxLineWidth = std::max(maxLineWidth,
+                MeasureTextEx(font, line.c_str(), label->fontSize, label->spacing).x);
+        const float totalHeight = label->wordWrap ?
+            static_cast<float>(lines.size()) * lineHeight :
+            MeasureTextEx(font, label->text.c_str(), label->fontSize, label->spacing).y;
 
-        Vector2 textPosition = {
-            geometry.rect.x + label->padding.left,
-            geometry.rect.y + label->padding.top
-        };
+        float top = geometry.rect.y + label->padding.top;
+        if (label->alignment.vertical == VerticalAlignment::MIDDLE)
+            top += (geometry.rect.height - label->padding.top - label->padding.bottom - totalHeight) * 0.5f;
+        else if (label->alignment.vertical == VerticalAlignment::BOTTOM)
+            top += geometry.rect.height - label->padding.top - label->padding.bottom - totalHeight;
 
-        switch (label->alignment.horizontal)
-        {
-            case HorizontalAlignment::MIDDLE:
-                textPosition.x += (geometry.rect.width - textSize.x - label->padding.right) * 0.5f;
-                break;
-            case HorizontalAlignment::RIGHT:
-                textPosition.x += geometry.rect.width - textSize.x - label->padding.right;
-                break;
-            default:
-                break;
-        }
-
-        switch (label->alignment.vertical)
-        {
-            case VerticalAlignment::MIDDLE:
-                textPosition.y += (geometry.rect.height - textSize.y - label->padding.bottom) * 0.5f;
-                break;
-            case VerticalAlignment::BOTTOM:
-                textPosition.y += geometry.rect.height - textSize.y - label->padding.bottom;
-                break;
-            default:
-                break;
-        }
-
-        label->textDrawRect = {
-            textPosition.x, textPosition.y,
-            textSize.x, textSize.y
-        };
-
+        label->textDrawRect = {geometry.rect.x + label->padding.left,
+            top, maxLineWidth, totalHeight};
         const Vector2 pivot = {
             geometry.rect.x + geometry.anchor.x,
             geometry.rect.y + geometry.anchor.y
         };
-        const Vector2 textOrigin = {
-            pivot.x - textPosition.x,
-            pivot.y - textPosition.y
-        };
-
-        DrawTextPro(
-            font, label->text.c_str(), pivot, textOrigin,
-            geometry.rotation, label->fontSize, label->spacing,
-            label->frame.renderable.tint);
+        for (size_t index = 0; index < lines.size(); ++index)
+        {
+            const float width = MeasureTextEx(font, lines[index].c_str(),
+                label->fontSize, label->spacing).x;
+            float x = geometry.rect.x + label->padding.left;
+            if (label->alignment.horizontal == HorizontalAlignment::MIDDLE)
+                x += (usableWidth - width) * 0.5f;
+            else if (label->alignment.horizontal == HorizontalAlignment::RIGHT)
+                x += usableWidth - width;
+            const float y = top + static_cast<float>(index) * lineHeight;
+            const Vector2 origin = {pivot.x - x, pivot.y - y};
+            DrawTextPro(font, lines[index].c_str(), pivot, origin,
+                geometry.rotation, label->fontSize, label->spacing,
+                label->frame.renderable.tint);
+        }
     };
 
     auto drawEntries = [&](const vector<RenderEntry> &entries, Camera2D *camera)

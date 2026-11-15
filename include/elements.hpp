@@ -121,6 +121,7 @@ namespace lapCore
                     id_type fontID{0};
                     float fontSize{10.f};
                     float spacing{1.f};
+                    bool wordWrap{false}; // Wrap within frame (respects padding).
 
                     Alignment alignment{};
                     Padding padding{};

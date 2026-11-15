@@ -2,6 +2,7 @@
 #include "world.hpp"
 #include "elements.hpp"
 #include "raymath.h"
+#include "audio_mixer.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -194,7 +195,7 @@ void SoundSystem::Update(float deltaTime, registry& registry)
             if (!IsMusicValid(sound.musicPlayback))
                 continue;
 
-            SetMusicVolume(sound.musicPlayback, volume);
+            SetMusicVolume(sound.musicPlayback, lapCore::AudioMixer::Music(volume));
             SetMusicPan(sound.musicPlayback, pan);
 
             if (sound.playing && sound.onPlay)
@@ -205,7 +206,7 @@ void SoundSystem::Update(float deltaTime, registry& registry)
             if (!IsSoundValid(sound.soundPlayback))
                 continue;
 
-            SetSoundVolume(sound.soundPlayback, volume);
+            SetSoundVolume(sound.soundPlayback, lapCore::AudioMixer::Sfx(volume));
             SetSoundPan(sound.soundPlayback, pan);
 
             if (sound.playing && sound.onPlay)
