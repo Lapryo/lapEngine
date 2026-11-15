@@ -41,7 +41,7 @@ namespace
             }
             else
             {
-                // This also catches the title screen's non-music intro sound.
+                // Non-streaming sounds are paused independently of their volume category.
                 if (!IsSoundValid(sound.soundPlayback)) continue;
                 if (paused) PauseSound(sound.soundPlayback);
                 else
@@ -107,7 +107,7 @@ void World::SetScene(Scene* scene)
     }
 
     // Do not let audio continue playing from a retained, inactive scene.
-    // This pauses both the menu's intro SoundPoint and its background Music.
+    // This pauses all SoundPoints, whether streamed music or sounds.
     // On reactivation, previously playing sounds/music can resume.
     if (mainScene != scene)
     {

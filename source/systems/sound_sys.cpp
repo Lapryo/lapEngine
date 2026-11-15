@@ -91,8 +91,8 @@ void SoundSystem::Update(float deltaTime, registry& registry)
                 if (!IsSoundValid(sound.soundPlayback))
                     continue;
 
-                // Title theme is a SoundPoint of type Sound, not Music;
-                // soften its start too without touching the WAV itself.
+                // Also fade in non-streaming SoundPoint playback without
+                // altering the underlying audio resource.
                 SetSoundVolume(sound.soundPlayback, 0.f);
                 PlaySound(sound.soundPlayback);
                 sound.fadeInElapsed = 0.f;
@@ -181,8 +181,8 @@ void SoundSystem::Update(float deltaTime, registry& registry)
             }
         }
 
-        // SoundPoint music fades in rather than starting at full volume.
-        // Independently, sceneMix is faded out by the owning game's transition.
+        // SoundPoint playback fades in rather than starting at full volume.
+        // Independently, sceneMix may be controlled by a transition system.
         sound.fadeInElapsed = std::min(0.40f, sound.fadeInElapsed + std::max(0.f, deltaTime));
         volume *= (sound.fadeInElapsed / 0.40f) * std::clamp(sound.sceneMix, 0.f, 1.f);
 
@@ -190,12 +190,19 @@ void SoundSystem::Update(float deltaTime, registry& registry)
         // Update volume and pan
         // ---------------------------------------------------------------------
 
+        // A sound's volume category is independent of its playback format.
+        // In Auto mode, streamed Music uses the music bus and Sound uses SFX.
+        const bool musicVolume = sound.volumeCategory == AudioVolumeCategory::Music ||
+            (sound.volumeCategory == AudioVolumeCategory::Auto && sound.isMusic);
+        const float mixedVolume = musicVolume ? lapCore::AudioMixer::Music(volume) :
+                                                lapCore::AudioMixer::Sfx(volume);
+
         if (sound.isMusic)
         {
             if (!IsMusicValid(sound.musicPlayback))
                 continue;
 
-            SetMusicVolume(sound.musicPlayback, lapCore::AudioMixer::Music(volume));
+            SetMusicVolume(sound.musicPlayback, mixedVolume);
             SetMusicPan(sound.musicPlayback, pan);
 
             if (sound.playing && sound.onPlay)
@@ -206,7 +213,7 @@ void SoundSystem::Update(float deltaTime, registry& registry)
             if (!IsSoundValid(sound.soundPlayback))
                 continue;
 
-            SetSoundVolume(sound.soundPlayback, lapCore::AudioMixer::Sfx(volume));
+            SetSoundVolume(sound.soundPlayback, mixedVolume);
             SetSoundPan(sound.soundPlayback, pan);
 
             if (sound.playing && sound.onPlay)

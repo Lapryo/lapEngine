@@ -312,6 +312,8 @@ namespace lapCore::JSON
     {
         return json{
             {"is-music"       , s.isMusic},
+            {"volume-category", s.volumeCategory == AudioVolumeCategory::Music ? "music" :
+                                s.volumeCategory == AudioVolumeCategory::Sfx ? "sfx" : "auto"},
             {"active"         , s.active},
             {"cutoff-distance", s.cutoffDistance},
             {"uses-own"       , s.usesOwn},
@@ -324,6 +326,12 @@ namespace lapCore::JSON
     void Serializer<SoundPoint>::from_json(SoundPoint& s, const json& j)
     {
         s.isMusic = j.value("is-music", s.isMusic);
+        // An optional, engine-generic audio bus selection. Legacy assets
+        // without this field retain the default Auto behavior.
+        const std::string category = j.value("volume-category", std::string("auto"));
+        if (category == "music") s.volumeCategory = AudioVolumeCategory::Music;
+        else if (category == "sfx") s.volumeCategory = AudioVolumeCategory::Sfx;
+        else s.volumeCategory = AudioVolumeCategory::Auto;
         if (j.contains("audio-id"))
             s.audioID = DeserializeEventID(j.at("audio-id"));
         

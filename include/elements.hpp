@@ -157,6 +157,11 @@ namespace lapCore
 
         namespace Physics
         {
+            // Which gain control a sound uses. "Auto" treats streamed Music
+            // as music and short Sound clips as SFX; the caller can override
+            // this independently of how the audio asset is stored or played.
+            enum class AudioVolumeCategory { Auto, Sfx, Music };
+
             struct Transform2D
             {
                 Vector2 scale{1.f, 1.f};
@@ -175,6 +180,7 @@ namespace lapCore
             {
                 id_type audioID{0};
                 bool isMusic{false}, positional{true}, active{true}, usesOwn{true};
+                AudioVolumeCategory volumeCategory{AudioVolumeCategory::Auto};
                 float cutoffDistance{100.f};
                 Vector2 target{0.f, 0.f}; // Target should be set to objects positions such as the player
 
