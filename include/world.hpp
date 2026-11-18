@@ -82,13 +82,16 @@ namespace lapCore
         bool switchingScene = false;
         Scene* pendingScene = nullptr;
         function<void()> preloadSceneCallback = nullptr;
+        function<void()> predrawCallback = nullptr;
 
         unordered_map<string, ActionMap> actionMaps;
         ActionMap* currentActionMap = nullptr;
 
+        #ifdef LAP_DEBUG
+        bool showDebug = false;
+        #endif
+
     private:
         Project project;
-
-        bool debugMenu = false;
     };
 }

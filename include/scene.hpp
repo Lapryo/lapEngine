@@ -159,5 +159,9 @@ namespace lapCore
         Object root;
 
         ProjectSceneData toData();
+
+        #ifdef LAP_DEBUG
+        unordered_map<string, double> timers;
+        #endif
     };
 }
