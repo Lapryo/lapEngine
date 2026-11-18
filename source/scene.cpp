@@ -3,9 +3,14 @@
 #include "systems.hpp"
 #include "event.hpp"
 
-#include "reflection.hpp"
+#include "middleman.hpp"
 
 #include <iostream>
+
+#ifdef LAP_DEBUG
+#include <imgui.h>
+#include <rlImGui.h>
+#endif
 
 using namespace lapCore;
 using namespace EUTIL::Functions;
@@ -20,7 +25,7 @@ namespace lapCore
 
         for (const auto& elementData : data.elements)
         {
-            auto entry = Reflection::TryGet(elementData->GetTypeID());
+            auto entry = Middleman::TryGet(elementData->GetTypeID());
             if (!entry) continue;
             entry->emplace(objects, object, elementData->GetRawData());
         }
@@ -548,6 +553,131 @@ namespace lapCore
         // TODO: Here we can draw a custom debug menu with system times, etc. if needed for developers
         // This option can be toggleable and is checked via the App class
 
+        #ifdef LAP_DEBUG
+        rlImGuiBegin();
+
+        ImGui::Begin("World info:");
+
+            ImGui::Text("Main scene: %s", GET_FORMER_HASHED(id).c_str());
+
+            if (ImGui::CollapsingHeader("Window"))
+            {
+                ImGui::Text("Title: %s", world->window.title.c_str());
+                ImGui::Text("Resolution: (%d, %d)", world->window.resolution.x, world->window.resolution.y);
+                ImGui::Text("Logical Resolution: (%d, %d)", world->window.logical_resolution.x, world->window.logical_resolution.y);
+                ImGui::Text("Fullscreen: %s", world->window.fullscreen ? "true" : "false");
+                ImGui::Text("Borderless: %s", world->window.borderless ? "true" : "false");
+                ImGui::Text("Decorated: %s", world->window.decorated ? "true" : "false");
+                ImGui::Text("Resizable: %s", world->window.resizable ? "true" : "false");
+                ImGui::Text("VSync: %s", world->window.vsync ? "true" : "false");
+                ImGui::Text("FPS Cap: %s", world->window.infinite_fps ? "Inf" : to_string(world->window.max_fps).c_str());
+
+                ImGui::Separator();
+
+                ImGui::Text("FPS: %d", GetFPS());
+                ImGui::Text("Frame time: %.3f ms", GetFrameTime() * 1000.0f);
+            }
+
+            if (ImGui::CollapsingHeader("Scenes"))
+            {
+                for (auto* scene : world->scenes)
+                {
+                    ImGui::PushID(scene);
+
+                    if (ImGui::TreeNode(
+                        "##scene",
+                        "%s",
+                        GET_FORMER_HASHED(scene->id).c_str()))
+                    {
+                        ImGui::Text("Background color:");
+                        ImGui::SameLine();
+
+                        ImGui::ColorButton(
+                            "##backgroundColor",
+                            ImVec4(
+                                scene->backgroundColor.r / 255.0f,
+                                scene->backgroundColor.g / 255.0f,
+                                scene->backgroundColor.b / 255.0f,
+                                scene->backgroundColor.a / 255.0f
+                            ),
+                            ImGuiColorEditFlags_NoTooltip,
+                            ImVec2(20, 20)
+                        );
+
+                        if (ImGui::TreeNode("Objects"))
+                        {
+                            for (auto object : scene->objects.view<ObjectData>())
+                            {
+                                ImGui::PushID(
+                                    static_cast<int>(entt::to_integral(object))
+                                );
+
+                                if (ImGui::TreeNode(
+                                    "##object",
+                                    "Object %u",
+                                    static_cast<unsigned>(entt::to_integral(object))))
+                                {
+                                    for (auto&& [type, storage] : scene->objects.storage())
+                                    {
+                                        if (type == GetTypeID<ObjectData>())
+                                            continue;
+
+                                        if (!storage.contains(object))
+                                            continue;
+
+                                        auto* entry = Middleman::TryGet(
+                                            storage.info().hash()
+                                        );
+
+                                        if (entry)
+                                        {
+                                            ImGui::BulletText("%s", entry->name.c_str());
+                                        }
+                                        else
+                                        {
+                                            auto name = storage.info().name();
+
+                                            ImGui::BulletText(
+                                                "%.*s (Unregistered)",
+                                                static_cast<int>(name.size()),
+                                                name.data()
+                                            );
+                                        }
+                                    }
+
+                                    ImGui::TreePop();
+                                }
+
+                                ImGui::PopID();
+                            }
+
+                            ImGui::TreePop();
+                        }
+
+                        if (ImGui::TreeNode("Systems"))
+                        {
+                            // Display systems
+
+                            ImGui::TreePop();
+                        }
+
+                        ImGui::TreePop();
+                    }
+
+                    ImGui::PopID();
+                }
+            }
+
+            if (ImGui::CollapsingHeader("Prefabs"))
+            {
+
+            }
+
+        ImGui::End();
+
+        rlImGuiEnd();
+        #endif
+
         EndDrawing();
     }
 
@@ -625,7 +755,7 @@ namespace lapCore
                     continue;
 
                 std::cout << "Getting element of type: " << type << '\n';
-                auto* entry = Reflection::TryGet(type);
+                auto* entry = Middleman::TryGet(type);
 
                 if (!entry)
                     continue;
@@ -635,7 +765,7 @@ namespace lapCore
                 try
                 {
                     std::cout << "Attempting to create data for element: " << entry->name << '\n';
-                    elementJson = entry->to_json(
+                    elementJson = entry->serialize(
                         storage.value(object),
                         &ctx
                     );

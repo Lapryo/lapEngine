@@ -2,7 +2,7 @@
 
 #include "project/project.hpp"
 
-#include "reflection.hpp"
+#include "middleman.hpp"
 #include "elements.hpp"
 
 using namespace lapCore;
@@ -13,19 +13,19 @@ using namespace ELEMENTS::Other;
 
 void lapCore::RegisterElements()
 {
-    Reflection::Register<Transform2D>("transform-2d");
-    Reflection::Register<Physics2D>("physics-2d");
-    Reflection::Register<SoundPoint>("sound-point");
-    Reflection::Register<UIFrame>("ui-frame");
-    Reflection::Register<UIList>("ui-list");
-    Reflection::Register<UIGradient>("ui-gradient");
-    //Reflection::Register<UIGrid>("ui-grid");
-    Reflection::Register<Sprite>("sprite");
-    Reflection::Register<UIImage>("ui-image");
-    Reflection::Register<UITextLabel>("ui-text-label");
-    Reflection::Register<UIButton>("ui-button");
-    Reflection::Register<Tags>("tags");
-    Reflection::Register<Parameter>("parameter");
-    Reflection::Register<Parameters>("parameters");
-    Reflection::Register<Script>("script");
+    Middleman::Register<Transform2D>("transform-2d");
+    Middleman::Register<Physics2D>("physics-2d");
+    Middleman::Register<SoundPoint>("sound-point");
+    Middleman::Register<UIFrame>("ui-frame");
+    Middleman::Register<UIList>("ui-list");
+    Middleman::Register<UIGradient>("ui-gradient");
+    //Middleman::Register<UIGrid>("ui-grid");
+    Middleman::Register<Sprite>("sprite");
+    Middleman::Register<UIImage>("ui-image");
+    Middleman::Register<UITextLabel>("ui-text-label");
+    Middleman::Register<UIButton>("ui-button");
+    Middleman::Register<Tags>("tags");
+    Middleman::Register<Parameter>("parameter");
+    Middleman::Register<Parameters>("parameters");
+    Middleman::Register<Script>("script");
 }

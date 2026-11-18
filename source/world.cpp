@@ -7,6 +7,11 @@
 #include <algorithm>
 #include <utility>
 
+#ifdef LAP_DEBUG
+#include <imgui.h>
+#include <rlImGui.h>
+#endif
+
 // TODO: Add string serialization
 
 using namespace lapCore;
@@ -560,6 +565,11 @@ void World::LoadWindow()
 {
     InitWindow(window.resolution.x, window.resolution.y, window.title.c_str());
     InitAudioDevice();
+
+    #ifdef LAP_DEBUG
+    rlImGuiSetup(true);
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    #endif
 
     ResetWindowProperties();
     window.target = LoadRenderTexture(window.logical_resolution.x, window.logical_resolution.y);

@@ -2,7 +2,7 @@
 
 #include "eutil.hpp"
 
-namespace lapCore::JSON
+namespace lapCore::mmJSON
 {
     template <>
     struct Serializer<Vector2>

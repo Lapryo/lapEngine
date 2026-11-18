@@ -1,7 +1,7 @@
-#include "reflection.hpp"
+#include "middleman.hpp"
 #include "json/structs/raylib.hpp"
 
-namespace lapCore::JSON
+namespace lapCore::mmJSON
 {
     // VECTOR2
     json Serializer<Vector2>::to_json(const Vector2& v, SerializeContext* ctx)

@@ -22,7 +22,7 @@ using namespace ELEMENTS::Physics;
 
 using namespace Math;
 
-namespace lapCore::JSON
+namespace lapCore::mmJSON
 {
     // EUTIL
 

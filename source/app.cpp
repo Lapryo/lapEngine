@@ -3,6 +3,11 @@
 
 #include <iostream>
 
+#ifdef LAP_DEBUG
+#include <imgui.h>
+#include <rlImGui.h>
+#endif
+
 using namespace lapCore;
 using namespace EUTIL;
 using namespace Functions;
@@ -74,6 +79,10 @@ void App::Shutdown()
 
     UnloadRenderTexture(world.window.target);
     CloseAudioDevice();
+
+    #ifdef LAP_DEBUG
+    rlImGuiShutdown();
+    #endif
 
     // shutdown window if it exists
     CloseWindow();

@@ -14,14 +14,14 @@ WISHLIST:
 
 */
 
-#include "reflection.hpp"
+#include "middleman.hpp"
 #include "json/structs/lapcore.hpp"
 
 #include "resourcemanager.hpp"
 
 using namespace std;
 
-namespace lapCore::JSON
+namespace lapCore::mmJSON
 {
     // EUTIL
 
@@ -48,7 +48,7 @@ namespace lapCore::JSON
         r.culling = j.value("culling", r.culling);
 
         if (j.contains("tint"))
-            JSON::Serializer<Color>::from_json(r.tint, j.at("tint"));
+            mmJSON::Serializer<Color>::from_json(r.tint, j.at("tint"));
     }
 
     // AXIS2D
@@ -77,7 +77,7 @@ namespace lapCore::JSON
     {
         return json{
             {"free-mode", s.freeMode},
-            {"direction", JSON::Serializer<Axis2D>::to_json(s.direction, ctx)},
+            {"direction", mmJSON::Serializer<Axis2D>::to_json(s.direction, ctx)},
             {"horizontal-scrolling", s.allowHorizontalScrolling},
             {"vertical-scrolling", s.allowVerticalScrolling},
             {"scroll-speed", s.scrollSpeed}
@@ -87,7 +87,7 @@ namespace lapCore::JSON
     void Serializer<ScrollSettings>::from_json(ScrollSettings& s, const json& j)
     {
         if (j.contains("direction"))
-            JSON::Serializer<Axis2D>::from_json(s.direction, j.at("direction"));
+            mmJSON::Serializer<Axis2D>::from_json(s.direction, j.at("direction"));
 
         s.freeMode = j.value("free-mode", s.freeMode);
 
@@ -197,33 +197,33 @@ namespace lapCore::JSON
     json Serializer<Alignment>::to_json(const Alignment& a, SerializeContext* ctx)
     {
         return json{
-            {"horizontal", JSON::Serializer<HorizontalAlignment>::to_json(a.horizontal, ctx)},
-            {"vertical", JSON::Serializer<VerticalAlignment>::to_json(a.vertical, ctx)}
+            {"horizontal", mmJSON::Serializer<HorizontalAlignment>::to_json(a.horizontal, ctx)},
+            {"vertical", mmJSON::Serializer<VerticalAlignment>::to_json(a.vertical, ctx)}
         };
     }
 
     void Serializer<Alignment>::from_json(Alignment& a, const json& j)
     {
         if (j.contains("horizontal"))
-            JSON::Serializer<HorizontalAlignment>::from_json(a.horizontal, j.at("horizontal"));
+            mmJSON::Serializer<HorizontalAlignment>::from_json(a.horizontal, j.at("horizontal"));
         if (j.contains("vertical"))
-            JSON::Serializer<VerticalAlignment>::from_json(a.vertical, j.at("vertical"));
+            mmJSON::Serializer<VerticalAlignment>::from_json(a.vertical, j.at("vertical"));
     }
 
     // FRAME VECTOR
     json Serializer<FrameVector>::to_json(const FrameVector& v, SerializeContext* ctx)
     {
         return json{
-            {"scale", JSON::Serializer<Vector2>::to_json(v.scale, ctx)},
-            {"offset", JSON::Serializer<Vector2>::to_json(v.offset, ctx)}
+            {"scale", mmJSON::Serializer<Vector2>::to_json(v.scale, ctx)},
+            {"offset", mmJSON::Serializer<Vector2>::to_json(v.offset, ctx)}
         };
     }
     void Serializer<FrameVector>::from_json(FrameVector& v, const json& j)
     {
         if (j.contains("scale"))
-            JSON::Serializer<Vector2>::from_json(v.scale, j.at("scale"));
+            mmJSON::Serializer<Vector2>::from_json(v.scale, j.at("scale"));
         if (j.contains("offset"))
-            JSON::Serializer<Vector2>::from_json(v.offset, j.at("offset"));
+            mmJSON::Serializer<Vector2>::from_json(v.offset, j.at("offset"));
     }
 
     // PADDING
@@ -248,9 +248,9 @@ namespace lapCore::JSON
     json Serializer<UITransform>::to_json(const UITransform& t, SerializeContext* ctx)
     {
         return json{
-            {"position", JSON::Serializer<FrameVector>::to_json(t.position, ctx)},
-            {"size", JSON::Serializer<FrameVector>::to_json(t.size, ctx)},
-            {"anchor", JSON::Serializer<FrameVector>::to_json(t.anchor, ctx)},
+            {"position", mmJSON::Serializer<FrameVector>::to_json(t.position, ctx)},
+            {"size", mmJSON::Serializer<FrameVector>::to_json(t.size, ctx)},
+            {"anchor", mmJSON::Serializer<FrameVector>::to_json(t.anchor, ctx)},
             {"rotation", t.rotation}
         };
     }
@@ -258,11 +258,11 @@ namespace lapCore::JSON
     void Serializer<UITransform>::from_json(UITransform& t, const json& j)
     {
         if (j.contains("position"))
-            JSON::Serializer<FrameVector>::from_json(t.position, j.at("position"));
+            mmJSON::Serializer<FrameVector>::from_json(t.position, j.at("position"));
         if (j.contains("size"))
-            JSON::Serializer<FrameVector>::from_json(t.size, j.at("size"));
+            mmJSON::Serializer<FrameVector>::from_json(t.size, j.at("size"));
         if (j.contains("anchor"))
-            JSON::Serializer<FrameVector>::from_json(t.anchor, j.at("anchor"));
+            mmJSON::Serializer<FrameVector>::from_json(t.anchor, j.at("anchor"));
 
         t.rotation = j.value("rotation", t.rotation);
     }
@@ -273,17 +273,17 @@ namespace lapCore::JSON
     json Serializer<Transform2D>::to_json(const Transform2D& t, SerializeContext* ctx)
     {
         return json{
-            { "position" , JSON::Serializer<Vector2>::to_json(t.position) },
-            { "scale"    , JSON::Serializer<Vector2>::to_json(t.scale)    },
+            { "position" , mmJSON::Serializer<Vector2>::to_json(t.position) },
+            { "scale"    , mmJSON::Serializer<Vector2>::to_json(t.scale)    },
             { "rotation" , t.rotation                                     }
         };
     }
     void Serializer<Transform2D>::from_json(Transform2D& t, const json& j)
     {
         if (j.contains("position"))
-            JSON::Serializer<Vector2>::from_json(t.position, j.at("position"));
+            mmJSON::Serializer<Vector2>::from_json(t.position, j.at("position"));
         if (j.contains("scale"))
-            JSON::Serializer<Vector2>::from_json(t.scale, j.at("scale"));
+            mmJSON::Serializer<Vector2>::from_json(t.scale, j.at("scale"));
 
         t.rotation = j.value("rotation", t.rotation);
     }
@@ -292,19 +292,19 @@ namespace lapCore::JSON
     json Serializer<Physics2D>::to_json(const Physics2D& p, SerializeContext* ctx)
     {
         return json{
-            { "body"    , JSON::Serializer<b2BodyDef>::to_json(p.bodyDef)   },
-            { "shape"   , JSON::Serializer<b2ShapeDef>::to_json(p.shapeDef) },
-            { "polygon" , JSON::Serializer<b2Polygon>::to_json(p.polygon)   }
+            { "body"    , mmJSON::Serializer<b2BodyDef>::to_json(p.bodyDef)   },
+            { "shape"   , mmJSON::Serializer<b2ShapeDef>::to_json(p.shapeDef) },
+            { "polygon" , mmJSON::Serializer<b2Polygon>::to_json(p.polygon)   }
         };
     }
     void Serializer<Physics2D>::from_json(Physics2D& p, const json& j)
     {
         if (j.contains("body"))
-            JSON::Serializer<b2BodyDef>::from_json(p.bodyDef, j.at("body"));
+            mmJSON::Serializer<b2BodyDef>::from_json(p.bodyDef, j.at("body"));
         if (j.contains("shape"))
-            JSON::Serializer<b2ShapeDef>::from_json(p.shapeDef, j.at("shape"));
+            mmJSON::Serializer<b2ShapeDef>::from_json(p.shapeDef, j.at("shape"));
         if (j.contains("polygon"))
-            JSON::Serializer<b2Polygon>::from_json(p.polygon, j.at("polygon"));
+            mmJSON::Serializer<b2Polygon>::from_json(p.polygon, j.at("polygon"));
     }
 
     // SOUND POINT
@@ -320,7 +320,7 @@ namespace lapCore::JSON
             {"auto-play"      , s.autoPlay},
             {"audio-id"       , SerializeEventID(s.audioID)},
             {"positional"     , s.positional},
-            {"target"         , JSON::Serializer<Vector2>::to_json(s.target, ctx)}
+            {"target"         , mmJSON::Serializer<Vector2>::to_json(s.target, ctx)}
         };
     }
     void Serializer<SoundPoint>::from_json(SoundPoint& s, const json& j)
@@ -342,23 +342,23 @@ namespace lapCore::JSON
 
         s.positional = j.value("positional", s.positional);
         if (j.contains("target"))
-            JSON::Serializer<Vector2>::from_json(s.target, j.at("target"));
+            mmJSON::Serializer<Vector2>::from_json(s.target, j.at("target"));
     }
 
     // UIFRAME
     json Serializer<UIFrame>::to_json(const UIFrame& f, SerializeContext* ctx)
     {
         return json{
-            { "renderable" , JSON::Serializer<Renderable>::to_json(f.renderable, ctx) },
-            { "transform"  , JSON::Serializer<UITransform>::to_json(f.transform, ctx) }
+            { "renderable" , mmJSON::Serializer<Renderable>::to_json(f.renderable, ctx) },
+            { "transform"  , mmJSON::Serializer<UITransform>::to_json(f.transform, ctx) }
         };
     }
     void Serializer<UIFrame>::from_json(UIFrame& f, const json& j)
     {
         if (j.contains("renderable"))
-            JSON::Serializer<Renderable>::from_json(f.renderable, j.at("renderable"));
+            mmJSON::Serializer<Renderable>::from_json(f.renderable, j.at("renderable"));
         if (j.contains("transform"))
-            JSON::Serializer<UITransform>::from_json(f.transform, j.at("transform"));
+            mmJSON::Serializer<UITransform>::from_json(f.transform, j.at("transform"));
     }
 
     // UILIST SPREADING
@@ -401,23 +401,23 @@ namespace lapCore::JSON
     json Serializer<UIList>::to_json(const UIList& l, SerializeContext* ctx)
     {
         return json{
-            { "scroll-size"   , JSON::Serializer<FrameVector>::to_json(l.scrollSize, ctx)    },
-            { "display-size"  , JSON::Serializer<FrameVector>::to_json(l.displaySize, ctx)   },
-            { "settings"      , JSON::Serializer<ScrollSettings>::to_json(l.settings, ctx)   },
-            { "spreading"     , JSON::Serializer<UIListSpreading>::to_json(l.spreading, ctx) },
+            { "scroll-size"   , mmJSON::Serializer<FrameVector>::to_json(l.scrollSize, ctx)    },
+            { "display-size"  , mmJSON::Serializer<FrameVector>::to_json(l.displaySize, ctx)   },
+            { "settings"      , mmJSON::Serializer<ScrollSettings>::to_json(l.settings, ctx)   },
+            { "spreading"     , mmJSON::Serializer<UIListSpreading>::to_json(l.spreading, ctx) },
             { "scroll-offset" , l.scrollOffset                                               }
         };
     }
     void Serializer<UIList>::from_json(UIList& l, const json& j)
     {
         if (j.contains("scroll-size"))
-            JSON::Serializer<FrameVector>::from_json(l.scrollSize, j.at("scroll-size"));
+            mmJSON::Serializer<FrameVector>::from_json(l.scrollSize, j.at("scroll-size"));
         if (j.contains("display-size"))
-            JSON::Serializer<FrameVector>::from_json(l.displaySize, j.at("display-size"));
+            mmJSON::Serializer<FrameVector>::from_json(l.displaySize, j.at("display-size"));
         if (j.contains("settings"))
-            JSON::Serializer<ScrollSettings>::from_json(l.settings, j.at("settings"));
+            mmJSON::Serializer<ScrollSettings>::from_json(l.settings, j.at("settings"));
         if (j.contains("spreading"))
-            JSON::Serializer<UIListSpreading>::from_json(l.spreading, j.at("spreading"));
+            mmJSON::Serializer<UIListSpreading>::from_json(l.spreading, j.at("spreading"));
 
         l.scrollOffset = j.value("scroll-offset", l.scrollOffset);
     }
@@ -457,10 +457,10 @@ namespace lapCore::JSON
     json Serializer<Sprite>::to_json(const Sprite& s, SerializeContext* ctx)
     {
         return json{
-            { "renderable" , JSON::Serializer<Renderable>::to_json(s.renderable) },
-            { "animated"   , JSON::Serializer<Animated>::to_json(s.animated)     },
-            { "source-rect", JSON::Serializer<Rectangle>::to_json(s.sourceRect)  },
-            { "dest-rect"  , JSON::Serializer<Rectangle>::to_json(s.destRect)    },
+            { "renderable" , mmJSON::Serializer<Renderable>::to_json(s.renderable) },
+            { "animated"   , mmJSON::Serializer<Animated>::to_json(s.animated)     },
+            { "source-rect", mmJSON::Serializer<Rectangle>::to_json(s.sourceRect)  },
+            { "dest-rect"  , mmJSON::Serializer<Rectangle>::to_json(s.destRect)    },
             { "flip-horizontal", s.flipX },
             { "flip-vertical", s.flipY },
             { "flip-diagonal", s.flipD },
@@ -470,14 +470,14 @@ namespace lapCore::JSON
     void Serializer<Sprite>::from_json(Sprite& s, const json& j)
     {
         if (j.contains("renderable"))
-            JSON::Serializer<Renderable>::from_json(s.renderable, j.at("renderable"));
+            mmJSON::Serializer<Renderable>::from_json(s.renderable, j.at("renderable"));
         if (j.contains("animated"))
-            JSON::Serializer<Animated>::from_json(s.animated, j.at("animated"));
+            mmJSON::Serializer<Animated>::from_json(s.animated, j.at("animated"));
 
         if (j.contains("source-rect"))
-            JSON::Serializer<Rectangle>::from_json(s.sourceRect, j.at("source-rect"));
+            mmJSON::Serializer<Rectangle>::from_json(s.sourceRect, j.at("source-rect"));
         if (j.contains("dest-rect"))
-            JSON::Serializer<Rectangle>::from_json(s.destRect, j.at("dest-rect"));
+            mmJSON::Serializer<Rectangle>::from_json(s.destRect, j.at("dest-rect"));
 
         s.flipX = j.value("flip-horizontal", s.flipX);
         s.flipY = j.value("flip-vertical", s.flipY);
@@ -491,28 +491,28 @@ namespace lapCore::JSON
     json Serializer<UIImage>::to_json(const UIImage& i, SerializeContext* ctx)
     {
         return json{
-            { "sprite" , JSON::Serializer<Sprite>::to_json(i.sprite, ctx)   },
-            { "transform"  , JSON::Serializer<UITransform>::to_json(i.transform, ctx) }
+            { "sprite" , mmJSON::Serializer<Sprite>::to_json(i.sprite, ctx)   },
+            { "transform"  , mmJSON::Serializer<UITransform>::to_json(i.transform, ctx) }
         };
     }
     void Serializer<UIImage>::from_json(UIImage& i, const json& j)
     {
         if (j.contains("sprite"))
-            JSON::Serializer<Sprite>::from_json(i.sprite, j.at("sprite"));
+            mmJSON::Serializer<Sprite>::from_json(i.sprite, j.at("sprite"));
         if (j.contains("transform"))
-            JSON::Serializer<UITransform>::from_json(i.transform, j.at("transform"));
+            mmJSON::Serializer<UITransform>::from_json(i.transform, j.at("transform"));
     }
 
     // UITEXTLABEL
     json Serializer<UITextLabel>::to_json(const UITextLabel& l, SerializeContext* ctx)
     {
         return json{
-            { "frame"     , JSON::Serializer<UIFrame>::to_json(l.frame, ctx)       },
+            { "frame"     , mmJSON::Serializer<UIFrame>::to_json(l.frame, ctx)       },
             { "text"      , l.text                                                 },
             { "font"      , ctx->resources->fonts.GetName(l.fontID)                },
             { "font-size" , l.fontSize                                             },
-            { "alignment" , JSON::Serializer<Alignment>::to_json(l.alignment, ctx) },
-            { "padding"   , JSON::Serializer<Padding>::to_json(l.padding, ctx)     },
+            { "alignment" , mmJSON::Serializer<Alignment>::to_json(l.alignment, ctx) },
+            { "padding"   , mmJSON::Serializer<Padding>::to_json(l.padding, ctx)     },
             { "spacing"   , l.spacing                                              },
             { "word-wrap" , l.wordWrap                                            }
         };
@@ -520,7 +520,7 @@ namespace lapCore::JSON
     void Serializer<UITextLabel>::from_json(UITextLabel& l, const json& j)
     {
         if (j.contains("frame"))
-            JSON::Serializer<UIFrame>::from_json(l.frame, j.at("frame"));
+            mmJSON::Serializer<UIFrame>::from_json(l.frame, j.at("frame"));
         l.text = j.value("text", l.text);
         if (j.contains("font"))
             l.fontID = hashed_string{j.at("font").get<string>().c_str()}.value();
@@ -529,9 +529,9 @@ namespace lapCore::JSON
         l.wordWrap = j.value("word-wrap", l.wordWrap);
         
         if (j.contains("alignment"))
-            JSON::Serializer<Alignment>::from_json(l.alignment, j.at("alignment"));
+            mmJSON::Serializer<Alignment>::from_json(l.alignment, j.at("alignment"));
         if (j.contains("padding"))
-            JSON::Serializer<Padding>::from_json(l.padding, j.at("padding"));
+            mmJSON::Serializer<Padding>::from_json(l.padding, j.at("padding"));
     }
 
     // UIBUTTON EVENT CALLBACKS
@@ -572,8 +572,8 @@ namespace lapCore::JSON
     json Serializer<UIButton>::to_json(const UIButton& b, SerializeContext* ctx)
     {
         return json{
-            { "event-callbacks"          , JSON::Serializer<UIButtonEventCallbacks>::to_json(b.eventCallbacks, ctx) },
-            { "bounds"                   , JSON::Serializer<UITransform>::to_json(b.bounds, ctx)                    },
+            { "event-callbacks"          , mmJSON::Serializer<UIButtonEventCallbacks>::to_json(b.eventCallbacks, ctx) },
+            { "bounds"                   , mmJSON::Serializer<UITransform>::to_json(b.bounds, ctx)                    },
             { "inherits-ui" , b.inheritsUI                                                                          },
             { "active"                   , b.active                                                                 }
         };
@@ -581,9 +581,9 @@ namespace lapCore::JSON
     void Serializer<UIButton>::from_json(UIButton& b, const json& j)
     {
         if (j.contains("event-callbacks"))
-            JSON::Serializer<UIButtonEventCallbacks>::from_json(b.eventCallbacks, j.at("event-callbacks"));
+            mmJSON::Serializer<UIButtonEventCallbacks>::from_json(b.eventCallbacks, j.at("event-callbacks"));
         if (j.contains("bounds"))
-            JSON::Serializer<UITransform>::from_json(b.bounds, j.at("bounds"));
+            mmJSON::Serializer<UITransform>::from_json(b.bounds, j.at("bounds"));
 
         b.inheritsUI = j.value("inherits-ui", b.inheritsUI);
         b.active                 = j.value("active", b.active);
@@ -666,7 +666,7 @@ namespace lapCore::JSON
         vector<json> parameters;
         for (const auto& param : p.parameters)
         {
-            auto paramJson = JSON::Serializer<Parameter>::to_json(param, ctx);
+            auto paramJson = mmJSON::Serializer<Parameter>::to_json(param, ctx);
             parameters.push_back(paramJson);
         }
 
@@ -682,7 +682,7 @@ namespace lapCore::JSON
             for (const auto& paramJson : j["values"])
             {
                 Parameter param;
-                JSON::Serializer<Parameter>::from_json(param, paramJson);
+                mmJSON::Serializer<Parameter>::from_json(param, paramJson);
                 params.push_back(std::move(param));
             }
 

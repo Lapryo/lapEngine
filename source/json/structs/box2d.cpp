@@ -1,7 +1,7 @@
-#include "reflection.hpp"
+#include "middleman.hpp"
 #include "json/structs/box2d.hpp"
 
-namespace lapCore::JSON
+namespace lapCore::mmJSON
 {
     // B2BODYTYPE
     json Serializer<b2BodyType>::to_json(const b2BodyType& t, SerializeContext* ctx)

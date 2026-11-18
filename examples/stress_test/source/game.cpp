@@ -385,14 +385,14 @@ namespace StressTest
             script
         );
 
-        ConnectECSEvent<float>(
+        ConnectECSEvent<float>(mainScene, 
             scriptObject,
-            HASH("runner_update"),
+            HASH_ID("runner_update"),
             RunnerUpdate
         );
-        ConnectECSEvent<float>(
+        ConnectECSEvent<float>(mainScene, 
             cameraObject,
-            HASH("camera_update"),
+            HASH_ID("camera_update"),
             CameraUpdate
         );
 

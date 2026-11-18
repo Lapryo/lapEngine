@@ -18,6 +18,7 @@ namespace lapCore
     struct ResourceManager;
 
     struct IProjectElementData;
+
     template <typename T>
     struct ProjectElementData;
 
@@ -27,18 +28,22 @@ namespace lapCore
         string objectName = "";
     };
 
-    template<typename T>
+    template <typename T>
     constexpr id_type GetTypeID()
     {
         return type_hash<T>::value();
     }
 
-    namespace JSON
+    namespace mmJSON
     {
-        template<typename T>
+        template <typename T>
         struct Serializer
         {
-            static json to_json(const T&, SerializeContext* = nullptr);
+            static json to_json(
+                const T&,
+                SerializeContext* = nullptr
+            );
+
             static void from_json(T&, const json&);
         };
 
@@ -47,45 +52,73 @@ namespace lapCore
             for (auto it = other.begin(); it != other.end(); ++it)
             {
                 const auto& key = it.key();
-                if (base.contains(key) && base[key].is_object() && it.value().is_object())
+
+                if (base.contains(key) &&
+                    base[key].is_object() &&
+                    it.value().is_object())
+                {
                     Merge(base[key], it.value());
+                }
                 else
+                {
                     base[key] = it.value();
+                }
             }
         }
     }
 
-    struct ReflectionEntry
+    template <typename Format, typename T>
+    struct MiddlemanSerializer;
+
+    // Adapter for JSON serializers
+    template <typename T>
+    struct MiddlemanSerializer<json, T>
+    {
+        static json Serialize(const T& data, SerializeContext* ctx)
+        {
+            return mmJSON::Serializer<T>::to_json(data, ctx);
+        }
+
+        static void Deserialize(T& data, const json& j)
+        {
+            mmJSON::Serializer<T>::from_json(data, j);
+        }
+    };
+
+    template <typename Format = json>
+    struct MiddlemanEntry
     {
         string name;
 
-        function<json(const void*, SerializeContext*)> to_json;
-        function<void(void*, const json&)> from_json;
+        function<Format(const void*, SerializeContext*)> serialize;
+        function<void(void*, const Format&)> deserialize;
 
-        function<void(registry&, Object, void*)> emplace;
-        function<void(registry&, Object)> erase;
+        function<void(entt::registry&, Object, void*)> emplace;
+        function<void(entt::registry&, Object)> erase;
         function<void(void*, const void*)> copy;
 
         function<
             unique_ptr<IProjectElementData>(
-                const json&,
+                const Format&,
                 const string&
             )
         > create_project_data;
+
         function<
-            json(const IProjectElementData*, SerializeContext*)
+            Format(const IProjectElementData*, SerializeContext*)
         > serialize_project_data;
     };
 
-    class Reflection
+    class Middleman
     {
     public:
 
-        Reflection() = delete;
+        Middleman() = delete;
 
+        template <typename Format = json>
         inline static unordered_map<
             id_type,
-            ReflectionEntry
+            MiddlemanEntry<Format>
         > registry;
 
         inline static unordered_map<
@@ -93,30 +126,35 @@ namespace lapCore
             id_type
         > reverseLookup;
 
-        template<typename T>
+        template <typename T, typename Format = json>
         static void Register(const string& name)
         {
+            using Serializer = MiddlemanSerializer<Format, T>;
+
             const id_type id = GetTypeID<T>();
 
             reverseLookup[name] = id;
 
-            registry[id] = ReflectionEntry
+            registry<Format>[id] = MiddlemanEntry<Format>
             {
                 name,
-                [](const void* ptr, SerializeContext* ctx) -> json
+
+                [](const void* ptr, SerializeContext* ctx) -> Format
                 {
-                    return JSON::Serializer<T>::to_json(
+                    return Serializer::Serialize(
                         *static_cast<const T*>(ptr),
                         ctx
                     );
                 },
-                [](void* ptr, const json& j)
+
+                [](void* ptr, const Format& data)
                 {
-                    JSON::Serializer<T>::from_json(
+                    Serializer::Deserialize(
                         *static_cast<T*>(ptr),
-                        j
+                        data
                     );
                 },
+
                 [](entt::registry& reg, Object obj, void* data)
                 {
                     reg.emplace<T>(
@@ -124,68 +162,73 @@ namespace lapCore
                         *static_cast<T*>(data)
                     );
                 },
+
                 [](entt::registry& reg, Object obj)
                 {
                     reg.remove<T>(obj);
                 },
+
                 [](void* dst, const void* src)
                 {
                     *static_cast<T*>(dst) =
                         *static_cast<const T*>(src);
                 },
-                [](const json& j, const string& typeName)
+
+                [](const Format& data, const string& typeName)
                     -> unique_ptr<IProjectElementData>
                 {
-                    auto ptr =
-                        make_unique<ProjectElementData<T>>();
+                    auto ptr = make_unique<ProjectElementData<T>>();
 
                     ptr->type = typeName;
 
-                    JSON::Serializer<T>::from_json(
+                    Serializer::Deserialize(
                         ptr->data,
-                        j
+                        data
                     );
 
                     return ptr;
                 },
 
-                [](const IProjectElementData* element, SerializeContext* ctx) -> json
+                [](const IProjectElementData* element,
+                SerializeContext* ctx) -> Format
                 {
                     auto typed =
                         static_cast<const ProjectElementData<T>*>(element);
 
-                    return JSON::Serializer<T>::to_json(
+                    return Serializer::Serialize(
                         typed->data,
                         ctx
                     );
                 }
             };
         }
-        
-        static ReflectionEntry* TryGet(id_type id)
-        {
-            auto it = registry.find(id);
 
-            if (it == registry.end())
+        template <typename Format = json>
+        static MiddlemanEntry<Format>* TryGet(id_type id)
+        {
+            auto it = registry<Format>.find(id);
+
+            if (it == registry<Format>.end())
                 return nullptr;
 
             return &it->second;
         }
 
-        template<typename T>
-        static ReflectionEntry* TryGet()
+        template <typename T, typename Format = json>
+        static MiddlemanEntry<Format>* TryGet()
         {
-            return TryGet(GetTypeID<T>());
+            return TryGet<Format>(GetTypeID<T>());
         }
 
-        static ReflectionEntry* TryGet(const string& name)
+        template <typename Format = json>
+        static MiddlemanEntry<Format>* TryGet(const string& name)
         {
             auto it = reverseLookup.find(name);
 
             if (it == reverseLookup.end())
                 return nullptr;
 
-            return TryGet(it->second);
+            return TryGet<Format>(it->second);
         }
     };
 }

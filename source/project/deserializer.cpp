@@ -1,6 +1,6 @@
 #include "project/deserializer.hpp"
 
-#include "reflection.hpp"
+#include "middleman.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -101,7 +101,7 @@ namespace lapCore
     ElementDataPtr MakeElement(const json &elementJson)
     {
         auto type = elementJson.value("type", "");
-        auto entry = Reflection::TryGet(type);
+        auto entry = Middleman::TryGet(type);
         if (!entry) return nullptr;
 
         if (!elementJson.contains("data") || !elementJson.at("data").is_object())
@@ -134,7 +134,7 @@ namespace lapCore
         if (sceneJson.contains("objects"))
             scene.objects = MakeObjects(sceneJson.at("objects"), false);
         if (sceneJson.contains("background-color"))
-            JSON::Serializer<Color>::from_json(scene.backgroundColor, sceneJson.at("background-color"));
+            mmJSON::Serializer<Color>::from_json(scene.backgroundColor, sceneJson.at("background-color"));
         if (sceneJson.contains("prefabs"))
             scene.instancedPrefabs = MakeInstancedPrefabs(sceneJson.at("prefabs"), prefabs);
         if (sceneJson.contains("systems"))
@@ -150,12 +150,12 @@ namespace lapCore
             return nullptr;
 
         const std::string type = elementModificationJson.value("type", "");
-        auto entry = Reflection::TryGet(type);
+        auto entry = Middleman::TryGet(type);
         if (!entry)
             return nullptr;
 
-        const auto typeLookup = Reflection::reverseLookup.find(type);
-        if (typeLookup == Reflection::reverseLookup.end())
+        const auto typeLookup = Middleman::reverseLookup.find(type);
+        if (typeLookup == Middleman::reverseLookup.end())
             return nullptr;
 
         ElementDataPtr existing;
@@ -191,7 +191,7 @@ namespace lapCore
         // nlohmann::json's merge_patch mutates the target in place.
         // This guarantees that {"text": "test"} overwrites the
         // inherited ui-text-label text, regardless of the behavior
-        // of the project's JSON::Merge helper.
+        // of the project's mmJSON::Merge helper.
         merged.merge_patch(overrideData);
         auto result = entry->create_project_data(merged, type);
         if (!result)
@@ -225,11 +225,11 @@ namespace lapCore
                 continue;
 
             const std::string type = overrideElement.value("type", "");
-            if (!Reflection::TryGet(type))
+            if (!Middleman::TryGet(type))
                 continue;
 
-            const auto typeLookup = Reflection::reverseLookup.find(type);
-            if (typeLookup == Reflection::reverseLookup.end())
+            const auto typeLookup = Middleman::reverseLookup.find(type);
+            if (typeLookup == Middleman::reverseLookup.end())
                 continue;
 
             const auto existing = std::find_if(
