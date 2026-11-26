@@ -42,11 +42,18 @@ function(fetch_dependencies)
     set(BOX2D_BENCHMARKS OFF)
     set(BOX2D_DOCS OFF)
 
-    fetch_library(
+    FetchContent_Declare(
         box2d
-        https://github.com/erincatto/box2d.git
-        main
+        GIT_REPOSITORY https://github.com/erincatto/box2d.git
+        GIT_TAG v3.2.0
+        GIT_SHALLOW TRUE
     )
+
+    FetchContent_MakeAvailable(box2d)
+
+    if(NOT TARGET box2d)
+        message(FATAL_ERROR "Failed to configure Box2D.")
+    endif()
 
     # ========================================================
     # raylib
@@ -122,7 +129,7 @@ function(fetch_dependencies)
     # Dear ImGui
     # ========================================================
 
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
         fetch_library(
             imgui
@@ -143,9 +150,9 @@ function(fetch_dependencies)
             "${imgui_SOURCE_DIR}"
         )
 
-        # ========================================================
+        # ====================================================
         # rlImGui
-        # ========================================================
+        # ====================================================
 
         fetch_library(
             rlimgui
